@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Cursuri.css';
+import './Student.css';
 
-const Cursuri = () => {
+const Student = () => {
     const navigate = useNavigate();
     const [cursuri] = useState([
         { id: 1, nume: 'Technologii Web', bifat: false },
@@ -54,4 +54,4 @@ const Cursuri = () => {
     );
 };
 
-export default Cursuri;
+export default Student;

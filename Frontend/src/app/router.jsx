@@ -4,7 +4,7 @@ import MainLayout from "../layouts/MainLayout";
 import Dashboard from "../pages/Dashboard";
 import Anunturi from "../pages/Anunturi";
 import Harta from "../pages/Harta";
-import Cursuri from "../pages/Cursuri";
+import Cursuri from "../pages/Cursuri/Cursuri";
 import Catalog from "../pages/Catalog";
 import Orar from "../pages/Orar";
 import Chat from "../pages/Chat";
