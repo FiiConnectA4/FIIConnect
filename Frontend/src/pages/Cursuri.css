@@ -1,0 +1,133 @@
+/* ----------------- CONTAINER PRINCIPAL ----------------- */
+.container-cursuri {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+    width: 100%;
+    max-width: 800px;
+    margin: 0;
+    padding: 20px 30px;
+}
+
+/* ----------------- TITLURI ----------------- */
+.cursuri-titlu {
+    color: #1A3C5A;
+    text-align: left;
+    width: 100%;
+    margin-bottom: 1.5rem;
+}
+
+.cursuri-titlu h1 {
+    font-size: 2.2em;
+    margin-bottom: 0.3em;
+    padding-left: 10px;
+}
+
+.cursuri-titlu h2 {
+    font-size: 1.4em;
+    color: #537A9C;
+    padding-left: 10px;
+}
+
+/* ----------------- LISTA CURSURE ----------------- */
+.lista-cursuri {
+    width: 100%;
+    padding-left: 0;
+    margin: 0;
+}
+
+/* ----------------- RAND CURSUL ----------------- */
+.rand-curs {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    margin-bottom: 12px;
+    padding-left: 10px;
+}
+
+/* ----------------- BUTOANE ICONIȚE ----------------- */
+.buton-icon {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.buton-icon:hover {
+    transform: scale(1.1);
+}
+
+.icon-curs {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+/* ----------------- BUTON PRINCIPAL ----------------- */
+.buton-curs {
+    box-sizing: border-box;
+    padding: 18px 25px;
+    border: none;
+    border-radius: 30px;
+    background: #537A9C;
+    color: #FFFFFF;
+    font-size: 16px;
+    font-family: 'Segoe UI', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+    flex-grow: 1;
+    width: 100%;
+    margin: 0;
+}
+
+/* Stări buton */
+.buton-curs:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    background: #567998;
+}
+
+.buton-curs.activ {
+    background: #CCCCCC;
+    color: #537A9C;
+    padding-right: 45px;
+}
+
+/* ----------------- EFECT RIPPLE ----------------- */
+.buton-curs:after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 10px;
+    background: rgba(255, 255, 255, 0.3);
+    opacity: 0;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.buton-curs:active:after {
+    animation: ripple 0.6s ease-out;
+}
+
+@keyframes ripple {
+    0% {
+        width: 10px;
+        height: 10px;
+        opacity: 1;
+    }
+
+    100% {
+        width: 400px;
+        height: 400px;
+        opacity: 0;
+    }
+}
