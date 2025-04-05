@@ -1,9 +1,12 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import Ceas from './../Components/Ceas';
+import Carte from '../Components/Carte';
+import Buton from '../Components/Buton';
 import './Student.css';
+import DetaliiCurs from './DetaliiCurs';
 
 const Student = () => {
-    const navigate = useNavigate();
+    const [selectedCursId, setSelectedCursId] = useState(null);
     const [cursuri] = useState([
         { id: 1, nume: 'Technologii Web', bifat: false },
         { id: 2, nume: 'Ingineria Programării', bifat: false },
@@ -11,12 +14,16 @@ const Student = () => {
         { id: 4, nume: 'Sisteme de operare', bifat: false },
     ]);
 
-    const handleClick = (idCurs) => {
-        navigate(`/cursuri/${idCurs}`);
-    };
-
     const an = 2;
     const semestru = 2;
+
+    if (selectedCursId) {
+        const cursSelectat = cursuri.find(c => c.id === selectedCursId);
+        return <DetaliiCurs
+            curs={cursSelectat}
+            onBack={() => setSelectedCursId(null)}
+        />;
+    }
 
     return (
         <div className="container-cursuri">
@@ -27,26 +34,13 @@ const Student = () => {
             <div className="lista-cursuri">
                 {cursuri.map((curs) => (
                     <div key={curs.id} className="rand-curs">
-                        <div id="carte">
-                            <img
-                                src="/Book open.png"
-                                alt="Carte curs"
-
-                            />
-                        </div>
-                        <button className="buton-icon">
-                            <img
-                                src="/Clock.png"
-                                alt="Ceas curs"
-                                className="icon-curs"
-                            />
-                        </button>
-                        <button
-                            className={`buton-curs`}
-                            onClick={() => handleClick(curs.id)}
-                        >
-                            {curs.nume}
-                        </button>
+                        <Carte />
+                        <Ceas />
+                        <Buton
+                            className="nume-curs"
+                            text={curs.nume}
+                            onNavigate={() => setSelectedCursId(curs.id)}
+                        />
                     </div>
                 ))}
             </div>

@@ -47,76 +47,27 @@
     padding-left: 10px;
 }
 
-/* ----------------- BUTOANE ICONIȚE ----------------- */
-.buton-icon {
-    background: none;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    transition: transform 0.2s ease;
-}
-
-.buton-icon:hover {
-    transform: scale(1.1);
-}
-
-.icon-curs {
-    width: 32px;
-    height: 32px;
-    object-fit: contain;
-}
-
-/* ----------------- BUTON PRINCIPAL ----------------- */
-.buton-curs {
-    box-sizing: border-box;
-    padding: 18px 25px;
-    border: none;
-    border-radius: 30px;
-    background: #537A9C;
-    color: #FFFFFF;
-    font-size: 16px;
-    font-family: 'Segoe UI', sans-serif;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    text-align: left;
-    position: relative;
-    overflow: hidden;
-    flex-grow: 1;
+.rand-curs .buton-curs {
     width: 100%;
-    margin: 0;
+    /* Umple tot spațiul disponibil */
+    min-width: 300px;
+    /* Lungime minimă */
+    padding: 20px 35px;
+    /* Spațiu intern crescut */
+    text-align: left;
+    /* Aliniere text la stânga */
+    font-size: 18px;
+    /* Text mai mare */
+    white-space: nowrap;
+    /* Text pe un singur rând */
 }
 
-/* Stări buton */
-.buton-curs:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    background: #567998;
+/* Hover specific Student */
+.rand-curs .buton-curs:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
-.buton-curs.activ {
-    background: #CCCCCC;
-    color: #537A9C;
-    padding-right: 45px;
-}
-
-/* ----------------- EFECT RIPPLE ----------------- */
-.buton-curs:after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 10px;
-    height: 10px;
-    background: rgba(255, 255, 255, 0.3);
-    opacity: 0;
-    border-radius: 50%;
-    transform: translate(-50%, -50%);
-}
-
-.buton-curs:active:after {
-    animation: ripple 0.6s ease-out;
-}
 
 @keyframes ripple {
     0% {
