@@ -32,7 +32,7 @@ const Sidebar = () => {
               key={index}
               icon={link.icon}
               label={link.name}
-              to={`/${link.name.toLowerCase()}`}
+              to={`/app/${link.name.toLowerCase()}`}
             />
           ))}
         </ul>
@@ -44,7 +44,7 @@ const Sidebar = () => {
               key={index}
               icon={link.icon}
               label={link.name}
-              to={`/${link.name.toLowerCase()}`}
+              to={`/app/${link.name.toLowerCase()}`}
             />
           ))}
         </ul>
