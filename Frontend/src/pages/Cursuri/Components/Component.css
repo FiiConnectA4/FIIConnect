@@ -1,0 +1,65 @@
+.buton-icon {
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.buton-icon:hover {
+    transform: scale(1.1);
+}
+
+.icon-curs {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+#carte {
+    background-color: #f0f0f0;
+    border-radius: 50%;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+#carte img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    filter: grayscale(20%);
+}
+
+.buton-curs {
+    box-sizing: border-box;
+    padding: 18px 25px;
+    border: none;
+    border-radius: 30px;
+    background: #537A9C;
+    color: #FFFFFF;
+    font-size: 16px;
+    font-family: 'Segoe UI', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    position: relative;
+    overflow: hidden;
+    margin: 0;
+}
+
+.buton-curs:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    background: #567998;
+}
+
+.buton-curs.activ {
+    background: #CCCCCC;
+    color: #537A9C;
+    padding-right: 45px;
+}
