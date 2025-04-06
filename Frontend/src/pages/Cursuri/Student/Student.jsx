@@ -8,10 +8,10 @@ import DetaliiCurs from './DetaliiCurs';
 const Student = () => {
     const [selectedCursId, setSelectedCursId] = useState(null);
     const [cursuri] = useState([
-        { id: 1, nume: 'Technologii Web', bifat: false },
-        { id: 2, nume: 'Ingineria Programării', bifat: false },
-        { id: 3, nume: 'Introducere în programare', bifat: false },
-        { id: 4, nume: 'Sisteme de operare', bifat: false },
+        { id: 1, nume: 'Technologii Web' },
+        { id: 2, nume: 'Ingineria Programării' },
+        { id: 3, nume: 'Introducere în programare' },
+        { id: 4, nume: 'Sisteme de operare' },
     ]);
 
     const an = 2;

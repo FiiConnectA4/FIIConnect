@@ -1,4 +1,3 @@
-/* containerul principal umple 100% din viewport */
 .detalii-container {
     height: 100%;
     padding: 10px;
@@ -10,10 +9,9 @@
     overflow-y: auto;
 }
 
-
 .buton-inapoi {
     align-self: flex-start;
-    background-color: #1a355e;
+    background-color: #537A9C;
     color: white;
     border: none;
     padding: 8px 16px;
@@ -23,36 +21,43 @@
     margin-bottom: 20px;
 }
 
-.titlu-curs h1 {
-    font-size: 28px;
-    font-weight: bold;
+.buton-curs {
+    width: fit-content;
+    margin-bottom: 20px;
+}
+
+.titlu-curs {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 15px;
+    margin-bottom: 25px;
 }
 
-.clock-icon {
-    font-size: 22px;
-}
-
-.profesor-label {
-    margin-top: 10px;
-    background-color: #3b6e91;
-    color: white;
-    padding: 6px 12px;
-    border-radius: 20px;
-    width: fit-content;
-    font-size: 14px;
+.titlu-curs h1 {
+    font-size: 40px;
+    font-weight: 600;
+    margin: 0;
+    color: #1a355e;
 }
 
 .sectiune {
+    width: 70vh;
     background-color: #ccc;
     padding: 10px;
-    margin-top: 20px;
+    margin-top: 30px;
     border-radius: 6px;
 }
 
+.bibliografie {
+    margin-top: 110px;
+}
+
+a {
+    text-decoration: none;
+    color: #1a355e;
+}
+
 .sectiune h2 {
-    font-size: 18px;
+    font-size: 40px;
     margin: 0;
 }
