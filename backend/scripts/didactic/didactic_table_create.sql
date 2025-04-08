@@ -64,14 +64,14 @@ create table teaching(
 create table formula(
     id integer primary key,
     idCourse integer not null,
-    formulaText varchar2(300),
+    formulaText varchar2(300) not null,
     foreign key (idCourse) references course(id) on delete cascade
 );
 
 create table formula_component(
     id integer primary key,
     idFormula integer not null,
-    name varchar2(20),
+    name varchar2(20) not null,
     foreign key (idFormula) references formula(id) on delete cascade
 );
 
