@@ -41,6 +41,7 @@
 }
 
 .sectiune {
+    position: relative;
     width: 70vh;
     background-color: #ccc;
     padding: 10px;

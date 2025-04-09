@@ -4,7 +4,7 @@ import Profesor from "./Profesor/Profesor";
 import Administrator from "./Administrator/Administrator";
 
 const Cursuri = () => {
-    let userType = 1;
+    let userType = 2;
     // aici in functie de cont -student 2-profesor 3-administrator
     // unit cu back-ul
 

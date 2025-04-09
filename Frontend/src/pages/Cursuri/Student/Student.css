@@ -39,6 +39,7 @@
 
 /* ----------------- RAND CURSUL ----------------- */
 .rand-curs {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 15px;
@@ -74,4 +75,13 @@
         height: 400px;
         opacity: 0;
     }
+}
+
+.Adauga {
+    height: 90px;
+    width: 250px !important;
+    border-radius: 50px;
+    left: 10%;
+    font-size: 1.5rem;
+    text-align: center;
 }

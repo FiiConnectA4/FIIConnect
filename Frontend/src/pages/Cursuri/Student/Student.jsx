@@ -37,7 +37,6 @@ const Student = () => {
                         <Carte />
                         <Ceas />
                         <Buton
-                            className="nume-curs"
                             text={curs.nume}
                             onNavigate={() => setSelectedCursId(curs.id)}
                         />
