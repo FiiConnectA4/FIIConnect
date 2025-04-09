@@ -1,4 +1,5 @@
 drop table feedback;
+drop table course_material;
 drop table enrollment;
 drop table grade;
 drop table teaching;
@@ -18,27 +19,26 @@ create table student(
     regNumber varchar2(30) unique not null,
     firstName varchar2(20) not null,
     lastName varchar2(20) not null,
-    birthDate date not null,
     year number(1) not null,
     facultyGroup varchar2(3) not null
 );
 
 create table course(
     id integer primary key,
-    code varchar2(30) not null,
+    code varchar2(30) unique not null,
     title varchar2(50) not null,
     credits number(1) not null,
     year number(1) not null,
     semester number(1) not null,
-    archived number(1) not null
+    archived number(1) not null,
+    academicYear date
 );
 
 create table professor(
     id integer primary key,
-    cnp varchar2(13) not null,
+    cnp varchar2(13) unique not null,
     firstName varchar2(20) not null,
     lastName varchar2(20) not null,
-    birthDate date not null,
     rank varchar2(20) not null
 );
 
@@ -63,7 +63,7 @@ create table teaching(
 
 create table formula(
     id integer primary key,
-    idCourse integer not null,
+    idCourse integer unique not null,
     formulaText varchar2(300) not null,
     foreign key (idCourse) references course(id) on delete cascade
 );
@@ -72,7 +72,8 @@ create table formula_component(
     id integer primary key,
     idFormula integer not null,
     name varchar2(20) not null,
-    foreign key (idFormula) references formula(id) on delete cascade
+    foreign key (idFormula) references formula(id) on delete cascade,
+    unique(idFormula, name)
 );
 
 create table component_score(
@@ -98,6 +99,7 @@ create table transfer_request(
     idCourse integer not null,
     facultyGroup varchar2(3) not null,
     reasonText varchar2(300) not null,
+    requestDate date not null,
     foreign key (idStud) references student(id) on delete cascade,
     foreign key (idCourse) references course(id) on delete cascade,
     unique(idStud, idCourse)
@@ -113,6 +115,18 @@ create table feedback(
     foreign key (idStud) references student(id) on delete cascade,
     foreign key (idProf) references professor(id) on delete cascade,
     unique(idStud, idProf)
+);
+
+create table course_material(
+    id integer primary key,
+    idCourse integer not null,
+    idProf integer not null,
+    filename varchar2(255) not null,
+    uploadDate date not null,
+    updateDate date not null,
+    foreign key (idCourse) references course(id) on delete cascade,
+    foreign key (idProf) references professor(id) on delete cascade,
+    unique(idCourse, filename)
 );
 
 commit;
