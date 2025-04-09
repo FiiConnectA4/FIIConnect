@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,33 +24,36 @@ public class CourseController {
     private final CourseRepository repository;
     private final CourseModelAssembler assembler;
 
-    CourseController(CourseRepository repository, CourseModelAssembler assembler) {
+    public CourseController(CourseRepository repository, CourseModelAssembler assembler) {
         this.repository = repository;
         this.assembler = assembler;
     }
 
     // get all courses
     @GetMapping("/didactic/course")
-    CollectionModel<EntityModel<Course>> all() {
-        List<EntityModel<Course>> courses = repository.findAll().stream().map(assembler::toModel).collect(Collectors.toList());
+     public CollectionModel<EntityModel<Course>> all() {
+        List<Course> courseList = repository.findAll();
+        //don't include details about materials and professors when returning a list of courses
+        courseList.forEach((c) -> {c.setMaterials(null); c.setProfessors(null);});
+        List<EntityModel<Course>> courses = courseList.stream().map(assembler::toModel).collect(Collectors.toList());
         return CollectionModel.of(courses, linkTo(methodOn(CourseController.class).all()).withSelfRel());
     }
 
     @GetMapping("didactic/course/{id}")
-    EntityModel<Course> one(@PathVariable("id") Long id){
+    public EntityModel<Course> one(@PathVariable("id") Long id){
         Course course = repository.findById(id).orElseThrow(() -> new CourseNotFoundException(id));
         return assembler.toModel(course);
     }
 
     @PostMapping("/didactic/course")
-    ResponseEntity<?> newEmployee(@RequestBody Course newCourse) {
+    public ResponseEntity<?> newCourse(@RequestBody Course newCourse) {
         newCourse.setId(null); // enforcing to choose a random id the db should create a sequence for id generation
         EntityModel<Course> entityModel = assembler.toModel(repository.save(newCourse));
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).build();
     }
 
     @PutMapping("/didactic/course/{id}")
-    ResponseEntity<?> replaceCourse(@PathVariable("id") Long id, @RequestBody Course newCourse) {
+    public ResponseEntity<?> replaceCourse(@PathVariable("id") Long id, @RequestBody Course newCourse) {
         Course temp = repository.findById(id)
                 .map(course -> {
                     course.setArchived(newCourse.getArchived());
@@ -67,7 +69,7 @@ public class CourseController {
     }
 
     @DeleteMapping("/didactic/course/{id}")
-    ResponseEntity<?> deleteCourse(@PathVariable("id") Long id) throws CourseNotFoundException {
+    public ResponseEntity<?> deleteCourse(@PathVariable("id") Long id) throws CourseNotFoundException {
         repository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
