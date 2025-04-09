@@ -39,6 +39,7 @@
 
 /* ----------------- RAND CURSUL ----------------- */
 .rand-curs {
+    position: relative;
     display: flex;
     align-items: center;
     gap: 15px;
@@ -49,20 +50,13 @@
 
 .rand-curs .buton-curs {
     width: 100%;
-    /* Umple tot spațiul disponibil */
     min-width: 300px;
-    /* Lungime minimă */
     padding: 20px 35px;
-    /* Spațiu intern crescut */
     text-align: left;
-    /* Aliniere text la stânga */
     font-size: 18px;
-    /* Text mai mare */
     white-space: nowrap;
-    /* Text pe un singur rând */
 }
 
-/* Hover specific Student */
 .rand-curs .buton-curs:hover {
     transform: translateY(-3px);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
@@ -81,4 +75,13 @@
         height: 400px;
         opacity: 0;
     }
+}
+
+.Adauga {
+    height: 90px;
+    width: 250px !important;
+    border-radius: 50px;
+    left: 10%;
+    font-size: 1.5rem;
+    text-align: center;
 }
