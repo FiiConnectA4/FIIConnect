@@ -4,6 +4,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import com.fiiconnect.api.modulexemplu.EmailValidator;
+import com.fiiconnect.api.modulexemplu.PasswordValidator;
 
 import java.util.List;
 
@@ -20,8 +22,17 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {
         try {
-            if (user.getPassword() == null || user.getUsername() == null) {
+            if (user.getPassword() == null || user.getUsername() == null || user.getEmail() == null) {
                 return ResponseEntity.badRequest().body("Username și parola sunt necesare.");
+            }
+
+            if (!PasswordValidator.isValid(user.getPassword())) {
+                return ResponseEntity.badRequest().body(
+                        "Parola trebuie să conțină minim 8 caractere, o literă mare, una mică, o cifră și un simbol.");
+            }
+
+            if (!EmailValidator.isValid(user.getEmail())) {
+                return ResponseEntity.badRequest().body("Email invalid.");
             }
 
             user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -29,10 +40,11 @@ public class UserController {
             return ResponseEntity.ok(saved);
 
         } catch (Exception e) {
-            e.printStackTrace(); // vezi consola
+            e.printStackTrace();
             return ResponseEntity.status(500).body("Eroare internă: " + e.getMessage());
         }
     }
+
 
     // ✅ Obține toți utilizatorii
     @GetMapping
