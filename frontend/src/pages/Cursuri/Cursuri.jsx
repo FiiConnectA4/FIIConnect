@@ -6,7 +6,8 @@ import Administrator from "./Administrator/Administrator";
 const Cursuri = () => {
     const [searchParams] = useSearchParams();
     const paramValue = searchParams.get("userType");
-    const userType = paramValue !== null && !isNaN(parseInt(paramValue)) ? parseInt(paramValue) : 1;
+
+    const userType = paramValue !== null && !isNaN(parseInt(paramValue)) ? parseInt(paramValue) : 2;
 
     return (
         <div>

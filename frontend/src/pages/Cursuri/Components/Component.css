@@ -151,3 +151,52 @@
     height: 20px;
     object-fit: contain;
 }
+
+.buton-container {
+    position: relative;
+    /* Permite poziționarea absolută a submeniului */
+    display: inline-block;
+}
+
+/* Sub-meniul care apare la click. */
+.buton-submenu {
+    position: absolute;
+    top: calc(100% + 5px);
+    /* Să fie puțin mai jos de butonul principal */
+    left: 0;
+    background: #537A9C;
+    border-radius: 30px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 10px 20px;
+    min-width: 200px;
+    /* Ajustează după preferință */
+    z-index: 999;
+    /* Să fie peste alte elemente */
+}
+
+/* Butoane din sub-meniu */
+.buton-submenu-item {
+    display: block;
+    width: 100%;
+    background: #537A9C;
+    color: #FFFFFF;
+    border: none;
+    border-radius: 25px;
+    padding: 10px;
+    margin-top: 5px;
+    text-align: left;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.buton-submenu-item:hover {
+    background: #567998;
+}
+
+/* Footer suplimentar din sub-meniu */
+.buton-submenu-footer {
+    margin-top: 10px;
+    color: #FFFFFF;
+    font-size: 14px;
+}
