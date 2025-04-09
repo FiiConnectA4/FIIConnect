@@ -24,7 +24,7 @@ public class CourseService {
     public void deleteCourse(Long courseId){
         courseRepository.deleteById(courseId);
     }
-
+    // probably will return List<String>
     public void viewCourseDetails(Long courseId){
         Course course = courseRepository.findById(courseId).orElseThrow(() -> new CourseNotFoundException(courseId));
         // logic for course details
