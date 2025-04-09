@@ -19,6 +19,7 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(unique = true)
     private String email;
 
     private boolean isActive = true;
@@ -42,5 +43,7 @@ public class User {
         return username;
     }
 
-    public String getEmail() { return email; }
+    public String getEmail() {
+        return email;
+    }
 }
