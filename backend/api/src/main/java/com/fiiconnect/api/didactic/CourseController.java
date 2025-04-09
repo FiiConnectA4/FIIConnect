@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,7 +32,10 @@ public class CourseController {
     // get all courses
     @GetMapping("/didactic/course")
      public CollectionModel<EntityModel<Course>> all() {
-        List<EntityModel<Course>> courses = repository.findAll().stream().map(assembler::toModel).collect(Collectors.toList());
+        List<Course> courseList = repository.findAll();
+        //don't include details about materials and professors when returning a list of courses
+        courseList.forEach((c) -> {c.setMaterials(null); c.setProfessors(null);});
+        List<EntityModel<Course>> courses = courseList.stream().map(assembler::toModel).collect(Collectors.toList());
         return CollectionModel.of(courses, linkTo(methodOn(CourseController.class).all()).withSelfRel());
     }
 
