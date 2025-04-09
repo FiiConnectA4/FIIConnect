@@ -1,23 +1,35 @@
 package com.fiiconnect.api.didactic;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+
 @Entity
 public class Course{
     private @Id @GeneratedValue Long id;
 	String code, title;
 	int credits, year, semester, archived;
+
+	@OneToMany(mappedBy = "idCourse")
+	private Set<CourseMaterial> materials;
+
+	@OneToMany(mappedBy = "id.idCourse")
+	private Set<Teaching> professors;
+
 	public Course() {}
-	public Course(String code, String title, int credits, int year, int semester, int archived) {
+
+	public Course(Long id, String code, String title, int credits, int year, int semester, int archived, Set<CourseMaterial> materials, Set<Teaching> professors) {
+		this.id = id;
 		this.code = code;
 		this.title = title;
 		this.credits = credits;
 		this.year = year;
 		this.semester = semester;
 		this.archived = archived;
+		this.materials = materials;
+		this.professors = professors;
 	}
 
 	public String getCode() {
@@ -76,6 +88,22 @@ public class Course{
 		this.title = title;
 	}
 
+	public Set<CourseMaterial> getMaterials() {
+		return materials;
+	}
+
+	public void setMaterials(Set<CourseMaterial> materials) {
+		this.materials = materials;
+	}
+
+	public Set<Teaching> getProfessors() {
+		return professors;
+	}
+
+	public void setProfessors(Set<Teaching> professors) {
+		this.professors = professors;
+	}
+
 	@Override
 	public String toString() {
 		return "Course{" +
@@ -86,18 +114,19 @@ public class Course{
 				", year=" + year +
 				", semester=" + semester +
 				", archived=" + archived +
+				", materials=" + materials +
+				", professors=" + professors +
 				'}';
 	}
 
 	@Override
 	public boolean equals(Object o) {
 		if (!(o instanceof Course course)) return false;
-        return credits == course.credits && year == course.year && semester == course.semester && archived == course.archived && Objects.equals(id, course.id) && Objects.equals(code, course.code) && Objects.equals(title, course.title);
+        return getCredits() == course.getCredits() && getYear() == course.getYear() && getSemester() == course.getSemester() && getArchived() == course.getArchived() && Objects.equals(getId(), course.getId()) && Objects.equals(getCode(), course.getCode()) && Objects.equals(getTitle(), course.getTitle()) && Objects.equals(getMaterials(), course.getMaterials()) && Objects.equals(getProfessors(), course.getProfessors());
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(id, code, title, credits, year, semester, archived);
+		return Objects.hash(getId(), getCode(), getTitle(), getCredits(), getYear(), getSemester(), getArchived(), getMaterials(), getProfessors());
 	}
-
 }
