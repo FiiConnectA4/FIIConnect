@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Ceas from './../Components/Ceas';
+import Ceas from '../Components/Ceas';
 import Carte from '../Components/Carte';
 import Buton from '../Components/Buton';
 import './Student.css';
