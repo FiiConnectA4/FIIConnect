@@ -66,7 +66,7 @@ public class CourseController {
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
 
-    @DeleteMapping("/didactic/{id}")
+    @DeleteMapping("/didactic/course/{id}")
     ResponseEntity<?> deleteCourse(@PathVariable("id") Long id) throws CourseNotFoundException {
         repository.deleteById(id);
         return ResponseEntity.noContent().build();
