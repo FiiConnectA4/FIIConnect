@@ -4,9 +4,9 @@ import Profesor from "./Profesor/Profesor";
 import Administrator from "./Administrator/Administrator";
 
 const Cursuri = () => {
-    let userType = 2;
-    // aici in functie de cont -student 2-profesor 3-administrator
-    // unit cu back-ul
+    const [searchParams] = useSearchParams();
+    const paramValue = searchParams.get("userType");
+    const userType = paramValue !== null && !isNaN(parseInt(paramValue)) ? parseInt(paramValue) : 1;
 
     return (
         <div>
