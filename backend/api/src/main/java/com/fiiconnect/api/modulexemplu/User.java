@@ -43,7 +43,5 @@ public class User {
         return username;
     }
 
-    public String getEmail() {
-        return email;
-    }
+    public String getEmail() { return email; }
 }
