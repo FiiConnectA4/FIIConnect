@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Ceas from '../Components/Ceas';
 import Carte from '../Components/Carte';
 import Buton from '../Components/Buton';
@@ -7,15 +7,29 @@ import DetaliiCurs from './DetaliiCurs';
 
 const Student = () => {
     const [selectedCursId, setSelectedCursId] = useState(null);
-    const [cursuri] = useState([
-        { id: 1, nume: 'Technologii Web' },
-        { id: 2, nume: 'Ingineria Programării' },
-        { id: 3, nume: 'Introducere în programare' },
-        { id: 4, nume: 'Sisteme de operare' },
-    ]);
+    const [cursuri, setCursuri] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        // Fetch courses from the backend API
+        fetch('/didactic/course')
+            .then(response => response.json())
+            .then(data => {
+                setCursuri(data._embedded.courses); // Adjust the structure based on your API response
+                setLoading(false);
+            })
+            .catch(error => {
+                console.error('Error fetching courses:', error);
+                setLoading(false);
+            });
+    }, []);
 
     const an = 2;
     const semestru = 2;
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
 
     if (selectedCursId) {
         const cursSelectat = cursuri.find(c => c.id === selectedCursId);
@@ -37,7 +51,7 @@ const Student = () => {
                         <Carte />
                         <Ceas />
                         <Buton
-                            text={curs.nume}
+                            text={curs.title}  // Display course title
                             onNavigate={() => setSelectedCursId(curs.id)}
                         />
                     </div>
