@@ -9,28 +9,29 @@ const Student = () => {
     const [cursuri, setCursuri] = useState([]);
     const [loading, setLoading] = useState(true);
 
+    const an = 2; // Year
+    const semestru = 2; // Semester
+
     useEffect(() => {
-        fetch('/didactic/course')
+        // Update the fetch URL to include year and semester
+        fetch(`/didactic/courses/${an}/${semestru}`)
             .then((response) => {
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                 return response.json();
             })
             .then((data) => {
-                console.log('Răspuns API:', data); // Verifică ce primești
-                // Ajustăm în funcție de structura reală a răspunsului
-                const courses = data._embedded?.courses || data || [];
+                console.log('Răspuns API:', data);
+                // Adjust based on the actual response structure from your API
+                const courses = data._embedded?.courseList || data || [];
                 setCursuri(Array.isArray(courses) ? courses : []);
                 setLoading(false);
             })
             .catch((error) => {
                 console.error('Eroare la încărcarea cursurilor:', error);
-                setCursuri([]); // Asigurăm un array gol în caz de eroare
+                setCursuri([]);
                 setLoading(false);
             });
-    }, []);
-
-    const an = 2;
-    const semestru = 2;
+    }, [an, semestru]); // Add dependencies to re-fetch if year or semester changes
 
     if (loading) {
         return <div>Loading...</div>;
@@ -76,4 +77,6 @@ const Student = () => {
             </div>
         </div>
     );
-};export default Student;
+};
+
+export default Student;
