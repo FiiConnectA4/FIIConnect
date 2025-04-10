@@ -1,4 +1,4 @@
-package com.fiiconnect.api.modulexemplu;
+package com.fiiconnect.api.social_secretary;
 
 
 import jakarta.persistence.Entity;
@@ -9,15 +9,14 @@ import jakarta.persistence.Table;
 import java.util.Objects;
 
 @Entity
-@Table(name = "obiectexemplu")
+@Table(name = "SOCIAL")
 public class ObiectExemplu {
     private @Id
     @GeneratedValue Integer id;
     private String nume;
     private double medie;
 
-    ObiectExemplu()
-    {
+    public ObiectExemplu() {
 
     }
 
@@ -26,6 +25,7 @@ public class ObiectExemplu {
         this.nume = nume;
         this.medie = medie;
     }
+
 
     public Integer getId() {
         return id;
