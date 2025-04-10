@@ -1,7 +1,9 @@
 package com.fiiconnect.api.didactic;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -11,16 +13,17 @@ public class Course{
     private @Id @GeneratedValue Long id;
 	String code, title;
 	int credits, year, semester, archived;
+	Date academicYear;
 
-	@OneToMany(mappedBy = "idCourse")
-	private Set<CourseMaterial> materials;
+	@Transient
+	private List<CourseMaterial> materials;
 
-	@OneToMany(mappedBy = "id.idCourse")
-	private Set<Teaching> professors;
+	@Transient
+	private List<Teaching> professors = null;
 
 	public Course() {}
 
-	public Course(Long id, String code, String title, int credits, int year, int semester, int archived, Set<CourseMaterial> materials, Set<Teaching> professors) {
+	public Course(Long id, String code, String title, int credits, int year, int semester, int archived, Date academicYear) {
 		this.id = id;
 		this.code = code;
 		this.title = title;
@@ -28,8 +31,7 @@ public class Course{
 		this.year = year;
 		this.semester = semester;
 		this.archived = archived;
-		this.materials = materials;
-		this.professors = professors;
+		this.academicYear = academicYear;
 	}
 
 	public String getCode() {
@@ -88,20 +90,28 @@ public class Course{
 		this.title = title;
 	}
 
-	public Set<CourseMaterial> getMaterials() {
+	public List<CourseMaterial> getMaterials() {
 		return materials;
 	}
 
-	public void setMaterials(Set<CourseMaterial> materials) {
+	public void setMaterials(List<CourseMaterial> materials) {
 		this.materials = materials;
 	}
 
-	public Set<Teaching> getProfessors() {
+	public List<Teaching> getProfessors() {
 		return professors;
 	}
 
-	public void setProfessors(Set<Teaching> professors) {
+	public void setProfessors(List<Teaching> professors) {
 		this.professors = professors;
+	}
+
+	public Date getAcademicYear() {
+		return academicYear;
+	}
+
+	public void setAcademicYear(Date academicYear) {
+		this.academicYear = academicYear;
 	}
 
 	@Override
@@ -114,19 +124,19 @@ public class Course{
 				", year=" + year +
 				", semester=" + semester +
 				", archived=" + archived +
-				", materials=" + materials +
-				", professors=" + professors +
+				", academicYear=" + academicYear +
 				'}';
 	}
 
 	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof Course course)) return false;
-        return getCredits() == course.getCredits() && getYear() == course.getYear() && getSemester() == course.getSemester() && getArchived() == course.getArchived() && Objects.equals(getId(), course.getId()) && Objects.equals(getCode(), course.getCode()) && Objects.equals(getTitle(), course.getTitle()) && Objects.equals(getMaterials(), course.getMaterials()) && Objects.equals(getProfessors(), course.getProfessors());
+		if (o == null || getClass() != o.getClass()) return false;
+		Course course = (Course) o;
+		return credits == course.credits && year == course.year && semester == course.semester && archived == course.archived && Objects.equals(id, course.id) && Objects.equals(code, course.code) && Objects.equals(title, course.title) && Objects.equals(academicYear, course.academicYear);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(getId(), getCode(), getTitle(), getCredits(), getYear(), getSemester(), getArchived(), getMaterials(), getProfessors());
+		return Objects.hash(id, code, title, credits, year, semester, archived, academicYear);
 	}
 }

@@ -1,5 +1,6 @@
 package com.fiiconnect.api.didactic;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 
 import java.util.Objects;
@@ -8,19 +9,61 @@ import java.util.Objects;
 public class Teaching {
     @EmbeddedId
     private TeachingCompositeKey id;
-    @ManyToOne
-    @MapsId("idProf")
-    @JoinColumn(name = "idProf", referencedColumnName = "id")
-    private Professor professor;
-    private String role;
 
+    @Transient
+    private Course course = null;
+
+    @Transient
+    private Professor professor = null;
+
+    private String role;
 
     public Teaching() {
     }
 
-    public Teaching(Professor professor, String role) {
+    public Teaching(TeachingCompositeKey id, Course course, Professor professor, String role) {
+        this.id = id;
+        this.course = course;
         this.professor = professor;
         this.role = role;
+    }
+
+    @Override
+    public String toString() {
+        return "Teaching{" +
+                "id=" + id +
+                ", course=" + course +
+                ", professor=" + professor +
+                ", role='" + role + '\'' +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Teaching teaching = (Teaching) o;
+        return Objects.equals(id, teaching.id) && Objects.equals(role, teaching.role);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, role);
+    }
+
+    public TeachingCompositeKey getId() {
+        return id;
+    }
+
+    public void setId(TeachingCompositeKey id) {
+        this.id = id;
+    }
+
+    public Course getCourse() {
+        return course;
+    }
+
+    public void setCourse(Course course) {
+        this.course = course;
     }
 
     public Professor getProfessor() {
@@ -37,25 +80,5 @@ public class Teaching {
 
     public void setRole(String role) {
         this.role = role;
-    }
-
-
-    @Override
-    public String toString() {
-        return "Teaching{" +
-                "professor=" + professor +
-                ", role='" + role + '\'' +
-                '}';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof Teaching teaching)) return false;
-        return Objects.equals(getProfessor(), teaching.getProfessor()) && Objects.equals(getRole(), teaching.getRole());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getProfessor(), getRole());
     }
 }

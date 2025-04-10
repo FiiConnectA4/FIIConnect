@@ -23,18 +23,22 @@ import java.util.stream.Collectors;
 public class CourseController {
     private final CourseRepository repository;
     private final CourseModelAssembler assembler;
+    private final TeachingRepository teachingRepo;
+    private final TeachingService teachingService;
+    private final CourseService service;
 
-    public CourseController(CourseRepository repository, CourseModelAssembler assembler) {
+    public CourseController(CourseRepository repository, CourseModelAssembler assembler, TeachingRepository teachingRepo, TeachingService teachingService, CourseService service) {
         this.repository = repository;
         this.assembler = assembler;
+        this.teachingRepo = teachingRepo;
+        this.teachingService = teachingService;
+        this.service = service;
     }
 
     // get all courses
     @GetMapping("/didactic/course")
      public CollectionModel<EntityModel<Course>> all() {
         List<Course> courseList = repository.findAll();
-        //don't include details about materials and professors when returning a list of courses
-        courseList.forEach((c) -> {c.setMaterials(null); c.setProfessors(null);});
         List<EntityModel<Course>> courses = courseList.stream().map(assembler::toModel).collect(Collectors.toList());
         return CollectionModel.of(courses, linkTo(methodOn(CourseController.class).all()).withSelfRel());
     }
@@ -42,6 +46,8 @@ public class CourseController {
     @GetMapping("didactic/course/{id}")
     public EntityModel<Course> one(@PathVariable("id") Long id){
         Course course = repository.findById(id).orElseThrow(() -> new CourseNotFoundException(id));
+        service.attachProfessors(course);
+        service.attachMaterials(course);
         return assembler.toModel(course);
     }
 
