@@ -4,22 +4,27 @@ import Carte from '../Components/Carte';
 import Buton from '../Components/Buton';
 import './Student.css';
 import DetaliiCurs from './DetaliiCurs';
-
 const Student = () => {
     const [selectedCursId, setSelectedCursId] = useState(null);
     const [cursuri, setCursuri] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Fetch courses from the backend API
         fetch('/didactic/course')
-            .then(response => response.json())
-            .then(data => {
-                setCursuri(data._embedded.courses); // Adjust the structure based on your API response
+            .then((response) => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.json();
+            })
+            .then((data) => {
+                console.log('Răspuns API:', data); // Verifică ce primești
+                // Ajustăm în funcție de structura reală a răspunsului
+                const courses = data._embedded?.courses || data || [];
+                setCursuri(Array.isArray(courses) ? courses : []);
                 setLoading(false);
             })
-            .catch(error => {
-                console.error('Error fetching courses:', error);
+            .catch((error) => {
+                console.error('Eroare la încărcarea cursurilor:', error);
+                setCursuri([]); // Asigurăm un array gol în caz de eroare
                 setLoading(false);
             });
     }, []);
@@ -32,11 +37,18 @@ const Student = () => {
     }
 
     if (selectedCursId) {
-        const cursSelectat = cursuri.find(c => c.id === selectedCursId);
-        return <DetaliiCurs
-            curs={cursSelectat}
-            onBack={() => setSelectedCursId(null)}
-        />;
+        const cursSelectat = cursuri.find((c) => c.id === selectedCursId);
+        if (!cursSelectat) {
+            console.error(`Cursul cu ID ${selectedCursId} nu a fost găsit`);
+            setSelectedCursId(null);
+            return <div>Cursul nu a fost găsit</div>;
+        }
+        return (
+            <DetaliiCurs
+                curs={cursSelectat}
+                onBack={() => setSelectedCursId(null)}
+            />
+        );
     }
 
     return (
@@ -44,21 +56,24 @@ const Student = () => {
             <div className="cursuri-titlu">
                 <h1>Cursuri</h1>
                 <h2>Anul {an} semestrul {semestru}</h2>
+                <Ceas />
             </div>
             <div className="lista-cursuri">
-                {cursuri.map((curs) => (
-                    <div key={curs.id} className="rand-curs">
-                        <Carte />
-                        <Ceas />
-                        <Buton
-                            text={curs.title}  // Display course title
-                            onNavigate={() => setSelectedCursId(curs.id)}
-                        />
-                    </div>
-                ))}
+                {cursuri.length > 0 ? (
+                    cursuri.map((curs) => (
+                        <div key={curs.id} className="rand-curs">
+                            <Carte />
+                            <Ceas />
+                            <Buton
+                                text={curs.title}
+                                onNavigate={() => setSelectedCursId(curs.id)}
+                            />
+                        </div>
+                    ))
+                ) : (
+                    <p>Nu există cursuri disponibile.</p>
+                )}
             </div>
         </div>
     );
-};
-
-export default Student;
+};export default Student;

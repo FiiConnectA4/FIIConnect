@@ -23,10 +23,11 @@ import java.util.stream.Collectors;
 public class CourseController {
     private final CourseRepository repository;
     private final CourseModelAssembler assembler;
-
-    public CourseController(CourseRepository repository, CourseModelAssembler assembler) {
+    private final CourseService service;
+    public CourseController(CourseRepository repository, CourseModelAssembler assembler, CourseService service) {
         this.repository = repository;
         this.assembler = assembler;
+        this.service = service;
     }
 
     // get all courses
@@ -38,6 +39,7 @@ public class CourseController {
         List<EntityModel<Course>> courses = courseList.stream().map(assembler::toModel).collect(Collectors.toList());
         return CollectionModel.of(courses, linkTo(methodOn(CourseController.class).all()).withSelfRel());
     }
+
 
     @GetMapping("didactic/course/{id}")
     public EntityModel<Course> one(@PathVariable("id") Long id){

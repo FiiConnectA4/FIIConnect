@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 public class CourseService {
     @Autowired
     private final CourseRepository courseRepository;
+    @Autowired
+    private CourseMaterialRepository courseMaterialRepository;
 
     public CourseService(CourseRepository courseRepository) {
         this.courseRepository = courseRepository;
