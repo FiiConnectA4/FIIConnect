@@ -1,4 +1,4 @@
-package com.fiiconnect.api.modulexemplu;
+package com.fiiconnect.api.social_secretary;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +14,8 @@ public class ExempluController {
     {
 
     }
-
+/// aici
+/// aici
     @GetMapping("/test")
     String exemplu()
     {

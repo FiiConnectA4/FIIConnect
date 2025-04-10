@@ -1,4 +1,4 @@
-package com.fiiconnect.api.modulexemplu;
+package com.fiiconnect.api.social_secretary;
 
 
 import jakarta.persistence.Entity;
