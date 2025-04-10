@@ -1,5 +1,6 @@
 package com.fiiconnect.api.didactic;
 
+import com.fiiconnect.api.didactic.professor.Professor;
 import jakarta.persistence.*;
 
 import java.util.Objects;
