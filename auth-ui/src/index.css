@@ -1,0 +1,185 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* === Global Styles === */
+body {
+  background-color: #f0f4f8;
+  color: #1a202c;
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+a {
+  color: #003087;
+  font-weight: 500;
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: #003087;
+  color: white;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+button:hover {
+  background-color: #00205b;
+}
+
+/* === Auth App Background === */
+.auth-app-background {
+  min-height: 100vh;
+  width: 100%;
+  background-color: #f0f4f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.auth-page-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* === Shared Styles === */
+.page-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+  text-align: center;
+  width: 360px;
+  margin: 0 auto;
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+
+.auth-input {
+  width: 100%;
+  height: 3.5rem;
+  text-indent: 10px;
+  padding-left: 0;
+  padding-right: 0;
+  background-color: #f5f7fa;
+  border-radius: 0.625rem;
+  font-size: 1rem;
+  color: #6b7280;
+  outline: none;
+  border: 1px solid red; /* Pentru debugging, poți șterge dacă nu mai ai nevoie */
+}
+.auth-input::placeholder {
+  color: #6b7280;
+}
+.auth-input:focus {
+  ring-width: 2px;
+  ring-color: #3b82f6;
+}
+
+.auth-button {
+  width: 100%;
+  height: 48px;
+  padding-left: 0rem;
+  padding-right: 0rem;
+  background-color: #003087;
+  color: white;
+  font-weight: bold;
+  text-transform: uppercase;
+  border-radius: 0.5rem;
+  border: none;
+  transition: background-color 0.2s ease;
+}
+.auth-button:hover {
+  background-color: #00205b;
+}
+
+.auth-link {
+  color: #003087;
+  font-size: 0.875rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+.footer-text {
+  text-align: center;
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-top: 2rem;
+}
+
+/* === Login Form === */
+.login-logo-container {
+  position: relative;
+  height: 60px;
+}
+
+.login-logo-image {
+  position: center;
+  left: 25px;
+  top: 11.5px;
+  width: 400px;
+  height: auto;
+}
+
+.login-greeting-text {
+  font-size: 0.875rem;
+  color: #003087;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.login-password-toggle {
+  position: absolute;
+  right: 42%; /* Ajustează această valoare dacă e nevoie */
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: #6b7280;
+  z-index: 10;
+}
+
+
+/* === Register Form === */
+.register-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #003087;
+}
+
+/* === Reset Password Form === */
+.reset-password-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #003087;
+}
+
+/* === Dashboard === */
+.dashboard-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #003087;
+}
+
+.dashboard-text {
+  color: #6b7280;
+}
