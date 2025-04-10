@@ -4,18 +4,20 @@ import jakarta.persistence.*;
 import java.util.Set;
 
 @Entity
+@Table(name = "ANNOUNCEMENT")
 public class Announcement {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "announcement_seq")
+    @SequenceGenerator(name = "announcement_seq", sequenceName = "announcement_seq", allocationSize = 1)
     private Long id;
 
     private String title;
-
     private String message;
 
     @ManyToOne
     @JoinColumn(name = "professor_id")
-    private User professor;
+    private User_Anunturi professor;
 
     @ManyToMany
     @JoinTable(
@@ -25,9 +27,11 @@ public class Announcement {
     )
     private Set<Tag> tags;
 
+    // Constructors, getters, setters
+
     public Announcement() {}
 
-    public Announcement(String title, String message, User professor, Set<Tag> tags) {
+    public Announcement(String title, String message, User_Anunturi professor, Set<Tag> tags) {
         this.title = title;
         this.message = message;
         this.professor = professor;
@@ -54,11 +58,11 @@ public class Announcement {
         this.message = message;
     }
 
-    public User getProfessor() {
+    public User_Anunturi getProfessor() {
         return professor;
     }
 
-    public void setProfessor(User professor) {
+    public void setProfessor(User_Anunturi professor) {
         this.professor = professor;
     }
 
