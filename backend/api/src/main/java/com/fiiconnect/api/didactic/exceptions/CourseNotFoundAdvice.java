@@ -1,4 +1,4 @@
-package com.fiiconnect.api.didactic;
+package com.fiiconnect.api.didactic.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;

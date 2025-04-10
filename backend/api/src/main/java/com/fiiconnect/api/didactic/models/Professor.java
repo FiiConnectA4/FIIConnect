@@ -1,4 +1,4 @@
-package com.fiiconnect.api.didactic;
+package com.fiiconnect.api.didactic.models;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -7,7 +7,6 @@ import jakarta.persistence.Transient;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 public class Professor {

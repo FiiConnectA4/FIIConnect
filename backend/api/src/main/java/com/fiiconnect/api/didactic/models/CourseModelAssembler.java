@@ -1,7 +1,8 @@
-package com.fiiconnect.api.didactic;
+package com.fiiconnect.api.didactic.models;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
+import com.fiiconnect.api.didactic.controllers.CourseController;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.server.RepresentationModelAssembler;
 import org.springframework.stereotype.Component;

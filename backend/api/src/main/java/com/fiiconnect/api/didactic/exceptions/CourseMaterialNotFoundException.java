@@ -1,4 +1,4 @@
-package com.fiiconnect.api.didactic;
+package com.fiiconnect.api.didactic.exceptions;
 
 public class CourseMaterialNotFoundException extends RuntimeException {
     public CourseMaterialNotFoundException(Long id) {

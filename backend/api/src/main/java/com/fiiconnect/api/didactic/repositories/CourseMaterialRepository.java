@@ -1,5 +1,6 @@
-package com.fiiconnect.api.didactic;
+package com.fiiconnect.api.didactic.repositories;
 
+import com.fiiconnect.api.didactic.models.CourseMaterial;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

@@ -1,6 +1,10 @@
 package com.fiiconnect.api;
 
-import com.fiiconnect.api.didactic.*;
+import com.fiiconnect.api.didactic.controllers.CourseController;
+import com.fiiconnect.api.didactic.exceptions.CourseNotFoundException;
+import com.fiiconnect.api.didactic.models.Course;
+import com.fiiconnect.api.didactic.models.CourseModelAssembler;
+import com.fiiconnect.api.didactic.repositories.CourseRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +20,6 @@ import org.springframework.http.ResponseEntity;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;

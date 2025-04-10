@@ -1,5 +1,9 @@
-package com.fiiconnect.api.didactic;
+package com.fiiconnect.api.didactic.services;
 
+import com.fiiconnect.api.didactic.repositories.ProfessorRepository;
+import com.fiiconnect.api.didactic.repositories.TeachingRepository;
+import com.fiiconnect.api.didactic.models.Professor;
+import com.fiiconnect.api.didactic.models.Teaching;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,7 +20,7 @@ public class ProfessorService {
         this.teachingService = teachingService;
     }
 
-    void attachCourses(Professor professor)
+    public void attachCourses(Professor professor)
     {
         List<Teaching> teachingInfo = teachingRepo.findByIdIdProf(professor.getId());
         teachingInfo.forEach(teachingService::attachCourse);

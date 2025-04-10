@@ -1,6 +1,5 @@
-package com.fiiconnect.api.didactic;
+package com.fiiconnect.api.didactic.models;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 
 import java.util.Objects;
