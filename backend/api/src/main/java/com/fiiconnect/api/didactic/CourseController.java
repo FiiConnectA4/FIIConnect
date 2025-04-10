@@ -40,6 +40,13 @@ public class CourseController {
         return CollectionModel.of(courses, linkTo(methodOn(CourseController.class).all()).withSelfRel());
     }
 
+    @GetMapping("didactic/course/{year}/{semester}")
+    public CollectionModel<EntityModel<Course>> allCourse(@PathVariable("year") Integer year, @PathVariable("semester") Integer semester) {
+        List<Course> courseList = service.viewAllCoursesAvailable(year, semester);
+        courseList.forEach((c) -> {c.setMaterials(null); c.setProfessors(null);});
+        List<EntityModel<Course>>  courses = courseList.stream().map(assembler::toModel).toList();
+        return CollectionModel.of(courses, linkTo(methodOn(CourseController.class).all()).withSelfRel());
+    }
 
     @GetMapping("didactic/course/{id}")
     public EntityModel<Course> one(@PathVariable("id") Long id){
