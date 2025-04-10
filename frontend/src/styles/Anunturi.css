@@ -1,0 +1,51 @@
+.announcements-container {
+    max-height: 100vh;
+    padding: 20px;
+    overflow-y: auto;
+  }
+  
+  .announcements-header {
+    margin-bottom: 20px;
+  }
+  
+  .announcements-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333;
+  }
+  
+  .announcements-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .announcement-box {
+    background-color: #4a86e8;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  
+  .announcement-header {
+    padding: 12px 16px;
+    color: white;
+    font-size: 18px;
+    font-weight: 500;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .announcement-content {
+    background-color: white;
+    padding: 12px 16px;
+    border-radius: 0 0 8px 8px;
+  }
+  
+  .announcement-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
