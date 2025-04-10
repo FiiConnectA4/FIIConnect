@@ -12,11 +12,15 @@ import java.util.stream.Collectors;
 public class CourseService {
     @Autowired
     private final CourseRepository courseRepository;
-    @Autowired
-    private CourseMaterialRepository courseMaterialRepository;
+    private final CourseMaterialRepository materialRepository;
+    private final TeachingRepository teachingRepo;
+    private final TeachingService teachingService;
 
-    public CourseService(CourseRepository courseRepository) {
+    public CourseService(CourseRepository courseRepository, CourseMaterialRepository materialRepository, TeachingRepository teachingRepo, TeachingService teachingService) {
         this.courseRepository = courseRepository;
+        this.materialRepository = materialRepository;
+        this.teachingRepo = teachingRepo;
+        this.teachingService = teachingService;
     }
 
     public void addCourse(Course course){
@@ -70,5 +74,18 @@ public class CourseService {
         Course course = courseRepository.findById(courseId).
                 orElseThrow(() -> new CourseNotFoundException(courseId));
         //  logic..
+    }
+
+    public void attachMaterials(Course course)
+    {
+        List<CourseMaterial> materials = materialRepository.findByIdCourse(course.getId());
+        course.setMaterials(materials);
+    }
+
+    public void attachProfessors(Course course)
+    {
+        List<Teaching> professors = teachingRepo.findByIdIdCourse(course.getId());
+        professors.forEach(teachingService::attachProfessor);
+        course.setProfessors(professors);
     }
 }

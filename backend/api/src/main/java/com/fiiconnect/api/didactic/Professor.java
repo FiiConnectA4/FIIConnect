@@ -3,8 +3,11 @@ package com.fiiconnect.api.didactic;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.Transient;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 public class Professor {
@@ -13,6 +16,9 @@ public class Professor {
     private String firstName;
     private String lastName;
     private String rank;
+
+    @Transient
+    private List<Teaching> courses = null;
 
     public Professor(Long id, String cnp, String firstName, String lastName, String rank) {
         this.id = id;
@@ -65,6 +71,7 @@ public class Professor {
         this.rank = rank;
     }
 
+
     @Override
     public String toString() {
         return "Professor{" +
@@ -73,17 +80,27 @@ public class Professor {
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", rank='" + rank + '\'' +
+                ", courses=" + courses +
                 '}';
+    }
+
+    public List<Teaching> getCourses() {
+        return courses;
+    }
+
+    public void setCourses(List<Teaching> courses) {
+        this.courses = courses;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Professor professor)) return false;
-        return Objects.equals(getId(), professor.getId()) && Objects.equals(getCnp(), professor.getCnp()) && Objects.equals(getFirstName(), professor.getFirstName()) && Objects.equals(getLastName(), professor.getLastName()) && Objects.equals(getRank(), professor.getRank());
+        if (o == null || getClass() != o.getClass()) return false;
+        Professor professor = (Professor) o;
+        return Objects.equals(id, professor.id) && Objects.equals(cnp, professor.cnp) && Objects.equals(firstName, professor.firstName) && Objects.equals(lastName, professor.lastName) && Objects.equals(rank, professor.rank);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getCnp(), getFirstName(), getLastName(), getRank());
+        return Objects.hash(id, cnp, firstName, lastName, rank);
     }
 }
