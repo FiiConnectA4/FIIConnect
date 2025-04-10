@@ -43,9 +43,9 @@ const LoginForm = ({ onSwitch }: { onSwitch: (page: string) => void }) => {
       const result = await response.json();
       if (response.ok) {
         alert('Login successful');
-        onSwitch('dashboard');  // Redirect to dashboard after successful login
+        onSwitch('dashboard');
       } else {
-        alert('Login failed: ' + result);
+        alert('Login failed: ' + result.message); // ✅ FIXED
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -71,7 +71,7 @@ const LoginForm = ({ onSwitch }: { onSwitch: (page: string) => void }) => {
       <div className="form-container">
         <input
           className="auth-input"
-          placeholder=" Email or phone number"
+          placeholder="Enter username "
           value={emailOrPhone}
           onChange={(e) => setEmailOrPhone(e.target.value)}
         />
@@ -142,7 +142,7 @@ const RegisterForm = ({ onSwitch }: { onSwitch: (page: string) => void }) => {
         alert('Account created successfully');
         onSwitch('login');
       } else {
-        alert('Registration failed: ' + result);
+        alert('Registration failed: ' + result.message); // ✅ FIXED
       }
     } catch (err: unknown) {
       if (err instanceof Error) {
