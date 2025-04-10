@@ -54,6 +54,26 @@ button:hover {
   min-height: 100vh;
 }
 
+/* Global Styles */
+.auth-input {
+  width: 100%;
+  height: 3.5rem;
+  text-indent: 10px;
+  padding-left: 0;
+  padding-right: 0;
+  background-color: #f5f7fa;
+  border-radius: 0.625rem;
+  font-size: 1rem;
+  color: #6b7280;
+  outline: none;
+  border: 1px solid red; /* Optional for debugging */
+}
+
+.auth-input:focus {
+  ring-width: 2px;
+  ring-color: #3b82f6;
+}
+
 /* === Shared Styles === */
 .page-content {
   display: flex;

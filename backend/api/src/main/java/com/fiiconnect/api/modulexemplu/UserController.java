@@ -71,14 +71,15 @@ public class UserController {
         User user = userRepository.findByUsername(loginRequest.getUsername());
 
         if (user == null) {
-            return ResponseEntity.status(401).body("User inexistent.");
+            return ResponseEntity.status(401).body(new ApiResponse("User inexistent.", false));
         }
 
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            return ResponseEntity.status(401).body("Parolă greșită.");
+            return ResponseEntity.status(401).body(new ApiResponse("Parolă greșită.", false));
         }
 
-        return ResponseEntity.ok("Login reușit!");
+        return ResponseEntity.ok(new ApiResponse("Login reușit!", true));
     }
+
 
 }

@@ -25,12 +25,35 @@ const LoginForm = ({ onSwitch }: { onSwitch: (page: string) => void }) => {
     setShowPassword(!showPassword);
   };
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     if (!emailOrPhone || !password) {
       alert('Please fill in all fields');
       return;
     }
-    onSwitch('dashboard');
+
+    try {
+      const response = await fetch('http://localhost:34101/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username: emailOrPhone, password })  // Assuming you use `username` here
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert('Login successful');
+        onSwitch('dashboard');  // Redirect to dashboard after successful login
+      } else {
+        alert('Login failed: ' + result);
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        alert('Connection error: ' + err.message);  // Access `err.message` only if `err` is an instance of `Error`
+      } else {
+        alert('An unknown error occurred');
+      }
+    }
   };
 
   return (
@@ -88,27 +111,93 @@ const LoginForm = ({ onSwitch }: { onSwitch: (page: string) => void }) => {
   );
 };
 
-const RegisterForm = ({ onSwitch }: { onSwitch: (page: string) => void }) => (
-  <div className="page-content">
-    <h2 className="register-title">Creare cont</h2>
-    <div className="form-container">
-      <input className="auth-input" placeholder="Username" />
-      <input className="auth-input" placeholder="Email" />
-      <input className="auth-input" type="password" placeholder="Parola" />
-      <input className="auth-input" type="password" placeholder="Repetare parola" />
-      <button className="auth-button" onClick={() => onSwitch('dashboard')}>
-        Înregistrează-te
-      </button>
-      <hr className="border-[#E5E5E5] w-full my-4" />
-      <div className="text-sm text-gray-600">
-        Ai deja cont?{' '}
-        <span className="auth-link" onClick={() => onSwitch('login')}>
-          Login
-        </span>
+const RegisterForm = ({ onSwitch }: { onSwitch: (page: string) => void }) => {
+  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+
+  const handleRegister = async () => {
+    if (!username || !email || !password || !confirmPassword) {
+      alert('Please fill in all fields');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      alert('Passwords do not match');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:34101/users/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, email, password })
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert('Account created successfully');
+        onSwitch('login');
+      } else {
+        alert('Registration failed: ' + result);
+      }
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        alert('Connection error: ' + err.message);
+      } else {
+        alert('An unknown error occurred');
+      }
+    }
+  };
+
+  return (
+      <div className="page-content">
+        <h2 className="register-title">Creare cont</h2>
+        <div className="form-container">
+          <input
+              className="auth-input"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+          />
+          <input
+              className="auth-input"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+              className="auth-input"
+              type="password"
+              placeholder="Parola"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+          />
+          <input
+              className="auth-input"
+              type="password"
+              placeholder="Repetare parola"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+          />
+          <button className="auth-button" onClick={handleRegister}>
+            Înregistrează-te
+          </button>
+          <hr className="border-[#E5E5E5] w-full my-4" />
+          <div className="text-sm text-gray-600">
+            Ai deja cont?{' '}
+            <span className="auth-link" onClick={() => onSwitch('login')}>
+            Login
+          </span>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
-);
+  );
+};
+
 
 const ResetPassword = ({ onSwitch }: { onSwitch: (page: string) => void }) => (
   <div className="page-content">

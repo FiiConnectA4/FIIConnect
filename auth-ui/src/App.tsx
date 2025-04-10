@@ -1,5 +1,3 @@
-
-
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import AuthApp from './AuthApp'; // componenta cu login, register, reset, dashboard etc.
