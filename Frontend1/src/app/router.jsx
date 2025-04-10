@@ -6,7 +6,7 @@ import Anunturi from "../pages/Anunturi";
 import Harta from "../pages/Harta";
 import Cursuri from "../pages/Cursuri/Cursuri";
 import Catalog from "../pages/Catalog";
-import Orar from "../pages/Orar/Orar";
+import Orar from "../pages/Orar/OrarToti";
 import Chat from "../pages/Chat";
 import Contul from "../pages/Contul";
 import Contact from "../pages/Contact";
