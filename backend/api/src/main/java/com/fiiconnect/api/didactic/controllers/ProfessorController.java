@@ -1,5 +1,11 @@
-package com.fiiconnect.api.didactic;
+package com.fiiconnect.api.didactic.controllers;
 
+import com.fiiconnect.api.didactic.exceptions.ProfessorNotFoundException;
+import com.fiiconnect.api.didactic.models.Professor;
+import com.fiiconnect.api.didactic.repositories.ProfessorRepository;
+import com.fiiconnect.api.didactic.repositories.TeachingRepository;
+import com.fiiconnect.api.didactic.services.ProfessorService;
+import com.fiiconnect.api.didactic.services.TeachingService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,13 +27,13 @@ public class ProfessorController {
     }
 
     @GetMapping("/didactic/professor")
-    List<Professor> all()
+    public List<Professor> all()
     {
         return repository.findAll();
     }
 
     @GetMapping("/didactic/professor/{id}")
-    Professor one(@PathVariable Long id)
+    public Professor one(@PathVariable Long id)
     {
         Professor professor = repository.findById(id).orElseThrow(() -> new ProfessorNotFoundException(id));
 

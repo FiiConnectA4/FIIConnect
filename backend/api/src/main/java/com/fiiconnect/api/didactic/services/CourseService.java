@@ -1,11 +1,16 @@
-package com.fiiconnect.api.didactic;
+package com.fiiconnect.api.didactic.services;
 
+import com.fiiconnect.api.didactic.repositories.CourseMaterialRepository;
+import com.fiiconnect.api.didactic.repositories.CourseRepository;
+import com.fiiconnect.api.didactic.repositories.TeachingRepository;
+import com.fiiconnect.api.didactic.exceptions.CourseNotFoundException;
+import com.fiiconnect.api.didactic.models.Course;
+import com.fiiconnect.api.didactic.models.CourseMaterial;
+import com.fiiconnect.api.didactic.models.Teaching;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service

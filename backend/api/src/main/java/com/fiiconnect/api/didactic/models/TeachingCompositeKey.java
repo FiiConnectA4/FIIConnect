@@ -1,4 +1,4 @@
-package com.fiiconnect.api.didactic;
+package com.fiiconnect.api.didactic.models;
 
 import jakarta.persistence.Embeddable;
 

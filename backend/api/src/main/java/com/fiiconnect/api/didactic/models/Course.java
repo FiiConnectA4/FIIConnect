@@ -1,12 +1,10 @@
-package com.fiiconnect.api.didactic;
+package com.fiiconnect.api.didactic.models;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 public class Course{

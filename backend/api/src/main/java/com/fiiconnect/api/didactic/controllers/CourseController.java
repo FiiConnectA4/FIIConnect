@@ -1,8 +1,15 @@
-package com.fiiconnect.api.didactic;
+package com.fiiconnect.api.didactic.controllers;
 
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
+import com.fiiconnect.api.didactic.exceptions.CourseNotFoundException;
+import com.fiiconnect.api.didactic.models.Course;
+import com.fiiconnect.api.didactic.models.CourseModelAssembler;
+import com.fiiconnect.api.didactic.repositories.CourseRepository;
+import com.fiiconnect.api.didactic.repositories.TeachingRepository;
+import com.fiiconnect.api.didactic.services.CourseService;
+import com.fiiconnect.api.didactic.services.TeachingService;
 import org.springframework.hateoas.EntityModel;
 
 import org.springframework.hateoas.CollectionModel;
@@ -23,15 +30,11 @@ import java.util.stream.Collectors;
 public class CourseController {
     private final CourseRepository repository;
     private final CourseModelAssembler assembler;
-    private final TeachingRepository teachingRepo;
-    private final TeachingService teachingService;
     private final CourseService service;
 
-    public CourseController(CourseRepository repository, CourseModelAssembler assembler, TeachingRepository teachingRepo, TeachingService teachingService, CourseService service) {
+    public CourseController(CourseRepository repository, CourseModelAssembler assembler, CourseService service) {
         this.repository = repository;
         this.assembler = assembler;
-        this.teachingRepo = teachingRepo;
-        this.teachingService = teachingService;
         this.service = service;
     }
 
