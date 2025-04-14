@@ -7,6 +7,7 @@ import Harta from "../pages/Harta";
 import Cursuri from "../pages/Cursuri/Cursuri";
 import Catalog from "../pages/Catalog";
 import Orar from "../pages/Orar/OrarToti";
+import Secretariat from "../pages/Secretariat/Secretariat";
 import Chat from "../pages/Chat";
 import Contul from "../pages/Contul";
 import Contact from "../pages/Contact";
@@ -26,6 +27,7 @@ const AppRoutes = () => {
         <Route path="cursuri" element={<Cursuri />} />
         <Route path="catalog" element={<Catalog />} />
         <Route path="orar" element={<Orar />} />
+        <Route path="secretariat" element={<Secretariat />} />
         <Route path="chat" element={<Chat />} />
         <Route path="contul" element={<Contul />} />
         <Route path="contact" element={<Contact />} />
