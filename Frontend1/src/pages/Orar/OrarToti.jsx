@@ -1,12 +1,16 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import ScheduleTable from "../../components/ScheduleTable/ScheduleTable";
 import "./OrarToti.css";
 
 const OrarToti = () => {
+  const navigate = useNavigate();
+  const { an, grupa } = useParams();
+
   const [activeDropdown, setActiveDropdown] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [section, setSection] = useState(null);
-  const [scheduleData, setScheduleData] = useState([]); // 🔥 Datele pentru tabel
+  const [scheduleData, setScheduleData] = useState([]);
   const dropdownRefs = useRef([]);
 
   const toggleDropdown = (index, e) => {
@@ -27,6 +31,30 @@ const OrarToti = () => {
       document.removeEventListener("click", handleClickOutside);
     };
   }, []);
+
+  // dacă vin parametri din URL, aduce orarul
+  useEffect(() => {
+    if (an && grupa) {
+      const anLabel = `Anul ${an}`;
+      setSelectedGroup(`${anLabel} - ${grupa}`);
+      setSection("studenti");
+
+      const url = `http://localhost:34101/orar/grupa/${an}/${grupa}`;
+      fetch(url)
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error("Eroare la fetch orar. Status: " + res.status);
+          }
+          return res.json();
+        })
+        .then((data) => {
+          setScheduleData(data);
+        })
+        .catch((err) => {
+          console.error("Eroare la preluarea orarului:", err);
+        });
+    }
+  }, [an, grupa]);
 
   const buttons = [
     {
@@ -71,26 +99,9 @@ const OrarToti = () => {
   ];
 
   const handleGroupSelect = (anLabel, grupa) => {
-    const an = anLabel.replace("Anul ", "").trim(); // ex: "1"
-    setSelectedGroup(`${anLabel} - ${grupa}`);
-    
-    const url = `http://localhost:34101/orar/grupa/${an}/${grupa}`;
-    console.log("Cerere către URL:", url); // Adaugă acest log pentru a vedea ce URL este cerut
-  
-    fetch(url)
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error("Nu s-a putut obține orarul. Status: " + res.status);
-        }
-        return res.json();
-      })
-      .then((data) => {
-        console.log("Datele orarului:", data);
-        setScheduleData(data); // 🧠 Setăm datele primite de la backend
-      })
-      .catch((err) => {
-        console.error("Eroare la preluarea orarului:", err);
-      });
+    const anNumber = anLabel.replace("Anul ", "").trim();
+    // Navighează la URL-ul cu an și grupă selectate
+    navigate(`/app/orar/studenti/${anNumber}/${grupa}`);
   };
 
   return (
@@ -98,15 +109,13 @@ const OrarToti = () => {
       {selectedGroup ? (
         <div className="orar-afisat">
           <h3>Orar pentru {selectedGroup}</h3>
-          <ScheduleTable
-            schedule={scheduleData} // 📦 Trecem datele către componentă
-            title={`Orar pentru ${selectedGroup}`}
-          />
+          <ScheduleTable schedule={scheduleData} title={`Orar pentru ${selectedGroup}`} />
           <button
             className="orar-button inapoi"
             onClick={() => {
               setSelectedGroup(null);
-              setScheduleData([]); // Resetăm datele
+              setScheduleData([]);
+              navigate("/app/orar"); // Navighează înapoi la secțiunea "orar"
             }}
           >
             🔙 Înapoi
@@ -175,6 +184,7 @@ const OrarToti = () => {
                   onClick={() => {
                     setSection(null);
                     setActiveDropdown(null);
+                    navigate("/app/orar");
                   }}
                 >
                   🔙 Înapoi
