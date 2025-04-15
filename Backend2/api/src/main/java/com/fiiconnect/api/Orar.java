@@ -1,13 +1,12 @@
-<<<<<<< HEAD
 package com.fiiconnect.api;
 
 import jakarta.persistence.*;
 import java.util.Objects;
 
-@Entity
-@Table(name = "orar")
+@Entity // o clasa ca o entitate jpa(o clas care va fi mapata la o tabela)
+@Table(name = "orar") //tabela se numeste orar
 public class Orar {
-    @Id
+    @Id // marcat id ca PK
 @SequenceGenerator(name = "orar_seq", sequenceName = "ORAR_SEQ", allocationSize = 1)
 @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "orar_seq")
 private Integer id;
@@ -20,10 +19,12 @@ private Integer id;
     private String disciplina;
     private String profesor;
     private String grupa;
+    @Column(name = "TIP_ACTIVITATE")
     private String tip;
+
     private String an;
 
-    public Orar() {}
+    public Orar() {} // obligatoriu pt jpa(cosntructor gol)
 
     public Orar(String zi, String oraStart, String oraEnd, String saptamana,
                 String sala, String disciplina, String profesor,
@@ -168,6 +169,7 @@ private Integer id;
                 '}';
     }
 }
+<<<<<<< HEAD
 
 =======
 package com.fiiconnect.api;
@@ -341,3 +343,5 @@ private Integer id;
 }
 
 >>>>>>> 73ebafa5 (Add files via upload)
+=======
+>>>>>>> 9be4bf6b (finalback)

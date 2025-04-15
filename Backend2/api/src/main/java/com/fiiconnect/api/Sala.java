@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 package com.fiiconnect.api;
 
 import jakarta.persistence.*;
@@ -55,6 +54,7 @@ public class Sala {
     public void setDotari(String dotari) { this.dotari = dotari; }
 
     public String getObservatii() { return observatii; }
+<<<<<<< HEAD
     public void setObservatii(String observatii) { this.observatii = observatii; }
 =======
 package com.fiiconnect.api;
@@ -116,3 +116,8 @@ public class Sala {
     public void setObservatii(String observatii) { this.observatii = observatii; }
 >>>>>>> 73ebafa5 (Add files via upload)
 }
+=======
+    public void setObservatii(String observatii) { this.observatii = observatii;
+     }
+    }
+>>>>>>> 9be4bf6b (finalback)

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 package com.fiiconnect.api;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +26,7 @@ public class SalaController {
     public Sala getById(@PathVariable Long id) {
         return salaRepository.findById(id).orElse(null);
     }
+<<<<<<< HEAD
 }
 =======
 package com.fiiconnect.api;
@@ -59,3 +59,6 @@ public class SalaController {
     }
 }
 >>>>>>> 73ebafa5 (Add files via upload)
+=======
+}
+>>>>>>> 9be4bf6b (finalback)

@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 package com.fiiconnect.api;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -15,6 +14,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedHeaders("*")
                 .allowCredentials(true);
     }
+<<<<<<< HEAD
 }
 =======
 package com.fiiconnect.api;
@@ -35,3 +35,6 @@ public class WebConfig implements WebMvcConfigurer {
     }
 }
 >>>>>>> 73ebafa5 (Add files via upload)
+=======
+}
+>>>>>>> 9be4bf6b (finalback)
