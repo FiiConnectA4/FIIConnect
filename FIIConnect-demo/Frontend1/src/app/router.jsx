@@ -7,6 +7,10 @@ import Harta from "../pages/Harta";
 import Cursuri from "../pages/Cursuri/Cursuri";
 import Catalog from "../pages/Catalog";
 import Orar from "../pages/Orar/OrarToti";
+<<<<<<< HEAD
+=======
+import Secretariat from "../pages/Secretariat/Secretariat";
+>>>>>>> 72f2310f0 (finalmerge)
 import Chat from "../pages/Chat";
 import Contul from "../pages/Contul";
 import Contact from "../pages/Contact";
@@ -30,6 +34,11 @@ const AppRoutes = () => {
 <Route path="/app/orar/grupa/:an/:grupa" element={<Orar />} />
 <Route path="orar/studenti/:an/:grupa" element={<Orar />} />
 
+<<<<<<< HEAD
+=======
+<Route path="secretariat" element={<Secretariat />} />
+
+>>>>>>> 72f2310f0 (finalmerge)
         <Route path="chat" element={<Chat />} />
         <Route path="contul" element={<Contul />} />
         <Route path="contact" element={<Contact />} />

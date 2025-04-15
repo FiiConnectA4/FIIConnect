@@ -16,6 +16,36 @@ const OrarToti = () => {
   const [scheduleData, setScheduleData] = useState([]);
   const dropdownRefs = useRef([]);
 
+<<<<<<< HEAD
+=======
+  const [sali, setSali] = useState([]);
+const [dotariSala, setDotariSala] = useState(null);
+
+const handleEtajSelect = (etaj) => {
+  fetch(`http://localhost:34101/sali/etaj/${etaj}`)
+    .then((res) => res.json())
+    .then((data) => setSali(data))
+    .catch((err) => console.error("Eroare la preluarea sălilor:", err));
+};
+
+const handleSalaSelect = (numeSala) => {
+  setSelectedGroup(numeSala);
+  setActiveDropdown(null); // închide dropdownul
+  fetch(`http://localhost:34101/orar/sala/${numeSala}`)
+    .then((res) => res.json())
+    .then((data) => setScheduleData(data))
+    .catch((err) => console.error("Eroare la orar sala:", err));
+};
+
+
+const handleShowDotari = () => {
+  fetch(`http://localhost:34101/sali/nume/${selectedGroup}`)
+    .then((res) => res.json())
+    .then((data) => setDotariSala(data[0]))
+    .catch((err) => console.error("Eroare la dotări:", err));
+};
+
+>>>>>>> 72f2310f0 (finalmerge)
   const toggleDropdown = (index, e) => {
     e.stopPropagation();
     setActiveDropdown((prev) => (prev === index ? null : index));
@@ -101,6 +131,33 @@ const OrarToti = () => {
     },
   ];
 
+<<<<<<< HEAD
+=======
+  const etaje = [
+    {
+      label: "Parter",
+      icon: "🏢",
+      sali: ["C2", "C112", "C210"],
+    },
+    {
+      label: "Etaj 1",
+      icon: "🧱",
+      sali: ["C308", "C309"],
+    },
+    {
+      label: "Etaj 2",
+      icon: "🏬",
+      sali: ["C401", "C403", "C405", "C409", "C411", "C412", "C413"],
+    },
+    {
+      label: "Etaj 7",
+      icon: "🌇",
+      sali: ["C901", "C903"],
+    },
+  ];
+  
+
+>>>>>>> 72f2310f0 (finalmerge)
   const handleGroupSelect = (anLabel, grupa) => {
     const anNumber = anLabel.replace("Anul ", "").trim();
     // Navighează la URL-ul cu an și grupă selectate
@@ -112,7 +169,16 @@ const OrarToti = () => {
       {selectedGroup ? (
         <div className="orar-afisat">
           <h3>Orar pentru {selectedGroup}</h3>
+<<<<<<< HEAD
           <ScheduleTable schedule={scheduleData} title={`Orar pentru ${selectedGroup}`} />
+=======
+          <ScheduleTable
+  schedule={scheduleData}
+  title={`Orar pentru ${selectedGroup}`}
+  showSala={true}
+/>
+
+>>>>>>> 72f2310f0 (finalmerge)
           <button
             className="orar-button inapoi"
             onClick={() => {
@@ -195,8 +261,112 @@ const OrarToti = () => {
               </div>
             </>
           )}
+<<<<<<< HEAD
         </>
       )}
+=======
+{section === "sali" && !selectedGroup && (
+  <>
+    <div className="orar-buttons">
+      {etaje.map((etaj, index) => (
+        <div
+          className="dropdown-container"
+          key={index}
+          ref={(el) => (dropdownRefs.current[index] = el)}
+        >
+          <button className="orar-button" onClick={(e) => toggleDropdown(index, e)}>
+            <span className="icon">{etaj.icon}</span>
+            {etaj.label}
+          </button>
+
+          {activeDropdown === index && (
+            <div className="dropdown-menu">
+              {etaj.sali.map((sala, i) => (
+                <div key={i}>
+                  <button className="dropdown-item" onClick={() => handleSalaSelect(sala)}>
+                    {sala}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+
+    <div className="inapoi-container">
+      <button
+        className="orar-button inapoi"
+        onClick={() => {
+          setSection(null);
+          setActiveDropdown(null);
+          navigate("/app/orar");
+        }}
+      >
+        🔙 Înapoi
+      </button>
+    </div>
+  </>
+)}
+
+
+{section === "sali" && sali.length > 0 && !selectedGroup && (
+  <div className="orar-buttons">
+    {sali.map((sala, index) => (
+      <button
+        key={index}
+        className="orar-button"
+        onClick={() => handleSalaSelect(sala.nume)}
+      >
+        🧾 {sala.nume}
+      </button>
+    ))}
+  </div>
+)}
+
+{section === "sali" && selectedGroup && (
+  <div className="orar-afisat">
+    <h3>Orar pentru sala {selectedGroup}</h3>
+    <ScheduleTable
+  schedule={scheduleData}
+  title={`Orar pentru sala ${selectedGroup}`}
+  showSala={false}
+/>
+
+    <button className="orar-button" onClick={handleShowDotari}>
+      📦 Afișează dotări
+    </button>
+
+    {dotariSala && (
+      <div className="dotari-box">
+        <p><strong>Dotări:</strong> {dotariSala.dotari}</p>
+        <p><strong>Capacitate:</strong> {dotariSala.capacitate}</p>
+        <p><strong>Tip:</strong> {dotariSala.tipSala}</p>
+        <p><strong>Locație:</strong> {dotariSala.locatie}</p>
+        <p><strong>Observații:</strong> {dotariSala.observatii}</p>
+      </div>
+    )}
+
+    <button
+      className="orar-button inapoi"
+      onClick={() => {
+        setSelectedGroup(null);
+        setScheduleData([]);
+        setDotariSala(null);
+      }}
+    >
+      🔙 Înapoi la etaje
+    </button>
+  </div>
+)}
+
+
+          
+        </>
+      )}
+    
+
+>>>>>>> 72f2310f0 (finalmerge)
     </div>
   );
 };
