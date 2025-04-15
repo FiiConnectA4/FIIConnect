@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 package com.fiiconnect.api;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,35 +8,35 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@RestController
-@RequestMapping("/orar")
+@RestController // imi returneaza un json
+@RequestMapping("/orar") //toate rutele vor incepe cu /orar
 public class OrarController {
 
-    @Autowired
+    @Autowired // pentru a face operatii CRUD
     private OrarRepository repository;
 
     @GetMapping
     public List<com.fiiconnect.api.Orar> toateOrele() {
-        return repository.findAll();
+        return repository.findAll(); // iti returneaza toate randurile din orar
     }
 
     @GetMapping("/{id}")
     public com.fiiconnect.api.Orar getOrarById(@PathVariable Integer id) {
-        return repository.findById(id).orElseThrow();
+        return repository.findById(id).orElseThrow(); // returneaza un orar dupa id
     }
 
     @PostMapping
     public com.fiiconnect.api.Orar adaugaOrar(@RequestBody com.fiiconnect.api.Orar orar) {
-        return repository.save(orar);
+        return repository.save(orar); // primeste un body orar din request si il afiseaza in DB
     }
 
     @DeleteMapping("/{id}")
     public void stergeOrar(@PathVariable Integer id) {
-        repository.deleteById(id);
+        repository.deleteById(id); //sterge inregistrarile din DB dupa id
     }
 
  @GetMapping("/grupa/{an}/{grupa}")
-    public List<OrarDTO> getOrarByAnAndGrupa(@PathVariable String an, @PathVariable String grupa) {
+    public List<OrarDTO> getOrarByAnAndGrupa(@PathVariable String an, @PathVariable String grupa) { //cauta inregistrarile pentru o anumita grupa dintr un an dat si datele le transforma in DTO
         // Obținem lista de orare din baza de date
         List<Orar> orarList = repository.findByAnAndGrupa(an, grupa);
 
@@ -67,53 +66,6 @@ public class OrarController {
     // Endpoint pentru a obține orarul pe baza numelui profesorului
     @GetMapping("/profesor/{profesor}")
     public List<Orar> getOrarByProfesor(@PathVariable String profesor) {
-        return repository.findByProfesor(profesor);
+        return repository.findByProfesor(profesor); //returneaza toate orele unui profesor
     }
-=======
-package com.fiiconnect.api;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-
-@RestController
-@RequestMapping("/orar")
-public class OrarController {
-
-    @Autowired
-    private OrarRepository repository;
-
-    @GetMapping
-    public List<com.fiiconnect.api.Orar> toateOrele() {
-        return repository.findAll();
-    }
-
-    @GetMapping("/{id}")
-    public com.fiiconnect.api.Orar getOrarById(@PathVariable Integer id) {
-        return repository.findById(id).orElseThrow();
-    }
-
-    @PostMapping
-    public com.fiiconnect.api.Orar adaugaOrar(@RequestBody com.fiiconnect.api.Orar orar) {
-        return repository.save(orar);
-    }
-
-    @DeleteMapping("/{id}")
-    public void stergeOrar(@PathVariable Integer id) {
-        repository.deleteById(id);
-    }
-
-    // Endpoint pentru a obține orarul pe baza grupei
-    @GetMapping("/grupa/{an}/{grupa}")
-    public List<Orar> getOrarByAnAndGrupa(@PathVariable String an, @PathVariable String grupa) {
-    return repository.findByAnAndGrupa(an, grupa);
-}
-
-    // Endpoint pentru a obține orarul pe baza numelui profesorului
-    @GetMapping("/profesor/{profesor}")
-    public List<Orar> getOrarByProfesor(@PathVariable String profesor) {
-        return repository.findByProfesor(profesor);
-    }
->>>>>>> 7139cfcef716dc3db2ee65277bd1c22c0e149812
 }
