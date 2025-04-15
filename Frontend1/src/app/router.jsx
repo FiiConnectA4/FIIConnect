@@ -25,7 +25,11 @@ const AppRoutes = () => {
         <Route path="harta" element={<Harta />} />
         <Route path="cursuri" element={<Cursuri />} />
         <Route path="catalog" element={<Catalog />} />
-        <Route path="orar" element={<Orar />} />
+        <Route path="/app/orar" element={<Orar />} />
+<Route path="/app/orar/studenti" element={<Orar />} />
+<Route path="/app/orar/grupa/:an/:grupa" element={<Orar />} />
+<Route path="orar/studenti/:an/:grupa" element={<Orar />} />
+
         <Route path="chat" element={<Chat />} />
         <Route path="contul" element={<Contul />} />
         <Route path="contact" element={<Contact />} />

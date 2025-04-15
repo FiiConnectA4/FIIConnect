@@ -41,9 +41,7 @@ const ScheduleTable = ({ schedule, title }) => {
             {schedule.map((entry, index) => (
               <tr key={index}>
                 <td>{entry.zi}</td>
-                <td>
-                  {entry.oraStart} - {entry.oraEnd}
-                </td>
+                <td>{entry.interval}</td> {/* Folosește interval-ul direct */}
                 <td>{entry.disciplina}</td>
                 <td>{entry.tip}</td>
                 <td>{entry.grupa || "-"}</td>
