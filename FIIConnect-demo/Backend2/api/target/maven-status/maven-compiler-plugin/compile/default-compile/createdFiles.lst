@@ -4,5 +4,11 @@ com\fiiconnect\api\OrarController.class
 com\fiiconnect\api\SalaController.class
 com\fiiconnect\api\WebConfig.class
 com\fiiconnect\api\Orar.class
+<<<<<<< HEAD
 com\fiiconnect\api\SalaRepository.class
+=======
+com\fiiconnect\api\SalaDTO.class
+com\fiiconnect\api\SalaRepository.class
+com\fiiconnect\api\OrarDTO.class
+>>>>>>> 72f2310f0 (finalmerge)
 com\fiiconnect\api\Sala.class

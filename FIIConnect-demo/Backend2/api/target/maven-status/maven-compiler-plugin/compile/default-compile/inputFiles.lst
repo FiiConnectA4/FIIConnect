@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 C:\Users\Roberto\OneDrive\Desktop\Ipm\FIIConnect\Backend2\api\src\main\java\com\fiiconnect\api\ApiApplication.java
 C:\Users\Roberto\OneDrive\Desktop\Ipm\FIIConnect\Backend2\api\src\main\java\com\fiiconnect\api\Orar.java
 C:\Users\Roberto\OneDrive\Desktop\Ipm\FIIConnect\Backend2\api\src\main\java\com\fiiconnect\api\OrarController.java
@@ -7,3 +8,15 @@ C:\Users\Roberto\OneDrive\Desktop\Ipm\FIIConnect\Backend2\api\src\main\java\com\
 C:\Users\Roberto\OneDrive\Desktop\Ipm\FIIConnect\Backend2\api\src\main\java\com\fiiconnect\api\SalaController.java
 C:\Users\Roberto\OneDrive\Desktop\Ipm\FIIConnect\Backend2\api\src\main\java\com\fiiconnect\api\SalaRepository.java
 C:\Users\Roberto\OneDrive\Desktop\Ipm\FIIConnect\Backend2\api\src\main\java\com\fiiconnect\api\WebConfig.java
+=======
+C:\Users\Roberto\OneDrive\Desktop\Copiat\FIIConnect-demo\Backend2\api\src\main\java\com\fiiconnect\api\ApiApplication.java
+C:\Users\Roberto\OneDrive\Desktop\Copiat\FIIConnect-demo\Backend2\api\src\main\java\com\fiiconnect\api\Orar.java
+C:\Users\Roberto\OneDrive\Desktop\Copiat\FIIConnect-demo\Backend2\api\src\main\java\com\fiiconnect\api\OrarController.java
+C:\Users\Roberto\OneDrive\Desktop\Copiat\FIIConnect-demo\Backend2\api\src\main\java\com\fiiconnect\api\OrarDTO.java
+C:\Users\Roberto\OneDrive\Desktop\Copiat\FIIConnect-demo\Backend2\api\src\main\java\com\fiiconnect\api\OrarRepository.java
+C:\Users\Roberto\OneDrive\Desktop\Copiat\FIIConnect-demo\Backend2\api\src\main\java\com\fiiconnect\api\Sala.java
+C:\Users\Roberto\OneDrive\Desktop\Copiat\FIIConnect-demo\Backend2\api\src\main\java\com\fiiconnect\api\SalaController.java
+C:\Users\Roberto\OneDrive\Desktop\Copiat\FIIConnect-demo\Backend2\api\src\main\java\com\fiiconnect\api\SalaDTO.java
+C:\Users\Roberto\OneDrive\Desktop\Copiat\FIIConnect-demo\Backend2\api\src\main\java\com\fiiconnect\api\SalaRepository.java
+C:\Users\Roberto\OneDrive\Desktop\Copiat\FIIConnect-demo\Backend2\api\src\main\java\com\fiiconnect\api\WebConfig.java
+>>>>>>> 72f2310f0 (finalmerge)

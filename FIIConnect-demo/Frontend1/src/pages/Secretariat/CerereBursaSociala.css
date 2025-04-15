@@ -1,0 +1,62 @@
+.cerere-bursa-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .cerere-bursa-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+  }
+  
+  .cerere-bursa-form label {
+    display: flex;
+    flex-direction: column;
+    font-size: 16px;
+    color: #333;
+  }
+  
+  .cerere-bursa-form input,
+  .cerere-bursa-form textarea {
+    padding: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .submit-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    background-color: #537A9C;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .submit-button:hover {
+    background-color: #3a5f7d;
+  }
+  
+  .back-button {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    background-color: #1A3C5A;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .back-button:hover {
+    background-color: #142c42;
+  }
