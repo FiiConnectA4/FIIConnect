@@ -1,0 +1,8 @@
+com\fiiconnect\api\OrarRepository.class
+com\fiiconnect\api\ApiApplication.class
+com\fiiconnect\api\OrarController.class
+com\fiiconnect\api\SalaController.class
+com\fiiconnect\api\WebConfig.class
+com\fiiconnect\api\Orar.class
+com\fiiconnect\api\SalaRepository.class
+com\fiiconnect\api\Sala.class
