@@ -1,11 +1,13 @@
 package com.fiiconnect.api.social_secretary;
 
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.Set;
 
 @Entity
+
 @Table(name = "ANNOUNCEMENT")
 public class Announcement {
 
@@ -23,18 +25,33 @@ public class Announcement {
     private User_Anunturi professor;
 
     @ManyToMany(cascade = CascadeType.PERSIST)
+
+public class Announcement {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String title;
+
+    private String message;
+
+    @ManyToOne
+    @JoinColumn(name = "professor_id")
+    private User professor;
+
+    @ManyToMany
     @JoinTable(
             name = "announcement_tags",
             joinColumns = @JoinColumn(name = "announcement_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
+
     @JsonIgnore
     private Set<Tag> tags;
 
     // Constructors, getters, setters
 
     public Announcement() {}
-
     public Announcement(String title, String message, User_Anunturi professor, Set<Tag> tags) {
         this.title = title;
         this.message = message;
@@ -62,6 +79,7 @@ public class Announcement {
         this.message = message;
     }
 
+
     public User_Anunturi getProfessor() {
         return professor;
     }
@@ -78,6 +96,7 @@ public class Announcement {
         this.tags = tags;
     }
 
+
     @Override
     public String toString() {
         return "Announcement{" +
@@ -89,3 +108,6 @@ public class Announcement {
                 '}';
     }
 }
+
+}
+

@@ -1,0 +1,7 @@
+organization=fiiconnecta4
+projectKey=FiiConnectA4_FIIConnect
+serverUrl=https://sonarcloud.io
+serverVersion=8.0.0.61474
+dashboardUrl=https://sonarcloud.io/dashboard?id=FiiConnectA4_FIIConnect
+ceTaskId=AZYMTQ28BPfzsaaMJlR1
+ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AZYMTQ28BPfzsaaMJlR1

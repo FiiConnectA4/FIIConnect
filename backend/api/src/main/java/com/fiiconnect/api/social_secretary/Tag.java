@@ -13,8 +13,6 @@ public class Tag {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tag_seq")
     @SequenceGenerator(name = "tag_seq", sequenceName = "tag_seq", allocationSize = 1)
     private Long id;
-
-
     private String name;
 
     @Enumerated(EnumType.STRING)
@@ -50,7 +48,6 @@ public class Tag {
     public void setType(TagType type) {
         this.type = type;
     }
-
     @Override
     public String toString() {
         return "Tag{" +
