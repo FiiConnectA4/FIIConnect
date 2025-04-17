@@ -21,8 +21,6 @@ function Anunturi() {
       const data = await response.json();
       setAnnouncements(data);
       setLoading(false);
-
-     
     } catch (err) {
       setError("Failed to fetch announcements");
       setLoading(false);
@@ -52,7 +50,6 @@ function Anunturi() {
                 <input
                   type="text"
                   className="announcement-input"
-
                   value={announcement.message}  // Assuming 'message' is the content
                   readOnly
                 />
@@ -66,4 +63,3 @@ function Anunturi() {
 }
 
 export default Anunturi;
-
