@@ -10,11 +10,11 @@ public class ChatService {
     @Autowired
     private ChatRepository chatRepository;
 
-    public List<Chat> getAllChats() {
+    public List<Chat> getAllChatMessages() {
         return chatRepository.findAll();
     }
 
-    public Chat saveChat(Chat chat) {
-        return chatRepository.save(chat);
+    public Chat saveChatMessages(Chat chatMessage) {
+        return chatRepository.save(chatMessage);
     }
 }

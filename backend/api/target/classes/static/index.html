@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+</head>
+<body>
+<div>
+    <input id="name" placeholder="Your name" />
+    <input id="message" placeholder="Type a message..." />
+    <button onclick="sendMessage()">Send</button>
+</div>
+<ul id="messages"></ul>
+
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+<script>
+    let stompClient = null;
+
+    function connect() {
+        console.log("Connecting...");
+        const socket = new SockJS("http://localhost:34101/ws");
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function (frame) {
+            console.log("Connected: " + frame);
+
+            // Only subscribe after connection is established
+            stompClient.subscribe("/topic/public", function (messageOutput) {
+                const message = JSON.parse(messageOutput.body);
+                console.log("Received:", message);
+
+                const msgList = document.getElementById('messages');
+                const el = document.createElement('li');
+
+                // Handle message content safely
+                el.textContent = (message.sender?.name || "Unknown") + ": " + (message.message || "...");
+                msgList.appendChild(el);
+            });
+        });
+    }
+
+    function sendMessage() {
+        const senderName = document.getElementById('name').value;
+        const content = document.getElementById('message').value;
+
+        console.log("Sending message:", senderName, content);
+
+        if (!stompClient || !stompClient.connected) {
+            console.error("Not connected to WebSocket.");
+            return;
+        }
+
+        stompClient.send("/app/chat.sendMessage", {}, JSON.stringify({
+            sender: {
+                id: 5, // This should be replaced with actual user data
+                name: senderName,
+                tags: null
+            },
+            message: content,
+            type: 'CHAT'
+        }));
+    }
+
+    // Make sure we call connect when the page loads
+    window.onload = connect;
+</script>
+</body>
+</html>
