@@ -11,10 +11,11 @@ public class ChatService {
     private ChatRepository chatRepository;
 
     public List<Chat> getAllChatMessages() {
-        return chatRepository.findAll();
+        return chatRepository.findAllChats();
     }
 
     public Chat saveChatMessages(Chat chatMessage) {
         return chatRepository.save(chatMessage);
     }
+
 }

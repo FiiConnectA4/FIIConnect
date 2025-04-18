@@ -7,7 +7,7 @@
 </head>
 <body>
 <div>
-    <input id="name" placeholder="Your name" />
+    <input id="id" placeholder="Your id" />
     <input id="message" placeholder="Type a message..." />
     <button onclick="sendMessage()">Send</button>
 </div>
@@ -42,10 +42,10 @@
     }
 
     function sendMessage() {
-        const senderName = document.getElementById('name').value;
+        const senderId = document.getElementById('id').value;
         const content = document.getElementById('message').value;
 
-        console.log("Sending message:", senderName, content);
+        console.log("Sending message:", senderId, content);
 
         if (!stompClient || !stompClient.connected) {
             console.error("Not connected to WebSocket.");
@@ -54,17 +54,33 @@
 
         stompClient.send("/app/chat.sendMessage", {}, JSON.stringify({
             sender: {
-                id: 5, // This should be replaced with actual user data
-                name: senderName,
+                id: senderId, // This should be replaced with actual user data
+                name: null,
                 tags: null
             },
             message: content,
             type: 'CHAT'
         }));
     }
+    function loadChatHistory() {
+    fetch("http://localhost:34101/chat")
+        .then(response => response.json())
+        .then(data => {
+            const msgList = document.getElementById('messages');
+            data.forEach(msg => {
+                const el = document.createElement('li');
+                el.textContent = (msg.sender?.name || "Unknown") + ": " + (msg.message || "...");
+                msgList.appendChild(el);
+            });
+        })
+        .catch(err => console.error("Failed to load chat history:", err));
+}
 
     // Make sure we call connect when the page loads
-    window.onload = connect;
+    window.onload = function () {
+    loadChatHistory();
+    connect();
+};
 </script>
 </body>
 </html>
