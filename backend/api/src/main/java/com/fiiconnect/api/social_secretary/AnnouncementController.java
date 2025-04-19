@@ -46,28 +46,19 @@ public class AnnouncementController {
         }
         CreateUserRequest user_request = announcement_request.getProfessor();
 
-        User_Anunturi user=userService.getUserByName(user_request.getName());
+        User_Anunturi user=userService.getUserById(user_request.getId());
+        System.out.println(user);
         if(user==null){
             System.out.println("nu se poate crea anuntul");
             return null;
         }
         else{
-            Set<TagRequest> user_tags_request = user_request.getTags();
-            Set<Tag> user_tags = new HashSet<>();
-            for (TagRequest t : user_tags_request){
-                Tag existingTag = tagService.findByNameAndType(t.getName(),t.getType());
-                if(existingTag==null)
-                {
-                    existingTag=new Tag(t.getName(),t.getType());
-                    tagService.save(existingTag);
-                }
-
-                user_tags.add(existingTag);
-            }
-
             Announcement announcement= new Announcement(announcement_request.getTitle(),announcement_request.getMessage(),user,tags);
             System.out.println(announcement);
             return announcementService.saveAnnouncement(announcement);
         }
+
     }
+
+
 }

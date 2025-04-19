@@ -18,21 +18,34 @@ public class Chat {
     @JoinColumn(name = "sender_id")
     private User_Anunturi sender;
 
-    @ManyToOne
+    /*@ManyToOne
     @JoinColumn(name = "receiver_id")
     private User_Anunturi receiver;
-
+    */
     private String timestamp;
 
+    @Enumerated(EnumType.STRING)
+    private ChatType type;
     // Constructors, getters, setters
 
     public Chat() {}
 
-    public Chat(String message, User_Anunturi sender, User_Anunturi receiver, String timestamp) {
+    public Chat(String message, User_Anunturi sender, String timestamp) {
         this.message = message;
         this.sender = sender;
-        this.receiver = receiver;
         this.timestamp = timestamp;
+    }
+
+    public ChatType getType() {
+        return type;
+    }
+
+    public void setType(ChatType type) {
+        this.type = type;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public Long getId() {
@@ -55,13 +68,7 @@ public class Chat {
         this.sender = sender;
     }
 
-    public User_Anunturi getReceiver() {
-        return receiver;
-    }
 
-    public void setReceiver(User_Anunturi receiver) {
-        this.receiver = receiver;
-    }
 
     public String getTimestamp() {
         return timestamp;
