@@ -27,6 +27,7 @@ public class SQLExceptionMessageParser {
         else if(!message.contains("constraint"))
             return null; //not a constraint error
 
+        //format is: ... constraint (username.constraint_name) violated
         message = message.substring(message.indexOf(credentials.getUsername().toUpperCase()));
         message = message.substring(message.indexOf(".")+1);
         message = message.substring(0, message.indexOf(")"));

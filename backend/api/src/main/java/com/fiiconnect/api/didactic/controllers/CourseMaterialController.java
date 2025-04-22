@@ -1,12 +1,10 @@
 package com.fiiconnect.api.didactic.controllers;
 
-import com.fiiconnect.api.didactic.helpers.DatabaseCredentials;
 import com.fiiconnect.api.didactic.helpers.SQLExceptionMessageParser;
 import com.fiiconnect.api.didactic.models.CourseMaterial;
 import com.fiiconnect.api.didactic.exceptions.CourseMaterialNotFoundException;
 import com.fiiconnect.api.didactic.repositories.CourseMaterialRepository;
 import org.hibernate.exception.ConstraintViolationException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
