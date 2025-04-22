@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.Objects;
 
 @Entity
-@Table(name = "course_material")
+@Table(name = "material")
 public class CourseMaterial {
     private @Id @GeneratedValue Long id;
     private Long idCourse;
