@@ -24,14 +24,14 @@ public class UserController {
             Tag existingTag = tagService.findByNameAndType(t.getName(),t.getType());
             if(existingTag==null)
             {
-                existingTag=new Tag(t.getName(),t.getType());
-                tagService.save(existingTag);
+                System.out.println("Tag invalid: " + t.getName());
+                return null;
             }
 
             tags.add(existingTag);
         }
         System.out.println(tags);
-        User_Anunturi user = new User_Anunturi(user_request.getName(),tags);
+        User_Anunturi user = new User_Anunturi(user_request.getName(),user_request.getType(),tags);
         System.out.println(user);
         return userService.createUser(user);
     }
@@ -45,6 +45,11 @@ public class UserController {
     @GetMapping("/{id}")
     public User_Anunturi getUserById(@PathVariable Long id) {
         return userService.getUserById(id);
+    }
+
+    @PutMapping("/{id}")
+    public User_Anunturi updateUser(@PathVariable Long id, @RequestBody CreateUserRequest updatedUser){
+        return userService.updateUser(id,updatedUser);
     }
 
     @DeleteMapping("/{id}")

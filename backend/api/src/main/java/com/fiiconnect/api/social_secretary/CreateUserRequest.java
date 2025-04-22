@@ -5,11 +5,13 @@ import java.util.Set;
 public class CreateUserRequest {
     private Long id;
     private String name;
+    private String type;
     private Set<TagRequest> tags;
 
-    public CreateUserRequest(Long id, String name, Set<TagRequest> tags) {
+    public CreateUserRequest(Long id, String name, String type, Set<TagRequest> tags) {
         this.id = id;
         this.name = name;
+        this.type = type;
         this.tags = tags;
     }
 
@@ -37,6 +39,13 @@ public class CreateUserRequest {
         this.id = id;
     }
 
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
 
     @Override
     public String toString() {
@@ -46,4 +55,5 @@ public class CreateUserRequest {
                 ", tags=" + tags +
                 '}';
     }
+
 }

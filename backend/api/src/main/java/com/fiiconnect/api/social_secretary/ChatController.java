@@ -78,4 +78,14 @@ public class ChatController {
         chatService.saveChatMessages(chatMessage);
         return chatMessage;
     }
+
+    @PutMapping("/{id}")
+    public Chat updateChat(@PathVariable Long id, @RequestBody Chat updatedChat){
+        return chatService.updateChat(id,updatedChat);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteChat(@PathVariable Long id){
+        chatService.deleteChat(id);
+    }
 }

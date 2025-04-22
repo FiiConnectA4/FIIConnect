@@ -22,4 +22,14 @@ public class AchievementController {
     public Achievement createAchievement(@RequestBody Achievement achievement) {
         return achievementService.saveAchievement(achievement);
     }
+
+    @PutMapping("/{id}")
+    public Achievement updateAchievement(@PathVariable Long id, @RequestBody Achievement updatedAchievement){
+        return achievementService.updateAchievement(id,updatedAchievement);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteAchievement(@PathVariable Long id){
+        achievementService.deleteAchievement(id);
+    }
 }

@@ -18,4 +18,17 @@ public class ChatService {
         return chatRepository.save(chatMessage);
     }
 
+    public Chat updateChat(Long id, Chat updatedChat) {
+        Chat currentChat = chatRepository.findById(id).orElse(null);
+        if(currentChat == null){
+            System.out.println("acest id nu exista");
+            return null;
+        }
+        currentChat.setMessage(updatedChat.getMessage());
+        return chatRepository.save(currentChat);
+    }
+
+    public void deleteChat(Long id) {
+        chatRepository.deleteById(id);
+    }
 }

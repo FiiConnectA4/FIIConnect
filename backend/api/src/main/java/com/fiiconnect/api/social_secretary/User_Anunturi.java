@@ -1,13 +1,8 @@
 package com.fiiconnect.api.social_secretary;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import java.util.Set;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "USER_ANUNTURI")
@@ -18,8 +13,9 @@ public class User_Anunturi {
     private Long id;
 
     private String name;
+    private String type; // Student, Profesor, Secretar
 
-    @ManyToMany(cascade =CascadeType.PERSIST)
+    @ManyToMany(cascade = CascadeType.PERSIST)
     @JoinTable(
             name = "user_tags",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -27,43 +23,21 @@ public class User_Anunturi {
     )
     @JsonIgnore
     private Set<Tag> tags;
+
     public User_Anunturi() {}
 
-    public User_Anunturi(String name, Set<Tag> tags) {
+    public User_Anunturi(String name, String type, Set<Tag> tags) {
         this.name = name;
+        this.type = type;
         this.tags = tags;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Set<Tag> getTags() {
-        return tags;
-    }
-
-    public void setTags(Set<Tag> tags) {
-        this.tags = tags;
-    }
-
-    @Override
-    public String toString() {
-        return "User_Anunturi{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", tags=" + tags +
-                '}';
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
+    public Set<Tag> getTags() { return tags; }
+    public void setTags(Set<Tag> tags) { this.tags = tags; }
 }
