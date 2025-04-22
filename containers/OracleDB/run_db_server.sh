@@ -17,6 +17,6 @@ docker exec -it oracle-free sqlplus api_test/api_test @/tmp/didactic_table_creat
 sleep 1
 docker exec -it oracle-free sqlplus api_test/api_test @/tmp/didactic_table_populate.sql
 
+
 echo "For more info about the docker image: https://hub.docker.com/r/gvenzl/oracle-free"
-
-
+echo "Connect with api_test/api_test"
