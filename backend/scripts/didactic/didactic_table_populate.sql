@@ -192,3 +192,4 @@ insert into course_material values(8, 3, 2, 'cursuri.ppt', sysdate - 3, sysdate 
 insert into course_material values(9, 4, 3, 'notare.txt', sysdate - 3, sysdate - 2);
 
 commit;
+exit;
