@@ -130,3 +130,4 @@ create table course_material(
 );
 
 commit;
+exit;

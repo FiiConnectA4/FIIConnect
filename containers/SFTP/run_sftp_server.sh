@@ -1,7 +1,7 @@
 #!/bin/bash
 
 path=$(pwd)
-sftp_dir="$path/../SFTP_remote_files"
+sftp_dir="$path/../../SFTP_remote_files"
 volume_path="/Volumes/sftp-volume"
 
 sudo mkdir -p "$volume_path"
@@ -26,6 +26,7 @@ else
 fi
 
 echo "Run with user: fiiconnect -- password: fiiconnect"
+rm -rf /Users/stefaniancu/.ssh/known_hosts
 
 cd "$sftp_dir"
 sftp -P 2222 fiiconnect@localhost
