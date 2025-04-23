@@ -6,7 +6,7 @@ import Anunturi from "../pages/Anunturi";
 import Harta from "../pages/Harta";
 import Cursuri from "../pages/Cursuri/Cursuri";
 import Catalog from "../pages/Catalog";
-import Orar from "../pages/Orar/OrarToti";
+import Orar from "../pages/Orar/Orar";
 
 import Secretariat from "../pages/Secretariat/Secretariat";
 
