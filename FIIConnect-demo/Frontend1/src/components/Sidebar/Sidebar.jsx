@@ -16,10 +16,8 @@ const Sidebar = () => {
   const managementLinks = [
     { name: "Contul", icon: "👤" },
     { name: "Contact", icon: "📧" },
-<<<<<<< HEAD
-=======
     { name: "Secretariat", icon: "🏛️"},
->>>>>>> 72f2310f0 (finalmerge)
+
   ];
 
   return (

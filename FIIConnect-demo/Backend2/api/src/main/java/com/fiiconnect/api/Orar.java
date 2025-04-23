@@ -21,7 +21,6 @@ private Integer id;
     private String sala;
     @Column(name = "TIP_ACTIVITATE")
     private String tip;
-
     private String an;
 
 
