@@ -84,4 +84,12 @@ public class AnnouncementService {
         currentAnnouncement.getTags().addAll(managedTags);
         return announcementRepository.save(currentAnnouncement);
     }
+
+    public List<Long> getAllAnnouncementsId(Long tagId) {
+        return announcementRepository.getAllAnnouncementsId(tagId);
+    }
+
+    public Set<Announcement> getAnnouncementsByUserId(Long id) {
+        return announcementRepository.getAnnouncementsByUserId(id);
+    }
 }

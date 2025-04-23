@@ -4,10 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 @RequestMapping("/announcements")
@@ -31,12 +28,13 @@ public class AnnouncementController {
         return announcementService.getAllAnnouncements();
     }
 
+    // Obtine toate anunturile existente pt profi si secretari
     @GetMapping("/prof-secretar")
     public List<Announcement> getAllAnnouncementsForProfAndSecretary() {
         return announcementService.getAllAnnouncements();
     }
 
-    // Creează un nou anunț
+    // Creează un nou anunț (doar pt profi si secretari)
     @PostMapping("/prof-secretar")
     public Announcement createAnnouncement(@RequestBody CreateAnnouncementRequest announcementRequest) {
         Set<TagRequest> tagsRequest = announcementRequest.getTags();
@@ -92,11 +90,53 @@ public class AnnouncementController {
         return announcementService.getAnnouncementById(id);
     }
 
+    // Obtine un anunt specific dupa ID pt profi si secretari
     @GetMapping("/prof-secretar/{id}")
     public Announcement getAnnouncementByIdForProfAndSecretary(@PathVariable Long id) {
         return announcementService.getAnnouncementById(id);
     }
 
+
+    private List<Announcement> getAllAnnouncementsWithTagId(Long tagId){
+            List<Long> announcementsId = announcementService.getAllAnnouncementsId(tagId);
+            List<Announcement> allAnnouncements = new ArrayList<>();
+            for(Long id : announcementsId){
+                allAnnouncements.add(announcementService.getAnnouncementById(id));
+            }
+            return allAnnouncements;
+    }
+
+    //obtine anunturile dupa un set de id-uri de tag-uri specificate pt profi si secretari
+    @GetMapping("/prof-secretar/with-tag")
+    public List<Announcement> getAnnouncementsWithTagsForProfAndSecretary(@RequestParam List<Long> tagIds){
+        List<Announcement> allAnnouncements = new ArrayList<>();
+        for (Long id : tagIds){
+            allAnnouncements.addAll(getAllAnnouncementsWithTagId(id));
+        }
+        return allAnnouncements;
+    }
+
+    //obtine anunturile dupa un set de id-uri de tag-uri specificate 
+    @GetMapping("/with-tag")
+    public Set<Announcement> getAnnouncementsWithTags(@RequestParam List<Long> tagIds){
+        Set<Announcement> allAnnouncements = new HashSet<>();
+        for (Long id : tagIds){
+            allAnnouncements.addAll(getAllAnnouncementsWithTagId(id));
+        }
+        return allAnnouncements;
+    }
+
+    //obtine toate anunturile unui user specificat dupa id
+    @GetMapping("/with-user-id/{id}")
+    public Set<Announcement> getAnnouncementsWithUserId(@PathVariable Long id){
+        return announcementService.getAnnouncementsByUserId(id);
+    }
+
+    //obtine toate anunturile unui user specificat dupa id pt profi si secretari
+    @GetMapping("/prof-secretar/with-user-id/{id}")
+    public Set<Announcement> getAnnouncementsWithUserIdForProfAndSecretary(@PathVariable Long id){
+        return announcementService.getAnnouncementsByUserId(id);
+    }
 
     // updateaza un anunt dupa id
     @PutMapping("/prof-secretar/{id}")
