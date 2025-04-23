@@ -180,16 +180,16 @@ insert into feedback values(4, 1, 'colaborare excelenta', 10, 8, 10);
 insert into feedback values(6, 1, 'experienta oribila', 3, 1, 2);
 insert into feedback values(3, 3, 'il urasc', 1, 1, 1);
 
-delete course_material;
-insert into course_material values(1, 11, 1, 'curs1.pdf', sysdate - 3, sysdate - 2);
-insert into course_material values(2, 12, 1, 'proiecte.pdf', sysdate - 3, sysdate - 2);
-insert into course_material values(3, 7, 1, 'seminar1.ppt', sysdate - 3, sysdate - 2);
-insert into course_material values(4, 8, 1, 'tema.docx', sysdate - 3, sysdate - 2);
-insert into course_material values(5, 9, 2, 'note.xlsx', sysdate - 3, sysdate - 2);
-insert into course_material values(6, 1, 1, 'amazon.pdf', sysdate - 3, sysdate - 2);
-insert into course_material values(7, 2, 1, 'logo_rust.png', sysdate - 3, sysdate - 2);
-insert into course_material values(8, 3, 2, 'cursuri.ppt', sysdate - 3, sysdate - 2);
-insert into course_material values(9, 4, 3, 'notare.txt', sysdate - 3, sysdate - 2);
+delete material;
+insert into material values(1, 11, 1, 'curs1.pdf', sysdate - 3, sysdate - 2);
+insert into material values(2, 12, 1, 'proiecte.pdf', sysdate - 3, sysdate - 2);
+insert into material values(3, 7, 1, 'seminar1.ppt', sysdate - 3, sysdate - 2);
+insert into material values(4, 8, 1, 'tema.docx', sysdate - 3, sysdate - 2);
+insert into material values(5, 9, 2, 'note.xlsx', sysdate - 3, sysdate - 2);
+insert into material values(6, 1, 1, 'amazon.pdf', sysdate - 3, sysdate - 2);
+insert into material values(7, 2, 1, 'logo_rust.png', sysdate - 3, sysdate - 2);
+insert into material values(8, 3, 2, 'cursuri.ppt', sysdate - 3, sysdate - 2);
+insert into material values(9, 4, 3, 'notare.txt', sysdate - 3, sysdate - 2);
 
 commit;
 exit;

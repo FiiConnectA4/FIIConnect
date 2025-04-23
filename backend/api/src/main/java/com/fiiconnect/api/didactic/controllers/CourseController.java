@@ -7,9 +7,7 @@ import com.fiiconnect.api.didactic.exceptions.CourseNotFoundException;
 import com.fiiconnect.api.didactic.models.Course;
 import com.fiiconnect.api.didactic.models.CourseModelAssembler;
 import com.fiiconnect.api.didactic.repositories.CourseRepository;
-import com.fiiconnect.api.didactic.repositories.TeachingRepository;
 import com.fiiconnect.api.didactic.services.CourseService;
-import com.fiiconnect.api.didactic.services.TeachingService;
 import org.springframework.hateoas.EntityModel;
 
 import org.springframework.hateoas.CollectionModel;
