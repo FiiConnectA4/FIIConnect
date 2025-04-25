@@ -6,7 +6,7 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/announcement")
-//@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*")
+@CrossOrigin(origins = "http://localhost:3000")
 public class AnnouncementController {
     @Autowired
     private  AnnouncementService announcementService;
