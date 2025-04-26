@@ -41,6 +41,7 @@ function Anunturi() {
         return b.id - a.id;
       });
       setAnnouncements(sortedData);
+
     } catch (err) {
       setError("Failed to load announcements: " + err.message);
     } finally {
@@ -229,6 +230,7 @@ function Anunturi() {
                   ))}
                 </div>
               )}
+
             </div>
           ))
         )}
@@ -238,3 +240,4 @@ function Anunturi() {
 }
 
 export default Anunturi;
+

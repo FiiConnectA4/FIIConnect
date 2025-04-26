@@ -31,4 +31,14 @@ public class TagService {
         return tagRepository.findAll();
     }
 
+    public Tag updateTag(Long id, Tag updatedTag) {
+        Tag currentTag = tagRepository.findById(id).orElse(null);
+        if(currentTag==null){
+            System.out.println("nu exista acest id");
+            return null;
+        }
+        currentTag.setName(updatedTag.getName());
+        currentTag.setType(currentTag.getType());
+        return tagRepository.save(currentTag);
+    }
 }

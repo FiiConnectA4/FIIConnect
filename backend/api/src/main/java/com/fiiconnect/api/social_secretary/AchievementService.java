@@ -18,4 +18,21 @@ public class AchievementService {
     public Achievement saveAchievement(Achievement achievement) {
         return achievementRepository.save(achievement);
     }
+
+    public Achievement updateAchievement(Long id, Achievement updatedAchievement) {
+        Achievement currentAchievement = achievementRepository.findById(id).orElse(null);
+        if(currentAchievement == null){
+            System.out.println("id-ul nu exista");
+            return null;
+        }
+        currentAchievement.setName(updatedAchievement.getName());
+        currentAchievement.setDateAchieved(updatedAchievement.getDateAchieved());
+        currentAchievement.setDescription(updatedAchievement.getDescription());
+        currentAchievement.setUser(updatedAchievement.getUser());
+        return achievementRepository.save(currentAchievement);
+    }
+
+    public void deleteAchievement(Long id) {
+        achievementRepository.deleteById(id);
+    }
 }

@@ -27,6 +27,11 @@ public class TagController {
         return tagService.findByType(type);
     }
 
+    @PutMapping("/{id}")
+    public Tag updateTag(@PathVariable Long id, @RequestBody Tag updatedTag){
+        return  tagService.updateTag(id,updatedTag);
+    }
+
     @DeleteMapping("/{id}")
     public void deleteTag(@PathVariable Long id) {
         tagService.deleteTag(id);
