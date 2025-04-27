@@ -5,7 +5,7 @@ export const CreateAccount = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [accountType, setAccountType] = useState('student'); // valoare implicită: 'student'
+  const [accountType, setAccountType] = useState('STUDENT'); // valoare implicită: 'student'
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,7 +35,7 @@ export const CreateAccount = () => {
         setUsername("");
         setEmail("");
         setPassword("");
-        setAccountType("student");
+        setAccountType("STUDENT");
       }
     } catch (error) {
       console.error("Eroare la înregistrare:", error);
@@ -73,8 +73,8 @@ export const CreateAccount = () => {
               value={accountType}
               onChange={(e) => setAccountType(e.target.value)}
           >
-            <option value="student">Student</option>
-            <option value="profesor">Profesor</option>
+            <option value="STUDENT">Student</option>
+            <option value="PROFESOR">Profesor</option>
           </select>
           <button type="submit" className="auth-button">
             Creează cont

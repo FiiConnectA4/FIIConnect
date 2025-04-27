@@ -65,7 +65,7 @@ public class AuthController {
 
             userRepository.save(user);
 
-            String qrUrl = twoFactorAuthenticationService.getQRCodeUrl(user.getEmail(), secret);
+            String qrUrl = twoFactorAuthenticationService.getQRCodeUrl(user.getEmail());
 
             return ResponseEntity.ok(new ApiResponse("Utilizator înregistrat cu succes. Scanează acest QR în Google Authenticator: " + qrUrl, true));
 

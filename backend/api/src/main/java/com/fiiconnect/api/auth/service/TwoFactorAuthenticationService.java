@@ -26,14 +26,20 @@ public class TwoFactorAuthenticationService {
     }
 
     // Generates a QR code URL for scanning
-    public String getQRCodeUrl(String userEmail, String secret) {
-        return GoogleAuthenticatorQRGenerator.getOtpAuthURL("FiiConnectApp", userEmail, secret);
+    public String getQRCodeUrl(String userEmail) {
+        // Creează un obiect GoogleAuthenticator
+        GoogleAuthenticator gAuth = new GoogleAuthenticator();
+
+        // Generează cheia secretă pentru utilizator
+        GoogleAuthenticatorKey key = gAuth.createCredentials();
+
+        // Generează URL-ul QR cu secretul de tip GoogleAuthenticatorKey
+        return GoogleAuthenticatorQRGenerator.getOtpAuthURL("FiiConnectApp", userEmail, key);
     }
 
     // Verifies the code entered by the user
     public boolean verifyCode(String secret, int verificationCode) {
-        // Create a temporary authenticator for this secret
-        GoogleAuthenticator tempAuth = new GoogleAuthenticator();
-        return tempAuth.authorize(secret, verificationCode);
+        return gAuth.authorize(secret, verificationCode);
     }
+
 }

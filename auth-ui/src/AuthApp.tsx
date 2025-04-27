@@ -21,6 +21,8 @@ const LoginForm = ({ onSwitch }: { onSwitch: (page: string) => void }) => {
     const [emailOrPhone, setEmailOrPhone] = useState('');
     const [password, setPassword] = useState('');
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [errorMessage, setErrorMessage] = useState('');
+
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
@@ -50,11 +52,11 @@ const LoginForm = ({ onSwitch }: { onSwitch: (page: string) => void }) => {
                 alert('Login successful');
                 onSwitch('dashboard');
             } else {
-                alert('Login failed: ' + result.message); // ✅ FIXED
+                setErrorMessage(result.message || 'Login failed');
             }
         } catch (err: unknown) {
             if (err instanceof Error) {
-                alert('Connection error: ' + err.message);
+                setErrorMessage('Connection error: ' + err.message);
             } else {
                 alert('An unknown error occurred');
             }
@@ -82,23 +84,25 @@ const LoginForm = ({ onSwitch }: { onSwitch: (page: string) => void }) => {
                 />
                 {errors.emailOrPhone && <span className="error">{errors.emailOrPhone}</span>}
 
-                <div className="relative w-full">
+                <div className="password-wrapper">
                     <input
-                        className="auth-input pr-10"
+                        className="auth-input"
                         type={showPassword ? 'text' : 'password'}
                         placeholder="Enter password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
-                    {errors.password && <span className="error">{errors.password}</span>}
-
                     <span
                         className="login-password-toggle"
                         onClick={togglePasswordVisibility}
                     >
-            {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
-          </span>
+    {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+  </span>
                 </div>
+                {errors.password && <span className="error">{errors.password}</span>}
+
+
+                {errorMessage && <p className="error-message">{errorMessage}</p>}
 
                 <div className="w-full text-right">
           <span className="auth-link" onClick={() => onSwitch('reset')}>
