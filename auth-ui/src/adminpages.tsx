@@ -4,49 +4,83 @@ import React, { useState } from 'react';
 export const CreateAccount = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [accountType, setAccountType] = useState('student'); // valoare implicită: 'student'
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !email) {
+
+    // Validare pentru câmpurile obligatorii
+    if (!username || !email || !password) {
       alert("Te rog completează toate câmpurile obligatorii.");
       return;
     }
-    // Aici poți apela API-ul de creare cont, de exemplu
-    alert(`Cont creat pentru: ${username}\nEmail: ${email}`);
+
+    try {
+      // Trimiterea datelor la backend pentru înregistrare
+      const response = await fetch("http://localhost:34101/users/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, email, password, accountType }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        alert(`Eroare: ${data.message}`);
+      } else {
+        alert(`Succes: ${data.message}`);
+        setUsername("");
+        setEmail("");
+        setPassword("");
+        setAccountType("student");
+      }
+    } catch (error) {
+      console.error("Eroare la înregistrare:", error);
+      alert("A apărut o eroare la conectarea cu serverul.");
+    }
   };
 
   return (
-    <div className="page-content">
-      <h2>Creare Cont (doar pentru admin)</h2>
-      <form onSubmit={handleSubmit} className="form-container">
-        <input
-          className="auth-input"
-          placeholder="Username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <input
-          className="auth-input"
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        {/* Dropdown pentru tipul contului */}
-        <select
-          className="auth-input"
-          value={accountType}
-          onChange={(e) => setAccountType(e.target.value)}
-        >
-          <option value="student">Student</option>
-          <option value="profesor">Profesor</option>
-        </select>
-        <button type="submit" className="auth-button">
-          Creează cont
-        </button>
-      </form>
-    </div>
+      <div className="page-content">
+        <h2>Creare Cont (doar pentru admin)</h2>
+        <form onSubmit={handleSubmit} className="form-container">
+          <input
+              className="auth-input"
+              placeholder="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+          />
+          <input
+              className="auth-input"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+          />
+          <input
+              className="auth-input"
+              type="password"
+              placeholder="Parola"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+          />
+          {/* Dropdown pentru tipul contului */}
+          <select
+              className="auth-input"
+              value={accountType}
+              onChange={(e) => setAccountType(e.target.value)}
+          >
+            <option value="student">Student</option>
+            <option value="profesor">Profesor</option>
+          </select>
+          <button type="submit" className="auth-button">
+            Creează cont
+          </button>
+        </form>
+      </div>
   );
 };
 
@@ -65,20 +99,20 @@ export const ResetPassword = () => {
   };
 
   return (
-    <div className="page-content">
-      <h2>Resetare Parolă</h2>
-      <form onSubmit={handleReset} className="form-container">
-        <input
-          className="auth-input"
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <button type="submit" className="auth-button">
-          Trimite link resetare
-        </button>
-      </form>
-    </div>
+      <div className="page-content">
+        <h2>Resetare Parolă</h2>
+        <form onSubmit={handleReset} className="form-container">
+          <input
+              className="auth-input"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+          />
+          <button type="submit" className="auth-button">
+            Trimite link resetare
+          </button>
+        </form>
+      </div>
   );
 };

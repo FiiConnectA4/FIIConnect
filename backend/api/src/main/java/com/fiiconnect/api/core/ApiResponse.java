@@ -1,4 +1,4 @@
-package com.fiiconnect.api.modulexemplu;
+package com.fiiconnect.api.core;
 
 public class ApiResponse {
     private String message;
