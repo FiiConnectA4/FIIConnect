@@ -4,9 +4,6 @@ import './../Student/DetaliiCurs.css';
 import Ceas from './../Components/Ceas';
 import Edit from './../Components/Edit';
 
-import ButonExtensibil from './../Components/ButonExtensibil';
-import Optiuni from './../Components/Optiuni';
-
 const PDetaliiCurs = ({ curs, onBack }) => {
     const [materials, setMaterials] = useState([]);
     const [gradingMethod, setGradingMethod] = useState('');

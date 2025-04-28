@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import './DetaliiCurs.css';
 import Ceas from './../Components/Ceas';
 import ButonExtensibil from '../Components/ButonExtensibil';
-import Edit from './../Components/Edit';
 
 const DetaliiCurs = ({ curs, onBack }) => {
     const [profesor, setProfesor] = useState('');
