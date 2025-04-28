@@ -48,15 +48,12 @@ const DetaliiCurs = ({ curs, onBack }) => {
             <div className="sectiune">
                 <h2>DESCRIERE CURS:</h2>
                 <a href={curs.descriptionLink} target="_blank" rel="noopener noreferrer">Click here</a>
-                <Edit />
             </div>
             <div className="sectiune">
                 <h2>Metoda notare:(componente)</h2>
-                <Edit />
             </div>
             <div className="sectiune bibliografie">
                 <h2>Resurse bibliografice:</h2>
-                <Edit />
                 {materials.length > 0 ? (
                     <ul>
                         {materials.map(material => (
