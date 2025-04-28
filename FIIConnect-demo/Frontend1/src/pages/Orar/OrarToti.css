@@ -102,3 +102,35 @@
   color: #1A3C5A;
   font-weight: 500;
 }
+
+
+.orar-sali-container {
+  text-align: center;
+  margin-top: 20px;
+}
+
+.orar-sali-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* Două coloane */
+  gap: 20px; /* Spațiu între butoane */
+  justify-content: center; /* Centrează grid-ul pe orizontală */
+  align-items: center; /* Centrează grid-ul pe verticală */
+  max-width: 600px; /* Lățime maximă pentru grid */
+  margin: 0 auto; /* Centrează grid-ul pe pagină */
+}
+
+.dotari-back-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.dotari-back-button:hover {
+  background-color: #0056b3;
+}

@@ -1,69 +1,29 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import ScheduleTable from "../../components/ScheduleTable/ScheduleTable";
+import OrarStudenti from './OrarStudenti';  
+import OrarProfesori from './OrarProfesori';  
+import OrarDiscipline from './OrarDiscipline';  
+import OrarSali from './OrarSali';  
 import "./OrarToti.css";
 
 const OrarToti = () => {
   const navigate = useNavigate();
-  const { an, grupa } = useParams();
+  const { an, grupa, section, profesor, sala, disciplina } = useParams(); // Parametrii din URL
 
-  const [activeDropdown, setActiveDropdown] = useState(null);
   const [selectedGroup, setSelectedGroup] = useState(null);
-  const [section, setSection] = useState(null);
   const [scheduleData, setScheduleData] = useState([]);
-  const dropdownRefs = useRef([]);
+  const [currentSection, setCurrentSection] = useState(section || null);
+  const [selectedProfessor, setSelectedProfessor] = useState(profesor || null);
+  const [selectedRoom, setSelectedRoom] = useState(sala || null);
+  const [selectedDiscipline, setSelectedDiscipline] = useState(disciplina || null);
 
-  const [sali, setSali] = useState([]);
-  const [dotariSala, setDotariSala] = useState(null);
-
-  const handleEtajSelect = (etaj) => {
-    fetch(`http://localhost:34101/sali/etaj/${etaj}`)
-      .then((res) => res.json())
-      .then((data) => setSali(data))
-      .catch((err) => console.error("Eroare la preluarea sălilor:", err));
-  };
-
-  const handleSalaSelect = (numeSala) => {
-    setSelectedGroup(numeSala);
-    setActiveDropdown(null);
-    setSection("sali"); // <- adăugat!
-    fetch(`http://localhost:34101/orar/sala/${numeSala}`)
-      .then((res) => res.json())
-      .then((data) => setScheduleData(data))
-      .catch((err) => console.error("Eroare la orar sala:", err));
-  };
-  
-  const handleShowDotari = () => {
-    fetch(`http://localhost:34101/sali/nume/${selectedGroup}`)
-      .then((res) => res.json())
-      .then((data) => setDotariSala(data[0]))
-      .catch((err) => console.error("Eroare la dotări:", err));
-  };
-
-  const toggleDropdown = (index, e) => {
-    e.stopPropagation();
-    setActiveDropdown((prev) => (prev === index ? null : index));
-    setSelectedGroup(null);
-  };
-
-  const handleClickOutside = (event) => {
-    if (dropdownRefs.current.every((ref) => ref && !ref.contains(event.target))) {
-      setActiveDropdown(null);
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener("click", handleClickOutside);
-    return () => {
-      document.removeEventListener("click", handleClickOutside);
-    };
-  }, []);
-
+  // Se actualizează dacă an, grupa, profesor, sală sau disciplină sunt disponibile
   useEffect(() => {
     if (an && grupa) {
       const anLabel = `Anul ${an}`;
       setSelectedGroup(`${anLabel} - ${grupa}`);
-      setSection("studenti");
+      setCurrentSection("studenti");
 
       const url = `http://localhost:34101/orar/grupa/${an}/${grupa}`;
       fetch(url)
@@ -74,288 +34,180 @@ const OrarToti = () => {
         .catch((err) => {
           console.error("Eroare la preluarea orarului:", err);
         });
+    } else if (profesor) {
+      const url = `http://localhost:34101/orar/profesor/${profesor}`;
+      fetch(url)
+        .then((res) => res.json())
+        .then((data) => {
+          setScheduleData(data); // Setează datele primite
+          setSelectedProfessor(profesor); // Setează profesorul selectat
+        })
+        .catch((err) => {
+          console.error("Eroare la preluarea orarului profesorului:", err);
+        });
+    } else  if (sala) {
+      const url = `http://localhost:34101/orar/sala/${sala}`; // URL-ul va conține doar sala
+      fetch(url)
+          .then((res) => res.json())
+          .then((data) => {
+              setScheduleData(data); // Setează datele primite în stare
+              setSelectedRoom(sala);  // Setează numele sălii selectate
+          })
+          .catch((err) => {
+              console.error("Eroare la preluarea orarului pentru sală:", err);
+          });
+    } else if (disciplina) {
+      const url = `http://localhost:34101/orar/disciplina/${disciplina}`;
+      fetch(url)
+        .then((res) => res.json())
+        .then((data) => {
+          setScheduleData(data); // Setează datele primite
+          setSelectedDiscipline(disciplina); // Setează disciplina selectată
+        })
+        .catch((err) => {
+          console.error("Eroare la preluarea orarului disciplinei:", err);
+        });
     }
-  }, [an, grupa]);
+  }, [an, grupa, profesor, sala, disciplina]);
 
-  const buttons = [
-    {
-      label: "Anul 1",
-      icon: "1️⃣",
-      options: ["A1", "A2", "A3", "A4", "A5", "B1", "B2", "B3", "B4", "E1", "E2", "E3", "I1X1", "I1X2", "I1X3", "I1X4"],
-    },
-    {
-      label: "Anul 2",
-      icon: "2️⃣",
-      options: ["A1", "A2", "A3", "A4", "A5", "B1", "B2", "B3", "B4", "E1", "E2", "E3", "I1X1", "I1X2", "I1X3", "I1X4"],
-    },
-    {
-      label: "Anul 3",
-      icon: "3️⃣",
-      options: ["A1", "A2", "A3", "A4", "A5", "B1", "B2", "B3", "B4", "E1", "E2", "E3", "X"]
-    },
-    {
-      label: "Master Anul 1",
-      icon: "🎓",
-      options: [
-        "Inteligența Artificială și Optimizare",
-        "Ingineria Sistemelor Soft",
-        "Lingvistica Computațională",
-        "Studii Avansate în Informatică",
-        "Sisteme Distribuite",
-        "Securitatea Informațiilor",
-      ],
-    },
-    {
-      label: "Master Anul 2",
-      icon: "🎓",
-      options: [
-        "Inteligența Artificială și Optimizare",
-        "Ingineria Sistemelor Soft",
-        "Lingvistica Computațională",
-        "Studii Avansate în Informatică",
-        "Sisteme Distribuite",
-        "Securitatea Informațiilor",
-      ],
-    },
-  ];
+  // Functii pentru selectarea elementelor
+  const handleRoomClick = (roomName) => {
+    setSelectedRoom(roomName);
+    navigate(`/app/orar/sali/${roomName}`); // Navighează doar la ruta sălii
+};
 
-  const etaje = [
-    {
-      label: "Parter",
-      icon: "🏢",
-      sali: ["C2", "C112", "C210"],
-    },
-    {
-      label: "Etaj 1",
-      icon: "🧱",
-      sali: ["C308", "C309"],
-    },
-    {
-      label: "Etaj 2",
-      icon: "🏬",
-      sali: ["C401", "C403", "C405", "C409", "C411", "C412", "C413"],
-    },
-    {
-      label: "Etaj 7",
-      icon: "🌇",
-      sali: ["C901", "C903"],
-    },
-  ];
+const handleDotariClick = () => {
+  if (selectedRoom) {
+    navigate(`/app/orar/sali/${selectedRoom}/dotari`); // Navighează la pagina dotărilor pentru sala selectată
+  }
+};
 
-  const handleGroupSelect = (anLabel, grupa) => {
-    const anNumber = anLabel.replace("Anul ", "").trim();
-    navigate(`/app/orar/studenti/${anNumber}/${grupa}`);
-  };
 
-  // Funcție pentru selectarea unui profesor
-  const handleProfesorSelect = (profesor) => {
-    setSelectedGroup(profesor);
-    setActiveDropdown(null);
-    fetch(`http://localhost:34101/orar/profesor/${profesor}`)
+const handleDisciplineClick = (disciplineName) => {
+  setSelectedDiscipline(disciplineName); // Actualizează starea pentru disciplina selectată
+  navigate(`/app/orar/discipline/${disciplineName}`); // Navighează la URL-ul disciplinei
+};
+
+  const handleProfessorClick = (professorName) => {
+    setSelectedProfessor(professorName);
+    navigate(`/app/orar/profesori/${professorName}`); // Actualizează URL-ul cu numele profesorului
+    const url = `http://localhost:34101/orar/profesor/${professorName}`;
+    fetch(url)
       .then((res) => res.json())
       .then((data) => {
-        console.log("Date pentru profesor:", data); // Verifică datele primite
         setScheduleData(data);
       })
-      .catch((err) => console.error("Eroare la orar profesor:", err));
+      .catch((err) => {
+        console.error("Eroare la preluarea orarului profesorului:", err);
+      });
   };
-  
 
-  // Funcție pentru selectarea unei discipline
-  const handleDisciplinaSelect = (disciplina) => {
-    setSelectedGroup(disciplina);
-    setActiveDropdown(null);
-    fetch(`http://localhost:34101/orar/disciplina/${disciplina}`)
-      .then((res) => res.json())
-      .then((data) => setScheduleData(data))
-      .catch((err) => console.error("Eroare la orar disciplina:", err));
+  const handleBackButtonClick = () => {
+    // Mergi înapoi la secțiunea generală (studenti, profesori, etc.)
+    setSelectedGroup(null);
+    setSelectedProfessor(null);
+    setSelectedRoom(null);
+    setSelectedDiscipline(null);
+    setScheduleData([]);
+    if (currentSection === "studenti") {
+      navigate(`/app/orar/studenti`);
+    } else if (currentSection === "profesori") {
+      navigate(`/app/orar/profesori`);
+    } else if (currentSection === "sali") {
+      navigate(`/app/orar/sali`);
+    } else if (currentSection === "discipline") {
+      navigate(`/app/orar/discipline`);
+    } else {
+      navigate(`/app/orar`);
+    }
   };
+
+  const handleSectionChange = (newSection) => {
+    setCurrentSection(newSection);
+    navigate(`/app/orar/${newSection}`);
+  };
+
+  // Actualizează titlul paginii în funcție de selecția curentă
+  useEffect(() => {
+    document.title = `Orar - ${selectedGroup || selectedProfessor || selectedRoom || selectedDiscipline || "Alege o categorie"}`;
+  }, [selectedGroup, selectedProfessor, selectedRoom, selectedDiscipline]);
 
   return (
     <div className="orar-container">
-      {selectedGroup ? (
+      {selectedGroup || selectedProfessor || selectedRoom || selectedDiscipline ? (
         <div className="orar-afisat">
-          <h3>Orar pentru {selectedGroup}</h3>
+          <h3>
+          <h3>
+  Orar pentru {selectedGroup || (selectedProfessor && `Profesor ${selectedProfessor}`) || (selectedRoom && `Sala ${selectedRoom}`) || (selectedDiscipline && `Disciplina ${selectedDiscipline}`) || "Selectează o categorie"}
+</h3>
+          </h3>
           <ScheduleTable
-  schedule={scheduleData}
-  title={`Orar pentru ${selectedGroup}`}
-  showSala={section !== "sali"} // afișează coloana "Sală" DOAR dacă nu e orar pentru săli
-/>
-
+            schedule={scheduleData}
+            title={`Orar pentru ${selectedGroup || `Profesor ${selectedProfessor}` || `Sala ${selectedRoom}` || `Disciplina ${selectedDiscipline}`}`}
+          />
           <button
             className="orar-button inapoi"
-            onClick={() => {
-              setSelectedGroup(null);
-              setScheduleData([]);
-              navigate("/app/orar");
-            }}
+            onClick={handleBackButtonClick}
           >
             🔙 Înapoi
           </button>
+
+          {selectedRoom && (
+            <button
+              className="orar-button dotari"
+              onClick={handleDotariClick}
+            >
+              Dotări
+            </button>
+          )}
+          
         </div>
       ) : (
         <>
           <div className="orar-titlu">
             <h1>Orar</h1>
-            {!section && <h2>Alege o categorie</h2>}
-            {section === "studenti" && <h2>Alege anul și grupa</h2>}
+            {!currentSection && <h2>Alege o categorie</h2>}
+            {currentSection === "studenti" && <h2>Alege anul și grupa</h2>}
           </div>
 
-          {!section && (
+          {!currentSection && (
             <div className="orar-buttons">
-              <button className="orar-button" onClick={() => setSection("studenti")}>
+              <button
+                className="orar-button"
+                onClick={() => handleSectionChange("studenti")}
+              >
                 🎓 Orar Studenți
               </button>
-              <button className="orar-button" onClick={() => setSection("profesori")}>
+              <button
+                className="orar-button"
+                onClick={() => handleSectionChange("profesori")}
+              >
                 👨‍🏫 Orar Profesori
               </button>
-              <button className="orar-button" onClick={() => setSection("sali")}>
+              <button
+                className="orar-button"
+                onClick={() => handleSectionChange("sali")}
+              >
                 🏫 Orar Săli
               </button>
-              <button className="orar-button" onClick={() => setSection("discipline")}>
+              <button
+                className="orar-button"
+                onClick={() => handleSectionChange("discipline")}
+              >
                 📚 Orar Discipline
               </button>
             </div>
           )}
 
-{section === "profesori" && (
-  <>
-    <div className="orar-buttons">
-      <button className="orar-button" onClick={() => handleProfesorSelect("Lenuta Alboaie")}>
-        Lenuta Alboaie
-      </button>
-      <button className="orar-button" onClick={() => handleProfesorSelect("Vasilescu Andrei")}>
-        Vasilescu Andrei
-      </button>
-    </div>
-    <div className="inapoi-container">
-      <button
-        className="orar-button inapoi"
-        onClick={() => {
-          setSection(null);
-          navigate("/app/orar");
-        }}
-      >
-        🔙 Înapoi
-      </button>
-    </div>
-  </>
-)}
-
-
-{section === "discipline" && (
-  <>
-    <div className="orar-buttons">
-      <button className="orar-button" onClick={() => handleDisciplinaSelect("Algoritmica grafurilor")}>
-        Algoritmica Grafurilor
-      </button>
-    </div>
-    <div className="inapoi-container">
-      <button
-        className="orar-button inapoi"
-        onClick={() => {
-          setSection(null);
-          navigate("/app/orar");
-        }}
-      >
-        🔙 Înapoi
-      </button>
-    </div>
-  </>
-)}
-
-{section === "sali" && (
-  <>
-    <div className="orar-buttons">
-      {etaje.map((etaj, index) => (
-        <div
-          className="dropdown-container"
-          key={index}
-          ref={(el) => (dropdownRefs.current[index] = el)}
-        >
-          <button className="orar-button" onClick={(e) => toggleDropdown(index, e)}>
-            <span className="icon">{etaj.icon}</span>
-            {etaj.label}
-          </button>
-
-          {activeDropdown === index && (
-            <div className="dropdown-menu">
-              {etaj.sali.map((sala, i) => (
-                <button
-                  className="dropdown-item"
-                  key={i}
-                  onClick={() => handleSalaSelect(sala)}
-                >
-                  {sala}
-                </button>
-              ))}
-            </div>
+          {currentSection === "studenti" && <OrarStudenti />}
+          {currentSection === "profesori" && (
+            <OrarProfesori onProfessorClick={handleProfessorClick} />
           )}
-        </div>
-      ))}
-    </div>
-
-    <div className="inapoi-container">
-      <button
-        className="orar-button inapoi"
-        onClick={() => {
-          setSection(null);
-          setActiveDropdown(null);
-          navigate("/app/orar");
-        }}
-      >
-        🔙 Înapoi
-      </button>
-    </div>
-  </>
-)}
-
-
-
-          {section === "studenti" && (
-            <>
-              <div className="orar-buttons">
-                {buttons.map((button, index) => (
-                  <div
-                    className="dropdown-container"
-                    key={index}
-                    ref={(el) => (dropdownRefs.current[index] = el)}
-                  >
-                    <button className="orar-button" onClick={(e) => toggleDropdown(index, e)}>
-                      <span className="icon">{button.icon}</span>
-                      {button.label}
-                    </button>
-
-                    {activeDropdown === index && (
-                      <div className="dropdown-menu">
-                        {button.options.map((option, i) => (
-                          <div key={i}>
-                            <button
-                              className="dropdown-item"
-                              onClick={() => handleGroupSelect(button.label, option)}
-                            >
-                              {option}
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <div className="inapoi-container">
-                <button
-                  className="orar-button inapoi"
-                  onClick={() => {
-                    setSection(null);
-                    setActiveDropdown(null);
-                    navigate("/app/orar");
-                  }}
-                >
-                  🔙 Înapoi
-                </button>
-              </div>
-            </>
+          {currentSection === "discipline" && (
+            <OrarDiscipline onDisciplineClick={handleDisciplineClick} />
+          )}
+          {currentSection === "sali" && (
+            <OrarSali onRoomClick={handleRoomClick} />
           )}
         </>
       )}
