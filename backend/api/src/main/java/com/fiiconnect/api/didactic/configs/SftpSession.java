@@ -3,18 +3,14 @@ package com.fiiconnect.api.didactic.configs;
 import io.micrometer.common.util.StringUtils;
 import org.apache.sshd.sftp.client.SftpClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
-import org.springframework.integration.config.EnableIntegration;
 import org.springframework.integration.file.remote.session.CachingSessionFactory;
 import org.springframework.integration.file.remote.session.SessionFactory;
 import org.springframework.integration.sftp.session.DefaultSftpSessionFactory;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.stereotype.Service;
+
 
 @Configuration
 public class SftpSession {
@@ -31,15 +27,13 @@ public class SftpSession {
         factory.setAllowUnknownKeys(true);
 
 
-//        Resource res = getPrivateKeyRes();
-//        if (res != null) {
-//            factory.setPrivateKey(res);
-//            factory.setPrivateKeyPassphrase(serverInfo.getPrivateKeyPassphrase());
-//        } else {
-//            factory.setPassword(serverInfo.getPassword());
-//        }
-
-        factory.setPassword(serverInfo.getPassword());
+        Resource res = getPrivateKeyRes();
+        if (res != null) {
+            factory.setPrivateKey(res);
+            factory.setPrivateKeyPassphrase(serverInfo.getPrivateKeyPassphrase());
+        } else {
+            factory.setPassword(serverInfo.getPassword());
+        }
 
         return new CachingSessionFactory<>(factory);
     }
@@ -51,7 +45,7 @@ public class SftpSession {
         }
         Resource res = new FileSystemResource(serverInfo.getPrivateKeyPath());
 
-        if(res.isFile() && res.exists()) {
+        if (res.isFile() && res.exists()) {
             return res;
         }
         return null;
