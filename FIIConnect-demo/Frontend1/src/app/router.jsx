@@ -5,13 +5,16 @@ import Anunturi from "../pages/Anunturi";
 import Harta from "../pages/Harta";
 import Cursuri from "../pages/Cursuri/Cursuri";
 import Catalog from "../pages/Catalog";
-import OrarToti from "../pages/Orar/OrarToti"; // Asigură-te că este componenta principală pentru Orar
+import OrarToti from "../pages/Orar/OrarToti"; 
 import Secretariat from "../pages/Secretariat/Secretariat";
 import Chat from "../pages/Chat";
 import Contul from "../pages/Contul";
 import Contact from "../pages/Contact";
 import Login from "../pages/Login";
 import DotariSala from "../pages/Orar/DotariSala";
+import OrarSecretariat from "../pages/Orar/OrarSecretariat";
+
+
 
 const AppRoutes = () => {
   return (
@@ -36,9 +39,19 @@ const AppRoutes = () => {
 <Route path="/app/orar/sali" element={<OrarToti />} />
 <Route path="/app/orar/sali/:sala" element={<OrarToti />} />
 <Route path="/app/orar/sali/:sala/dotari" element={<DotariSala />} />
-
 <Route path="/app/orar/discipline" element={<OrarToti />} />
 <Route path="/app/orar/discipline/:disciplina" element={<OrarToti />} />
+
+
+<Route path="/app/orar-secretariat" element={<OrarSecretariat />} />
+<Route path="/app/orar-secretariat/studenti" element={<OrarSecretariat />} />
+<Route path="/app/orar-secretariat/studenti/:an/:grupa" element={<OrarSecretariat />} />
+<Route path="/app/orar-secretariat/profesori" element={<OrarSecretariat />} />
+<Route path="/app/orar-secretariat/profesori/:profesor" element={<OrarSecretariat />} />
+<Route path="/app/orar-secretariat/sali" element={<OrarSecretariat />} />
+<Route path="/app/orar-secretariat/sali/:sala" element={<OrarSecretariat />} />
+<Route path="/app/orar-secretariat/discipline" element={<OrarSecretariat />} />
+<Route path="/app/orar-secretariat/discipline/:disciplina" element={<OrarSecretariat />} />
 
 
         <Route path="secretariat" element={<Secretariat />} />

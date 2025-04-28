@@ -1,8 +1,7 @@
 import React from "react";
 import "./ScheduleTable.css";
 
-const ScheduleTable = ({ schedule, title, showSala = true }) => {
-  // Verifică dacă 'schedule' este un array valid înainte de a încerca să-l mapăm
+const ScheduleTable = ({ schedule, title, showSala = true, editable = false, onEditClick }) => {
   if (!Array.isArray(schedule)) {
     return (
       <div className="schedule-table-container">
@@ -22,26 +21,24 @@ const ScheduleTable = ({ schedule, title, showSala = true }) => {
             <th>Interval</th>
             <th>Disciplina</th>
             <th>Tip</th>
-            <th>Grupa Studentilor</th>
+            <th>Grupa Studenților</th>
             {showSala && <th>Sală</th>}
             <th>Profesor</th>
-            <th>An</th> {/* Coloană pentru an */}
+            <th>An</th>
+            {editable && <th>Acțiuni</th>} {/* Afișăm coloana de editare doar dacă editable */}
           </tr>
         </thead>
         <tbody>
           {schedule.length === 0 ? (
             <tr>
-              <td colSpan={showSala ? 8 : 7} style={{ textAlign: "center" }}>
+              <td colSpan={showSala ? (editable ? 9 : 8) : (editable ? 8 : 7)} style={{ textAlign: "center" }}>
                 Nu există date disponibile pentru afișare.
               </td>
             </tr>
           ) : (
             schedule.map((entry, index) => {
-              console.log("Entry:", entry); // Verifică structura obiectului `entry`
-
-              // Asigură-te că avem valori corecte pentru profesor și an
-              let an = entry.an || "-";  // Dacă nu există, afișează "-"
-              let profesor = entry.profesor || "-";  // Dacă nu există, afișează "-"
+              const an = entry.an || "-";
+              const profesor = entry.profesor || "-";
 
               return (
                 <tr key={index}>
@@ -51,8 +48,18 @@ const ScheduleTable = ({ schedule, title, showSala = true }) => {
                   <td>{entry.tip}</td>
                   <td>{entry.grupa || "-"}</td>
                   {showSala && <td>{entry.sala}</td>}
-                  <td>{profesor}</td> {/* Afișează profesorul */}
-                  <td>{an}</td> {/* Afișează anul */}
+                  <td>{profesor}</td>
+                  <td>{an}</td>
+                  {editable && (
+                    <td>
+                      <button
+                        className="edit-button"
+                        onClick={() => onEditClick && onEditClick(entry)}
+                      >
+                        ✏️ Editare
+                      </button>
+                    </td>
+                  )}
                 </tr>
               );
             })

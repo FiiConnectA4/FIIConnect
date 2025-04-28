@@ -1,23 +1,28 @@
-import React, { useState } from "react";
-import OrarToti from "./OrarToti";
-import OrarSecretariat from "./OrarSecretariat"; // Importăm componenta pentru secretariat
+import React from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const Orar = () => {
-    const [userType, setUserType] = useState(2); // Inițializare cu 2 (Secretariat)
+  const navigate = useNavigate();
+  const location = useLocation();
 
-    const toggleUserType = () => {
-        setUserType((prevType) => (prevType === 1 ? 2 : 1)); // Comută între 1 și 2
-    };
+  // Determină dacă utilizatorul este pe pagina "Orar" sau "OrarSecretariat"
+  const isSecretariat = location.pathname.includes("orar-secretariat");
 
-    return (
-        <div>
-            <button onClick={toggleUserType}>
-                Schimbă utilizator ({userType === 1 ? "Toti" : "Secretariat"})
-            </button>
-            {userType === 1 && <OrarToti />}
-            {userType === 2 && <OrarSecretariat />}
-        </div>
-    );
+  const handleSwitch = () => {
+    if (isSecretariat) {
+      navigate("/app/orar"); // Navighează la pagina "Orar"
+    } else {
+      navigate("/app/orar-secretariat"); // Navighează la pagina "OrarSecretariat"
+    }
+  };
+
+  return (
+    <div>
+      <button className="toggle-button" onClick={handleSwitch}>
+        {isSecretariat ? "Switch la Orar" : "Switch la Orar Secretariat"}
+      </button>
+    </div>
+  );
 };
 
 export default Orar;
