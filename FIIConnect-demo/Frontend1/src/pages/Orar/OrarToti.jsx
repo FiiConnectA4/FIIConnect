@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import ScheduleTable from "../../components/ScheduleTable/ScheduleTable";
 import OrarStudenti from './OrarStudenti';  
 import OrarProfesori from './OrarProfesori';  
@@ -7,8 +7,11 @@ import OrarDiscipline from './OrarDiscipline';
 import OrarSali from './OrarSali';  
 import "./OrarToti.css";
 
+
 const OrarToti = () => {
   const navigate = useNavigate();
+  const location = useLocation(); 
+
   const { an, grupa, section, profesor, sala, disciplina } = useParams(); // Parametrii din URL
 
   const [selectedGroup, setSelectedGroup] = useState(null);
@@ -17,6 +20,32 @@ const OrarToti = () => {
   const [selectedProfessor, setSelectedProfessor] = useState(profesor || null);
   const [selectedRoom, setSelectedRoom] = useState(sala || null);
   const [selectedDiscipline, setSelectedDiscipline] = useState(disciplina || null);
+
+
+  const handleSwitchToSecretariat = () => {
+    navigate("/app/orar-secretariat"); // Navighează la pagina "OrarSecretariat"
+  };
+
+
+  useEffect(() => {
+    const path = location.pathname;
+
+    if (path.includes("/orar/studenti")) {
+      setCurrentSection("studenti");
+      setSelectedGroup(null);
+    } else if (path.includes("/orar/profesori")) {
+      setCurrentSection("profesori");
+      setSelectedProfessor(null);
+    } else if (path.includes("/orar/sali")) {
+      setCurrentSection("sali");
+      setSelectedRoom(null);
+    } else if (path.includes("/orar/discipline")) {
+      setCurrentSection("discipline");
+      setSelectedDiscipline(null);
+    } else {
+      setCurrentSection(null);
+    }
+  }, [location]);
 
   // Se actualizează dacă an, grupa, profesor, sală sau disciplină sunt disponibile
   useEffect(() => {
@@ -122,6 +151,20 @@ const handleDisciplineClick = (disciplineName) => {
     }
   };
 
+  const handleBackToMain = () => {
+    if (currentSection === "studenti") {
+      navigate(`/app/orar`);
+    } else if (currentSection === "profesori") {
+      navigate(`/app/orar`);
+    } else if (currentSection === "sali") {
+      navigate(`/app/orar`);
+    } else if (currentSection === "discipline") {
+      navigate(`/app/orar`);
+    } else {
+      navigate(`/app/orar`);
+    }
+  };
+
   const handleSectionChange = (newSection) => {
     setCurrentSection(newSection);
     navigate(`/app/orar/${newSection}`);
@@ -134,6 +177,16 @@ const handleDisciplineClick = (disciplineName) => {
 
   return (
     <div className="orar-container">
+      <button className="toggle-button" onClick={handleSwitchToSecretariat}>
+        Switch la Orar Secretariat
+      </button>
+
+      {currentSection && (
+       <button className="orar-button inapoi" onClick={handleBackToMain}>
+       🔙 Înapoi la Orar Secretariat
+     </button>
+      )}
+
       {selectedGroup || selectedProfessor || selectedRoom || selectedDiscipline ? (
         <div className="orar-afisat">
           <h3>
