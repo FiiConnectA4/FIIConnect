@@ -25,7 +25,7 @@ public class AnnouncementService {
 
     // Obține toate anunțurile din baza de date
     public List<Announcement> getAllAnnouncements() {
-        return announcementRepository.findAll();
+        return announcementRepository.findAllOrderById();
     }
 
     // Salvează un nou anunț în baza de date

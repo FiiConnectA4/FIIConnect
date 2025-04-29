@@ -29,7 +29,7 @@ public class AnnouncementController {
    /* @GetMapping("/{Title}")
     public Announcement getAnnouncementByTitle(@PathVariable String Title){
        return announcementService.getAnnouncement(Title);
-    }*/
+    }*/ 
 
     // Obtine toate anunturile existente pt profi si secretari
     @GetMapping("/prof-secretar")

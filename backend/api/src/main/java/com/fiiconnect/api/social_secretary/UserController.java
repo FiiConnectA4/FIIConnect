@@ -47,6 +47,15 @@ public class UserController {
         return userService.getUserById(id);
     }
 
+    @GetMapping("/{id}/tags")
+    public Set<Tag> getUserTags(@PathVariable Long id) {
+        User_Anunturi user = userService.getUserById(id);
+        if (user == null) {
+            throw new RuntimeException("User not found");
+        }
+        return user.getTags();
+    }
+
     @PutMapping("/{id}")
     public User_Anunturi updateUser(@PathVariable Long id, @RequestBody CreateUserRequest updatedUser){
         return userService.updateUser(id,updatedUser);
