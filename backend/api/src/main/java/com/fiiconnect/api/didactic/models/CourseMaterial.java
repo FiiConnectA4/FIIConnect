@@ -100,4 +100,6 @@ public class CourseMaterial {
     public void setUpdateDate(Date updateDate) {
         this.updateDate = updateDate;
     }
+
+
 }
