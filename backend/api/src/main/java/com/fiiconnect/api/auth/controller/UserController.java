@@ -51,13 +51,19 @@ public class UserController {
         PasswordResetToken resetToken = new PasswordResetToken();
         resetToken.setToken(token);
         resetToken.setUser(user);
-        resetToken.setExpirationDate(LocalDateTime.now().plusMinutes(30)); // 30 minute expirare
+        resetToken.setExpirationDate(LocalDateTime.now().plusMinutes(30));
 
         tokenRepository.save(resetToken);
 
+        // Link pentru email
         String resetLink = "http://localhost:34101/reset-password?token=" + token;
-        return ResponseEntity.ok("Reset link: " + resetLink);
+
+        // Trimite email
+        emailService.sendResetPasswordEmail(email, token);
+
+        return ResponseEntity.ok("Link-ul de resetare a fost trimis pe email.");
     }
+
 
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
@@ -152,29 +158,6 @@ public class UserController {
         }
 
         return ResponseEntity.ok(new ApiResponse("Login reușit!", true));
-    }
-
-    @PostMapping("/forgot-password")
-    public ResponseEntity<?> forgot(@RequestParam String email) {
-        System.out.println("EMAIL primit: " + email);
-        Optional<User> userOptional = Optional.ofNullable(userRepository.findByEmail(email));
-        if (userOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body("User not found");
-        }
-
-        User user = userOptional.get();
-
-        String token = UUID.randomUUID().toString();
-        PasswordResetToken resetToken = new PasswordResetToken();
-        resetToken.setToken(token);
-        resetToken.setUser(user);
-        resetToken.setExpirationDate(LocalDateTime.now().plusMinutes(30)); // 30 minute expirare
-
-        tokenRepository.save(resetToken);
-
-        emailService.sendResetPasswordEmail(email, token);
-
-        return ResponseEntity.ok("Un email cu linkul de resetare a fost trimis.");
     }
 
 }
