@@ -19,5 +19,5 @@ public class Permission {
     @ManyToMany(mappedBy = "permissions")
     private Set<Role> roles = new HashSet<>();
 
-    // Constructori, getteri, setteri, etc.
+    //
 }

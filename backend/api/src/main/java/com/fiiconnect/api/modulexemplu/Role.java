@@ -12,7 +12,7 @@ public class Role {
     @GeneratedValue
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "ROLE_NAME", nullable = false, unique = true)
     private String roleName;
 
     @ManyToMany(mappedBy = "roles")
@@ -25,6 +25,14 @@ public class Role {
             inverseJoinColumns = @JoinColumn(name = "permission_id")
     )
     private Set<Permission> permissions = new HashSet<>();
+
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
+
+    public String getRoleName() {
+        return roleName;
+    }
 
     // Constructori, getteri, setteri, etc.
 }
