@@ -90,17 +90,10 @@ public class SftpService {
     public void deleteFile(String remoteFilePath) throws IOException {
         try {
             sftpRemoteFileTemplate.execute(session -> {
-                try {
                     if (!session.exists(remoteFilePath)) {
                         throw new FileNotFoundException("Remote file not found: " + remoteFilePath);
                     }
-
                     session.remove(remoteFilePath);
-                } catch (IOException e) {
-                    throw new IOException("I/O error while deleting remote file: " + remoteFilePath, e);
-                } catch (Exception e) {
-                    throw new RuntimeException("SFTP session error during file deletion", e);
-                }
                 return null;
             });
         } catch (RuntimeException e) {
