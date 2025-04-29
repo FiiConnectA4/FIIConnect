@@ -7,6 +7,20 @@
     transition: transform 0.2s ease;
 }
 
+.buton-icon {
+    width: 34px;
+    height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.buton-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
 .buton-icon:hover,
 .buton-edit:hover {
     transform: scale(1.1);
@@ -201,6 +215,9 @@
     font-size: 14px;
 }
 
+.add-material {
+    margin-top: 15px;
+}
 
 .add-material input {
     border: none;

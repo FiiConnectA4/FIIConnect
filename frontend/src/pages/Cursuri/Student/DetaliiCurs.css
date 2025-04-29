@@ -75,3 +75,17 @@ a {
     font-size: 40px;
     margin: 0;
 }
+
+.stergere {
+    background-color: #537A9C;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.link {
+    margin-top: 10px;
+}

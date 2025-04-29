@@ -96,9 +96,9 @@ const PDetaliiCurs = ({ curs, onBack }) => {
             <div className="sectiune bibliografie">
                 <h2>Materiale (Resurse):</h2>
                 {materials.map((m) => (
-                    <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                    <div className='link' key={m.id} style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <a href={m.link} target="_blank" rel="noreferrer">{m.name}</a>
-                        <button onClick={() => deleteMaterial(m.id)}>Șterge</button>
+                        <button className='stergere' onClick={() => deleteMaterial(m.id)}>Șterge</button>
                     </div>
                 ))}
                 <AdaugaLink
