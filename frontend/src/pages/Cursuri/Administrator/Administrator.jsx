@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Buton from '../Components/Buton';
 import Carte from '../Components/Carte';
 import Ceas from '../Components/Ceas';
+import PageControl from '../Components/PageControl';
 import './../Student/Student.css';
 import PDetaliiCurs from '../Profesor/PDetaliiCurs';
 
@@ -61,6 +62,11 @@ const Administrator = () => {
                             <Carte />
                             <Ceas idCurs={curs.id} />
                             <Buton text={curs.title} onNavigate={() => setSelectedCursId(curs.id)} />
+                            <PageControl
+                                id={curs.id}
+                                title={curs.title}
+                                description={curs.description}
+                                professorId={curs.professorId} />
                         </div>
                     ))
                 ) : (

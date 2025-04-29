@@ -21,6 +21,19 @@
     margin-bottom: 20px;
 }
 
+.save-button {
+    align-self: center;
+    background-color: #537A9C;
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 20px;
+    margin: 20px auto;
+    display: block;
+}
+
 .buton-curs {
     width: fit-content;
     margin-bottom: 20px;

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import './../Student/DetaliiCurs.css';
 import Ceas from './../Components/Ceas';
 import Edit from './../Components/Edit';
+import AdaugaLink from './../Components/AdaugaLink';
 
 const PDetaliiCurs = ({ curs, onBack }) => {
     const [materials, setMaterials] = useState([]);
@@ -15,7 +16,8 @@ const PDetaliiCurs = ({ curs, onBack }) => {
         fetch(`/didactic/course/material/${curs.id}`)
             .then((res) => res.json())
             .then((data) => {
-                setMaterials(data);
+                console.log('Răspuns API pentru materiale:', data); // Debugging
+                setMaterials(Array.isArray(data) ? data : []); // Asigură-te că materials este un array
                 setGradingMethod(curs.gradingMethod || '');
                 setDescription(curs.description || '');
                 setLoading(false);
@@ -77,17 +79,17 @@ const PDetaliiCurs = ({ curs, onBack }) => {
 
             <div className="sectiune">
                 <h2>Descriere:</h2>
-                <textarea
+                <Edit
                     value={description}
-                    onChange={(e) => setDescription(e.target.value)}
+                    onChange={(newDescription) => setDescription(newDescription)}
                 />
             </div>
 
             <div className="sectiune">
                 <h2>Metoda de notare:</h2>
-                <textarea
+                <Edit
                     value={gradingMethod}
-                    onChange={(e) => setGradingMethod(e.target.value)}
+                    onChange={(newGradingMethod) => setGradingMethod(newGradingMethod)}
                 />
             </div>
 
@@ -99,13 +101,10 @@ const PDetaliiCurs = ({ curs, onBack }) => {
                         <button onClick={() => deleteMaterial(m.id)}>Șterge</button>
                     </div>
                 ))}
-                <input
-                    type="text"
-                    placeholder="Link nou material"
-                    value={newMaterial}
-                    onChange={(e) => setNewMaterial(e.target.value)}
-                />
-                <button onClick={addMaterial}>Adaugă</button>
+                <AdaugaLink
+                    newMaterial={newMaterial}
+                    setNewMaterial={setNewMaterial} // Transmite funcția setNewMaterial
+                    onAdd={addMaterial} />
             </div>
 
             <button className="save-button" onClick={saveCourseChanges}>Salvează modificările</button>
