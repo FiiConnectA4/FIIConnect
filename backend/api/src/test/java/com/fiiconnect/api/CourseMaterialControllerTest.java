@@ -1,7 +1,7 @@
 package com.fiiconnect.api;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fiiconnect.api.didactic.controllers.CourseMaterialController;
+import com.fiiconnect.api.didactic.exceptions.CourseMaterialNotFoundException;
 import com.fiiconnect.api.didactic.helpers.SQLExceptionMessageParser;
 import com.fiiconnect.api.didactic.models.CourseMaterial;
 import com.fiiconnect.api.didactic.repositories.CourseMaterialRepository;
@@ -9,23 +9,21 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 public class CourseMaterialControllerTest {
@@ -39,107 +37,106 @@ public class CourseMaterialControllerTest {
     @InjectMocks
     private CourseMaterialController controller;
 
-    private MockMvc mockMvc;
-
-    private ObjectMapper objectMapper;
+    private CourseMaterial material;
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
-        objectMapper = new ObjectMapper();
+        material = new CourseMaterial(
+                1L,
+                101L,
+                201L,
+                "lecture1.pdf",
+                new Date(),
+                new Date()
+        );
     }
 
     @Test
-    void testGetAllMaterials() throws Exception {
-        CourseMaterial cm1 = new CourseMaterial(1L, 100L, 200L, "example1.pdf", new Date(), new Date());
-        CourseMaterial cm2 = new CourseMaterial(2L, 101L, 201L, "example2.pdf", new Date(), new Date());
-        List<CourseMaterial> materials = Arrays.asList(cm1, cm2);
+    void all_ReturnsAllMaterials() {
+        when(repository.findAll()).thenReturn(List.of(material));
 
-        when(repository.findAll()).thenReturn(materials);
+        List<CourseMaterial> result = controller.all();
 
-        mockMvc.perform(get("/didactic/course/material")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1L))
-                .andExpect(jsonPath("$[0].filename").value("example1.pdf"))
-                .andExpect(jsonPath("$[1].id").value(2L))
-                .andExpect(jsonPath("$[1].filename").value("example2.pdf"));
-
+        assertNotNull(result);
+        assertEquals(1, result.size());
+        assertEquals(material, result.get(0));
         verify(repository, times(1)).findAll();
     }
 
     @Test
-    void testGetMaterialById_Found() throws Exception {
-        CourseMaterial cm = new CourseMaterial(1L, 100L, 200L, "example.pdf", new Date(), new Date());
+    void one_ReturnsMaterial_WhenExists() {
+        when(repository.findById(1L)).thenReturn(Optional.of(material));
 
-        when(repository.findById(1L)).thenReturn(Optional.of(cm));
+        CourseMaterial result = controller.one(1L);
 
-        mockMvc.perform(get("/didactic/course/material/1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.filename").value("example.pdf"));
-
+        assertNotNull(result);
+        assertEquals(material, result);
         verify(repository, times(1)).findById(1L);
     }
 
     @Test
-    void testGetMaterialById_NotFound() throws Exception {
-        when(repository.findById(99L)).thenReturn(Optional.empty());
+    void one_ThrowsException_WhenNotFound() {
+        when(repository.findById(1L)).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/didactic/course/material/99")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string("Could not find course material with id 99"));
-
-        verify(repository, times(1)).findById(99L);
+        assertThrows(CourseMaterialNotFoundException.class, () -> controller.one(1L));
+        verify(repository, times(1)).findById(1L);
     }
 
     @Test
-    void testUploadMaterial_Success() throws Exception {
-        CourseMaterial input = new CourseMaterial(null, 100L, 200L, "lecture1.pdf", null, null);
-        CourseMaterial saved = new CourseMaterial(5L, 100L, 200L, "lecture1.pdf", new Date(), new Date());
+    void uploadMaterial_SavesMaterialAndReturns201() {
+        CourseMaterial input = new CourseMaterial();
+        input.setIdCourse(101L);
+        input.setIdProfessor(201L);
+        input.setFilename("lab1.pdf");
+        input.setUploadDate(new Date());
+        input.setUpdateDate(new Date());
+
+        CourseMaterial saved = new CourseMaterial();
+        saved.setId(2L);
+        saved.setIdCourse(input.getIdCourse());
+        saved.setIdProfessor(input.getIdProfessor());
+        saved.setFilename(input.getFilename());
+        saved.setUploadDate(input.getUploadDate());
+        saved.setUpdateDate(input.getUpdateDate());
 
         when(repository.save(any(CourseMaterial.class))).thenReturn(saved);
 
-        mockMvc.perform(post("/didactic/course/material")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(input)))
-                .andExpect(status().isCreated())
-                .andExpect(header().string("Location", "/didactic/course/material/5"));
+        ResponseEntity<?> response = controller.uploadMaterial(input);
 
-        verify(repository, times(1)).save(any(CourseMaterial.class));
+        assertEquals(201, response.getStatusCode().value());
+        assertEquals("/didactic/course/material/2", response.getHeaders().getLocation().toString());
+        verify(repository, times(1)).save(any());
     }
 
     @Test
-    void testUploadMaterial_ConstraintViolation() throws Exception {
-        // Arrange
-        CourseMaterial input = new CourseMaterial(null, 100L, 200L, "lecture1.pdf", null, null);
-        SQLException sqlException = new SQLException("Constraint violation");
-        ConstraintViolationException exception = new ConstraintViolationException("Constraint violation", sqlException, "unique_filename");
-
-        when(repository.save(any(CourseMaterial.class))).thenThrow(exception);
-        when(exceptionHelper.getConstraintName(sqlException.getMessage())).thenReturn("unique_filename");
-
-        // Act & Assert
-        mockMvc.perform(post("/didactic/course/material")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(input)))
-                .andExpect(status().isConflict())
-                .andExpect(content().string("Constraint violated: unique_filename"));
-
-        verify(repository, times(1)).save(any(CourseMaterial.class));
-        verify(exceptionHelper, times(1)).getConstraintName(sqlException.getMessage());
-    }
-
-    @Test
-    void testDeleteMaterial() throws Exception {
+    void deleteMaterial_DeletesSuccessfully() {
         doNothing().when(repository).deleteById(1L);
 
-        mockMvc.perform(delete("/didactic/course/material/1")
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+        controller.deleteMaterial(1L);
 
         verify(repository, times(1)).deleteById(1L);
     }
+
+    @Test
+    void integrityViolation_ReturnsParsedMessage() {
+        ConstraintViolationException exception = mock(ConstraintViolationException.class);
+        SQLException sqlEx = new SQLException("Unique constraint violation: material_title_key");
+        when(exception.getSQLException()).thenReturn(sqlEx);
+        when(exceptionHelper.getConstraintName("Unique constraint violation: material_title_key"))
+                .thenReturn("material_title_key");
+
+        String response = controller.integrityViolation(exception);
+
+        assertEquals("Constraint violated: material_title_key", response);
+    }
+
+    @Test
+    void materialNotFound_ReturnsMessage() {
+        CourseMaterialNotFoundException e = new CourseMaterialNotFoundException(999L);
+
+        String response = controller.materialNotFound(e);
+
+        assertTrue(response.contains("999"));
+    }
 }
+

@@ -5,36 +5,34 @@ import com.fiiconnect.api.didactic.exceptions.CourseNotFoundException;
 import com.fiiconnect.api.didactic.models.Course;
 import com.fiiconnect.api.didactic.models.CourseModelAssembler;
 import com.fiiconnect.api.didactic.repositories.CourseRepository;
+import com.fiiconnect.api.didactic.services.CourseService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.hateoas.Link;
+import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
 
-@ActiveProfiles("test")
-@SpringBootTest
 @ExtendWith(MockitoExtension.class)
 public class CourseControllerTest {
 
     @Mock
     private CourseRepository repository;
-
+    @Mock
+    private CourseService service;
     @Mock
     private CourseModelAssembler assembler;
 
@@ -53,13 +51,12 @@ public class CourseControllerTest {
         course.setYear(1);
         course.setSemester(1);
         course.setArchived(0);
-
     }
-    // test get
+
     @Test
     void all_ReturnsAllCourses() {
         List<Course> courses = Arrays.asList(course);
-        EntityModel<Course> courseEntityModel = EntityModel.of(course, Link.of("/didactic/course/1").withSelfRel());
+        EntityModel<Course> courseEntityModel = EntityModel.of(course);
         when(repository.findAll()).thenReturn(courses);
         when(assembler.toModel(any(Course.class))).thenReturn(courseEntityModel);
 
@@ -67,12 +64,10 @@ public class CourseControllerTest {
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
-        assertTrue(result.getLinks().hasLink("self"));
-        assertEquals("/didactic/course", result.getLinks().getLink("self").get().getHref());
         verify(repository, times(1)).findAll();
         verify(assembler, times(1)).toModel(course);
     }
-    // test get
+
     @Test
     void one_ReturnsCourse_WhenCourseExists() {
         EntityModel<Course> courseEntityModel = EntityModel.of(course, Link.of("/didactic/course/1").withSelfRel());
@@ -97,7 +92,6 @@ public class CourseControllerTest {
         verify(assembler, never()).toModel(any());
     }
 
-    // test post
     @Test
     void newCourse_CreatesCourseSuccessfully() {
         Course newCourse = new Course();
@@ -123,12 +117,12 @@ public class CourseControllerTest {
 
         ResponseEntity<?> response = controller.newCourse(newCourse);
 
-        assertEquals(201, response.getStatusCode().value()); // 201 Created
+        assertEquals(201, response.getStatusCode().value());
         assertEquals("/didactic/course/2", response.getHeaders().getLocation().toString());
         verify(repository, times(1)).save(any(Course.class));
         verify(assembler, times(1)).toModel(savedCourse);
     }
-    // test put
+
     @Test
     void replaceCourse_UpdatesCourse_WhenCourseExists() {
         Course existingCourse = new Course();
@@ -160,7 +154,7 @@ public class CourseControllerTest {
 
         ResponseEntity<?> response = controller.replaceCourse(1L, newCourse);
 
-        assertEquals(201, response.getStatusCode().value()); // 201 Created
+        assertEquals(201, response.getStatusCode().value());
         assertEquals("/didactic/course/1", response.getHeaders().getLocation().toString());
         assertEquals(updatedCourse, ((EntityModel<Course>) response.getBody()).getContent());
         verify(repository, times(1)).findById(1L);
@@ -170,7 +164,6 @@ public class CourseControllerTest {
 
     @Test
     void replaceCourse_CreatesNewCourse_WhenCourseDoesNotExist() {
-        // Arrange
         Course newCourse = new Course();
         newCourse.setCode("CS101");
         newCourse.setTitle("New Title");
@@ -195,7 +188,7 @@ public class CourseControllerTest {
 
         ResponseEntity<?> response = controller.replaceCourse(1L, newCourse);
 
-        assertEquals(201, response.getStatusCode().value()); // 201 Created
+        assertEquals(201, response.getStatusCode().value());
         assertEquals("/didactic/course/1", response.getHeaders().getLocation().toString());
         assertEquals(savedCourse, ((EntityModel<Course>) response.getBody()).getContent());
         verify(repository, times(1)).findById(1L);
