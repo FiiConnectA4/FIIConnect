@@ -1,16 +1,16 @@
 package com.fiiconnect.api.didactic.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.Transient;
+import jakarta.persistence.*;
 
 import java.util.List;
 import java.util.Objects;
 
 @Entity
 public class Professor {
-    private @Id @GeneratedValue Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "professor_id_gen")
+    @SequenceGenerator(name="professor_id_gen", sequenceName = "seq_professor_id", allocationSize = 1, initialValue = 1)
+    private Long id;
     private String cnp;
     private String firstName;
     private String lastName;

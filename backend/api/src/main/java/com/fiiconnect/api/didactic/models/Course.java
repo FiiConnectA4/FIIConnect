@@ -8,7 +8,10 @@ import java.util.Objects;
 
 @Entity
 public class Course{
-    private @Id @GeneratedValue Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "course_id_gen")
+	@SequenceGenerator(name="course_id_gen", sequenceName = "seq_course_id", allocationSize = 1, initialValue = 1)
+	private Long id;
 	String code, title;
 	int credits, year, semester, archived;
 	Date academicYear;
