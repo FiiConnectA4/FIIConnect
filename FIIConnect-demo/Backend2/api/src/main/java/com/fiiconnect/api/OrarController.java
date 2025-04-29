@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController // îmi returnează un json
-@RequestMapping({"/orar", "/orar-secretariat"})  // toate rutele vor începe cu /orar
+@RequestMapping({"/orar", "/orar-secretariat"}) // toate rutele vor începe cu /orar
 public class OrarController {
 
     @Autowired // pentru a face operații CRUD

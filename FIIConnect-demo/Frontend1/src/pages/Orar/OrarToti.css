@@ -134,3 +134,11 @@
 .dotari-back-button:hover {
   background-color: #0056b3;
 }
+
+.orar-button.dotari {
+  margin-top: 20px; /* Adaugă spațiu deasupra butonului */
+  display: block;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+}

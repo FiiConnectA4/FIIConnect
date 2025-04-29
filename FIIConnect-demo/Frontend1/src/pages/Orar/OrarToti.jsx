@@ -181,38 +181,34 @@ const handleDisciplineClick = (disciplineName) => {
         Switch la Orar Secretariat
       </button>
 
-      {currentSection && (
-       <button className="orar-button inapoi" onClick={handleBackToMain}>
-       🔙 Înapoi la Orar Secretariat
-     </button>
-      )}
+      {currentSection && ["studenti", "profesori", "sali", "discipline"].includes(currentSection) && (
+  <button className="orar-button inapoi" onClick={handleBackToMain}>
+    🔙 Înapoi la Orar Secretariat
+  </button>
+)}
 
       {selectedGroup || selectedProfessor || selectedRoom || selectedDiscipline ? (
         <div className="orar-afisat">
-          <h3>
-          <h3>
-  Orar pentru {selectedGroup || (selectedProfessor && `Profesor ${selectedProfessor}`) || (selectedRoom && `Sala ${selectedRoom}`) || (selectedDiscipline && `Disciplina ${selectedDiscipline}`) || "Selectează o categorie"}
-</h3>
-          </h3>
-          <ScheduleTable
-            schedule={scheduleData}
-            title={`Orar pentru ${selectedGroup || `Profesor ${selectedProfessor}` || `Sala ${selectedRoom}` || `Disciplina ${selectedDiscipline}`}`}
-          />
+        <h3>
+          Orar pentru {selectedGroup || (selectedProfessor && `Profesor ${selectedProfessor}`) || (selectedRoom && `Sala ${selectedRoom}`) || (selectedDiscipline && `Disciplina ${selectedDiscipline}`)}
+        </h3>
+        <ScheduleTable
+  schedule={scheduleData}
+/>
+        {selectedRoom && (
           <button
-            className="orar-button inapoi"
-            onClick={handleBackButtonClick}
+            className="orar-button dotari"
+            onClick={handleDotariClick}
           >
-            🔙 Înapoi
+            Dotări
           </button>
-
-          {selectedRoom && (
-            <button
-              className="orar-button dotari"
-              onClick={handleDotariClick}
-            >
-              Dotări
-            </button>
-          )}
+        )}
+        <button
+          className="orar-button inapoi"
+          onClick={handleBackButtonClick}
+        >
+          🔙 Înapoi
+        </button>
           
         </div>
       ) : (

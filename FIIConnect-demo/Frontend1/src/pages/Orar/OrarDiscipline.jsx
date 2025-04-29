@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-const OrarDiscipline = () => {
+const OrarDiscipline = ({ isSecretariat = false }) => {
   const navigate = useNavigate();
 
   // Listă cu discipline
@@ -17,7 +17,8 @@ const OrarDiscipline = () => {
 
   // Functia de selectare a disciplinei
   const handleDisciplinaSelect = (disciplina) => {
-    navigate(`/app/orar/discipline/${disciplina}`);
+    const basePath = isSecretariat ? "/app/orar-secretariat/discipline" : "/app/orar/discipline";
+    navigate(`${basePath}/${disciplina}`);
   };
 
   return (

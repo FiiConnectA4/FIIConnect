@@ -2,7 +2,7 @@ import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
 
-const OrarStudenti = () => {
+const OrarStudenti = ({ isSecretariat = false }) => {
   const navigate = useNavigate();
   const [activeDropdown, setActiveDropdown] = useState(null);
   const dropdownRefs = useRef([]);
@@ -54,9 +54,12 @@ const OrarStudenti = () => {
     setActiveDropdown((prev) => (prev === index ? null : index));
   };
 
+ 
+
   const handleGroupSelect = (anLabel, grupa) => {
     const anNumber = anLabel.replace("Anul ", "").trim();
-    navigate(`/app/orar/studenti/${anNumber}/${grupa}`);
+    const basePath = isSecretariat ? "/app/orar-secretariat/studenti" : "/app/orar/studenti";
+    navigate(`${basePath}/${anNumber}/${grupa}`);
   };
 
   return (
