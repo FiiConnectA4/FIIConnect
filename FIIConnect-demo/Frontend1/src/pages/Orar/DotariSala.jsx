@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
-const DotariSala = () => {
+const DotariSala = ({ isSecretariat = false }) => {
   const { sala } = useParams(); // Preia parametrul "sala" din URL
   const navigate = useNavigate(); // Hook pentru navigare
   const [dotari, setDotari] = useState(null);
@@ -15,7 +15,8 @@ const DotariSala = () => {
   }, [sala]);
 
   const handleBackClick = () => {
-    navigate(`/app/orar/sali/${sala}`); // Navighează înapoi la pagina sălii
+    const basePath = isSecretariat ? "/app/orar-secretariat/sali" : "/app/orar/sali";
+    navigate(`${basePath}/${sala}`);
   };
 
   return (

@@ -233,9 +233,9 @@ const OrarSecretariat = () => {
             </div>
           )}
 
-          {currentSection === "studenti" && <OrarStudenti />}
+{currentSection === "studenti" && <OrarStudenti isSecretariat={true} />}
           {currentSection === "profesori" && <OrarProfesori onProfessorClick={handleProfessorClick} />}
-          {currentSection === "discipline" && <OrarDiscipline onDisciplineClick={handleDisciplineClick} />}
+          {currentSection === "discipline" && <OrarDiscipline isSecretariat={true} />}
           {currentSection === "sali" && <OrarSali onRoomClick={handleRoomClick} />}
         </>
       )}
