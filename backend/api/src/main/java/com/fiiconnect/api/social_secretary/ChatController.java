@@ -2,6 +2,7 @@ package com.fiiconnect.api.social_secretary;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -14,7 +15,7 @@ import java.util.List;
 @Controller
 @RestController
 @RequestMapping("/chat")
-//@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*")
+@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*")
 public class ChatController {
 
     @Autowired
@@ -62,14 +63,14 @@ public class ChatController {
         chatMessage.setMessage(message);
         if(userService.getUserById(senderId)==null){
             System.out.println("user ul nu exista");
-            return new Chat("user-ul nu exista",null,null);
+            return new Chat("user-ul nu exista",null,null, null);
         }
 
 
         return chatService.saveChatMessages(chatMessage);
     }
 
-    @MessageMapping("/chat.addUser")
+    /*@MessageMapping("/chat.addUser")
     @SendTo("/topic/public")
     public Chat addUser(Chat chatMessage) {
         chatMessage.setType(ChatType.JOIN);
@@ -77,6 +78,16 @@ public class ChatController {
         chatMessage.setMessage(chatMessage.getSender() + " joined the chat");
         chatService.saveChatMessages(chatMessage);
         return chatMessage;
+    }
+
+     */
+
+    @GetMapping("/{channelId}")
+    public ResponseEntity<List<Chat>> getChannelMessages(
+            @PathVariable Long channelId) {
+
+        List<Chat> messages = chatService.findByChannelIdOrderByTimestampAsc(channelId);
+        return ResponseEntity.ok(messages);
     }
 
     @PutMapping("/{id}")

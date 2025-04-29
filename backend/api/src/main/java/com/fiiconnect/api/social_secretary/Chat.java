@@ -18,10 +18,8 @@ public class Chat {
     @JoinColumn(name = "sender_id")
     private User_Anunturi sender;
 
-    /*@ManyToOne
-    @JoinColumn(name = "receiver_id")
-    private User_Anunturi receiver;
-    */
+    private Long channel_id;
+
     private String timestamp;
 
     @Enumerated(EnumType.STRING)
@@ -30,10 +28,11 @@ public class Chat {
 
     public Chat() {}
 
-    public Chat(String message, User_Anunturi sender, String timestamp) {
+    public Chat(String message, User_Anunturi sender, String timestamp, ChatType type) {
         this.message = message;
         this.sender = sender;
         this.timestamp = timestamp;
+        this.type = type;
     }
 
     public ChatType getType() {
@@ -68,7 +67,13 @@ public class Chat {
         this.sender = sender;
     }
 
+    public Long getChannel_id() {
+        return channel_id;
+    }
 
+    public void setChannel_id(Long channel_id) {
+        this.channel_id = channel_id;
+    }
 
     public String getTimestamp() {
         return timestamp;

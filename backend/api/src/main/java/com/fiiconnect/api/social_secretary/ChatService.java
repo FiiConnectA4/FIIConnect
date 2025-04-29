@@ -31,4 +31,8 @@ public class ChatService {
     public void deleteChat(Long id) {
         chatRepository.deleteById(id);
     }
+
+    public List<Chat> findByChannelIdOrderByTimestampAsc(Long channelId) {
+        return chatRepository.findByChannelIdOrderByTimestampAsc(channelId);
+    }
 }
