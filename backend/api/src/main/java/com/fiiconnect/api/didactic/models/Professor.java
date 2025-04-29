@@ -1,10 +1,14 @@
 package com.fiiconnect.api.didactic.models;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.List;
 import java.util.Objects;
 
+@Setter
+@Getter
 @Entity
 public class Professor {
     @Id
@@ -30,47 +34,6 @@ public class Professor {
     public Professor() {
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getCnp() {
-        return cnp;
-    }
-
-    public void setCnp(String cnp) {
-        this.cnp = cnp;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getRank() {
-        return rank;
-    }
-
-    public void setRank(String rank) {
-        this.rank = rank;
-    }
-
-
     @Override
     public String toString() {
         return "Professor{" +
@@ -81,14 +44,6 @@ public class Professor {
                 ", rank='" + rank + '\'' +
                 ", courses=" + courses +
                 '}';
-    }
-
-    public List<Teaching> getCourses() {
-        return courses;
-    }
-
-    public void setCourses(List<Teaching> courses) {
-        this.courses = courses;
     }
 
     @Override

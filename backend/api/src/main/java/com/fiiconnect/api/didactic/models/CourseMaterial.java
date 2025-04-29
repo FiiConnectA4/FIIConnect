@@ -1,10 +1,14 @@
 package com.fiiconnect.api.didactic.models;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Date;
 import java.util.Objects;
 
+@Setter
+@Getter
 @Entity
 @Table(name = "material")
 public class CourseMaterial {
@@ -19,7 +23,6 @@ public class CourseMaterial {
     private String filename;
     private Date uploadDate;
     private Date updateDate;
-
 
     public CourseMaterial() {
     }
@@ -54,53 +57,5 @@ public class CourseMaterial {
                 ", uploadDate=" + uploadDate +
                 ", updateDate=" + updateDate +
                 '}';
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Long getIdCourse() {
-        return idCourse;
-    }
-
-    public void setIdCourse(Long idCourse) {
-        this.idCourse = idCourse;
-    }
-
-    public Long getIdProfessor() {
-        return idProfessor;
-    }
-
-    public void setIdProfessor(Long idProfessor) {
-        this.idProfessor = idProfessor;
-    }
-
-    public String getFilename() {
-        return filename;
-    }
-
-    public void setFilename(String filename) {
-        this.filename = filename;
-    }
-
-    public Date getUploadDate() {
-        return uploadDate;
-    }
-
-    public void setUploadDate(Date uploadDate) {
-        this.uploadDate = uploadDate;
-    }
-
-    public Date getUpdateDate() {
-        return updateDate;
-    }
-
-    public void setUpdateDate(Date updateDate) {
-        this.updateDate = updateDate;
     }
 }

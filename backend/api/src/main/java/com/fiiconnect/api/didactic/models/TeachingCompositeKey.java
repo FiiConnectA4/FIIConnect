@@ -1,10 +1,14 @@
 package com.fiiconnect.api.didactic.models;
 
 import jakarta.persistence.Embeddable;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.io.Serializable;
 import java.util.Objects;
 
+@Setter
+@Getter
 @Embeddable
 public class TeachingCompositeKey implements Serializable {
     private Long idProf;
@@ -15,22 +19,6 @@ public class TeachingCompositeKey implements Serializable {
 
     public TeachingCompositeKey(Long idProf, Long idCourse) {
         this.idProf = idProf;
-        this.idCourse = idCourse;
-    }
-
-    public Long getIdProf() {
-        return idProf;
-    }
-
-    public void setIdProf(Long idProf) {
-        this.idProf = idProf;
-    }
-
-    public Long getIdCourse() {
-        return idCourse;
-    }
-
-    public void setIdCourse(Long idCourse) {
         this.idCourse = idCourse;
     }
 
