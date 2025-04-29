@@ -4,6 +4,7 @@ package com.fiiconnect.api.auth.controller;
 
 import com.fiiconnect.api.auth.model.User;
 import com.fiiconnect.api.auth.repository.UserRepository;
+import com.fiiconnect.api.auth.service.EmailService;
 import com.fiiconnect.api.auth.validator.EmailValidator;
 import com.fiiconnect.api.auth.validator.PasswordValidator;
 import com.fiiconnect.api.core.ApiResponse;
@@ -31,6 +32,9 @@ public class UserController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EmailService emailService;
 
 
     @PostMapping("/forgot-password")
@@ -149,4 +153,28 @@ public class UserController {
 
         return ResponseEntity.ok(new ApiResponse("Login reușit!", true));
     }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgot(@RequestParam String email) {
+        System.out.println("EMAIL primit: " + email);
+        Optional<User> userOptional = Optional.ofNullable(userRepository.findByEmail(email));
+        if (userOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body("User not found");
+        }
+
+        User user = userOptional.get();
+
+        String token = UUID.randomUUID().toString();
+        PasswordResetToken resetToken = new PasswordResetToken();
+        resetToken.setToken(token);
+        resetToken.setUser(user);
+        resetToken.setExpirationDate(LocalDateTime.now().plusMinutes(30)); // 30 minute expirare
+
+        tokenRepository.save(resetToken);
+
+        emailService.sendResetPasswordEmail(email, token);
+
+        return ResponseEntity.ok("Un email cu linkul de resetare a fost trimis.");
+    }
+
 }
