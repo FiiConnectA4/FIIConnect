@@ -7,6 +7,9 @@ import com.fiiconnect.api.auth.model.User;
 import com.fiiconnect.api.auth.repository.UserRepository;
 import com.fiiconnect.api.auth.service.TwoFactorAuthenticationService;
 import com.fiiconnect.api.auth.dto.LoginRequest;
+import com.fiiconnect.api.auth.dto.RegisterRequest;
+import com.fiiconnect.api.permissions.model.Role;
+import com.fiiconnect.api.permissions.repository.RoleRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -28,40 +31,56 @@ public class AuthController {
     @Autowired
     private TwoFactorAuthenticationService twoFactorAuthenticationService;
 
+    @Autowired
+    private RoleRepository roleRepository;
+
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse> registerUser(@RequestBody User user) {
+    public ResponseEntity<ApiResponse> registerUser(@RequestBody RegisterRequest request) {
         try {
-            if (user.getPassword() == null || user.getUsername() == null || user.getEmail() == null || user.getAccountType() == null) {
+            if (request.getPassword() == null || request.getUsername() == null || request.getEmail() == null || request.getRoleName() == null) {
                 return ResponseEntity.badRequest().body(
-                        new ApiResponse("Username, email, parola și tipul de cont sunt necesare.", false));
+                        new ApiResponse("Username, email, parola și rolul sunt necesare.", false));
             }
 
-            if (userRepository.findByEmail(user.getEmail()) != null) {
+            if (userRepository.findByEmail(request.getEmail()) != null) {
                 return ResponseEntity.badRequest().body(
                         new ApiResponse("Emailul este deja folosit.", false));
             }
 
-            if (!PasswordValidator.isValid(user.getPassword())) {
+            if (!PasswordValidator.isValid(request.getPassword())) {
                 return ResponseEntity.badRequest().body(
                         new ApiResponse("Parola trebuie să conțină minim 8 caractere, o literă mare, una mică, o cifră și un simbol.", false));
             }
 
-            if (!EmailValidator.isValid(user.getEmail())) {
+            if (!EmailValidator.isValid(request.getEmail())) {
                 return ResponseEntity.badRequest().body(
                         new ApiResponse("Email invalid.", false));
             }
 
-            if (userRepository.findByUsername(user.getUsername()) != null) {
+            if (userRepository.findByUsername(request.getUsername()) != null) {
                 return ResponseEntity.badRequest().body(
                         new ApiResponse("Username-ul este deja folosit.", false));
             }
 
-            // Password encrypt
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            // Creăm user-ul
+            User user = new User();
+            user.setUsername(request.getUsername());
+            user.setEmail(request.getEmail());
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-            // Generate and assign 2FA secret
+            // Căutăm rolul
+            Role role = roleRepository.findByRoleName(request.getRoleName());
+            if (role == null) {
+                return ResponseEntity.badRequest().body(
+                        new ApiResponse("Rolul specificat nu există.", false));
+            }
+
+            // Asignăm rolul la user
+            user.getRoles().add(role);
+
+            // Two Factor Authentication
             String secret = twoFactorAuthenticationService.generateSecretKey();
-            user.setTwoFactorSecret(secret); // Make sure you added this field to User entity
+            user.setTwoFactorSecret(secret);
 
             userRepository.save(user);
 
@@ -75,6 +94,7 @@ public class AuthController {
                     new ApiResponse("Eroare internă: " + e.getMessage(), false));
         }
     }
+
 
     @GetMapping
     public List<User> getAllUsers() {

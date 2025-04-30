@@ -35,7 +35,7 @@ export const CreateAccount = () => {
         setUsername("");
         setEmail("");
         setPassword("");
-        setAccountType("STUDENT");
+        setRoles("STUDENT");
       }
     } catch (error) {
       console.error("Eroare la înregistrare:", error);
@@ -45,7 +45,7 @@ export const CreateAccount = () => {
 
   return (
       <div className="page-content">
-        <h2>Creare Cont (doar pentru admin)</h2>
+        <h2>Admin : Creare Cont</h2>
         <form onSubmit={handleSubmit} className="form-container">
           <input
               className="auth-input"
@@ -71,7 +71,7 @@ export const CreateAccount = () => {
           <select
               className="auth-input"
               value={accountType}
-              onChange={(e) => setAccountType(e.target.value)}
+              onChange={(e) => setRoles(e.target.value)}
           >
             <option value="STUDENT">Student</option>
             <option value="PROFESOR">Profesor</option>

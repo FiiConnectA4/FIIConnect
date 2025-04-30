@@ -33,10 +33,6 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private AccountType accountType; // New field for account type
-
     @Column(name = "two_factor_secret")
     private String twoFactorSecret;
 
@@ -57,12 +53,24 @@ public class User {
         return email;
     }
 
-    public AccountType getAccountType() {
-        return accountType;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public void setAccountType(AccountType accountType) {
-        this.accountType = accountType;
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 
 
