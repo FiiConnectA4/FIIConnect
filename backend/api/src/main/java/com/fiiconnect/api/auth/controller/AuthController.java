@@ -111,8 +111,8 @@ public class AuthController {
         return ResponseEntity.ok(new ApiResponse("Ești autentificat!", true));
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<ApiResponse> login(@RequestBody LoginRequest loginRequest) {
+    @PostMapping("/login/init")
+    public ResponseEntity<ApiResponse> initialLogin(@RequestBody LoginRequest loginRequest) {
         User user = userRepository.findByUsername(loginRequest.getUsername());
 
         if (user == null) {
@@ -125,15 +125,32 @@ public class AuthController {
                     new ApiResponse("Parolă greșită.", false));
         }
 
-        // 2FA check
         if (user.getTwoFactorSecret() != null) {
-            boolean is2FACodeValid = twoFactorAuthenticationService.verifyCode(user.getTwoFactorSecret(), loginRequest.getTwoFactorCode());
-            if (!is2FACodeValid) {
-                return ResponseEntity.status(401).body(
-                        new ApiResponse("Cod 2FA invalid.", false));
-            }
+            return ResponseEntity.ok(new ApiResponse("2FA_REQUIRED", true));
         }
 
         return ResponseEntity.ok(new ApiResponse("Login reușit!", true));
+    }
+
+    @PostMapping("/login/verify")
+    public ResponseEntity<ApiResponse> verifyTwoFactor(@RequestBody LoginRequest loginRequest) {
+        User user = userRepository.findByUsername(loginRequest.getUsername());
+
+        if (user == null || user.getTwoFactorSecret() == null) {
+            return ResponseEntity.status(401).body(
+                    new ApiResponse("Autentificare invalidă.", false));
+        }
+
+        boolean is2FACodeValid = twoFactorAuthenticationService.verifyCode(
+                user.getTwoFactorSecret(),
+                loginRequest.getTwoFactorCode()
+        );
+
+        if (!is2FACodeValid) {
+            return ResponseEntity.status(401).body(
+                    new ApiResponse("Cod 2FA invalid.", false));
+        }
+
+        return ResponseEntity.ok(new ApiResponse("Login reușit cu 2FA!", true));
     }
 }

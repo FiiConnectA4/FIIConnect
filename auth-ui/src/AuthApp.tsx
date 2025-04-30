@@ -22,7 +22,9 @@ const LoginForm = ({ onSwitch }: { onSwitch: (page: string) => void }) => {
     const [password, setPassword] = useState('');
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [errorMessage, setErrorMessage] = useState('');
-
+    const [show2FAModal, setShow2FAModal] = useState(false);
+    const [twoFACode, setTwoFACode] = useState('');
+    const [tempToken, setTempToken] = useState('');
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
@@ -41,16 +43,21 @@ const LoginForm = ({ onSwitch }: { onSwitch: (page: string) => void }) => {
         try {
             const response = await fetch('http://localhost:34101/users/login', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ username: emailOrPhone, password })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: emailOrPhone, password }),
             });
 
-            const result = await response.json();
+            const text = await response.text();
+            const result = text ? JSON.parse(text) : {};
+
             if (response.ok) {
-                alert('Login successful');
-                onSwitch('dashboard');
+                if (result.requires2FA) {
+                    setTempToken(result.tempToken); // backend ar trebui să trimită ceva temporar
+                    setShow2FAModal(true);
+                } else {
+                    alert('Login successful');
+                    onSwitch('dashboard');
+                }
             } else {
                 setErrorMessage(result.message || 'Login failed');
             }
@@ -63,68 +70,54 @@ const LoginForm = ({ onSwitch }: { onSwitch: (page: string) => void }) => {
         }
     };
 
+    const handle2FAVerification = async () => {
+        try {
+            const response = await fetch('http://localhost:34101/users/verify-2fa', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: twoFACode, token: tempToken }),
+            });
+
+            if (response.ok) {
+                alert('Login successful with 2FA');
+                setShow2FAModal(false);
+                onSwitch('dashboard');
+            } else {
+                const result = await response.json();
+                alert(result.message || '2FA verification failed');
+            }
+        } catch (err) {
+            alert('Error verifying 2FA code');
+        }
+    };
+
     return (
         <div className="page-content">
-            <div className="login-logo-container">
-                <img
-                    src="/FiiConnect-removebg-preview.png"
-                    alt="FIIConnect"
-                    className="login-logo-image"
-                />
-            </div>
+            {/* restul formularului de login... */}
 
-            <p className="login-greeting-text">Nice to see you again</p>
+            <button className="auth-button" onClick={handleSignIn}>
+                Sign in
+            </button>
 
-            <div className="form-container">
-                <input
-                    className="auth-input"
-                    placeholder="Enter username"
-                    value={emailOrPhone}
-                    onChange={(e) => setEmailOrPhone(e.target.value)}
-                />
-                {errors.emailOrPhone && <span className="error">{errors.emailOrPhone}</span>}
-
-                <div className="password-wrapper">
-                    <input
-                        className="auth-input"
-                        type={showPassword ? 'text' : 'password'}
-                        placeholder="Enter password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                    <span
-                        className="login-password-toggle"
-                        onClick={togglePasswordVisibility}
-                    >
-    {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
-  </span>
+            {show2FAModal && (
+                <div className="modal-overlay">
+                    <div className="modal-content">
+                        <h3>Enter 2FA Code</h3>
+                        <input
+                            className="auth-input"
+                            placeholder="123456"
+                            value={twoFACode}
+                            onChange={(e) => setTwoFACode(e.target.value)}
+                        />
+                        <button className="auth-button" onClick={handle2FAVerification}>
+                            Verify
+                        </button>
+                        <button className="auth-button cancel" onClick={() => setShow2FAModal(false)}>
+                            Cancel
+                        </button>
+                    </div>
                 </div>
-                {errors.password && <span className="error">{errors.password}</span>}
-
-
-                {errorMessage && <p className="error-message">{errorMessage}</p>}
-
-                <div className="w-full text-right">
-          <span className="auth-link" onClick={() => onSwitch('reset')}>
-            Forgot password?
-          </span>
-                </div>
-
-                <button className="auth-button" onClick={handleSignIn}>
-                    Sign in
-                </button>
-
-                <hr className="border-[#E5E5E5] w-full my-4" />
-
-                <div className="text-sm text-gray-600">
-                    Don't have an account?{' '}
-                    <span className="auth-link" onClick={() => onSwitch('register')}>
-            Sign up now
-          </span>
-                </div>
-
-                <div className="footer-text">© FIIConnect</div>
-            </div>
+            )}
         </div>
     );
 };

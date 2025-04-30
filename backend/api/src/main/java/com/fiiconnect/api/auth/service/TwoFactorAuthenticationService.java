@@ -27,7 +27,7 @@ public class TwoFactorAuthenticationService {
 
     // Generates a QR code URL for scanning
     public String getQRCodeUrl(String userEmail) {
-        // Creează un obiect GoogleAuthenticator
+        // Creează un obiect GoogleAuthenticator,
         GoogleAuthenticator gAuth = new GoogleAuthenticator();
 
         // Generează cheia secretă pentru utilizator

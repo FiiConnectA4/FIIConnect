@@ -33,6 +33,9 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
+    @Column(nullable = false)
+    private String accountType; // New field for account type
+
     @Column(name = "two_factor_secret")
     private String twoFactorSecret;
 
@@ -53,24 +56,12 @@ public class User {
         return email;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public String getAccountType() {
+        return accountType;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public boolean isActive() {
-        return isActive;
-    }
-
-    public Set<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
+    public void setAccountType(String accountType) {
+        this.accountType = accountType;
     }
 
 
