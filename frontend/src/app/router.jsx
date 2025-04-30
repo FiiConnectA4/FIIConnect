@@ -11,12 +11,17 @@ import Chat from "../pages/Chat";
 import Contul from "../pages/Contul";
 import Contact from "../pages/Contact";
 import Login from "../pages/Login";
+import Profil from "../pages/Profil";
+import TwoFactorAuth from "../pages/TwoFactorAuth";
+import TwoFactorPrompt from "../pages/TwoFactorPrompt";
+import ResetPasswordPage from "../pages/ResetPasswordPage";
 
 const AppRoutes = () => {
   return (
     <Routes>
       {/* Public route (login page) */}
       <Route path="/" element={<Login />} />
+      <Route path="/2fa-verify" element={<TwoFactorPrompt />} />
 
       {/* Protected routes inside layout */}
       <Route path="/app" element={<MainLayout />}>
@@ -29,9 +34,12 @@ const AppRoutes = () => {
         <Route path="chat" element={<Chat />} />
         <Route path="contul" element={<Contul />} />
         <Route path="contact" element={<Contact />} />
+        <Route path="profil" element={<Profil />} />
+        <Route path="2fa" element={<TwoFactorAuth />} />
+        <Route path="reset-password" element={<ResetPasswordPage />} />
+        
         <Route index element={<Navigate to="/app/dashboard" replace />} />
       </Route>
-
       {/* Catch unknown paths */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
