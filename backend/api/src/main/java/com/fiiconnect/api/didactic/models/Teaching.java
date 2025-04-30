@@ -1,9 +1,13 @@
 package com.fiiconnect.api.didactic.models;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Objects;
 
+@Setter
+@Getter
 @Entity
 public class Teaching {
     @EmbeddedId
@@ -47,37 +51,5 @@ public class Teaching {
     @Override
     public int hashCode() {
         return Objects.hash(id, role);
-    }
-
-    public TeachingCompositeKey getId() {
-        return id;
-    }
-
-    public void setId(TeachingCompositeKey id) {
-        this.id = id;
-    }
-
-    public Course getCourse() {
-        return course;
-    }
-
-    public void setCourse(Course course) {
-        this.course = course;
-    }
-
-    public Professor getProfessor() {
-        return professor;
-    }
-
-    public void setProfessor(Professor professor) {
-        this.professor = professor;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
     }
 }

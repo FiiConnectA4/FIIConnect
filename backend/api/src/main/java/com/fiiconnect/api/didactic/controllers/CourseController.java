@@ -4,23 +4,21 @@ package com.fiiconnect.api.didactic.controllers;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import com.fiiconnect.api.didactic.exceptions.CourseNotFoundException;
+import com.fiiconnect.api.didactic.helpers.SQLExceptionMessageParser;
 import com.fiiconnect.api.didactic.models.Course;
 import com.fiiconnect.api.didactic.models.CourseModelAssembler;
 import com.fiiconnect.api.didactic.repositories.CourseRepository;
 import com.fiiconnect.api.didactic.services.CourseService;
+import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.hateoas.EntityModel;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.IanaLinkRelations;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,11 +27,13 @@ public class CourseController {
     private final CourseRepository repository;
     private final CourseModelAssembler assembler;
     private final CourseService service;
+    private final SQLExceptionMessageParser exceptionHelper;
 
-    public CourseController(CourseRepository repository, CourseModelAssembler assembler, CourseService service) {
+    public CourseController(CourseRepository repository, CourseModelAssembler assembler, CourseService service, SQLExceptionMessageParser exceptionHelper) {
         this.repository = repository;
         this.assembler = assembler;
         this.service = service;
+        this.exceptionHelper = exceptionHelper;
     }
 
     // get all courses
@@ -87,5 +87,15 @@ public class CourseController {
     public ResponseEntity<?> deleteCourse(@PathVariable("id") Long id) throws CourseNotFoundException {
         repository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @ResponseStatus(HttpStatus.CONFLICT)
+    @ExceptionHandler(ConstraintViolationException.class)
+    public String integrityViolation(ConstraintViolationException e)
+    {
+        SQLException sqlException = e.getSQLException();
+        String message = sqlException.getMessage();
+        message = exceptionHelper.getConstraintName(message);
+        return "Constraint violated: " + message;
     }
 }
