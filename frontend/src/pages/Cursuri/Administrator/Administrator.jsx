@@ -30,6 +30,25 @@ const Administrator = () => {
             });
     }, []);
 
+    const handleDeleteCourse = (id) => {
+        if (!window.confirm("Ești sigur că vrei să ștergi acest curs?")) return;
+    
+        console.log("🔄 Ștergere curs cu ID:", id);
+    
+        fetch(`/didactic/course/${id}`, {
+            method: 'DELETE'
+        })
+            .then((res) => {
+                console.log("📡 Status DELETE:", res.status);
+                if (!res.ok) throw new Error("Eroare la ștergere");
+                setCursuri(prev => prev.filter(c => c.id !== id));
+            })
+            .catch((err) => {
+                console.error("⛔ Eroare la ștergerea cursului:", err);
+                alert("Nu s-a putut șterge cursul.");
+            });
+    };
+
     if (loading) {
         return <div>Loading...</div>;
     }
@@ -67,6 +86,7 @@ const Administrator = () => {
                                 title={curs.title}
                                 description={curs.description}
                                 professorId={curs.professorId}
+                                onDelete={() => handleDeleteCourse(curs.id)}
                             />
                         </div>
                     ))
