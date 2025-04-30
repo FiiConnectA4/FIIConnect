@@ -3,7 +3,7 @@ import Buton from '../Components/Buton';
 import Carte from '../Components/Carte';
 import Ceas from '../Components/Ceas';
 import './../Student/Student.css';
-import PDetaliiCurs from '../Profesor/PDetaliiCurs';
+import PDetaliiCurs from '../DetaliiCurs/DetaliiCursEditabil';
 import PageControl from '../Components/PageControl';
 
 const Administrator = () => {

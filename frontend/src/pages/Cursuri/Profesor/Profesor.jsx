@@ -4,7 +4,7 @@ import Carte from '../Components/Carte';
 import Buton from '../Components/Buton';
 import PageControl from '../Components/PageControl';
 import './../Student/Student.css';
-import PDetaliiCurs from './PDetaliiCurs';
+import PDetaliiCurs from '../DetaliiCurs/DetaliiCursEditabil';
 import { useSearchParams } from 'react-router-dom';
 const Profesor = () => {
     const [searchParams] = useSearchParams(); // Hook pentru a citi query params

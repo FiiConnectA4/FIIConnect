@@ -1,11 +1,11 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import './../Student/DetaliiCurs.css';
-import Ceas from './../Components/Ceas';
-import Edit from './../Components/Edit';
+import './DetaliiCurs.css';
+import Ceas from '../Components/Ceas';
+import Edit from '../Components/Edit';
 
-import ButonExtensibil from './../Components/ButonExtensibil';
-import Optiuni from './../Components/Optiuni';
+import ButonExtensibil from '../Components/ButonExtensibil';
+import Optiuni from '../Components/Optiuni';
 
 const PDetaliiCurs = ({ curs, onBack }) => {
     const [materials, setMaterials] = useState([]);
