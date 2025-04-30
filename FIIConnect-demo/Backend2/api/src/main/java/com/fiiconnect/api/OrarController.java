@@ -95,67 +95,49 @@ public class OrarController {
 
     @GetMapping("/sala/{sala}")
     public List<OrarDTO> getOrarBySala(@PathVariable String sala) {
-        // Obținem lista de orare din baza de date
+        System.out.println("Căutăm orar pentru sala: " + sala);
         List<Orar> orarList = repository.findBySala(sala);
-
-        // Mapează entitățile Orar în OrarDTO, fără a include frecvența
+        System.out.println("Număr de orare găsite: " + orarList.size());
         return orarList.stream().map(orar -> {
-            // Conversia oraStart și oraEnd din String în LocalTime
             LocalTime oraStartTime = LocalTime.parse(orar.getOraStart(), DateTimeFormatter.ofPattern("HH:mm"));
             LocalTime oraEndTime = LocalTime.parse(orar.getOraEnd(), DateTimeFormatter.ofPattern("HH:mm"));
-            
-            // Formatează oraStart și oraEnd ca String
             String oraStart = oraStartTime.format(DateTimeFormatter.ofPattern("HH:mm"));
             String oraEnd = oraEndTime.format(DateTimeFormatter.ofPattern("HH:mm"));
-            
-            // Creăm obiectul DTO fără frecvența
             return new OrarDTO(
                 orar.getZi(),
-                oraStart + " - " + oraEnd,  // Aici combinăm intervalul de timp
+                oraStart + " - " + oraEnd,
                 orar.getDisciplina(),
                 orar.getTip(),
                 orar.getGrupa(),
                 orar.getSala(),
-                orar.getProfesor(),  // Adăugăm profesorul
-                orar.getAn()  // Adăugăm anul
+                orar.getProfesor(),
+                orar.getAn()
             );
         }).collect(Collectors.toList());
     }
-
+    
     @GetMapping("/disciplina/{disciplina}")
-public List<OrarDTO> getOrarByDisciplina(@PathVariable String disciplina) {
-    // Log pentru a verifica valoarea primită
-    System.out.println("Căutăm disciplina: " + disciplina); 
-
-    // Căutăm în baza de date
-    List<Orar> orarList = repository.findByDisciplina(disciplina);
-
-    // Verifică dacă există rezultate
-    if (orarList.isEmpty()) {
-        System.out.println("Nu am găsit orare pentru disciplina: " + disciplina);
-    } else {
-        System.out.println("Am găsit " + orarList.size() + " orar(e) pentru disciplina: " + disciplina);
+    public List<OrarDTO> getOrarByDisciplina(@PathVariable String disciplina) {
+        System.out.println("Căutăm orar pentru disciplina: " + disciplina);
+        List<Orar> orarList = repository.findByDisciplina(disciplina);
+        System.out.println("Număr de orare găsite: " + orarList.size());
+        return orarList.stream().map(orar -> {
+            LocalTime oraStartTime = LocalTime.parse(orar.getOraStart(), DateTimeFormatter.ofPattern("HH:mm"));
+            LocalTime oraEndTime = LocalTime.parse(orar.getOraEnd(), DateTimeFormatter.ofPattern("HH:mm"));
+            String oraStart = oraStartTime.format(DateTimeFormatter.ofPattern("HH:mm"));
+            String oraEnd = oraEndTime.format(DateTimeFormatter.ofPattern("HH:mm"));
+            return new OrarDTO(
+                orar.getZi(),
+                oraStart + " - " + oraEnd,
+                orar.getDisciplina(),
+                orar.getTip(),
+                orar.getGrupa(),
+                orar.getSala(),
+                orar.getProfesor(),
+                orar.getAn()
+            );
+        }).collect(Collectors.toList());
     }
-
-    // Conversie Orar -> OrarDTO
-    return orarList.stream().map(orar -> {
-        LocalTime oraStartTime = LocalTime.parse(orar.getOraStart(), DateTimeFormatter.ofPattern("HH:mm"));
-        LocalTime oraEndTime = LocalTime.parse(orar.getOraEnd(), DateTimeFormatter.ofPattern("HH:mm"));
-        String oraStart = oraStartTime.format(DateTimeFormatter.ofPattern("HH:mm"));
-        String oraEnd = oraEndTime.format(DateTimeFormatter.ofPattern("HH:mm"));
-
-        return new OrarDTO(
-            orar.getZi(),
-            oraStart + " - " + oraEnd,
-            orar.getDisciplina(),
-            orar.getTip(),
-            orar.getGrupa(),
-            orar.getSala(),
-            orar.getProfesor(),
-            orar.getAn()
-        );
-    }).collect(Collectors.toList());
-}
 
 
     @PutMapping("/{id}")

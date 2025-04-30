@@ -7,7 +7,6 @@ import OrarDiscipline from './OrarDiscipline';
 import OrarSali from './OrarSali';  
 import "./OrarToti.css";
 
-
 const OrarToti = () => {
   const navigate = useNavigate();
   const location = useLocation(); 
@@ -21,11 +20,9 @@ const OrarToti = () => {
   const [selectedRoom, setSelectedRoom] = useState(sala || null);
   const [selectedDiscipline, setSelectedDiscipline] = useState(disciplina || null);
 
-
   const handleSwitchToSecretariat = () => {
     navigate("/app/orar-secretariat"); // Navighează la pagina "OrarSecretariat"
   };
-
 
   useEffect(() => {
     const path = location.pathname;
@@ -47,7 +44,6 @@ const OrarToti = () => {
     }
   }, [location]);
 
-  // Se actualizează dacă an, grupa, profesor, sală sau disciplină sunt disponibile
   useEffect(() => {
     if (an && grupa) {
       const anLabel = `Anul ${an}`;
@@ -58,7 +54,16 @@ const OrarToti = () => {
       fetch(url)
         .then((res) => res.json())
         .then((data) => {
-          setScheduleData(data);
+          console.log('Răspuns API pentru grupă:', data); // Verificăm ce răspuns primim
+          
+          if (Array.isArray(data)) {
+            setScheduleData(data);
+          } else if (data && data.schedule && Array.isArray(data.schedule)) {
+            setScheduleData(data.schedule); // Dacă datele sunt într-un câmp `schedule`, le extragem
+          } else {
+            console.error("Datele primite nu sunt un array valid:", data);
+            setScheduleData([]);
+          }
         })
         .catch((err) => {
           console.error("Eroare la preluarea orarului:", err);
@@ -68,19 +73,37 @@ const OrarToti = () => {
       fetch(url)
         .then((res) => res.json())
         .then((data) => {
-          setScheduleData(data); // Setează datele primite
-          setSelectedProfessor(profesor); // Setează profesorul selectat
+          console.log('Răspuns API pentru profesor:', data); // Verificăm ce răspuns primim
+
+          if (Array.isArray(data)) {
+            setScheduleData(data);
+          } else if (data && data.schedule && Array.isArray(data.schedule)) {
+            setScheduleData(data.schedule);
+          } else {
+            console.error("Datele primite nu sunt un array valid:", data);
+            setScheduleData([]);
+          }
+          setSelectedProfessor(profesor);
         })
         .catch((err) => {
           console.error("Eroare la preluarea orarului profesorului:", err);
         });
-    } else  if (sala) {
-      const url = `http://localhost:34101/orar/sala/${sala}`; // URL-ul va conține doar sala
+    } else if (sala) {
+      const url = `http://localhost:34101/orar/sala/${sala}`;
       fetch(url)
           .then((res) => res.json())
           .then((data) => {
-              setScheduleData(data); // Setează datele primite în stare
-              setSelectedRoom(sala);  // Setează numele sălii selectate
+              console.log('Răspuns API pentru sală:', data); // Verificăm ce răspuns primim
+              
+              if (Array.isArray(data)) {
+                setScheduleData(data);
+              } else if (data && data.schedule && Array.isArray(data.schedule)) {
+                setScheduleData(data.schedule);
+              } else {
+                console.error("Datele primite nu sunt un array valid:", data);
+                setScheduleData([]);
+              }
+              setSelectedRoom(sala);
           })
           .catch((err) => {
               console.error("Eroare la preluarea orarului pentru sală:", err);
@@ -90,8 +113,17 @@ const OrarToti = () => {
       fetch(url)
         .then((res) => res.json())
         .then((data) => {
-          setScheduleData(data); // Setează datele primite
-          setSelectedDiscipline(disciplina); // Setează disciplina selectată
+          console.log('Răspuns API pentru disciplină:', data); // Verificăm ce răspuns primim
+
+          if (Array.isArray(data)) {
+            setScheduleData(data);
+          } else if (data && data.schedule && Array.isArray(data.schedule)) {
+            setScheduleData(data.schedule);
+          } else {
+            console.error("Datele primite nu sunt un array valid:", data);
+            setScheduleData([]);
+          }
+          setSelectedDiscipline(disciplina);
         })
         .catch((err) => {
           console.error("Eroare la preluarea orarului disciplinei:", err);
@@ -99,27 +131,25 @@ const OrarToti = () => {
     }
   }, [an, grupa, profesor, sala, disciplina]);
 
-  // Functii pentru selectarea elementelor
   const handleRoomClick = (roomName) => {
     setSelectedRoom(roomName);
-    navigate(`/app/orar/sali/${roomName}`); // Navighează doar la ruta sălii
-};
+    navigate(`/app/orar/sali/${roomName}`);
+  };
 
-const handleDotariClick = () => {
-  if (selectedRoom) {
-    navigate(`/app/orar/sali/${selectedRoom}/dotari`); // Navighează la pagina dotărilor pentru sala selectată
-  }
-};
+  const handleDotariClick = () => {
+    if (selectedRoom) {
+      navigate(`/app/orar/sali/${selectedRoom}/dotari`);
+    }
+  };
 
-
-const handleDisciplineClick = (disciplineName) => {
-  setSelectedDiscipline(disciplineName); // Actualizează starea pentru disciplina selectată
-  navigate(`/app/orar/discipline/${disciplineName}`); // Navighează la URL-ul disciplinei
-};
+  const handleDisciplineClick = (disciplineName) => {
+    setSelectedDiscipline(disciplineName);
+    navigate(`/app/orar/discipline/${disciplineName}`);
+  };
 
   const handleProfessorClick = (professorName) => {
     setSelectedProfessor(professorName);
-    navigate(`/app/orar/profesori/${professorName}`); // Actualizează URL-ul cu numele profesorului
+    navigate(`/app/orar/profesori/${professorName}`);
     const url = `http://localhost:34101/orar/profesor/${professorName}`;
     fetch(url)
       .then((res) => res.json())
@@ -132,7 +162,6 @@ const handleDisciplineClick = (disciplineName) => {
   };
 
   const handleBackButtonClick = () => {
-    // Mergi înapoi la secțiunea generală (studenti, profesori, etc.)
     setSelectedGroup(null);
     setSelectedProfessor(null);
     setSelectedRoom(null);
@@ -170,7 +199,6 @@ const handleDisciplineClick = (disciplineName) => {
     navigate(`/app/orar/${newSection}`);
   };
 
-  // Actualizează titlul paginii în funcție de selecția curentă
   useEffect(() => {
     document.title = `Orar - ${selectedGroup || selectedProfessor || selectedRoom || selectedDiscipline || "Alege o categorie"}`;
   }, [selectedGroup, selectedProfessor, selectedRoom, selectedDiscipline]);
@@ -182,34 +210,33 @@ const handleDisciplineClick = (disciplineName) => {
       </button>
 
       {currentSection && ["studenti", "profesori", "sali", "discipline"].includes(currentSection) && (
-  <button className="orar-button inapoi" onClick={handleBackToMain}>
-    🔙 Înapoi la Orar Secretariat
-  </button>
-)}
+        <button className="orar-button inapoi" onClick={handleBackToMain}>
+          🔙 Înapoi la Orar Secretariat
+        </button>
+      )}
 
       {selectedGroup || selectedProfessor || selectedRoom || selectedDiscipline ? (
         <div className="orar-afisat">
-        <h3>
-          Orar pentru {selectedGroup || (selectedProfessor && `Profesor ${selectedProfessor}`) || (selectedRoom && `Sala ${selectedRoom}`) || (selectedDiscipline && `Disciplina ${selectedDiscipline}`)}
-        </h3>
-        <ScheduleTable
-  schedule={scheduleData}
-/>
-        {selectedRoom && (
+          <h3>
+            Orar pentru {selectedGroup || (selectedProfessor && `Profesor ${selectedProfessor}`) || (selectedRoom && `Sala ${selectedRoom}`) || (selectedDiscipline && `Disciplina ${selectedDiscipline}`)}
+          </h3>
+          <ScheduleTable
+            schedule={scheduleData}
+          />
+          {selectedRoom && (
+            <button
+              className="orar-button dotari"
+              onClick={handleDotariClick}
+            >
+              Dotări
+            </button>
+          )}
           <button
-            className="orar-button dotari"
-            onClick={handleDotariClick}
+            className="orar-button inapoi"
+            onClick={handleBackButtonClick}
           >
-            Dotări
+            🔙 Înapoi
           </button>
-        )}
-        <button
-          className="orar-button inapoi"
-          onClick={handleBackButtonClick}
-        >
-          🔙 Înapoi
-        </button>
-          
         </div>
       ) : (
         <>
