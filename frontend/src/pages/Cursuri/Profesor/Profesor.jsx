@@ -8,7 +8,7 @@ import PDetaliiCurs from '../DetaliiCurs/DetaliiCursEditabil';
 import { useSearchParams } from 'react-router-dom';
 const Profesor = () => {
     const [searchParams] = useSearchParams(); // Hook pentru a citi query params
-    const professorId = searchParams.get('professorId') || 1;
+    const professorId = searchParams.get('professorId') || 5;
     const [professor, setProfessor] = useState(null); // Stocăm obiectul Professor
     const [courses, setCourses] = useState([]); // Lista de cursuri (goală momentan)
     const [selectedCourseId, setSelectedCourseId] = useState(null);
@@ -21,16 +21,14 @@ const Profesor = () => {
                 return res.json();
             })
             .then((data) => {
-                console.log('Răspuns API:', data); // Verifică ce primești
+                console.log('Răspuns API:', data); // Verifică structura datelor
                 setProfessor(data); // Setăm obiectul Professor
-                // Dacă backend-ul nu returnează cursuri, setăm un array gol
-                // În viitor, aici ai putea seta data.courses dacă devine disponibil
-                setCourses([]); 
+                setCourses(data.courses || []); // Setăm cursurile profesorului
                 setLoading(false);
             })
             .catch((err) => {
                 console.error('Eroare la încărcarea datelor:', err);
-                setCourses([]);
+                setCourses([]); // Dacă apare o eroare, setăm cursurile ca fiind goale
                 setLoading(false);
             });
     }, [professorId]);
@@ -65,10 +63,12 @@ const Profesor = () => {
             )}
             <div className="lista-cursuri">
                 {Array.isArray(courses) && courses.length > 0 ? (
-                    courses.map((curs) => (
-                        <div key={curs.id} className="rand-curs">
+                    courses.map((cursuri) => (
+                        <div key={cursuri.course.id} className="rand-curs">
                             <Carte />
-                            <Buton text={curs.title} onNavigate={() => setSelectedCourseId(curs.id)} />
+                            <Ceas />
+                            <Buton text={cursuri.course.title || 'Titlu indisponibil'} onNavigate={() => setSelectedCourseId(cursuri.course.id)} />
+                            <PageControl />
                         </div>
                     ))
                 ) : (

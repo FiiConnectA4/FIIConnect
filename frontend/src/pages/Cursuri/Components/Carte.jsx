@@ -4,7 +4,7 @@ const Carte = () => {
     return (
         <div id="carte">
             <img
-                src="/Book open.png"
+                src="/Book.png"
                 alt="Carte curs"
             />
         </div>);
