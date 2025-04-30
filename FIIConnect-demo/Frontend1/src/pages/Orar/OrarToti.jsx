@@ -50,7 +50,7 @@ const OrarToti = () => {
       setSelectedGroup(`${anLabel} - ${grupa}`);
       setCurrentSection("studenti");
 
-      const url = `http://localhost:34101/orar/grupa/${an}/${grupa}`;
+      const url = `http://localhost:34101/orar/studenti/${an}/${grupa}`;
       fetch(url)
         .then((res) => res.json())
         .then((data) => {

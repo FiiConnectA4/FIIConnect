@@ -7,13 +7,28 @@ const ScheduleTable = ({ schedule, title, showSala = true, editable = false, onD
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
   const [scheduleData, setScheduleData] = useState(schedule);
+  useEffect(() => {
+    setScheduleData(schedule);
+  }, [schedule]);
 
   // Funcție pentru a actualiza state-ul componentelor de orar
 
 
-  const handleEditClick = (entry) => {
+  /*const handleEditClick = (entry) => {
     setSelectedEntry(entry);
     setFormData(entry); // inițializezi formularul cu valorile existente
+    setShowPopup(true);
+    setIsEditing(false);
+  };*/
+
+  const handleEditClick = (entry) => {
+    const entryWithId = {
+      ...entry,
+      id: entry.id ?? entry._id ?? null // fallback dacă folosești Mongo sau ai id-ul în altă formă
+    };
+  
+    setSelectedEntry(entryWithId);
+    setFormData(entryWithId);
     setShowPopup(true);
     setIsEditing(false);
   };
@@ -26,7 +41,7 @@ const ScheduleTable = ({ schedule, title, showSala = true, editable = false, onD
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value, id: prev.id }));
   };
 
   const handleDeleteEntry = () => {
@@ -43,15 +58,15 @@ const ScheduleTable = ({ schedule, title, showSala = true, editable = false, onD
       .catch((err) => console.error("Eroare la ștergere:", err));
   };
 
-  const handleSaveEdit = () => {
-    const isNew = selectedEntry && selectedEntry.id == null;
-  
+  /*const handleSaveEdit = () => {
+    const isNew = !formData.id;
+
     const payload = { ...formData };
     if (isNew) delete payload.id; // elimină id-ul pentru POST
-  
-    const url = isNew
+
+      const url = isNew
       ? "http://localhost:34101/orar"
-      : `http://localhost:34101/orar/${selectedEntry.id}`;
+      : `http://localhost:34101/orar/${formData.id}`;  
     const method = isNew ? "POST" : "PUT";
   
     fetch(url, {
@@ -63,26 +78,86 @@ const ScheduleTable = ({ schedule, title, showSala = true, editable = false, onD
         if (!res.ok) throw new Error("Eroare la salvare");
         return res.json();
       })
-      .then((data) => {
-        if (isNew) {
-          // Dacă e o linie nouă, adaugă-o la lista locală
-          setScheduleData((prev) => [...prev, data]);
-        } else {
-          // Actualizează linia modificată în lista locală
-          setScheduleData((prev) =>
-            prev.map((item) => (item.id === data.id ? data : item))
-          );
-        }
-        closePopup();
-      })
-      .catch((err) => console.error("Eroare la salvare:", err));
+        .then((data) => {
+          // 💡 reconstruim intervalul dacă lipsește
+          if ((!data.interval || data.interval.trim() === "") && data.oraStart && data.oraEnd) {
+            data.interval = `${data.oraStart} - ${data.oraEnd}`;
+          }
+        
+          if (isNew) {
+            setScheduleData((prev) => [...prev, data]);
+          } else {
+            setScheduleData((prev) =>
+              prev.map((item) => (item.id === data.id ? data : item))
+            );
+          }
+        
+          closePopup();
+        });
+        
+
+      //.catch((err) => console.error("Eroare la salvare:", err));
   };
+*/
+const handleSaveEdit = () => {
+  const isNew = !formData.id;
+
+  // 🧠 Sparge intervalul nou introdus în oraStart și oraEnd
+  let oraStart = null;
+  let oraEnd = null;
+
+  if (formData.interval && formData.interval.includes(" - ")) {
+    const parts = formData.interval.split(" - ");
+    oraStart = parts[0].trim();
+    oraEnd = parts[1].trim();
+  }
+
+  const payload = {
+    ...formData,
+    oraStart,
+    oraEnd
+  };
+
+  const url = isNew
+    ? "http://localhost:34101/orar"
+    : `http://localhost:34101/orar/${formData.id}`;
+  const method = isNew ? "POST" : "PUT";
+
+  fetch(url, {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("Eroare la salvare");
+      return res.json();
+    })
+    .then((data) => {
+      // reconstruim intervalul din datele salvate
+      if (!data.interval && data.oraStart && data.oraEnd) {
+        data.interval = `${data.oraStart} - ${data.oraEnd}`;
+      }
+
+      if (isNew) {
+        setScheduleData((prev) => [...prev, data]);
+      } else {
+        setScheduleData((prev) =>
+          prev.map((item) => (item.id === data.id ? data : item))
+        );
+      }
+
+      closePopup();
+    })
+    .catch((err) => console.error("Eroare la salvare:", err));
+};
 
   const handleAddNew = () => {
     const newEntry = {
       id: null, // Fără ID pentru intrarea nouă
       zi: "Luni",
       interval: "08:00 - 10:00",
+      oraStart: "08:00",
+      oraEnd: "10:00",
       disciplina: "Nouă Disciplina",
       tip: "Curs",
       grupa: "A1",
@@ -128,7 +203,7 @@ const ScheduleTable = ({ schedule, title, showSala = true, editable = false, onD
             </tr>
           ) : (
             scheduleData.map((entry) => (
-              <tr key={entry.id}>
+              <tr key={`${entry.id ?? entry.disciplina}-${entry.zi}-${entry.interval}`}>
                 <td>{entry.zi}</td>
                 <td>{entry.interval}</td>
                 <td>{entry.disciplina}</td>

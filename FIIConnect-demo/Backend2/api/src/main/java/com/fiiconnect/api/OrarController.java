@@ -36,7 +36,7 @@ public class OrarController {
         repository.deleteById(id); // șterge înregistrările din DB după id
     }
 
-    @GetMapping("/grupa/{an}/{grupa}")
+    /*@GetMapping({"/student/{an}/{grupa}", "/grupa/{an}/{grupa}"})
     public List<OrarDTO> getOrarByAnAndGrupa(@PathVariable String an, @PathVariable String grupa) {
         List<Orar> orarList = repository.findByAnAndGrupa(an, grupa);
     
@@ -59,7 +59,42 @@ public class OrarController {
                 orar.getAn()  // Adăugăm anul
             );
         }).collect(Collectors.toList());
+    }*/
+
+    @GetMapping({"/studenti/{an}/{grupa}", "/grupa/{an}/{grupa}"})
+    public List<OrarDTO> getOrarByAnAndGrupa(@PathVariable String an, @PathVariable String grupa) {
+        List<Orar> orarList = repository.findByAnAndGrupa(an, grupa);
+
+        System.out.println("📋 Am găsit " + orarList.size() + " înregistrări pentru anul " + an + ", grupa " + grupa);
+
+        for (Orar orar : orarList) {
+            if (orar.getOraStart() == null || orar.getOraEnd() == null) {
+                System.out.println("⚠️ Ora Start sau End este null pentru: " + orar);
+            }
+        }
+
+        // Conversie Orar -> OrarDTO și includerea câmpului 'an'
+        return orarList.stream().map(orar -> {
+            LocalTime oraStartTime = LocalTime.parse(orar.getOraStart(), DateTimeFormatter.ofPattern("HH:mm"));
+            LocalTime oraEndTime = LocalTime.parse(orar.getOraEnd(), DateTimeFormatter.ofPattern("HH:mm"));
+            String oraStart = oraStartTime.format(DateTimeFormatter.ofPattern("HH:mm"));
+            String oraEnd = oraEndTime.format(DateTimeFormatter.ofPattern("HH:mm"));
+
+            // Creăm un OrarDTO cu anul și profesorul
+            return new OrarDTO(
+                    orar.getZi(),
+                    oraStart + " - " + oraEnd,  // Aici combinăm intervalul de timp
+                    orar.getDisciplina(),
+                    orar.getTip(),
+                    orar.getGrupa(),
+                    orar.getSala(),
+                    orar.getProfesor(),  // Adăugăm profesorul
+                    orar.getAn(),  // Adăugăm anul
+                    orar.getId()
+            );
+        }).collect(Collectors.toList());
     }
+
     @GetMapping("/profesor/{profesor}")
     public List<OrarDTO> getOrarByProfesor(@PathVariable String profesor) {
         // Elimină spațiile înainte și după numele profesorului
@@ -87,7 +122,8 @@ public class OrarController {
                 orar.getGrupa(),
                 orar.getSala(),
                 orar.getProfesor(),
-                orar.getAn()
+                orar.getAn(),
+                orar.getId()
             );
         }).collect(Collectors.toList());
     }
@@ -111,7 +147,8 @@ public class OrarController {
                 orar.getGrupa(),
                 orar.getSala(),
                 orar.getProfesor(),
-                orar.getAn()
+                orar.getAn(),
+                orar.getId()
             );
         }).collect(Collectors.toList());
     }
@@ -134,7 +171,8 @@ public class OrarController {
                 orar.getGrupa(),
                 orar.getSala(),
                 orar.getProfesor(),
-                orar.getAn()
+                orar.getAn(),
+                orar.getId()
             );
         }).collect(Collectors.toList());
     }
