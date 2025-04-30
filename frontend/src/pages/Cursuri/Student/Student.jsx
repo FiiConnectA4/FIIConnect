@@ -56,9 +56,9 @@ const Student = () => {
         <div className="container-cursuri">
             <div className="cursuri-titlu">
                 <h1>Cursuri</h1>
-                <h2>Anul {an} semestrul {semestru}</h2>
                 <Ceas />
             </div>
+            <h2>Anul {an} semestrul {semestru}</h2>
             <div className="lista-cursuri">
                 {cursuri.length > 0 ? (
                     cursuri.map((curs) => (
