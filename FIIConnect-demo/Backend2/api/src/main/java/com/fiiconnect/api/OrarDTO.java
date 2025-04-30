@@ -9,9 +9,10 @@ public class OrarDTO {
     private String sala;
     private String profesor;
     private String an; // <-- Adaugă acest câmp pentru anul respectiv
+    private Integer id;
    
 
-    public OrarDTO(String zi, String interval, String disciplina, String tip, String grupa, String sala, String profesor, String an) {
+    public OrarDTO(String zi, String interval, String disciplina, String tip, String grupa, String sala, String profesor, String an, Integer id) {
         this.zi = zi;
         this.interval = interval;
         this.disciplina = disciplina;
@@ -20,7 +21,7 @@ public class OrarDTO {
         this.sala = sala;
         this.profesor = profesor;
         this.an = an;
-        
+        this.id = id;
     }
 
     // Getters
@@ -34,5 +35,6 @@ public class OrarDTO {
         return profesor;
     }
     public String getAn() { return an; } // Getter pentru an
+    public Integer getId() { return id; } // Getter pentru id
   
 }
