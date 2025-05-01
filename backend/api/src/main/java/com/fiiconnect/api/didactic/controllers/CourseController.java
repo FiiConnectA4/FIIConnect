@@ -7,8 +7,10 @@ import com.fiiconnect.api.didactic.exceptions.CourseNotFoundException;
 import com.fiiconnect.api.didactic.helpers.SQLExceptionMessageParser;
 import com.fiiconnect.api.didactic.models.Course;
 import com.fiiconnect.api.didactic.models.CourseModelAssembler;
+import com.fiiconnect.api.didactic.models.Enrollment;
 import com.fiiconnect.api.didactic.repositories.CourseRepository;
 import com.fiiconnect.api.didactic.services.CourseService;
+import com.fiiconnect.api.didactic.services.EnrollmentService;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.hateoas.EntityModel;
 
@@ -28,12 +30,14 @@ public class CourseController {
     private final CourseModelAssembler assembler;
     private final CourseService service;
     private final SQLExceptionMessageParser exceptionHelper;
+    private final EnrollmentService enrollmentService;
 
-    public CourseController(CourseRepository repository, CourseModelAssembler assembler, CourseService service, SQLExceptionMessageParser exceptionHelper) {
+    public CourseController(CourseRepository repository, CourseModelAssembler assembler, CourseService service, SQLExceptionMessageParser exceptionHelper, EnrollmentService enrollmentService) {
         this.repository = repository;
         this.assembler = assembler;
         this.service = service;
         this.exceptionHelper = exceptionHelper;
+        this.enrollmentService = enrollmentService;
     }
 
     // get all courses
@@ -58,6 +62,12 @@ public class CourseController {
         service.attachProfessors(course);
         service.attachMaterials(course);
         return assembler.toModel(course);
+    }
+
+    @GetMapping("/didactic/course/{id}/enrolled")
+    public List<Enrollment> getEnrolledStudents(@PathVariable Long id)
+    {
+        return enrollmentService.getCourseEnrollments(id);
     }
 
     @PostMapping("/didactic/course")

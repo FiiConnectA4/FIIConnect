@@ -12,7 +12,7 @@ public class SQLExceptionMessageParser {
     {
         //keep only first line of error message
         message = message.substring(0, message.indexOf("\n"));
-        if(message.contains("cannot insert NULL into"))
+        if(message.contains("cannot insert NULL into") || (message.contains(") to NULL")))
         {
             //message doesn't include constraint name so have to rebuild it
             //format is: ... cannot insert NULL into ("username"."table"."column") ...

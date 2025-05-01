@@ -21,10 +21,13 @@ public class Course{
 	Date academicYear;
 
 	@Transient
-	private List<CourseMaterial> materials;
+	private List<CourseMaterial> materials = null;
 
 	@Transient
 	private List<Teaching> professors = null;
+
+	@Transient
+	private List<Enrollment> enrollments = null;
 
 	public Course() {}
 
