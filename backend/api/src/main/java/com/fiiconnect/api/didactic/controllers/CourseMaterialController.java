@@ -6,7 +6,9 @@ import com.fiiconnect.api.didactic.exceptions.CourseMaterialNotFoundException;
 import com.fiiconnect.api.didactic.repositories.CourseMaterialRepository;
 import com.fiiconnect.api.didactic.services.SftpService;
 import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -61,18 +63,24 @@ public class CourseMaterialController {
     public void uploadFile(@PathVariable Long id, @RequestBody MultipartFile file) throws IOException
     {
         CourseMaterial material = repository.findById(id).orElseThrow(()->new CourseMaterialNotFoundException(id));
-
+        material.setFilename(file.getOriginalFilename());
         sftpService.uploadFile(file, "faculty_files/didactic/course-" + material.getIdCourse() + "/materials/");
+        repository.save(material);
     }
 
     @GetMapping("/didactic/course/material/{id}/file")
-    public File downloadFile(@PathVariable Long id) throws IOException {
+    public ResponseEntity<?> downloadFile(@PathVariable Long id) throws IOException {
         CourseMaterial material = repository.findById(id).orElseThrow(()->new CourseMaterialNotFoundException(id));
         File file;
-
         file = sftpService.downloadFile("faculty_files/didactic/course-" + material.getIdCourse() + "/materials/" + material.getFilename(), "didactic/course-" + material.getIdCourse() + "/materials/" + material.getFilename());
 
-        return file;
+        byte[] data;
+        try(var input = new FileInputStream(file))
+        {
+            data = input.readAllBytes();
+        }
+
+        return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() +"\"").body(data);
     }
 
     @DeleteMapping("/didactic/course/material/{id}")
