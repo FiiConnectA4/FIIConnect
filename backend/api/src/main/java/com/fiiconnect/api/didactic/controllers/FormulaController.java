@@ -14,7 +14,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
@@ -30,7 +33,6 @@ public class FormulaController {
         this.exceptionHelper = exceptionHelper;
     }
 
-
     @GetMapping("/formulas")
     public CollectionModel<EntityModel<Formula>> allFormulas() {
         List<Formula> formulas = service.viewAllFormulas();
@@ -43,7 +45,6 @@ public class FormulaController {
         return CollectionModel.of(formulaModels, linkTo(methodOn(FormulaController.class).allFormulas()).withSelfRel());
     }
 
-
     @GetMapping("/formula/{id}")
     public EntityModel<Formula> oneFormula(@PathVariable("id") Long id) {
         Formula formula = service.getFormula(id);
@@ -52,14 +53,29 @@ public class FormulaController {
                 linkTo(methodOn(FormulaController.class).allFormulas()).withRel("formulas"));
     }
 
+    @GetMapping("/course/{idCourse}/formula")
+    public EntityModel<Formula> getFormulaByCourse(@PathVariable("idCourse") Long idCourse) {
+        Formula formula = service.getFormulaByCourseId(idCourse);
+        return EntityModel.of(formula,
+                linkTo(methodOn(FormulaController.class).getFormulaByCourse(idCourse)).withSelfRel(),
+                linkTo(methodOn(FormulaController.class).allFormulas()).withRel("formulas"));
+    }
 
     @PostMapping("/formula")
-    public ResponseEntity<?> newFormula(@RequestBody Formula newFormula) {
-        newFormula.setId(null); // Enforce DB-generated ID
+    public ResponseEntity<?> newFormula(@RequestBody FormulaRequest request) {
+        Formula newFormula = new Formula();
+        newFormula.setIdCourse(request.getIdCourse());
+        newFormula.setText(request.getText());
+
+        // Parse components after "="
+        List<FormulaComponent> components = parseFormulaComponents(request.getText(), newFormula);
+        newFormula.setComponents(components);
+
         service.addFormula(newFormula);
         EntityModel<Formula> entityModel = EntityModel.of(newFormula,
-                linkTo(methodOn(FormulaController.class).oneFormula(newFormula.getId())).withSelfRel());
-        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).build();
+                linkTo(methodOn(FormulaController.class).oneFormula(newFormula.getId())).withSelfRel(),
+                linkTo(methodOn(FormulaController.class).allFormulas()).withRel("formulas"));
+        return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
 
     @PutMapping("/formula/{id}")
@@ -110,7 +126,7 @@ public class FormulaController {
     @PutMapping("/formula-component/{id}")
     public ResponseEntity<?> replaceFormulaComponent(@PathVariable("id") Long id, @RequestBody FormulaComponent newComponent) {
         FormulaComponent updatedComponent = service.getFormulaComponent(id);
-        updatedComponent.setIdFormula(newComponent.getIdFormula());
+        updatedComponent.setFormula(newComponent.getFormula());
         updatedComponent.setName(newComponent.getName());
         service.addFormulaComponent(updatedComponent);
         EntityModel<FormulaComponent> entityModel = EntityModel.of(updatedComponent,
@@ -131,5 +147,53 @@ public class FormulaController {
         String message = sqlException.getMessage();
         message = exceptionHelper.getConstraintName(message);
         return "Constraint violated: " + message;
+    }
+
+    // DTO for POST request
+    public static class FormulaRequest {
+        private Long idCourse;
+        private String text;
+
+        public Long getIdCourse() {
+            return idCourse;
+        }
+
+        public void setIdCourse(Long idCourse) {
+            this.idCourse = idCourse;
+        }
+
+        public String getText() {
+            return text;
+        }
+
+        public void setText(String text) {
+            this.text = text;
+        }
+    }
+
+    private List<FormulaComponent> parseFormulaComponents(String formulaText, Formula formula) {
+        List<FormulaComponent> components = new ArrayList<>();
+        // Split formula at "=" and take the part after it
+        String[] parts = formulaText.split("=", 2);
+        if (parts.length < 2) {
+            return components; // No components if no "=" found
+        }
+        String expression = parts[1].trim();
+
+        // Regex to match variable names (alphanumeric with spaces or underscores)
+        Pattern pattern = Pattern.compile("\\b[a-zA-Z][a-zA-Z0-9_ ]*\\b");
+        Matcher matcher = pattern.matcher(expression);
+
+        while (matcher.find()) {
+            String componentName = matcher.group().replace(" ", "_"); // Convert spaces to underscores
+            // Skip common keywords
+            if (!componentName.equals("Final_grade")) { // Adjust for other keywords if needed
+                FormulaComponent component = new FormulaComponent();
+                component.setFormula(formula);
+                component.setName(componentName);
+                components.add(component);
+            }
+        }
+        return components;
     }
 }
