@@ -2,9 +2,12 @@ import React, { useState } from 'react';
 import Optiuni from './Optiuni';
 import './Component.css';
 
-const PageControl = ({ onClick, ariaLabel = "Menu" }) => {
+const PageControl = ({ onDelete, ariaLabel = "Menu" }) => {
+    console.log("✅ PageControl: onDelete primit:", onDelete);
+    
     const [isVisible, setIsVisible] = useState(false);
     const toggleVisibility = () => setIsVisible(prev => !prev);
+
     return (
         <div className="page-control-container">
             <button
@@ -14,8 +17,10 @@ const PageControl = ({ onClick, ariaLabel = "Menu" }) => {
             >
                 <span className="dots"></span>
             </button>
-            {isVisible && <Optiuni />}
-        </div>);
+            {isVisible && <Optiuni onDelete={onDelete} />}
+        </div>
+    );
 };
+
 
 export default PageControl;
