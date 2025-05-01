@@ -4,14 +4,15 @@ import Ceas from './../Components/Ceas';
 import ButonExtensibil from '../Components/ButonExtensibil';
 
 const DetaliiCurs = ({ curs, onBack }) => {
-    const [profesori, setProfesori] = useState([]); // Array pentru profesori
+    const [profesori, setProfesori] = useState([]);
     const [materials, setMaterials] = useState([]);
+    const [formula, setFormula] = useState(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        console.log('ID-ul cursului:', curs.id); // Verificăm ID-ul cursului
+        console.log('ID-ul cursului:', curs.id);
 
-        // Fetch materials for the selected course
+        // Fetch materials
         fetch(`/didactic/course/material/${curs.id}`)
             .then(response => response.json())
             .then(data => {
@@ -23,20 +24,20 @@ const DetaliiCurs = ({ curs, onBack }) => {
                 setLoading(false);
             });
 
-        // Fetch professors for the selected course
+        // Fetch professors
         fetch(`/didactic/course/${curs.id}`)
             .then(response => {
                 if (!response.ok) {
                     console.error(`HTTP error! Status: ${response.status}`);
-                    setProfesori([]); // Setăm lista ca fiind goală
+                    setProfesori([]);
                     return [];
                 }
                 return response.json();
             })
             .then(data => {
-                console.log('Răspuns API profesori:', data); // Verificăm structura răspunsului
-                const professorsArray = data.professors || []; // Accesăm array-ul din răspuns
-                console.log('Array profesori:', professorsArray); // Verificăm array-ul de profesori
+                console.log('Răspuns API profesori:', data);
+                const professorsArray = data.professors || [];
+                console.log('Array profesori:', professorsArray);
                 if (Array.isArray(professorsArray)) {
                     const profList = professorsArray.map(prof => ({
                         name: `${prof.professor.firstName} ${prof.professor.lastName}`,
@@ -44,12 +45,31 @@ const DetaliiCurs = ({ curs, onBack }) => {
                     setProfesori(profList);
                 } else {
                     console.error('Răspuns invalid: nu conține un array de profesori.', data);
-                    setProfesori([]); // Setăm lista ca fiind goală
+                    setProfesori([]);
                 }
             })
             .catch(error => {
                 console.error('Error fetching professors:', error);
-                setProfesori([]); // Setăm lista ca fiind goală în caz de eroare
+                setProfesori([]);
+            });
+
+        // Fetch formula
+        fetch(`/didactic/course/${curs.id}/formula`)
+            .then(response => {
+                if (!response.ok) {
+                    console.error(`No formula found for course ${curs.id}`);
+                    setFormula(null);
+                    return null;
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Răspuns API formula:', data);
+                setFormula(data);
+            })
+            .catch(error => {
+                console.error('Error fetching formula:', error);
+                setFormula(null);
             });
     }, [curs.id]);
 
@@ -59,14 +79,14 @@ const DetaliiCurs = ({ curs, onBack }) => {
 
     return (
         <div className="detalii-container">
-            <button className="buton-inapoi" onClick={onBack}>&lt; Înapoi</button>
+            <button className="buton-inapoi" onClick={onBack}>{'< Înapoi'}</button>
             <div className="titlu-curs">
                 <h1><u>{curs.title}</u></h1>
                 <Ceas />
             </div>
             <ButonExtensibil
                 text="Profesori"
-                professors={profesori} // Transmitem lista de profesori
+                professors={profesori}
             />
             <div className="sectiune">
                 <h2>DESCRIERE CURS:</h2>
@@ -74,6 +94,20 @@ const DetaliiCurs = ({ curs, onBack }) => {
             </div>
             <div className="sectiune">
                 <h2>Metoda notare:(componente)</h2>
+                {formula ? (
+                    <div>
+                        <p>{formula.text}</p>
+                        {formula.components?.length > 0 && (
+                            <ul>
+                                {formula.components.map(comp => (
+                                    <li key={comp.id}>{comp.name}</li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                ) : (
+                    <p>No formula defined</p>
+                )}
             </div>
             <div className="sectiune bibliografie">
                 <h2>Resurse bibliografice:</h2>
