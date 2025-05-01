@@ -1,6 +1,7 @@
 package com.fiiconnect.api.didactic.models;
 
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,6 +9,7 @@ import java.util.List;
 
 @Getter
 @Setter
+@EqualsAndHashCode
 @Entity
 @Table(name = "formula")
 public class Formula {
@@ -22,6 +24,7 @@ public class Formula {
     @Column(name = "text")
     private String text;
 
-    @OneToMany(mappedBy = "formula", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "idFormula", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FormulaComponent> components;
+
 }
