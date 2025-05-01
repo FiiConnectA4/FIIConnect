@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -25,6 +26,8 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 @RestController
 @RequestMapping("/didactic")
 public class FormulaController {
+    private static final Logger LOGGER = Logger.getLogger(FormulaController.class.getName());
+
     private final FormulaService service;
     private final SQLExceptionMessageParser exceptionHelper;
 
@@ -35,6 +38,7 @@ public class FormulaController {
 
     @GetMapping("/formulas")
     public CollectionModel<EntityModel<Formula>> allFormulas() {
+        LOGGER.info("Fetching all formulas");
         List<Formula> formulas = service.viewAllFormulas();
         formulas.forEach(service::attachComponents);
         List<EntityModel<Formula>> formulaModels = formulas.stream()
@@ -47,6 +51,7 @@ public class FormulaController {
 
     @GetMapping("/formula/{id}")
     public EntityModel<Formula> oneFormula(@PathVariable("id") Long id) {
+        LOGGER.info("Fetching formula with ID: " + id);
         Formula formula = service.getFormula(id);
         return EntityModel.of(formula,
                 linkTo(methodOn(FormulaController.class).oneFormula(id)).withSelfRel(),
@@ -55,6 +60,7 @@ public class FormulaController {
 
     @GetMapping("/course/{idCourse}/formula")
     public EntityModel<Formula> getFormulaByCourse(@PathVariable("idCourse") Long idCourse) {
+        LOGGER.info("Fetching formula for course ID: " + idCourse);
         Formula formula = service.getFormulaByCourseId(idCourse);
         return EntityModel.of(formula,
                 linkTo(methodOn(FormulaController.class).getFormulaByCourse(idCourse)).withSelfRel(),
@@ -63,15 +69,21 @@ public class FormulaController {
 
     @PostMapping("/formula")
     public ResponseEntity<?> newFormula(@RequestBody FormulaRequest request) {
+        LOGGER.info("Creating new formula for course ID: " + request.getIdCourse());
         Formula newFormula = new Formula();
         newFormula.setIdCourse(request.getIdCourse());
         newFormula.setText(request.getText());
 
-        // Parse components after "="
         List<FormulaComponent> components = parseFormulaComponents(request.getText(), newFormula);
         newFormula.setComponents(components);
 
-        service.addFormula(newFormula);
+        try {
+            service.addFormula(newFormula);
+        } catch (Exception e) {
+            LOGGER.severe("Failed to save formula: " + e.getMessage());
+            throw e;
+        }
+
         EntityModel<Formula> entityModel = EntityModel.of(newFormula,
                 linkTo(methodOn(FormulaController.class).oneFormula(newFormula.getId())).withSelfRel(),
                 linkTo(methodOn(FormulaController.class).allFormulas()).withRel("formulas"));
@@ -79,11 +91,27 @@ public class FormulaController {
     }
 
     @PutMapping("/formula/{id}")
-    public ResponseEntity<?> replaceFormula(@PathVariable("id") Long id, @RequestBody Formula newFormula) {
+    public ResponseEntity<?> replaceFormula(@PathVariable("id") Long id, @RequestBody FormulaRequest request) {
+        LOGGER.info("Updating formula with ID: " + id);
         Formula updatedFormula = service.getFormula(id);
-        updatedFormula.setIdCourse(newFormula.getIdCourse());
-        updatedFormula.setText(newFormula.getText());
+        updatedFormula.setIdCourse(request.getIdCourse());
+        updatedFormula.setText(request.getText());
+
+        // Update components in place to preserve Hibernate's collection reference
+        List<FormulaComponent> currentComponents = updatedFormula.getComponents();
+        currentComponents.clear();
         service.addFormula(updatedFormula);
+        // Remove existing components (orphanRemoval will delete them)
+        List<FormulaComponent> newComponents = parseFormulaComponents(request.getText(), updatedFormula);
+        currentComponents.addAll(newComponents);// Add new components to the same collection
+
+        try {
+            service.addFormula(updatedFormula);
+        } catch (Exception e) {
+            LOGGER.severe("Failed to update formula: " + e.getMessage());
+            throw e;
+        }
+
         EntityModel<Formula> entityModel = EntityModel.of(updatedFormula,
                 linkTo(methodOn(FormulaController.class).oneFormula(id)).withSelfRel());
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
@@ -91,12 +119,14 @@ public class FormulaController {
 
     @DeleteMapping("/formula/{id}")
     public ResponseEntity<?> deleteFormula(@PathVariable("id") Long id) {
+        LOGGER.info("Deleting formula with ID: " + id);
         service.deleteFormula(id);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/formula-components")
     public CollectionModel<EntityModel<FormulaComponent>> allFormulaComponents() {
+        LOGGER.info("Fetching all formula components");
         List<FormulaComponent> components = service.viewAllFormulaComponents();
         List<EntityModel<FormulaComponent>> componentModels = components.stream()
                 .map(component -> EntityModel.of(component,
@@ -108,14 +138,16 @@ public class FormulaController {
 
     @GetMapping("/formula-component/{id}")
     public EntityModel<FormulaComponent> oneFormulaComponent(@PathVariable("id") Long id) {
+        LOGGER.info("Fetching formula component with ID: " + id);
         FormulaComponent component = service.getFormulaComponent(id);
         return EntityModel.of(component,
                 linkTo(methodOn(FormulaController.class).oneFormulaComponent(id)).withSelfRel(),
-                linkTo(methodOn(FormulaController.class).allFormulaComponents()).withRel("formula-components"));
+                linkTo(methodOn(FormulaController.class).allFormulaComponents()).withRel("formulas-components"));
     }
 
     @PostMapping("/formula-component")
     public ResponseEntity<?> newFormulaComponent(@RequestBody FormulaComponent newComponent) {
+        LOGGER.info("Creating new formula component");
         newComponent.setId(null); // Enforce DB-generated ID
         service.addFormulaComponent(newComponent);
         EntityModel<FormulaComponent> entityModel = EntityModel.of(newComponent,
@@ -125,8 +157,9 @@ public class FormulaController {
 
     @PutMapping("/formula-component/{id}")
     public ResponseEntity<?> replaceFormulaComponent(@PathVariable("id") Long id, @RequestBody FormulaComponent newComponent) {
+        LOGGER.info("Updating formula component with ID: " + id);
         FormulaComponent updatedComponent = service.getFormulaComponent(id);
-        updatedComponent.setFormula(newComponent.getFormula());
+        updatedComponent.setIdFormula(newComponent.getIdFormula());
         updatedComponent.setName(newComponent.getName());
         service.addFormulaComponent(updatedComponent);
         EntityModel<FormulaComponent> entityModel = EntityModel.of(updatedComponent,
@@ -136,6 +169,7 @@ public class FormulaController {
 
     @DeleteMapping("/formula-component/{id}")
     public ResponseEntity<?> deleteFormulaComponent(@PathVariable("id") Long id) {
+        LOGGER.info("Deleting formula component with ID: " + id);
         service.deleteFormulaComponent(id);
         return ResponseEntity.noContent().build();
     }
@@ -146,10 +180,10 @@ public class FormulaController {
         SQLException sqlException = e.getSQLException();
         String message = sqlException.getMessage();
         message = exceptionHelper.getConstraintName(message);
+        LOGGER.warning("Constraint violation: " + message);
         return "Constraint violated: " + message;
     }
 
-    // DTO for POST request
     public static class FormulaRequest {
         private Long idCourse;
         private String text;
@@ -172,26 +206,25 @@ public class FormulaController {
     }
 
     private List<FormulaComponent> parseFormulaComponents(String formulaText, Formula formula) {
+        LOGGER.info("Parsing components for formula text: " + formulaText);
         List<FormulaComponent> components = new ArrayList<>();
-        // Split formula at "=" and take the part after it
         String[] parts = formulaText.split("=", 2);
         if (parts.length < 2) {
-            return components; // No components if no "=" found
+            LOGGER.warning("Invalid formula format: no '=' found");
+            return components;
         }
         String expression = parts[1].trim();
-
-        // Regex to match variable names (alphanumeric with spaces or underscores)
         Pattern pattern = Pattern.compile("\\b[a-zA-Z][a-zA-Z0-9_ ]*\\b");
         Matcher matcher = pattern.matcher(expression);
 
         while (matcher.find()) {
-            String componentName = matcher.group().replace(" ", "_"); // Convert spaces to underscores
-            // Skip common keywords
-            if (!componentName.equals("Final_grade")) { // Adjust for other keywords if needed
+            String componentName = matcher.group().replace(" ", "_");
+            if (!componentName.equals("Final_grade")) {
                 FormulaComponent component = new FormulaComponent();
-                component.setFormula(formula);
+                component.setIdFormula(formula.getId());
                 component.setName(componentName);
                 components.add(component);
+                LOGGER.info("Parsed component: " + componentName);
             }
         }
         return components;
