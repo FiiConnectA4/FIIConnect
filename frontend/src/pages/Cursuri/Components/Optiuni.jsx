@@ -1,20 +1,20 @@
 import React from "react";
 import "./Component.css";
 
-function Optiuni() {
-    const handleDelete = () => {
-        // Aici pui logica pentru butonul de ștergere
-        console.log("Șterge ceva...");
-    };
-
+function Optiuni({ onDelete }) {
     const handleDownload = () => {
-        // Aici pui logica pentru butonul de download
         console.log("Descarcă ceva...");
     };
 
     return (
         <div className="icon-buttons-container">
-            <button className="icon-button" onClick={handleDelete}>
+            <button
+                className="icon-button"
+                onClick={() => {
+                    console.log("➡️ Ai apăsat pe ȘTERGERE");
+                    if (onDelete) onDelete();
+                }}
+            >
                 <img
                     src="/Delete.png"
                     alt="Delete icon"

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useEffect } from 'react';
-import './../Student/DetaliiCurs.css';
+import './DetaliiCurs.css';
 import Ceas from './../Components/Ceas';
 import Edit from './../Components/Edit';
 import ButonExtensibil from '../Components/ButonExtensibil';

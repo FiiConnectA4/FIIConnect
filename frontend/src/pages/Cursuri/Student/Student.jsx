@@ -3,7 +3,7 @@ import Ceas from '../Components/Ceas';
 import Carte from '../Components/Carte';
 import Buton from '../Components/Buton';
 import './Student.css';
-import DetaliiCurs from './DetaliiCurs';
+import DetaliiCurs from '../DetaliiCurs/DetaliiCurs';
 const Student = () => {
     const [selectedCursId, setSelectedCursId] = useState(null);
     const [cursuri, setCursuri] = useState([]);

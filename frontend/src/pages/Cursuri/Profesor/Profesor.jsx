@@ -4,7 +4,7 @@ import Carte from '../Components/Carte';
 import Buton from '../Components/Buton';
 import PageControl from '../Components/PageControl';
 import './../Student/Student.css';
-import PDetaliiCurs from './PDetaliiCurs';
+import PDetaliiCurs from '../DetaliiCurs/DetaliiCursEditabil';
 import { useSearchParams } from 'react-router-dom';
 const Profesor = () => {
     const [searchParams] = useSearchParams(); // Hook pentru a citi query params
@@ -32,6 +32,29 @@ const Profesor = () => {
                 setLoading(false);
             });
     }, [professorId]);
+
+    const handleDeleteCourse = (id) => {
+        if (!window.confirm("Ești sigur că vrei să ștergi acest curs?")) return;
+
+        console.log("🔄 Începem ștergerea cursului cu ID:", id);
+
+        fetch(`/didactic/course/${id}`, {
+            method: 'DELETE'
+        })
+            .then((res) => {
+                console.log("📡 Status răspuns DELETE:", res.status);
+                if (!res.ok) throw new Error('Eroare la ștergere');
+                setCourses(prev => {
+                    const actualizata = prev.filter(c => c.course.id !== id);
+                    console.log("🧹 Lista după ștergere:", actualizata);
+                    return actualizata;
+                });
+            })
+            .catch((err) => {
+                console.error('⛔ Eroare la ștergerea cursului:', err);
+                alert('Nu s-a putut șterge cursul.');
+            });
+    };
 
     if (loading) return <div>Loading...</div>;
 
@@ -63,14 +86,28 @@ const Profesor = () => {
             )}
             <div className="lista-cursuri">
                 {Array.isArray(courses) && courses.length > 0 ? (
-                    courses.map((cursuri) => (
-                        <div key={cursuri.course.id} className="rand-curs">
-                            <Carte />
-                            <Ceas />
-                            <Buton text={cursuri.course.title || 'Titlu indisponibil'} onNavigate={() => setSelectedCourseId(cursuri.id)} />
-                            <PageControl />
-                        </div>
-                    ))
+                    courses.map((cursuri) => {
+                        console.log("📍 cursuri object:", cursuri);
+                        console.log("🆔 cursuri.course?.id:", cursuri.course?.id);
+
+                        const id = cursuri.course?.id;
+                        if (!id) {
+                            console.warn("⚠️ cursuri.course.id este undefined", cursuri);
+                            return null;
+                        }
+
+                        return (
+                            <div key={id} className="rand-curs">
+                                <Carte />
+                                <Ceas />
+                                <Buton
+                                    text={cursuri.course.title || 'Titlu indisponibil'}
+                                    onNavigate={() => setSelectedCourseId(id)}
+                                />
+                                <PageControl onDelete={() => handleDeleteCourse(id)} />
+                            </div>
+                        );
+                    })
                 ) : (
                     <p>Nu există cursuri disponibile pentru acest profesor.</p>
                 )}
