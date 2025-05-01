@@ -1,5 +1,4 @@
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import './DetaliiCurs.css';
 import Ceas from './../Components/Ceas';
 import Edit from './../Components/Edit';
@@ -10,17 +9,20 @@ const PDetaliiCurs = ({ curs, onBack }) => {
     const [materials, setMaterials] = useState([]);
     const [gradingMethod, setGradingMethod] = useState('');
     const [description, setDescription] = useState('');
-    const [newMaterial, setNewMaterial] = useState([]);
+    const [newMaterial, setNewMaterial] = useState('');
     const [profesori, setProfesori] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [formula, setFormula] = useState(null);
+    const [isEditingFormula, setIsEditingFormula] = useState(false);
+    const [formulaText, setFormulaText] = useState('');
 
     useEffect(() => {
+        // Fetch materials
         fetch(`/didactic/course/material/${curs.id}`)
             .then((res) => res.json())
             .then((data) => {
-                console.log('Răspuns API pentru materiale:', data); // Debugging
-                setMaterials(Array.isArray(data) ? data : []); // Asigură-te că materials este un array
-                setGradingMethod(curs.gradingMethod || '');
+                console.log('Răspuns API pentru materiale:', data);
+                setMaterials(Array.isArray(data) ? data : []);
                 setDescription(curs.description || '');
                 setLoading(false);
             })
@@ -29,19 +31,20 @@ const PDetaliiCurs = ({ curs, onBack }) => {
                 setLoading(false);
             });
 
+        // Fetch professors
         fetch(`/didactic/course/${curs.id}`)
             .then(response => {
                 if (!response.ok) {
                     console.error(`HTTP error! Status: ${response.status}`);
-                    setProfesori([]); // Setăm lista ca fiind goală
+                    setProfesori([]);
                     return [];
                 }
                 return response.json();
             })
             .then(data => {
-                console.log('Răspuns API profesori:', data); // Verificăm structura răspunsului
-                const professorsArray = data.professors || []; // Accesăm array-ul din răspuns
-                console.log('Array profesori:', professorsArray); // Verificăm array-ul de profesori
+                console.log('Răspuns API profesori:', data);
+                const professorsArray = data.professors || [];
+                console.log('Array profesori:', professorsArray);
                 if (Array.isArray(professorsArray)) {
                     const profList = professorsArray.map(prof => ({
                         name: `${prof.professor.firstName} ${prof.professor.lastName}`,
@@ -49,12 +52,33 @@ const PDetaliiCurs = ({ curs, onBack }) => {
                     setProfesori(profList);
                 } else {
                     console.error('Răspuns invalid: nu conține un array de profesori.', data);
-                    setProfesori([]); // Setăm lista ca fiind goală
+                    setProfesori([]);
                 }
             })
             .catch(error => {
                 console.error('Error fetching professors:', error);
-                setProfesori([]); // Setăm lista ca fiind goală în caz de eroare
+                setProfesori([]);
+            });
+
+        // Fetch formula
+        fetch(`/didactic/course/${curs.id}/formula`)
+            .then(response => {
+                if (!response.ok) {
+                    console.error(`No formula found for course ${curs.id}`);
+                    setFormula(null);
+                    return null;
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Răspuns API formula:', data);
+                setFormula(data);
+                setFormulaText(data?.text || '');
+                setGradingMethod(data?.text || '');
+            })
+            .catch(error => {
+                console.error('Error fetching formula:', error);
+                setFormula(null);
             });
     }, [curs.id]);
 
@@ -63,12 +87,40 @@ const PDetaliiCurs = ({ curs, onBack }) => {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                gradingMethod,
                 description
             })
         })
             .then(() => alert('Course updated!'))
             .catch(err => console.error('Failed to update course', err));
+    };
+
+    const saveFormula = () => {
+        const requestBody = {
+            idCourse: curs.id,
+            text: formulaText
+        };
+        const isExistingFormula = formula && formula.id;
+
+        fetch(isExistingFormula ? `/didactic/formula/${formula.id}` : `/didactic/formula`, {
+            method: isExistingFormula ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+        })
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Formula saved:', data);
+                setFormula(data);
+                setGradingMethod(data.text);
+                setIsEditingFormula(false);
+                alert('Formula saved!');
+            })
+            .catch(err => {
+                console.error('Failed to save formula:', err);
+                alert('Failed to save formula: ' + err.message);
+            });
     };
 
     const addMaterial = () => {
@@ -101,14 +153,14 @@ const PDetaliiCurs = ({ curs, onBack }) => {
 
     return (
         <div className="detalii-container">
-            <button className="buton-inapoi" onClick={onBack}>&lt; Înapoi</button>
+            <button className="buton-inapoi" onClick={onBack}>{'< Înapoi'}</button>
             <div className="titlu-curs">
                 <h1><u>{curs.title}</u></h1>
                 <Ceas />
             </div>
             <ButonExtensibil
                 text="Profesori"
-                professors={profesori} // Transmitem lista de profesori
+                professors={profesori}
             />
 
             <div className="sectiune">
@@ -121,10 +173,30 @@ const PDetaliiCurs = ({ curs, onBack }) => {
 
             <div className="sectiune">
                 <h2>Metoda de notare:</h2>
-                <Edit
-                    value={gradingMethod}
-                    onChange={(newGradingMethod) => setGradingMethod(newGradingMethod)}
-                />
+                {isEditingFormula ? (
+                    <div>
+                        <input
+                            type="text"
+                            value={formulaText}
+                            onChange={(e) => setFormulaText(e.target.value)}
+                            placeholder="e.g., Final grade=lab note + test"
+                        />
+                        <button onClick={saveFormula}>Save Formula</button>
+                        <button onClick={() => setIsEditingFormula(false)}>Cancel</button>
+                    </div>
+                ) : (
+                    <div>
+                        <p>{formula?.text || 'No formula defined'}</p>
+                        {formula?.components?.length > 0 && (
+                            <ul>
+                                {formula.components.map(comp => (
+                                    <li key={comp.id}>{comp.name}</li>
+                                ))}
+                            </ul>
+                        )}
+                        <button onClick={() => setIsEditingFormula(true)}>Edit Formula</button>
+                    </div>
+                )}
             </div>
 
             <div className="sectiune bibliografie">
@@ -137,8 +209,9 @@ const PDetaliiCurs = ({ curs, onBack }) => {
                 ))}
                 <AdaugaLink
                     newMaterial={newMaterial}
-                    setNewMaterial={setNewMaterial} // Transmite funcția setNewMaterial
-                    onAdd={addMaterial} />
+                    setNewMaterial={setNewMaterial}
+                    onAdd={addMaterial}
+                />
             </div>
 
             <button className="save-button" onClick={saveCourseChanges}>Salvează modificările</button>
