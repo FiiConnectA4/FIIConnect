@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -113,10 +114,21 @@ public class CourseService {
 
     public void attachDescription(Course course)
     {
+        File descriptionFile;
         try
         {
-            File descriptionFile = sftpService.downloadFile("didactic/" + course.getId() + "/description.txt", "didactic/" + course.getId() + "/description.txt");
-            FileInputStream input = new FileInputStream(descriptionFile);
+            descriptionFile = sftpService.downloadFile("faculty_files/didactic/course-" + course.getId() + "/description.txt", "didactic/course-" + course.getId() + "/description.txt");
+        }
+        catch (IOException e) {
+            if(e instanceof FileNotFoundException)
+                course.setDescription("");
+            else
+                throw new RuntimeException(e);
+            return;
+        }
+
+        try(FileInputStream input = new FileInputStream(descriptionFile))
+        {
             String description = new String(input.readAllBytes());
             course.setDescription(description);
         } catch (IOException e) {
@@ -131,9 +143,9 @@ public class CourseService {
             throw new CourseNotFoundException(idCourse);
         }
 
-        MockMultipartFile descriptionFile = new MockMultipartFile("description.txt", description.getBytes());
+        MockMultipartFile descriptionFile = new MockMultipartFile("description.txt", "description.txt", null, description.getBytes());
         try {
-            sftpService.uploadFile(descriptionFile, "didactic/" + idCourse + "/");
+            sftpService.uploadFile(descriptionFile, "faculty_files/didactic/course-" + idCourse + "/");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
