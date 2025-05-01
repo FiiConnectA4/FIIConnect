@@ -4,10 +4,9 @@ const AdaugaLink = ({ newMaterial, setNewMaterial, onAdd }) => {
     return (
         <div className="add-material">
             <input
-                type="text"
-                placeholder="Link nou material"
-                value={newMaterial}
-                onChange={(e) => setNewMaterial(e.target.value)}
+                type="file"
+                accept="application/pdf"
+                onChange={(e) => setNewMaterial(e.target.files[0])}
             />
             <button onClick={onAdd}>Adaugă</button>
         </div>
