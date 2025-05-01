@@ -1,0 +1,58 @@
+/* containerul principal umple 100% din viewport */
+.detalii-container {
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    font-family: sans-serif;
+    color: #1a355e;
+    overflow-y: auto;
+}
+
+
+.buton-inapoi {
+    align-self: flex-start;
+    background-color: #1a355e;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.titlu-curs h1 {
+    font-size: 28px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.clock-icon {
+    font-size: 22px;
+}
+
+.profesor-label {
+    margin-top: 10px;
+    background-color: #3b6e91;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    width: fit-content;
+    font-size: 14px;
+}
+
+.sectiune {
+    background-color: #ccc;
+    padding: 10px;
+    margin-top: 20px;
+    border-radius: 6px;
+}
+
+.sectiune h2 {
+    font-size: 18px;
+    margin: 0;
+}
