@@ -7,6 +7,7 @@ const DetaliiCurs = ({ curs, onBack }) => {
     const [profesori, setProfesori] = useState([]);
     const [materials, setMaterials] = useState([]);
     const [formula, setFormula] = useState(null);
+    const [description, setDescription] = useState(''); // New state for description
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -16,7 +17,7 @@ const DetaliiCurs = ({ curs, onBack }) => {
         fetch(`/didactic/course/material/${curs.id}`)
             .then(response => response.json())
             .then(data => {
-                setMaterials(data);
+                setMaterials(Array.isArray(data) ? data : []);
                 setLoading(false);
             })
             .catch(error => {
@@ -24,12 +25,13 @@ const DetaliiCurs = ({ curs, onBack }) => {
                 setLoading(false);
             });
 
-        // Fetch professors
+        // Fetch professors and description
         fetch(`/didactic/course/${curs.id}`)
             .then(response => {
                 if (!response.ok) {
                     console.error(`HTTP error! Status: ${response.status}`);
                     setProfesori([]);
+                    setDescription('');
                     return [];
                 }
                 return response.json();
@@ -47,10 +49,12 @@ const DetaliiCurs = ({ curs, onBack }) => {
                     console.error('Răspuns invalid: nu conține un array de profesori.', data);
                     setProfesori([]);
                 }
+                setDescription(data.description || 'Fara descriere');
             })
             .catch(error => {
                 console.error('Error fetching professors:', error);
                 setProfesori([]);
+                setDescription('');
             });
 
         // Fetch formula
@@ -90,7 +94,7 @@ const DetaliiCurs = ({ curs, onBack }) => {
             />
             <div className="sectiune">
                 <h2>DESCRIERE CURS:</h2>
-                <a href={curs.descriptionLink} target="_blank" rel="noopener noreferrer">Click here</a>
+                <p>{description}</p>
             </div>
             <div className="sectiune">
                 <h2>Metoda notare:(componente)</h2>
@@ -110,7 +114,7 @@ const DetaliiCurs = ({ curs, onBack }) => {
                 )}
             </div>
             <div className="sectiune bibliografie">
-                <h2>Resurse bibliografice:</h2>
+                <h2>Materiale de curs:</h2>
                 {materials.length > 0 ? (
                     <ul>
                         {materials.map(material => (
@@ -122,7 +126,7 @@ const DetaliiCurs = ({ curs, onBack }) => {
                         ))}
                     </ul>
                 ) : (
-                    <p>No materials available</p>
+                    <p>Nu sunt materiale disponibile</p>
                 )}
             </div>
         </div>

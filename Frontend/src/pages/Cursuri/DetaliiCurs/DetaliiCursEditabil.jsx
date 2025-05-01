@@ -15,6 +15,7 @@ const PDetaliiCurs = ({ curs, onBack }) => {
     const [formula, setFormula] = useState(null);
     const [isEditingFormula, setIsEditingFormula] = useState(false);
     const [formulaText, setFormulaText] = useState('');
+    const [isEditingDescription, setIsEditingDescription] = useState(false);
 
     useEffect(() => {
         // Fetch materials
@@ -23,7 +24,6 @@ const PDetaliiCurs = ({ curs, onBack }) => {
             .then((data) => {
                 console.log('Răspuns API pentru materiale:', data);
                 setMaterials(Array.isArray(data) ? data : []);
-                setDescription(curs.description || '');
                 setLoading(false);
             })
             .catch((err) => {
@@ -54,6 +54,7 @@ const PDetaliiCurs = ({ curs, onBack }) => {
                     console.error('Răspuns invalid: nu conține un array de profesori.', data);
                     setProfesori([]);
                 }
+                setDescription(data.description || '');
             })
             .catch(error => {
                 console.error('Error fetching professors:', error);
@@ -94,11 +95,12 @@ const PDetaliiCurs = ({ curs, onBack }) => {
         })
             .then(res => {
                 console.log("📥 Status răspuns:", res.status);
-                return res.text(); // 🔍 Vedem și răspunsul (dacă e eroare cu mesaj util)
+                return res.text();
             })
             .then(text => {
                 console.log("Răspuns complet:", text);
                 alert("Descriere salvată!");
+                setIsEditingDescription(false);
             })
             .catch(err => {
                 console.error("⛔ Eroare la salvarea descrierii:", err);
@@ -177,10 +179,21 @@ const PDetaliiCurs = ({ curs, onBack }) => {
 
             <div className="sectiune">
                 <h2>Descriere:</h2>
-                <Edit
-                    value={description}
-                    onChange={(newDescription) => setDescription(newDescription)}
-                />
+                {isEditingDescription ? (
+                    <div>
+                        <Edit
+                            value={description}
+                            onChange={(newDescription) => setDescription(newDescription)}
+                        />
+                        <button onClick={saveCourseChanges}>Salvează</button>
+                        <button onClick={() => setIsEditingDescription(false)}>Anulează</button>
+                    </div>
+                ) : (
+                    <div>
+                        <p>{description || 'No description available'}</p>
+                        <button onClick={() => setIsEditingDescription(true)}>Editează</button>
+                    </div>
+                )}
             </div>
 
             <div className="sectiune">
@@ -225,8 +238,6 @@ const PDetaliiCurs = ({ curs, onBack }) => {
                     onAdd={addMaterial}
                 />
             </div>
-
-            <button className="save-button" onClick={saveCourseChanges}>Salvează modificările</button>
         </div>
     );
 };
