@@ -7,12 +7,16 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;  // Import corect
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -35,19 +39,34 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        jwt = authHeader.substring(7); // scoatem "Bearer "
+        jwt = authHeader.substring(7); // Scoatem "Bearer "
         username = jwtService.extractUsername(jwt);
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             if (jwtService.isTokenValid(jwt, username)) {
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(username, null, null);
-                authToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                // Extragem rolurile din JWT
+                List<String> roles = jwtService.extractClaim(jwt, claims -> claims.get("roles", List.class));
+
+                if (roles != null) {
+                    // Mapăm rolurile într-o listă de SimpleGrantedAuthority
+                    List<GrantedAuthority> authorities = roles.stream()
+                            .map(SimpleGrantedAuthority::new)
+                            .collect(Collectors.toList());
+
+                    // Creăm un token de autentificare
+                    UsernamePasswordAuthenticationToken authToken =
+                            new UsernamePasswordAuthenticationToken(username, null, authorities);
+
+                    // Setăm detaliile autentificării
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    // Setăm autentificarea în contextul de securitate
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
             }
         }
+
+        // Continuăm cu filtrul
         filterChain.doFilter(request, response);
     }
 }
