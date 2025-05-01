@@ -84,7 +84,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           mvn -B verify \
-            -Dspring.datasource.url=jdbc:oracle:thin:@localhost:1521/XE \
+            -Dspring.datasource.url=jdbc:oracle:thin:@localhost:1521/FREE \
             -Dspring.datasource.username=api_test \
             -Dspring.datasource.password=api_test \
             -Dsftp.host=localhost \
