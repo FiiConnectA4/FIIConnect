@@ -7,53 +7,51 @@ import './../Student/Student.css';
 import PDetaliiCurs from '../DetaliiCurs/DetaliiCursEditabil';
 import { useSearchParams } from 'react-router-dom';
 import PAdaugaCurs from '../DetaliiCurs/PAdaugaCurs';
+
 const Profesor = () => {
-    const [searchParams] = useSearchParams(); // Hook pentru a citi query params
+    const [searchParams] = useSearchParams();
     const professorId = searchParams.get('professorId') || 8;
-    const [professor, setProfessor] = useState(null); // Stocăm obiectul Professor
-    const [courses, setCourses] = useState([]); // Lista de cursuri (goală momentan)
+    const [professor, setProfessor] = useState(null);
+    const [courses, setCourses] = useState([]);
     const [selectedCourseId, setSelectedCourseId] = useState(null);
     const [loading, setLoading] = useState(true);
     const [adaugaCurs, setAdaugaCurs] = useState(false);
 
-    useEffect(() => {
+    const fetchCourses = () => {
+        setLoading(true);
         fetch(`/didactic/professor/${professorId}`)
             .then((res) => {
                 if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
                 return res.json();
             })
             .then((data) => {
-                console.log('Răspuns API:', data); // Verifică structura datelor
-                setProfessor(data); // Setăm obiectul Professor
-                setCourses(data.courses || []); // Setăm cursurile profesorului
+                setProfessor(data);
+                setCourses(data.courses || []);
                 setLoading(false);
             })
             .catch((err) => {
                 console.error('Eroare la încărcarea datelor:', err);
-                setCourses([]); // Dacă apare o eroare, setăm cursurile ca fiind goale
+                setCourses([]);
                 setLoading(false);
             });
+    };
+
+    useEffect(() => {
+        fetchCourses();
     }, [professorId]);
 
     const handleDeleteCourse = (id) => {
         if (!window.confirm("Ești sigur că vrei să ștergi acest curs?")) return;
 
-        console.log("🔄 Începem ștergerea cursului cu ID:", id);
-
         fetch(`/didactic/course/${id}`, {
             method: 'DELETE'
         })
             .then((res) => {
-                console.log("📡 Status răspuns DELETE:", res.status);
                 if (!res.ok) throw new Error('Eroare la ștergere');
-                setCourses(prev => {
-                    const actualizata = prev.filter(c => c.course.id !== id);
-                    console.log("🧹 Lista după ștergere:", actualizata);
-                    return actualizata;
-                });
+                setCourses(prev => prev.filter(c => c.course.id !== id));
             })
             .catch((err) => {
-                console.error('⛔ Eroare la ștergerea cursului:', err);
+                console.error('Eroare la ștergerea cursului:', err);
                 alert('Nu s-a putut șterge cursul.');
             });
     };
@@ -63,7 +61,6 @@ const Profesor = () => {
     if (selectedCourseId) {
         const course = courses.find(c => c.course?.id === selectedCourseId);
         if (!course) {
-            console.error(`Cursul cu ID ${selectedCourseId} nu a fost găsit`);
             setSelectedCourseId(null);
             return <div>Cursul nu a fost găsit</div>;
         }
@@ -80,7 +77,10 @@ const Profesor = () => {
             <PAdaugaCurs
                 professorId={professorId}
                 onBack={() => setAdaugaCurs(false)}
-                onCreated={() => window.location.reload()}
+                onCreated={() => {
+                    setAdaugaCurs(false);
+                    fetchCourses(); // ✅ Actualizează lista fără reload
+                }}
             />
         );
     }
@@ -99,14 +99,8 @@ const Profesor = () => {
             <div className="lista-cursuri">
                 {Array.isArray(courses) && courses.length > 0 ? (
                     courses.map((cursuri) => {
-                        console.log("📍 cursuri object:", cursuri);
-                        console.log("🆔 cursuri.course?.id:", cursuri.course?.id);
-
                         const id = cursuri.course?.id;
-                        if (!id) {
-                            console.warn("⚠️ cursuri.course.id este undefined", cursuri);
-                            return null;
-                        }
+                        if (!id) return null;
 
                         return (
                             <div key={id} className="rand-curs">
@@ -128,4 +122,5 @@ const Profesor = () => {
         </div>
     );
 };
+
 export default Profesor;

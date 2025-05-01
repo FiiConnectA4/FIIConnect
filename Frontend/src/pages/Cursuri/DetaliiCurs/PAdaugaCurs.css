@@ -22,7 +22,6 @@
 }
 
 .save-button {
-    align-self: center;
     background-color: #537A9C;
     color: white;
     border: none;
@@ -30,8 +29,9 @@
     border-radius: 20px;
     cursor: pointer;
     font-size: 20px;
-    margin: 20px auto;
-    display: block;
+    max-width:30%;
+    margin: 20px 0;         /* ❌ elimină auto */
+    display: inline-block;  /* ❌ nu block */
 }
 
 .buton-curs {
@@ -54,12 +54,15 @@
 }
 
 .sectiune {
-    position: relative;
-    width: 70vh;
+    gap: 10px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
     background-color: #ccc;
-    padding: 10px;
-    margin-top: 30px;
-    border-radius: 6px;
+    border-radius: 10px;
+    padding: 1rem;
+    max-width: 50%;
+    margin-right: auto;
 }
 
 .bibliografie {
@@ -72,9 +75,12 @@ a {
 }
 
 .sectiune h2 {
-    font-size: 40px;
+    width: 150px;
     margin: 0;
+    font-size: 1.2rem;
+    color: #234;
 }
+
 
 .stergere {
     background-color: #537A9C;
@@ -88,4 +94,37 @@ a {
 
 .link {
     margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+    .sectiune {
+        flex-direction: column;
+        align-items: flex-start;
+        max-width: 90%;
+    }
+
+    .sectiune h2 {
+        margin-bottom: 0.5rem;
+        width: 100%;
+    }
+
+    .input-curs {
+        width: 100%;
+    }
+
+    .save-button {
+        width: 100%;
+        max-width: none;
+        font-size: 18px;
+        padding: 14px 24px;
+    }
+
+    .titlu-curs {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .titlu-curs h1 {
+        font-size: 30px;
+    }
 }

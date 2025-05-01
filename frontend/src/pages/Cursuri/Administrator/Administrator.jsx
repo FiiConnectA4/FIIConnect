@@ -5,20 +5,22 @@ import Ceas from '../Components/Ceas';
 import './../Student/Student.css';
 import PDetaliiCurs from '../DetaliiCurs/DetaliiCursEditabil';
 import PageControl from '../Components/PageControl';
+import AdaugaCurs from '../DetaliiCurs/AdaugaCurs';
 
 const Administrator = () => {
     const [selectedCursId, setSelectedCursId] = useState(null);
     const [cursuri, setCursuri] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [adaugaCurs, setAdaugaCurs] = useState(false);
 
-    useEffect(() => {
+    const fetchCourses = () => {
+        setLoading(true);
         fetch('/didactic/course')
             .then((response) => {
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                 return response.json();
             })
             .then((data) => {
-                console.log('Răspuns API:', data);
                 const courses = data._embedded?.courseList || [];
                 setCursuri(courses);
                 setLoading(false);
@@ -28,18 +30,19 @@ const Administrator = () => {
                 setCursuri([]);
                 setLoading(false);
             });
+    };
+
+    useEffect(() => {
+        fetchCourses();
     }, []);
 
     const handleDeleteCourse = (id) => {
         if (!window.confirm("Ești sigur că vrei să ștergi acest curs?")) return;
-    
-        console.log("🔄 Ștergere curs cu ID:", id);
-    
+
         fetch(`/didactic/course/${id}`, {
             method: 'DELETE'
         })
             .then((res) => {
-                console.log("📡 Status DELETE:", res.status);
                 if (!res.ok) throw new Error("Eroare la ștergere");
                 setCursuri(prev => prev.filter(c => c.id !== id));
             })
@@ -49,9 +52,7 @@ const Administrator = () => {
             });
     };
 
-    if (loading) {
-        return <div>Loading...</div>;
-    }
+    if (loading) return <div>Loading...</div>;
 
     if (selectedCursId) {
         const cursSelectat = cursuri.find((c) => c.id === selectedCursId);
@@ -64,6 +65,18 @@ const Administrator = () => {
             <PDetaliiCurs
                 curs={cursSelectat}
                 onBack={() => setSelectedCursId(null)}
+            />
+        );
+    }
+
+    if (adaugaCurs) {
+        return (
+            <AdaugaCurs
+                onBack={() => setAdaugaCurs(false)}
+                onCreated={() => {
+                    setAdaugaCurs(false);
+                    fetchCourses();
+                }}
             />
         );
     }
@@ -93,6 +106,7 @@ const Administrator = () => {
                 ) : (
                     <p>Nu există cursuri disponibile.</p>
                 )}
+                <Buton text="Adaugă curs" onNavigate={() => setAdaugaCurs(true)} />
             </div>
         </div>
     );

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './PAdaugaCurs.css';
 
-const PAdaugaCurs = ({ professorId, onBack, onCreated }) => {
+const AdaugaCurs = ({onBack, onCreated }) => {
     const [title, setTitle] = useState('');
     const [code, setCode] = useState('');
     const [year, setYear] = useState('');
@@ -9,7 +9,7 @@ const PAdaugaCurs = ({ professorId, onBack, onCreated }) => {
     const [credits, setCredits] = useState('');
     const [academicYear, setAcademicYear] = useState('');
 
-    const handleCreate = async () => {
+    const handleCreate = () => {
         const newCourse = {
             title,
             code,
@@ -20,54 +20,22 @@ const PAdaugaCurs = ({ professorId, onBack, onCreated }) => {
             academicYear
         };
 
-        try {
-            console.log("📤 Trimitem JSON:", newCourse);
+        console.log("📤 Trimitem JSON:", newCourse);
 
-            const res = await fetch('/didactic/course', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newCourse)
+        fetch('/didactic/course', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(newCourse)
+        })
+            .then(res => {
+                if (!res.ok) throw new Error("Eroare la creare curs");
+                alert("✅ Curs adăugat cu succes!");
+                if (onCreated) onCreated(); // dacă ai o funcție care revine la lista de cursuri
+            })
+            .catch(err => {
+                console.error("⛔ Eroare la adăugare curs:", err);
+                alert("Eroare la salvare!");
             });
-
-            if (!res.ok) {
-                const errText = await res.text();
-                throw new Error("❌ Eroare creare curs: " + errText);
-            }
-
-            const location = res.headers.get('Location');
-            const courseId = location ? parseInt(location.split('/').pop()) : null;
-
-            if (!courseId || isNaN(courseId)) throw new Error("ID-ul cursului este invalid!");
-            console.log("🆕 Curs creat cu id =", courseId);
-
-            const teaching = {
-                id: {
-                    idProf: parseInt(professorId),
-                    idCourse: parseInt(courseId),
-                },
-                role: "titular"
-            };
-
-            console.log("📎 Trimitem teaching:", teaching);
-
-            const res2 = await fetch('/didactic/teach', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(teaching)
-            });
-
-            if (!res2.ok) {
-                const errText = await res2.text();
-                throw new Error("❌ Eroare asociere profesor: " + errText);
-            }
-
-            alert("✅ Curs creat și asociat cu succes!");
-            if (onCreated) onCreated();
-
-        } catch (err) {
-            console.error("⛔ Eroare finală:", err);
-            alert(err.message || "Eroare necunoscută");
-        }
     };
 
     return (
@@ -117,4 +85,4 @@ const PAdaugaCurs = ({ professorId, onBack, onCreated }) => {
     );
 };
 
-export default PAdaugaCurs;
+export default AdaugaCurs;
