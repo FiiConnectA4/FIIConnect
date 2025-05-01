@@ -17,7 +17,6 @@ import java.io.File;
 
 @Configuration
 public class SftpOutboundConfig {
-
     @Autowired
     private SessionFactory<SftpClient.DirEntry> sessionFactory;
 
