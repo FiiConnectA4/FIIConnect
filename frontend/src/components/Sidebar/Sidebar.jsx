@@ -1,3 +1,4 @@
+import React from 'react';
 import ThemeToggle from "../ThemeToggle/ThemeToggle";
 import "./Sidebar.css";
 import SidebarButton from "../SidebarButton/SidebarButton";

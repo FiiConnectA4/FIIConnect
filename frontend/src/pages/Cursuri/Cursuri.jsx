@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState } from 'react';
 import Student from "./Student/Student";
 import Profesor from "./Profesor/Profesor";

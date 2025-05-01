@@ -1,3 +1,5 @@
+import React from 'react';
+
 // frontend/src/pages/Dashboard.jsx
 
 function Dashboard() {

@@ -66,7 +66,7 @@ public class UserController {
     public ResponseEntity<?> forgotPassword(@RequestParam String email) {
         Optional<User> userOptional = Optional.ofNullable(userRepository.findByEmail(email));
         if (userOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body("User not found");
+            return ResponseEntity.badRequest().body("{\"message\": \"User not found\"}");
         }
 
         User user = userOptional.get();
@@ -83,8 +83,9 @@ public class UserController {
         // Trimite email
         emailService.sendResetPasswordEmail(email, token);
 
-        return ResponseEntity.ok("Link-ul de resetare a fost trimis pe email.");
+        return ResponseEntity.ok("{\"message\": \"Reset link sent successfully\"}");
     }
+
 
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestParam String token, @RequestParam String newPassword) {

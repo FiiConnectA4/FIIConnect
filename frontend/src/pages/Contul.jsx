@@ -1,3 +1,5 @@
+import React from 'react';
+
 const Contul = () => {
     return <h1>Contul</h1>;
   };
