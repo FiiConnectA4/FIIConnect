@@ -1,8 +1,8 @@
-package com.fiiconnect.api.auth_userMgmt.models;
+package com.fiiconnect.api.modulexemplu;
 
-import com.fiiconnect.api.auth_userMgmt.permissions.model.Role;
 import jakarta.persistence.*;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -22,6 +22,12 @@ public class User {
     @Column(unique = true)
     private String email;
 
+    @Column(name = "two_factor_secret")
+    private String twoFactorSecret;
+
+    @Column(name = "iban")
+    private String iban;
+
     private boolean isActive = true;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -30,15 +36,9 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
+
     private Set<Role> roles = new HashSet<>();
 
-    @Column(nullable = false)
-    private String accountType; // New field for account type
-
-    @Column(name = "two_factor_secret")
-    private String twoFactorSecret;
-
-    // Getters and setters
     public String getPassword() {
         return password;
     }
@@ -51,26 +51,25 @@ public class User {
         return username;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public String getAccountType() {
-        return accountType;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
+    public String getEmail() { return email; }
+    public Set<Role> getRoles() {
+        return roles;
     }
 
     public void setEmail(String email) {
         this.email = email;
     }
 
-    public void setAccountType(String accountType) {
-        this.accountType = accountType;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
+    public String getIban() { return iban; }
+    public void setIban(String iban) { this.iban = iban; }
 
     public String getTwoFactorSecret() {
         return twoFactorSecret;
@@ -78,5 +77,4 @@ public class User {
     public void setTwoFactorSecret(String twoFactorSecret) {
         this.twoFactorSecret = twoFactorSecret;
     }
-    // Other necessary methods like hashCode, equals, toString, etc.
 }

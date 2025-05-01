@@ -1,4 +1,8 @@
+<<<<<<<< HEAD:backend/api/src/main/java/com/fiiconnect/api/auth_userMgmt/permissions/model/Permission.java
 package com.fiiconnect.api.auth_userMgmt.permissions.model;
+========
+package com.fiiconnect.api.auth_userMgmt.models;
+>>>>>>>> module/auth_dashboard:backend/api/src/main/java/com/fiiconnect/api/auth_userMgmt/models/Permission.java
 
 
 import jakarta.persistence.*;
