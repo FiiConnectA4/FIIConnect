@@ -37,8 +37,8 @@ jobs:
 
       - name: Copy SQL files into Oracle container
         run: |
-          docker cp containers/OracleDD/create_user.sql oracle-free:/tmp/
-          docker cp backend/scripts/didactic_table_create.sql oracle-free:/tmp/
+          docker cp containers/OracleDB/create_user.sql oracle-free:/tmp/
+          docker cp backend/scripts/didactic/didactic_table_create.sql oracle-free:/tmp/
           docker cp backend/scripts/didactic/didactic_sequence_create.sql oracle-free:/tmp/
           docker cp backend/scripts/didactic/didactic_table_populate.sql oracle-free:/tmp/
 
