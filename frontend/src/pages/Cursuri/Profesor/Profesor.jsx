@@ -8,7 +8,7 @@ import PDetaliiCurs from '../DetaliiCurs/DetaliiCursEditabil';
 import { useSearchParams } from 'react-router-dom';
 const Profesor = () => {
     const [searchParams] = useSearchParams(); // Hook pentru a citi query params
-    const professorId = searchParams.get('professorId') || 5;
+    const professorId = searchParams.get('professorId') || 2;
     const [professor, setProfessor] = useState(null); // Stocăm obiectul Professor
     const [courses, setCourses] = useState([]); // Lista de cursuri (goală momentan)
     const [selectedCourseId, setSelectedCourseId] = useState(null);
@@ -98,7 +98,11 @@ const Profesor = () => {
 
                         return (
                             <div key={id} className="rand-curs">
-                                <Carte />
+                                <Carte
+                                    key={id}
+                                    id={id}
+                                    userType='professor'
+                                />
                                 <Ceas />
                                 <Buton
                                     text={cursuri.course.title || 'Titlu indisponibil'}

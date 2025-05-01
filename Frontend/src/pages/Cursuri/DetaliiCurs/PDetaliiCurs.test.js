@@ -1,6 +1,6 @@
 import { render, screen, fireEvent } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import Profesor from "./Profesor";
+import Profesor from "../Profesor/Profesor";
 
 describe("Profesor Component", () => {
     beforeEach(() => {
