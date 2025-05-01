@@ -35,25 +35,25 @@ const Profesor = () => {
 
     const handleDeleteCourse = (id) => {
         if (!window.confirm("Ești sigur că vrei să ștergi acest curs?")) return;
-    
+
         console.log("🔄 Începem ștergerea cursului cu ID:", id);
-    
+
         fetch(`/didactic/course/${id}`, {
             method: 'DELETE'
         })
-        .then((res) => {
-            console.log("📡 Status răspuns DELETE:", res.status);
-            if (!res.ok) throw new Error('Eroare la ștergere');
-            setCourses(prev => {
-                const actualizata = prev.filter(c => c.course.id !== id);
-                console.log("🧹 Lista după ștergere:", actualizata);
-                return actualizata;
+            .then((res) => {
+                console.log("📡 Status răspuns DELETE:", res.status);
+                if (!res.ok) throw new Error('Eroare la ștergere');
+                setCourses(prev => {
+                    const actualizata = prev.filter(c => c.course.id !== id);
+                    console.log("🧹 Lista după ștergere:", actualizata);
+                    return actualizata;
+                });
+            })
+            .catch((err) => {
+                console.error('⛔ Eroare la ștergerea cursului:', err);
+                alert('Nu s-a putut șterge cursul.');
             });
-        })
-        .catch((err) => {
-            console.error('⛔ Eroare la ștergerea cursului:', err);
-            alert('Nu s-a putut șterge cursul.');
-        });
     };
 
     if (loading) return <div>Loading...</div>;
@@ -67,7 +67,7 @@ const Profesor = () => {
         }
         return (
             <PDetaliiCurs
-                curs={course}
+                curs={course.course}
                 onBack={() => setSelectedCourseId(null)}
             />
         );
@@ -89,13 +89,13 @@ const Profesor = () => {
                     courses.map((cursuri) => {
                         console.log("📍 cursuri object:", cursuri);
                         console.log("🆔 cursuri.course?.id:", cursuri.course?.id);
-                        
+
                         const id = cursuri.course?.id;
                         if (!id) {
                             console.warn("⚠️ cursuri.course.id este undefined", cursuri);
                             return null;
                         }
-    
+
                         return (
                             <div key={id} className="rand-curs">
                                 <Carte />
@@ -111,6 +111,7 @@ const Profesor = () => {
                 ) : (
                     <p>Nu există cursuri disponibile pentru acest profesor.</p>
                 )}
+                <Buton text='Adauga curs' />
             </div>
         </div>
     );
