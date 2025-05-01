@@ -11,6 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.sql.SQLException;
@@ -54,11 +57,22 @@ public class CourseMaterialController {
         return ResponseEntity.created(URI.create("/didactic/course/material/" + material.getId())).build();
     }
 
-    @PostMapping("/didactic/course/material/{id}")
-    public void uploadFile(@PathVariable Long id, @RequestBody MultipartFile file) throws IOException {
+    @PostMapping("/didactic/course/material/{id}/file")
+    public void uploadFile(@PathVariable Long id, @RequestBody MultipartFile file) throws IOException
+    {
         CourseMaterial material = repository.findById(id).orElseThrow(()->new CourseMaterialNotFoundException(id));
 
         sftpService.uploadFile(file, "faculty_files/didactic/course-" + material.getIdCourse() + "/materials/");
+    }
+
+    @GetMapping("/didactic/course/material/{id}/file")
+    public File downloadFile(@PathVariable Long id) throws IOException {
+        CourseMaterial material = repository.findById(id).orElseThrow(()->new CourseMaterialNotFoundException(id));
+        File file;
+
+        file = sftpService.downloadFile("faculty_files/didactic/course-" + material.getIdCourse() + "/materials/" + material.getFilename(), "didactic/course-" + material.getIdCourse() + "/materials/" + material.getFilename());
+
+        return file;
     }
 
     @DeleteMapping("/didactic/course/material/{id}")
