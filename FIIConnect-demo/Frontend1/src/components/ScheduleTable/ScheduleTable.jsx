@@ -1,6 +1,35 @@
 import React, { useState, useEffect } from "react";
 import "./ScheduleTable.css";
 
+const zileSaptamana = ["Luni", "Marti", "Miercuri", "Joi", "Vineri", "Sambata", "Duminica"];
+
+const sorteazaOrar = (orar) => {
+  return orar.sort((a, b) => {
+    // Sortează după ziua săptămânii
+    const ziA = zileSaptamana.indexOf(a.zi);
+    const ziB = zileSaptamana.indexOf(b.zi);
+
+    if (ziA !== ziB) {
+      return ziA - ziB; // Compară zilele
+    }
+
+    // Verifică dacă oraStart există pentru ambele obiecte
+    if (!a.oraStart || !b.oraStart) {
+      return 0; // Dacă lipsește oraStart, păstrează ordinea inițială
+    }
+
+    // Compară orele de început
+    const [oraA, minutA] = a.oraStart.split(":").map(Number); // Transformă ora în [HH, MM]
+    const [oraB, minutB] = b.oraStart.split(":").map(Number);
+
+    if (oraA !== oraB) {
+      return oraA - oraB; // Compară orele (HH)
+    }
+
+    return minutA - minutB; // Compară minutele (MM) dacă orele sunt egale
+  });
+};
+
 const ScheduleTable = ({ schedule, title, showSala = true, editable = false, onDataChange }) => {
   const [showPopup, setShowPopup] = useState(false);
   const [selectedEntry, setSelectedEntry] = useState(null);
@@ -8,18 +37,9 @@ const ScheduleTable = ({ schedule, title, showSala = true, editable = false, onD
   const [formData, setFormData] = useState({});
   const [scheduleData, setScheduleData] = useState(schedule);
   useEffect(() => {
-    setScheduleData(schedule);
+    const sortedData = sorteazaOrar(schedule); // Sortează datele
+    setScheduleData(sortedData);
   }, [schedule]);
-
-  // Funcție pentru a actualiza state-ul componentelor de orar
-
-
-  /*const handleEditClick = (entry) => {
-    setSelectedEntry(entry);
-    setFormData(entry); // inițializezi formularul cu valorile existente
-    setShowPopup(true);
-    setIsEditing(false);
-  };*/
 
   const handleEditClick = (entry) => {
     const entryWithId = {
@@ -58,47 +78,6 @@ const ScheduleTable = ({ schedule, title, showSala = true, editable = false, onD
       .catch((err) => console.error("Eroare la ștergere:", err));
   };
 
-  /*const handleSaveEdit = () => {
-    const isNew = !formData.id;
-
-    const payload = { ...formData };
-    if (isNew) delete payload.id; // elimină id-ul pentru POST
-
-      const url = isNew
-      ? "http://localhost:34101/orar"
-      : `http://localhost:34101/orar/${formData.id}`;  
-    const method = isNew ? "POST" : "PUT";
-  
-    fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Eroare la salvare");
-        return res.json();
-      })
-        .then((data) => {
-          // 💡 reconstruim intervalul dacă lipsește
-          if ((!data.interval || data.interval.trim() === "") && data.oraStart && data.oraEnd) {
-            data.interval = `${data.oraStart} - ${data.oraEnd}`;
-          }
-        
-          if (isNew) {
-            setScheduleData((prev) => [...prev, data]);
-          } else {
-            setScheduleData((prev) =>
-              prev.map((item) => (item.id === data.id ? data : item))
-            );
-          }
-        
-          closePopup();
-        });
-        
-
-      //.catch((err) => console.error("Eroare la salvare:", err));
-  };
-*/
 const handleSaveEdit = () => {
   const isNew = !formData.id;
 

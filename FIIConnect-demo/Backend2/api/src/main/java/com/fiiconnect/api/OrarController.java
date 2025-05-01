@@ -36,30 +36,25 @@ public class OrarController {
         repository.deleteById(id); // șterge înregistrările din DB după id
     }
 
-    /*@GetMapping({"/student/{an}/{grupa}", "/grupa/{an}/{grupa}"})
-    public List<OrarDTO> getOrarByAnAndGrupa(@PathVariable String an, @PathVariable String grupa) {
-        List<Orar> orarList = repository.findByAnAndGrupa(an, grupa);
-    
-        // Conversie Orar -> OrarDTO și includerea câmpului 'an'
-        return orarList.stream().map(orar -> {
-            LocalTime oraStartTime = LocalTime.parse(orar.getOraStart(), DateTimeFormatter.ofPattern("HH:mm"));
-            LocalTime oraEndTime = LocalTime.parse(orar.getOraEnd(), DateTimeFormatter.ofPattern("HH:mm"));
-            String oraStart = oraStartTime.format(DateTimeFormatter.ofPattern("HH:mm"));
-            String oraEnd = oraEndTime.format(DateTimeFormatter.ofPattern("HH:mm"));
-    
-            // Creăm un OrarDTO cu anul și profesorul
-            return new OrarDTO(
-                orar.getZi(),
-                oraStart + " - " + oraEnd,  // Aici combinăm intervalul de timp
-                orar.getDisciplina(),
-                orar.getTip(),
-                orar.getGrupa(),
-                orar.getSala(),
-                orar.getProfesor(),  // Adăugăm profesorul
-                orar.getAn()  // Adăugăm anul
-            );
-        }).collect(Collectors.toList());
-    }*/
+    @GetMapping("/discipline")
+    public List<String> getDiscipline() {
+        // Obține lista unică de discipline din baza de date
+        return repository.findAll().stream()
+                .map(Orar::getDisciplina) // Extrage numele disciplinelor
+                .filter(disciplina -> disciplina != null && !disciplina.isEmpty()) // Elimină valorile null sau goale
+                .distinct() // Elimină duplicatele
+                .collect(Collectors.toList()); // Returnează ca listă
+    }
+
+    @GetMapping("/profesori")
+    public List<String> getProfesori() {
+        // Obține lista unică de profesori din baza de date
+        return repository.findAll().stream()
+                .map(Orar::getProfesor) // Extrage numele profesorilor
+                .filter(profesor -> profesor != null && !profesor.isEmpty()) // Elimină valorile null sau goale
+                .distinct() // Elimină duplicatele
+                .collect(Collectors.toList()); // Returnează ca listă
+    }
 
     @GetMapping({"/studenti/{an}/{grupa}", "/grupa/{an}/{grupa}"})
     public List<OrarDTO> getOrarByAnAndGrupa(@PathVariable String an, @PathVariable String grupa) {
