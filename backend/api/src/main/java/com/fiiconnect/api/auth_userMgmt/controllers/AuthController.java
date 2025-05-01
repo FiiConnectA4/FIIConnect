@@ -1,15 +1,14 @@
-package com.fiiconnect.api.auth.controller;
+package com.fiiconnect.api.auth_userMgmt.controllers;
 
-import com.fiiconnect.api.auth.validator.EmailValidator;
-import com.fiiconnect.api.core.ApiResponse;
-import com.fiiconnect.api.auth.validator.PasswordValidator;
-import com.fiiconnect.api.auth.model.User;
-import com.fiiconnect.api.auth.repository.UserRepository;
-import com.fiiconnect.api.auth.service.TwoFactorAuthenticationService;
-import com.fiiconnect.api.auth.dto.LoginRequest;
-import com.fiiconnect.api.auth.dto.RegisterRequest;
-import com.fiiconnect.api.permissions.model.Role;
-import com.fiiconnect.api.permissions.repository.RoleRepository;
+import com.fiiconnect.api.auth_userMgmt.validators.EmailValidator;
+import com.fiiconnect.api.auth_userMgmt.core.ApiResponse;
+import com.fiiconnect.api.auth_userMgmt.validators.PasswordValidator;
+import com.fiiconnect.api.auth_userMgmt.models.User;
+import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository;
+import com.fiiconnect.api.auth_userMgmt.services.TwoFactorAuthenticationService;
+import com.fiiconnect.api.auth_userMgmt.dtos.LoginRequest;
+import com.fiiconnect.api.auth_userMgmt.dtos.RegisterRequest;
+import com.fiiconnect.api.auth_userMgmt.permissions.repository.RoleRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -67,16 +66,6 @@ public class AuthController {
             user.setUsername(request.getUsername());
             user.setEmail(request.getEmail());
             user.setPassword(passwordEncoder.encode(request.getPassword()));
-
-            // Căutăm rolul
-            Role role = roleRepository.findByRoleName(request.getRoleName());
-            if (role == null) {
-                return ResponseEntity.badRequest().body(
-                        new ApiResponse("Rolul specificat nu există.", false));
-            }
-
-            // Asignăm rolul la user
-            user.getRoles().add(role);
 
             // Two Factor Authentication
             String secret = twoFactorAuthenticationService.generateSecretKey();

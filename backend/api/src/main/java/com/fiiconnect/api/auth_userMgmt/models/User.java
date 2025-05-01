@@ -1,7 +1,6 @@
-package com.fiiconnect.api.auth.model;
+package com.fiiconnect.api.auth_userMgmt.models;
 
-import com.fiiconnect.api.core.AccountType;
-import com.fiiconnect.api.permissions.model.Role;
+import com.fiiconnect.api.auth_userMgmt.permissions.model.Role;
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -58,6 +57,14 @@ public class User {
 
     public String getAccountType() {
         return accountType;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public void setAccountType(String accountType) {

@@ -1,4 +1,4 @@
-package com.fiiconnect.api.auth.dto;
+package com.fiiconnect.api.auth_userMgmt.dtos;
 
 public class LoginRequest {
     private String username;

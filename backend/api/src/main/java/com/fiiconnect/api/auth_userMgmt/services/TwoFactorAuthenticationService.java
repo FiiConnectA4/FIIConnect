@@ -1,4 +1,4 @@
-package com.fiiconnect.api.auth.service;
+package com.fiiconnect.api.auth_userMgmt.services;
 
 import com.warrenstrange.googleauth.GoogleAuthenticator;
 import com.warrenstrange.googleauth.GoogleAuthenticatorConfig;

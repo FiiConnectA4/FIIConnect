@@ -1,4 +1,4 @@
-package com.fiiconnect.api.core;
+package com.fiiconnect.api.auth_userMgmt.core;
 
 public class ApiResponse {
     private String message;
