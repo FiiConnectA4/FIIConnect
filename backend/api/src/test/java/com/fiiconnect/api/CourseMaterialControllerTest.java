@@ -101,7 +101,7 @@ public class CourseMaterialControllerTest {
 
         when(repository.save(any(CourseMaterial.class))).thenReturn(saved);
 
-        ResponseEntity<?> response = controller.uploadMaterial(input);
+        ResponseEntity<?> response = controller.addMaterial(input);
 
         assertEquals(201, response.getStatusCode().value());
         assertEquals("/didactic/course/material/2", response.getHeaders().getLocation().toString());
