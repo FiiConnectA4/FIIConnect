@@ -9,7 +9,7 @@ import { useSearchParams } from 'react-router-dom';
 
 const Student = () => {
     const [searchParams] = useSearchParams();
-    const studentId = searchParams.get('studentId') || 8;
+    const studentId = searchParams.get('studentId') || 4;
 
     const [student, setStudent] = useState(null);
     const [courses, setCourses] = useState([]);
@@ -71,7 +71,9 @@ const Student = () => {
                 {courses.length > 0 ? (
                     courses.map((curs) => (
                         <div key={curs.id} className="rand-curs">
-                            <Carte />
+                            <Carte
+                                userType='student'
+                            />
                             <Ceas />
                             <Buton
                                 text={curs.title || 'Titlu indisponibil'}
