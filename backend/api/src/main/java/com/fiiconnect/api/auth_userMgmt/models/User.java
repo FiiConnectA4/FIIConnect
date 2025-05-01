@@ -21,6 +21,12 @@ public class User {
     @Column(unique = true)
     private String email;
 
+    @Column(name = "two_factor_secret")
+    private String twoFactorSecret;
+
+    @Column(name = "iban")
+    private String iban;
+
     private boolean isActive = true;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -29,7 +35,9 @@ public class User {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
+
     private Set<Role> roles = new HashSet<>();
+
     public String getPassword() {
         return password;
     }
@@ -43,4 +51,29 @@ public class User {
     }
 
     public String getEmail() { return email; }
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
+    public String getIban() { return iban; }
+    public void setIban(String iban) { this.iban = iban; }
+
+    public String getTwoFactorSecret() {
+        return twoFactorSecret;
+    }
+    public void setTwoFactorSecret(String twoFactorSecret) {
+        this.twoFactorSecret = twoFactorSecret;
+    }
 }

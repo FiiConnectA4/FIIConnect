@@ -94,16 +94,6 @@ button:hover {
 
 .auth-input {
   width: 100%;
-  height: 3.5rem;
-  text-indent: 10px;
-  padding-left: 0;
-  padding-right: 0;
-  background-color: #f5f7fa;
-  border-radius: 0.625rem;
-  font-size: 1rem;
-  color: #6b7280;
-  outline: none;
-  border: 1px solid red; /* Pentru debugging, poți șterge dacă nu mai ai nevoie */
 }
 .auth-input::placeholder {
   color: #6b7280;
@@ -170,13 +160,14 @@ button:hover {
 
 .login-password-toggle {
   position: absolute;
-  right: 42%; /* Ajustează această valoare dacă e nevoie */
   top: 50%;
+  right: 12px;
   transform: translateY(-50%);
   cursor: pointer;
   color: #6b7280;
-  z-index: 10;
 }
+
+
 
 
 /* === Register Form === */
@@ -202,4 +193,41 @@ button:hover {
 
 .dashboard-text {
   color: #6b7280;
+}
+
+.error {
+  color: red;
+  font-size: 0.75rem; /* smaller font */
+  font-style: italic; /* <-- italic */
+  margin-top: -15px;    /* small space */
+  margin-left: 4px;   /* slight indent */
+}
+
+
+.error-message {
+  color: #ef4444; /* red-500 */
+  font-size: 0.875rem; /* small text */
+  margin-top: 0.25rem;
+  text-align: left;
+}
+
+.password-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex; justify-content: center; align-items: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  text-align: center;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
 }
