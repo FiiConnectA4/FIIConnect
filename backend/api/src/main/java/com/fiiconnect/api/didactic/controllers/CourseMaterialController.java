@@ -96,11 +96,12 @@ public class CourseMaterialController {
     public void changeFilename(@PathVariable Long id, @RequestBody String newFilename) throws IOException {
         CourseMaterial material = repository.findById(id).orElseThrow(() -> new CourseMaterialNotFoundException(id));
 
-        String pathPrefix = "faculty_files/didactic/course-" + material.getIdCourse() + "/materials/";
-        sftpService.renameFile(pathPrefix + material.getFilename(), pathPrefix + newFilename);
-
+        String oldFilename = material.getFilename();
         material.setFilename(newFilename);
         repository.save(material);
+        
+        String pathPrefix = "faculty_files/didactic/course-" + material.getIdCourse() + "/materials/";
+        sftpService.renameFile(pathPrefix + oldFilename, pathPrefix + newFilename);
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)
