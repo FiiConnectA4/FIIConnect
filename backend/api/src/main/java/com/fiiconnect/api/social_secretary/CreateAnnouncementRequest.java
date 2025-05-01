@@ -12,7 +12,7 @@ public class CreateAnnouncementRequest {
 
     public CreateAnnouncementRequest(String title, String message, CreateUserRequest professor, Set<TagRequest> tags,LocalDate publishedDate) {
         this.title = title;
-        this.message = message;
+        this.message =   message;
         this.professor = professor;
         this.tags = tags;
         this.publishedDate=publishedDate;
