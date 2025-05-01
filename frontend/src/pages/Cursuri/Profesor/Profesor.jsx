@@ -59,7 +59,7 @@ const Profesor = () => {
     if (loading) return <div>Loading...</div>;
 
     if (selectedCourseId) {
-        const course = courses.find(c => c.id === selectedCourseId);
+        const course = courses.find(c => c.course?.id === selectedCourseId);
         if (!course) {
             console.error(`Cursul cu ID ${selectedCourseId} nu a fost găsit`);
             setSelectedCourseId(null);
