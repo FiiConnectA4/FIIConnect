@@ -3,13 +3,15 @@ import { useState, useEffect } from 'react';
 import './DetaliiCurs.css';
 import Ceas from './../Components/Ceas';
 import Edit from './../Components/Edit';
+import ButonExtensibil from '../Components/ButonExtensibil';
 import AdaugaLink from './../Components/AdaugaLink';
 
 const PDetaliiCurs = ({ curs, onBack }) => {
     const [materials, setMaterials] = useState([]);
     const [gradingMethod, setGradingMethod] = useState('');
     const [description, setDescription] = useState('');
-    const [newMaterial, setNewMaterial] = useState('');
+    const [newMaterial, setNewMaterial] = useState([]);
+    const [profesori, setProfesori] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -25,6 +27,34 @@ const PDetaliiCurs = ({ curs, onBack }) => {
             .catch((err) => {
                 console.error('Error loading materials', err);
                 setLoading(false);
+            });
+
+        fetch(`/didactic/course/${curs.id}`)
+            .then(response => {
+                if (!response.ok) {
+                    console.error(`HTTP error! Status: ${response.status}`);
+                    setProfesori([]); // Setăm lista ca fiind goală
+                    return [];
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Răspuns API profesori:', data); // Verificăm structura răspunsului
+                const professorsArray = data.professors || []; // Accesăm array-ul din răspuns
+                console.log('Array profesori:', professorsArray); // Verificăm array-ul de profesori
+                if (Array.isArray(professorsArray)) {
+                    const profList = professorsArray.map(prof => ({
+                        name: `${prof.professor.firstName} ${prof.professor.lastName}`,
+                    }));
+                    setProfesori(profList);
+                } else {
+                    console.error('Răspuns invalid: nu conține un array de profesori.', data);
+                    setProfesori([]); // Setăm lista ca fiind goală
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching professors:', error);
+                setProfesori([]); // Setăm lista ca fiind goală în caz de eroare
             });
     }, [curs.id]);
 
@@ -76,6 +106,10 @@ const PDetaliiCurs = ({ curs, onBack }) => {
                 <h1><u>{curs.title}</u></h1>
                 <Ceas />
             </div>
+            <ButonExtensibil
+                text="Profesori"
+                professors={profesori} // Transmitem lista de profesori
+            />
 
             <div className="sectiune">
                 <h2>Descriere:</h2>

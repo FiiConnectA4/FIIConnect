@@ -5,7 +5,6 @@ import Carte from '../Components/Carte'; // Adjusted path
 import Buton from '../Components/Buton'; // Adjusted path
 import DetaliiCurs from './DetaliiCurs';
 
-
 jest.mock('../Components/Ceas', () => () => <div>Ceas Mock</div>);
 jest.mock('../Components/Carte', () => () => <div>Carte Mock</div>);
 jest.mock('../Components/Buton', () => ({ text, onNavigate }) => (

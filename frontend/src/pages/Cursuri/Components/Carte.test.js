@@ -6,6 +6,12 @@ describe('Carte Component', () => {
         render(<Carte />);
         const img = screen.getByAltText('Carte curs');
         expect(img).toBeInTheDocument();
-        expect(img).toHaveAttribute('src', '/Book open.png');
+        expect(img).toHaveAttribute('src', '/Book.png'); // Verificăm sursa corectă a imaginii
+    });
+
+    test('renders div with id "carte"', () => {
+        render(<Carte />);
+        const divElement = screen.getByTestId('carte-container');
+        expect(divElement).toBeInTheDocument();
     });
 });
