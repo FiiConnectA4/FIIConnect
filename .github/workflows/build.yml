@@ -77,7 +77,6 @@ jobs:
           path: ~/.m2
           key: ${{ runner.os }}-m2-${{ hashFiles('**pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
-
       - name: Build and run tests + SonarQube
         working-directory: backend/api
         env:
@@ -91,7 +90,7 @@ jobs:
             -Dsftp.port=2222 \
             org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
             -Dsonar.projectKey=FiiConnectA4_FIIConnect
-        - name: Dump surefire logs (on failure)
+      - name: Dump surefire logs (on failure)
         if: failure()
         run: cat backend/api/target/surefire-reports/*.txt || true
      
