@@ -38,7 +38,6 @@ const Administrator = () => {
 
     const handleDeleteCourse = (id) => {
         if (!window.confirm("Ești sigur că vrei să ștergi acest curs?")) return;
-
         fetch(`/didactic/course/${id}`, {
             method: 'DELETE'
         })
@@ -91,7 +90,11 @@ const Administrator = () => {
                 {cursuri.length > 0 ? (
                     cursuri.map((curs) => (
                         <div key={curs.id} className="rand-curs">
-                            <Carte />
+                            <Carte
+                                key={curs.id}
+                                id={curs.id}
+                                userType='professor'
+                            />
                             <Ceas idCurs={curs.id} />
                             <Buton text={curs.title} onNavigate={() => setSelectedCursId(curs.id)} />
                             <PageControl

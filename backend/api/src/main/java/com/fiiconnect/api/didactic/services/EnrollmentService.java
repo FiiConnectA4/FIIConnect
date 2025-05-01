@@ -10,6 +10,8 @@ import com.fiiconnect.api.didactic.repositories.EnrollmentRepository;
 import com.fiiconnect.api.didactic.repositories.StudentRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class EnrollmentService {
     private final StudentRepository studentRepository;
@@ -34,5 +36,12 @@ public class EnrollmentService {
         Long idCourse = enrollment.getId().getIdCourse();
         Course course = courseRepository.findById(idCourse).orElseThrow(() -> new CourseNotFoundException(idCourse));
         enrollment.setCourse(course);
+    }
+
+    public List<Enrollment> getCourseEnrollments(Long idCourse)
+    {
+        List<Enrollment> enrollments = repository.findByIdIdCourse(idCourse);
+        enrollments.forEach(this::attachStudent);
+        return enrollments;
     }
 }
