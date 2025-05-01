@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "sftp")
 public class SftpServerInfo {
-    @Getter
     private String host;
     private Integer port;
     private String username;
