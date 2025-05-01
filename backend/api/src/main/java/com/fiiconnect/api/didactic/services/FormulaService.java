@@ -9,9 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 @Service
 public class FormulaService {
+    private static final Logger LOGGER = Logger.getLogger(FormulaService.class.getName());
+
     private final FormulaRepository formulaRepository;
     private final FormulaComponentRepository componentRepository;
 
@@ -32,6 +35,13 @@ public class FormulaService {
     public Formula getFormula(Long formulaId) {
         Formula formula = formulaRepository.findById(formulaId)
                 .orElseThrow(() -> new FormulaNotFoundException(formulaId));
+        attachComponents(formula);
+        return formula;
+    }
+
+    public Formula getFormulaByCourseId(Long idCourse) {
+        Formula formula = formulaRepository.findByIdCourse(idCourse)
+                .orElseThrow(() -> new FormulaNotFoundException("No formula found for course ID: " + idCourse));
         attachComponents(formula);
         return formula;
     }
@@ -58,9 +68,9 @@ public class FormulaService {
     }
 
     public void attachComponents(Formula formula) {
-        List<FormulaComponent> components = componentRepository.findAll().stream()
-                .filter(c -> c.getIdFormula().equals(formula.getId()))
-                .toList();
+        LOGGER.info("Attaching components for formula ID: " + formula.getId() + ", type: " + formula.getId().getClass().getName());
+        List<FormulaComponent> components = componentRepository.findByFormulaId(formula.getId());
+        LOGGER.info("Found " + components.size() + " components");
         formula.setComponents(components);
     }
 }
