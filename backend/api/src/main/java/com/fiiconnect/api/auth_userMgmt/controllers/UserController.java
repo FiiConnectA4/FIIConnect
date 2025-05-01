@@ -36,45 +36,60 @@ public class UserController {
     private JwtService jwtService;
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse> registerUser(@RequestBody User user) {
+    public ResponseEntity<ApiResponse> registerUser(@RequestBody RegisterRequest registerRequest) {
         try {
-            if (user.getPassword() == null || user.getUsername() == null || user.getEmail() == null) {
+            if (registerRequest.getUsername() == null || registerRequest.getPassword() == null || registerRequest.getEmail() == null || registerRequest.getRole() == null) {
                 return ResponseEntity.badRequest().body(
-                        new ApiResponse("Username, email și parola sunt necesare.", false));
+                        new ApiResponse("Username, email, parola și rolul sunt necesare.", false));
             }
 
-            if (userRepository.findByEmail(user.getEmail()) != null) {
+            if (userRepository.findByEmail(registerRequest.getEmail()) != null) {
                 return ResponseEntity.badRequest().body(
                         new ApiResponse("Emailul este deja folosit.", false));
             }
 
-            if (!PasswordValidator.isValid(user.getPassword())) {
+            if (!PasswordValidator.isValid(registerRequest.getPassword())) {
                 return ResponseEntity.badRequest().body(
                         new ApiResponse("Parola trebuie să conțină minim 8 caractere, o literă mare, una mică, o cifră și un simbol.", false));
             }
 
-            if (!EmailValidator.isValid(user.getEmail())) {
+            if (!EmailValidator.isValid(registerRequest.getEmail())) {
                 return ResponseEntity.badRequest().body(
                         new ApiResponse("Email invalid.", false));
             }
 
-            if (userRepository.findByUsername(user.getUsername()) != null) {
+            if (userRepository.findByUsername(registerRequest.getUsername()) != null) {
                 return ResponseEntity.badRequest().body(
                         new ApiResponse("Username-ul este deja folosit.", false));
             }
 
-            if (user.getIban() != null && !user.getIban().isEmpty()) {
-                if (!IbanValidator.isValid(user.getIban())) {
+            System.out.println("Rol căutat: ROLE_" + registerRequest.getRole().toUpperCase());
+            Role role = roleRepository.findByRoleName("ROLE_" + registerRequest.getRole().toUpperCase());
+            System.out.println("Rol găsit: " + role);
+
+            if (role == null) {
+                return ResponseEntity.badRequest().body(
+                        new ApiResponse("Rol invalid. Roluri posibile: STUDENT sau PROFESOR.", false));
+            }
+
+            if (registerRequest.getIban() != null && !registerRequest.getIban().isEmpty()) {
+                if (!IbanValidator.isValid(registerRequest.getIban())) {
                     return ResponseEntity.badRequest().body(
                             new ApiResponse("IBAN invalid.", false));
                 }
             }
 
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            User user = new User();
+            user.setUsername(registerRequest.getUsername());
+            user.setEmail(registerRequest.getEmail());
+            user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
+            user.getRoles().add(role);
+            user.setIban(registerRequest.getIban());
+            user.setActive(true);
+
             userRepository.save(user);
 
             return ResponseEntity.ok(new ApiResponse("Utilizator înregistrat cu succes.", true));
-
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body(
