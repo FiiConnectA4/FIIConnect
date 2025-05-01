@@ -93,6 +93,26 @@ public class SftpService {
         return localFile;
     }
 
+    public boolean checkExists(String remoteFilePath) throws IOException {
+        try {
+            sftpRemoteFileTemplate.execute(session -> {
+                if (!session.exists(remoteFilePath)) {
+                    throw new FileNotFoundException("Remote file not found: " + remoteFilePath);
+                }
+
+                return null;
+            });
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof FileNotFoundException) {
+                return false;
+            } else if (e.getCause() instanceof IOException) {
+                throw (IOException) e.getCause();
+            }
+            throw e;
+        }
+        return true;
+    }
+
     public void deleteFile(String remoteFilePath, boolean isDirectory) throws IOException {
         try {
             sftpRemoteFileTemplate.execute(session -> {

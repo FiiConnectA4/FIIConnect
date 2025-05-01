@@ -23,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
@@ -112,9 +113,23 @@ public class CourseController {
             materialService.deleteMaterial(material);
 
         String pathPrefix = "faculty_files/didactic/course-" + course.getId() + "/";
-        sftpService.deleteFile(pathPrefix + "materials/", true);
-        sftpService.deleteFile(pathPrefix + "description.txt", false);
-        sftpService.deleteFile(pathPrefix, true);
+        if(sftpService.checkExists(pathPrefix))
+        {
+            try{
+                sftpService.deleteFile(pathPrefix + "materials/", true);
+            }catch(FileNotFoundException e)
+            {
+                //do nothing
+            }
+            try{
+                sftpService.deleteFile(pathPrefix + "description.txt", false);
+            }catch(FileNotFoundException e)
+            {
+                //do nothing
+            }
+
+            sftpService.deleteFile(pathPrefix, true);
+        }
 
         repository.delete(course);
         return ResponseEntity.noContent().build();
