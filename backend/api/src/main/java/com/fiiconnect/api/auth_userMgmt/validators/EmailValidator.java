@@ -1,4 +1,4 @@
-package com.fiiconnect.api.auth.validator;
+package com.fiiconnect.api.auth_userMgmt.validators;
 
 import java.util.regex.Pattern;
 

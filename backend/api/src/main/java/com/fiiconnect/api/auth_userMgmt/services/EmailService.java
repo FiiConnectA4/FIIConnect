@@ -1,4 +1,4 @@
-package com.fiiconnect.api.auth.service;
+package com.fiiconnect.api.auth_userMgmt.services;
 
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;

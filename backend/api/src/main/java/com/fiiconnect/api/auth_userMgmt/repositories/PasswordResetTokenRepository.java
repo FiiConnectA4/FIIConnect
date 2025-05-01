@@ -1,6 +1,6 @@
-package com.fiiconnect.api.passwordreset.repository;
+package com.fiiconnect.api.auth_userMgmt.repositories;
 
-import com.fiiconnect.api.passwordreset.model.PasswordResetToken;
+import com.fiiconnect.api.auth_userMgmt.models.PasswordResetToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 

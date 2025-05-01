@@ -1,6 +1,5 @@
-package com.fiiconnect.api.passwordreset.model;
+package com.fiiconnect.api.auth_userMgmt.models;
 
-import com.fiiconnect.api.auth.model.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 

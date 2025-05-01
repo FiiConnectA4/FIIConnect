@@ -1,4 +1,4 @@
-package com.fiiconnect.api.config;
+package com.fiiconnect.api.auth_userMgmt.configs;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

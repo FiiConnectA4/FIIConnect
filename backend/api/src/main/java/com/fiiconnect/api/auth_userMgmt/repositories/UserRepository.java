@@ -1,6 +1,6 @@
-package com.fiiconnect.api.auth.repository;
+package com.fiiconnect.api.auth_userMgmt.repositories;
 
-import com.fiiconnect.api.auth.model.User;
+import com.fiiconnect.api.auth_userMgmt.models.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserRepository extends JpaRepository<User, Long> {

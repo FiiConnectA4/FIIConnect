@@ -1,15 +1,15 @@
-package com.fiiconnect.api.auth.controller;
+package com.fiiconnect.api.auth_userMgmt.controllers;
 
 
 
-import com.fiiconnect.api.auth.model.User;
-import com.fiiconnect.api.auth.repository.UserRepository;
-import com.fiiconnect.api.auth.service.EmailService;
-import com.fiiconnect.api.auth.validator.EmailValidator;
-import com.fiiconnect.api.auth.validator.PasswordValidator;
-import com.fiiconnect.api.core.ApiResponse;
-import com.fiiconnect.api.passwordreset.model.PasswordResetToken;
-import com.fiiconnect.api.passwordreset.repository.PasswordResetTokenRepository;
+import com.fiiconnect.api.auth_userMgmt.models.User;
+import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository;
+import com.fiiconnect.api.auth_userMgmt.services.EmailService;
+import com.fiiconnect.api.auth_userMgmt.validators.EmailValidator;
+import com.fiiconnect.api.auth_userMgmt.validators.PasswordValidator;
+import com.fiiconnect.api.auth_userMgmt.core.ApiResponse;
+import com.fiiconnect.api.auth_userMgmt.models.PasswordResetToken;
+import com.fiiconnect.api.auth_userMgmt.repositories.PasswordResetTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;

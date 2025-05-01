@@ -1,7 +1,7 @@
-package com.fiiconnect.api.auth.service;
+package com.fiiconnect.api.auth_userMgmt.services;
 
-import com.fiiconnect.api.passwordreset.model.PasswordResetToken;
-import com.fiiconnect.api.passwordreset.repository.PasswordResetTokenRepository;
+import com.fiiconnect.api.auth_userMgmt.models.PasswordResetToken;
+import com.fiiconnect.api.auth_userMgmt.repositories.PasswordResetTokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
