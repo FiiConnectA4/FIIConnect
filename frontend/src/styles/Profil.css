@@ -1,0 +1,294 @@
+.profile-wrapper {
+  padding: 2rem;
+  background-color: #f0f4f8;
+  font-family: 'Inter', sans-serif;
+}
+
+.profile-title {
+  font-size: 1.4rem;
+  color: #003087;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+.profile-sections {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+}
+
+.profile-left,
+.profile-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.card {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* ===== Left section ===== */
+
+.profile-avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 9999px;
+  object-fit: cover;
+  border: 2px solid #003087;
+}
+
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.upload-btn {
+  background-color: #003087;
+  color: white;
+  padding: 0.4rem 0.8rem;
+  font-size: 0.8rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+}
+
+.info-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.label {
+  font-weight: 500;
+  color: #374151;
+}
+
+.label.large {
+  font-size: 1.1rem;
+}
+
+.value-edit {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.edit-btn,
+.view-btn {
+  background-color: #e0e7ff;
+  color: #003087;
+  font-weight: bold;
+  border: none;
+  padding: 0.35rem 0.8rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.kyc-badge {
+  background-color: #dcfce7;
+  color: #16a34a;
+  font-weight: 600;
+  padding: 0.3rem 0.8rem;
+  border-radius: 0.5rem;
+  font-size: 0.75rem;
+}
+
+.about-text {
+  font-size: 0.85rem;
+  color: #4b5563;
+  margin-top: 0.5rem;
+}
+
+.about-textarea {
+  width: 100%;
+  min-height: 100px;
+  font-size: 0.9rem;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  resize: vertical;
+  font-family: 'Inter', sans-serif;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.save-btn,
+.cancel-btn {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.75rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.save-btn {
+  background-color: #16a34a;
+  color: white;
+}
+
+.cancel-btn {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.editable-input {
+  padding: 0.4rem 0.6rem;
+  font-size: 0.85rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  width: 200px;
+  outline: none;
+  font-family: 'Inter', sans-serif;
+}
+
+.highlight {
+  color: #003087;
+  font-weight: bold;
+}
+
+/* ===== Tags and badges ===== */
+
+.tags {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.tags.spaced {
+  margin-top: 0.5rem;
+}
+
+.tag {
+  background-color: #f0f4ff;
+  color: #003087;
+  font-size: 0.75rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+}
+
+.tag.active {
+  background-color: #d1fae5;
+  color: #065f46;
+  font-weight: bold;
+}
+
+.badge {
+  font-size: 0.85rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 999px;
+  font-weight: bold;
+}
+
+.orange {
+  background-color: #ffe6cc;
+  color: #c2410c;
+}
+
+.yellow {
+  background-color: #fef08a;
+  color: #ca8a04;
+}
+
+.status-icon {
+  font-size: 1.25rem;
+}
+
+/* ===== Right section (updated!) ===== */
+
+.profile-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.status-header {
+  padding-bottom: 1rem;
+}
+
+.horizontal-card {
+  display: flex;
+  padding: 1rem;
+  align-items: center;
+  justify-content: space-between;
+  border-left: 5px solid transparent;
+}
+
+.horizontal-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.emoji-box {
+  background-color: #f3f4f6;
+  font-size: 1.4rem;
+  padding: 0.5rem 0.9rem;
+  border-radius: 0.75rem;
+}
+
+.value-text {
+  font-size: 0.95rem;
+  font-weight: 500;
+  margin-top: 0.25rem;
+}
+
+.orange-outline {
+  border-left-color: #fdba74;
+}
+
+.yellow-outline {
+  border-left-color: #facc15;
+}
+
+/* ===== Achievements ===== */
+
+.achievement-box {
+  padding: 1rem;
+}
+
+.achievement-list {
+  margin-top: 0.5rem;
+  list-style-type: disc;
+  padding-left: 1.2rem;
+  font-size: 0.85rem;
+  color: #1d4ed8;
+}
+
+.achievement-list.spaced {
+  background-color: #f9fafb;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e5e7eb;
+}
+
+.achievement-list li {
+  margin-bottom: 0.5rem;
+}
+
+.achievement-list li:last-child {
+  margin-bottom: 0;
+}
+
+.card .info-item > button.edit-btn {
+  background-color: #facc15;
+  color: #1f2937;
+}

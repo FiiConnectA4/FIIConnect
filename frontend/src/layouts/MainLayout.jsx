@@ -1,23 +1,30 @@
-import React from 'react';
 import Sidebar from "../components/Sidebar/Sidebar";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet } from "react-router-dom";
+import ProfileButton from "../components/ProfileButton/ProfileButton";
 
 const MainLayout = () => {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    localStorage.removeItem("token"); // șterge tokenul JWT
-    navigate("/"); // redirect la login
-  };
-
   return (
     <div style={{ display: "flex", height: "100vh" }}>
       <Sidebar />
-      <div style={{ flex: 1, padding: "2rem" }}>
-        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1rem" }}>
-          <button onClick={handleLogout}>Logout</button>
+
+      <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+        {/* Header */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "flex-end",
+            padding: "1rem 2rem",
+            borderBottom: "1px solid #e5e7eb",
+            alignItems: "center",
+          }}
+        >
+          <ProfileButton />
         </div>
-        <Outlet />
+
+        {/* Pagina curentă */}
+        <div style={{ padding: "2rem", flex: 1, overflowY: "auto" }}>
+          <Outlet />
+        </div>
       </div>
     </div>
   );
