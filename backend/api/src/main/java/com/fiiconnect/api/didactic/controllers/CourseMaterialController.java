@@ -67,8 +67,8 @@ public class CourseMaterialController {
     {
         CourseMaterial material = repository.findById(id).orElseThrow(()->new CourseMaterialNotFoundException(id));
         material.setFilename(file.getOriginalFilename());
-        sftpService.uploadFile(file, "faculty_files/didactic/course-" + material.getIdCourse() + "/materials/");
         repository.save(material);
+        sftpService.uploadFile(file, "faculty_files/didactic/course-" + material.getIdCourse() + "/materials/");
     }
 
     @GetMapping("/didactic/course/material/{id}/file")
