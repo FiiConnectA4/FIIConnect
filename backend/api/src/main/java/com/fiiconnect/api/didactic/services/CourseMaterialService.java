@@ -17,7 +17,7 @@ public class CourseMaterialService {
     }
 
     public void deleteMaterial(CourseMaterial material) throws IOException {
-        sftpService.deleteFile("faculty_files/didactic/course-" + material.getIdCourse() + "/materials/" + material.getFilename());
+        sftpService.deleteFile("faculty_files/didactic/course-" + material.getIdCourse() + "/materials/" + material.getFilename(), false);
         repository.delete(material);
     }
 }

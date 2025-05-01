@@ -112,9 +112,9 @@ public class CourseController {
             materialService.deleteMaterial(material);
 
         String pathPrefix = "faculty_files/didactic/course-" + course.getId() + "/";
-        sftpService.deleteFile(pathPrefix + "materials/");
-        sftpService.deleteFile(pathPrefix + "description.txt");
-        sftpService.deleteFile(pathPrefix);
+        sftpService.deleteFile(pathPrefix + "materials/", true);
+        sftpService.deleteFile(pathPrefix + "description.txt", false);
+        sftpService.deleteFile(pathPrefix, true);
 
         repository.delete(course);
         return ResponseEntity.noContent().build();

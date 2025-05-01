@@ -66,8 +66,8 @@ public class SftpController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing or invalid remote file name.");
             }
 
-            String remoteFilePath = "/faculty_files/" + remoteFile;
-            sftpService.deleteFile(remoteFilePath);
+            String remoteFilePath = "faculty_files/" + remoteFile;
+            sftpService.deleteFile(remoteFilePath, false);
             return ResponseEntity.ok("File deleted successfully.");
         } catch (FileNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("File not found: " + e.getMessage() + " - " + e.getCause());
