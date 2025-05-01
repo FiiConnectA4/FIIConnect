@@ -1,6 +1,7 @@
 package com.fiiconnect.api.auth_userMgmt.controllers;
 
 import com.fiiconnect.api.auth_userMgmt.core.ApiResponse;
+import com.fiiconnect.api.auth_userMgmt.dtos.LoginRequest;
 import com.fiiconnect.api.auth_userMgmt.dtos.RegisterRequest;
 import com.fiiconnect.api.auth_userMgmt.models.Role;
 import com.fiiconnect.api.auth_userMgmt.models.User;
@@ -9,6 +10,7 @@ import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository;
 import com.fiiconnect.api.auth_userMgmt.core.ApiResponse;
 import com.fiiconnect.api.auth_userMgmt.core.AuthResponse;
 import com.fiiconnect.api.auth_userMgmt.services.JwtService;
+import com.fiiconnect.api.auth_userMgmt.services.TwoFactorAuthenticationService;
 import com.fiiconnect.api.auth_userMgmt.validators.EmailValidator;
 import com.fiiconnect.api.auth_userMgmt.validators.IbanValidator;
 import com.fiiconnect.api.auth_userMgmt.validators.PasswordValidator;
@@ -31,6 +33,9 @@ public class UserController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private TwoFactorAuthenticationService twoFactorAuthenticationService;
 
     @Autowired
     private JwtService jwtService;
@@ -79,6 +84,8 @@ public class UserController {
                 }
             }
 
+
+            // Creăm user-ul
             User user = new User();
             user.setUsername(registerRequest.getUsername());
             user.setEmail(registerRequest.getEmail());
@@ -87,9 +94,15 @@ public class UserController {
             user.setIban(registerRequest.getIban());
             user.setActive(true);
 
+            // Two Factor Authentication
+            String secret = twoFactorAuthenticationService.generateSecretKey();
+            user.setTwoFactorSecret(secret);
+
             userRepository.save(user);
 
-            return ResponseEntity.ok(new ApiResponse("Utilizator înregistrat cu succes.", true));
+            String qrUrl = twoFactorAuthenticationService.getQRCodeUrl(user.getEmail(), secret);
+
+            return ResponseEntity.ok(new ApiResponse("Utilizator înregistrat cu succes. Scanează acest QR în Google Authenticator: " + qrUrl, true));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body(
@@ -112,8 +125,8 @@ public class UserController {
         return ResponseEntity.ok(new ApiResponse("Ești autentificat!", true));
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody User loginRequest) {
+    @PostMapping("/login/init")
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         User user = userRepository.findByUsername(loginRequest.getUsername());
 
         if (user == null) {
@@ -126,10 +139,36 @@ public class UserController {
                     new ApiResponse("Parolă greșită.", false));
         }
 
-        // Generăm tokenul
-        String jwtToken = jwtService.generateToken(user.getUsername());
+        if (user.getTwoFactorSecret() != null) {
+            return ResponseEntity.ok(new ApiResponse("2FA_REQUIRED", true));
+        }
 
-        // Trimitem tokenul înapoi
+        // Generăm tokenul si trimitem
+        String jwtToken = jwtService.generateToken(user.getUsername());
+        return ResponseEntity.ok(new AuthResponse(jwtToken));
+    }
+
+    @PostMapping("/login/verify")
+    public ResponseEntity<?> verifyTwoFactor(@RequestBody LoginRequest loginRequest) {
+        User user = userRepository.findByUsername(loginRequest.getUsername());
+
+        if (user == null || user.getTwoFactorSecret() == null) {
+            return ResponseEntity.status(401).body(
+                    new ApiResponse("Autentificare invalidă.", false));
+        }
+
+        boolean is2FACodeValid = twoFactorAuthenticationService.verifyCode(
+                user.getTwoFactorSecret(),
+                loginRequest.getTwoFactorCode()
+        );
+
+        if (!is2FACodeValid) {
+            return ResponseEntity.status(401).body(
+                    new ApiResponse("Cod 2FA invalid.", false));
+        }
+
+        // Generăm tokenul si trimitem
+        String jwtToken = jwtService.generateToken(user.getUsername());
         return ResponseEntity.ok(new AuthResponse(jwtToken));
     }
 }

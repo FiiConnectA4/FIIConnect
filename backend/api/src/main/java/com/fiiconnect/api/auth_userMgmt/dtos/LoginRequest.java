@@ -3,7 +3,7 @@ package com.fiiconnect.api.auth_userMgmt.dtos;
 public class LoginRequest {
     private String username;
     private String password;
-    private int twoFactorCode; // This will hold the 6-digit code from Google Authenticator
+    private int twoFactorCode;
 
     // Getters and Setters
     public String getUsername() {

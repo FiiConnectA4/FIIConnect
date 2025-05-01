@@ -38,6 +38,7 @@ public class RegisterRequest {
     public void setRole(String role) {
         this.role = role;
     }
+
     public String getIban() { return iban; }
     public void setIban(String iban) { this.iban = iban; }
 }

@@ -13,33 +13,25 @@ public class TwoFactorAuthenticationService {
 
     public TwoFactorAuthenticationService() {
         GoogleAuthenticatorConfig config = new GoogleAuthenticatorConfig.GoogleAuthenticatorConfigBuilder()
-                .setTimeStepSizeInMillis(30_000)  // 30 sec default
-                .setWindowSize(1)                 // Accept codes +- 1 timestep
+                .setTimeStepSizeInMillis(30_000)
+                .setWindowSize(5)
                 .build();
         this.gAuth = new GoogleAuthenticator(config);
     }
 
-    // Generates a secret key for a new user
     public String generateSecretKey() {
         GoogleAuthenticatorKey key = gAuth.createCredentials();
         return key.getKey();
     }
 
-    // Generates a QR code URL for scanning
-    public String getQRCodeUrl(String userEmail) {
-        // Creează un obiect GoogleAuthenticator,
-        GoogleAuthenticator gAuth = new GoogleAuthenticator();
-
-        // Generează cheia secretă pentru utilizator
-        GoogleAuthenticatorKey key = gAuth.createCredentials();
-
-        // Generează URL-ul QR cu secretul de tip GoogleAuthenticatorKey
+    public String getQRCodeUrl(String userEmail, String secret) {
+        GoogleAuthenticatorKey key = new GoogleAuthenticatorKey.Builder(secret).build();
         return GoogleAuthenticatorQRGenerator.getOtpAuthURL("FiiConnectApp", userEmail, key);
     }
 
-    // Verifies the code entered by the user
+
     public boolean verifyCode(String secret, int verificationCode) {
         return gAuth.authorize(secret, verificationCode);
     }
-
 }
+
