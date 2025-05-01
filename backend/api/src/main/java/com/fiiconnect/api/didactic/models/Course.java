@@ -29,6 +29,9 @@ public class Course{
 	@Transient
 	private List<Enrollment> enrollments = null;
 
+	@Transient
+	private String description = null;
+
 	public Course() {}
 
 	public Course(Long id, String code, String title, int credits, int year, int semester, int archived, Date academicYear) {

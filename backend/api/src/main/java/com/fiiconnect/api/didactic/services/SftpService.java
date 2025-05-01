@@ -16,8 +16,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
-import java.util.UUID;
-
 
 @Service
 public class SftpService {
@@ -53,10 +51,16 @@ public class SftpService {
         }
     }
 
-    public File downloadFile(String remoteFilePath) throws Exception {
-        File localFile = new File(localDir, new File(remoteFilePath).getName());
+    public File downloadFile(String remoteFilePath) throws IOException
+    {
+        return this.downloadFile(remoteFilePath, new File(remoteFilePath).getName());
+    }
+
+    public File downloadFile(String remoteFilePath, String localPath) throws IOException {
+        File localFile = new File(localDir, localPath);
 
         try {
+            localFile.getParentFile().mkdirs(); //create all directories leading to file if necessary
             sftpRemoteFileTemplate.execute(session -> {
                 try {
                     if (!session.exists(remoteFilePath)) {
@@ -67,6 +71,8 @@ public class SftpService {
                         session.read(remoteFilePath, os);
                     }
 
+                } catch(FileNotFoundException e) {
+                    throw e;
                 } catch (IOException e) {
                     throw new IOException("I/O error while reading remote file: " + remoteFilePath, e);
                 } catch (Exception e) {
@@ -115,6 +121,4 @@ public class SftpService {
         Files.write(tempPath, multipartFile.getBytes());
         return tempPath.toFile();
     }
-
-
 }
