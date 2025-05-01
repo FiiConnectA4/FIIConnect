@@ -1,4 +1,4 @@
-package com.fiiconnect.api.modulexemplu;
+package com.fiiconnect.api.auth_userMgmt.core;
 
 public class AuthResponse {
     private String token;

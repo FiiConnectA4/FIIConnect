@@ -1,5 +1,6 @@
-package com.fiiconnect.api.security;
+package com.fiiconnect.api.auth_userMgmt.validators;
 
+import com.fiiconnect.api.auth_userMgmt.services.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

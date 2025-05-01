@@ -1,4 +1,4 @@
-package com.fiiconnect.api.modulexemplu;
+package com.fiiconnect.api.auth_userMgmt.validators;
 
 public class PasswordValidator {
 

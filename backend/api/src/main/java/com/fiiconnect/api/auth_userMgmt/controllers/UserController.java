@@ -1,6 +1,12 @@
-package com.fiiconnect.api.modulexemplu;
+package com.fiiconnect.api.auth_userMgmt.controllers;
 
-import com.fiiconnect.api.security.JwtService;
+import com.fiiconnect.api.auth_userMgmt.models.User;
+import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository;
+import com.fiiconnect.api.auth_userMgmt.core.ApiResponse;
+import com.fiiconnect.api.auth_userMgmt.core.AuthResponse;
+import com.fiiconnect.api.auth_userMgmt.services.JwtService;
+import com.fiiconnect.api.auth_userMgmt.validators.EmailValidator;
+import com.fiiconnect.api.auth_userMgmt.validators.PasswordValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;

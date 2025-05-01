@@ -1,4 +1,4 @@
-package com.fiiconnect.api.security;
+package com.fiiconnect.api.auth_userMgmt.services;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

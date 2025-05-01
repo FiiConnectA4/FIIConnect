@@ -1,6 +1,6 @@
-package com.fiiconnect.api.modulexemplu;
+package com.fiiconnect.api.auth_userMgmt.configs;
 
-import com.fiiconnect.api.security.JwtAuthenticationFilter;
+import com.fiiconnect.api.auth_userMgmt.validators.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
