@@ -9,7 +9,7 @@ const Student = () => {
     const [cursuri, setCursuri] = useState([]);
     const [loading, setLoading] = useState(true);
 
-    const an = 2; // Year
+    const an = 1; // Year
     const semestru = 2; // Semester
 
     useEffect(() => {

@@ -44,7 +44,7 @@ const Profesor = () => {
         }
         return (
             <PDetaliiCurs
-                curs={course}
+                curs={course.course}
                 onBack={() => setSelectedCourseId(null)}
             />
         );
@@ -67,13 +67,14 @@ const Profesor = () => {
                         <div key={cursuri.course.id} className="rand-curs">
                             <Carte />
                             <Ceas />
-                            <Buton text={cursuri.course.title || 'Titlu indisponibil'} onNavigate={() => setSelectedCourseId(cursuri.course.id)} />
+                            <Buton text={cursuri.course.title || 'Titlu indisponibil'} onNavigate={() => setSelectedCourseId(cursuri.id)} />
                             <PageControl />
                         </div>
                     ))
                 ) : (
                     <p>Nu există cursuri disponibile pentru acest profesor.</p>
                 )}
+                <Buton text='Adauga curs' />
             </div>
         </div>
     );
