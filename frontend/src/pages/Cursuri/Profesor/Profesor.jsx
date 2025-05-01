@@ -6,13 +6,15 @@ import PageControl from '../Components/PageControl';
 import './../Student/Student.css';
 import PDetaliiCurs from '../DetaliiCurs/DetaliiCursEditabil';
 import { useSearchParams } from 'react-router-dom';
+import PAdaugaCurs from '../DetaliiCurs/PAdaugaCurs';
 const Profesor = () => {
     const [searchParams] = useSearchParams(); // Hook pentru a citi query params
-    const professorId = searchParams.get('professorId') || 5;
+    const professorId = searchParams.get('professorId') || 8;
     const [professor, setProfessor] = useState(null); // Stocăm obiectul Professor
     const [courses, setCourses] = useState([]); // Lista de cursuri (goală momentan)
     const [selectedCourseId, setSelectedCourseId] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [adaugaCurs, setAdaugaCurs] = useState(false);
 
     useEffect(() => {
         fetch(`/didactic/professor/${professorId}`)
@@ -73,6 +75,16 @@ const Profesor = () => {
         );
     }
 
+    if (adaugaCurs) {
+        return (
+            <PAdaugaCurs
+                professorId={professorId}
+                onBack={() => setAdaugaCurs(false)}
+                onCreated={() => window.location.reload()}
+            />
+        );
+    }
+
     return (
         <div className="container-cursuri">
             <div className="cursuri-titlu">
@@ -111,7 +123,7 @@ const Profesor = () => {
                 ) : (
                     <p>Nu există cursuri disponibile pentru acest profesor.</p>
                 )}
-                <Buton text='Adauga curs' />
+                <Buton text="Adaugă curs" onNavigate={() => setAdaugaCurs(true)} />
             </div>
         </div>
     );
