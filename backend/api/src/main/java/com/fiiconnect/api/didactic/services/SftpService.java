@@ -112,6 +112,25 @@ public class SftpService {
         }
     }
 
+    public void renameFile(String originalFilePath, String newFilePath) throws IOException {
+        try {
+            sftpRemoteFileTemplate.execute(session -> {
+                if (!session.exists(originalFilePath)) {
+                    throw new FileNotFoundException("Remote file not found: " + originalFilePath);
+                }
+                session.rename(originalFilePath, newFilePath);
+                return null;
+            });
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof FileNotFoundException) {
+                throw (FileNotFoundException) e.getCause();
+            } else if (e.getCause() instanceof IOException) {
+                throw (IOException) e.getCause();
+            }
+            throw e;
+        }
+    }
+
     private File convertToFile(MultipartFile multipartFile) throws IOException {
         if (multipartFile.isEmpty()) {
             throw new IOException("Cannot convert empty MultipartFile to file.");

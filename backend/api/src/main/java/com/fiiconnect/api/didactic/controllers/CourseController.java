@@ -6,11 +6,14 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 import com.fiiconnect.api.didactic.exceptions.CourseNotFoundException;
 import com.fiiconnect.api.didactic.helpers.SQLExceptionMessageParser;
 import com.fiiconnect.api.didactic.models.Course;
+import com.fiiconnect.api.didactic.models.CourseMaterial;
 import com.fiiconnect.api.didactic.models.CourseModelAssembler;
 import com.fiiconnect.api.didactic.models.Enrollment;
 import com.fiiconnect.api.didactic.repositories.CourseRepository;
+import com.fiiconnect.api.didactic.services.CourseMaterialService;
 import com.fiiconnect.api.didactic.services.CourseService;
 import com.fiiconnect.api.didactic.services.EnrollmentService;
+import com.fiiconnect.api.didactic.services.SftpService;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.hateoas.EntityModel;
 
@@ -20,6 +23,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,13 +35,17 @@ public class CourseController {
     private final CourseService service;
     private final SQLExceptionMessageParser exceptionHelper;
     private final EnrollmentService enrollmentService;
+    private final CourseMaterialService materialService;
+    private final SftpService sftpService;
 
-    public CourseController(CourseRepository repository, CourseModelAssembler assembler, CourseService service, SQLExceptionMessageParser exceptionHelper, EnrollmentService enrollmentService) {
+    public CourseController(CourseRepository repository, CourseModelAssembler assembler, CourseService service, SQLExceptionMessageParser exceptionHelper, EnrollmentService enrollmentService, CourseMaterialService materialService, SftpService sftpService) {
         this.repository = repository;
         this.assembler = assembler;
         this.service = service;
         this.exceptionHelper = exceptionHelper;
         this.enrollmentService = enrollmentService;
+        this.materialService = materialService;
+        this.sftpService = sftpService;
     }
 
     // get all courses
@@ -88,6 +96,7 @@ public class CourseController {
                     course.setYear(newCourse.getYear());
                     course.setSemester(newCourse.getSemester());
                     course.setTitle(newCourse.getTitle());
+                    course.setArchived(newCourse.getArchived());
                     return repository.save(course);
                 }).orElseGet(() -> repository.save(newCourse));
         EntityModel<Course> entityModel = assembler.toModel(temp);
@@ -95,8 +104,19 @@ public class CourseController {
     }
 
     @DeleteMapping("/didactic/course/{id}")
-    public ResponseEntity<?> deleteCourse(@PathVariable("id") Long id) throws CourseNotFoundException {
-        repository.deleteById(id);
+    public ResponseEntity<?> deleteCourse(@PathVariable("id") Long id) throws CourseNotFoundException, IOException {
+        Course course = repository.findById(id).orElseThrow(() -> new CourseNotFoundException(id));
+        service.attachMaterials(course);
+
+        for(CourseMaterial material : course.getMaterials())
+            materialService.deleteMaterial(material);
+
+        String pathPrefix = "faculty_files/didactic/course-" + course.getId() + "/";
+        sftpService.deleteFile(pathPrefix + "materials/");
+        sftpService.deleteFile(pathPrefix + "description.txt");
+        sftpService.deleteFile(pathPrefix);
+
+        repository.delete(course);
         return ResponseEntity.noContent().build();
     }
 
@@ -104,6 +124,14 @@ public class CourseController {
     public void addDescription(@PathVariable Long id, @RequestBody String description)
     {
         service.saveDescription(id, description);
+    }
+
+    @PutMapping("/didactic/course/{id}/archive")
+    public void archiveCourse(@PathVariable Long id)
+    {
+        Course course = repository.findById(id).orElseThrow(() -> new CourseNotFoundException(id));
+        course.setArchived(1);
+        repository.save(course);
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)
