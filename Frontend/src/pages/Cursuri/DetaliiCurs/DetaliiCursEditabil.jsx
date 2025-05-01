@@ -83,15 +83,27 @@ const PDetaliiCurs = ({ curs, onBack }) => {
     }, [curs.id]);
 
     const saveCourseChanges = () => {
-        fetch(`/didactic/course/${curs.id}`, {
+        console.log("📤 Trimitem descriere simplă (text/plain):", description);
+
+        fetch(`/didactic/course/${curs.id}/description`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                description
-            })
+            headers: {
+                'Content-Type': 'text/plain'
+            },
+            body: description
         })
-            .then(() => alert('Course updated!'))
-            .catch(err => console.error('Failed to update course', err));
+            .then(res => {
+                console.log("📥 Status răspuns:", res.status);
+                return res.text(); // 🔍 Vedem și răspunsul (dacă e eroare cu mesaj util)
+            })
+            .then(text => {
+                console.log("Răspuns complet:", text);
+                alert("Descriere salvată!");
+            })
+            .catch(err => {
+                console.error("⛔ Eroare la salvarea descrierii:", err);
+                alert("Eroare la salvare");
+            });
     };
 
     const saveFormula = () => {
