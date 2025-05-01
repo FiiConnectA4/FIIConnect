@@ -20,7 +20,6 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // Caută utilizatorul direct
         User appUser = userRepository.findByUsername(username);
 
         if (appUser == null) {

@@ -2,7 +2,6 @@ package com.fiiconnect.api.auth_userMgmt.models;
 
 import jakarta.persistence.*;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 @Entity
