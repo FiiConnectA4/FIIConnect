@@ -53,8 +53,13 @@ public class SftpService {
         }
     }
 
-    public File downloadFile(String remoteFilePath) throws Exception {
-        File localFile = new File(localDir, new File(remoteFilePath).getName());
+    public File downloadFile(String remoteFilePath) throws IOException
+    {
+        return this.downloadFile(remoteFilePath, new File(remoteFilePath).getName());
+    }
+
+    public File downloadFile(String remoteFilePath, String localPath) throws IOException {
+        File localFile = new File(localDir, localPath);
 
         try {
             sftpRemoteFileTemplate.execute(session -> {

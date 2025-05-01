@@ -61,6 +61,7 @@ public class CourseController {
         Course course = repository.findById(id).orElseThrow(() -> new CourseNotFoundException(id));
         service.attachProfessors(course);
         service.attachMaterials(course);
+        service.attachDescription(course);
         return assembler.toModel(course);
     }
 
@@ -97,6 +98,12 @@ public class CourseController {
     public ResponseEntity<?> deleteCourse(@PathVariable("id") Long id) throws CourseNotFoundException {
         repository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/didactic/course/{id}/description")
+    public void addDescription(@PathVariable Long id, @RequestBody String description)
+    {
+        service.saveDescription(id, description);
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)

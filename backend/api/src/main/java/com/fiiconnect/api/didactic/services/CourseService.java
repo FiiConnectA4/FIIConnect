@@ -10,8 +10,12 @@ import com.fiiconnect.api.didactic.models.Course;
 import com.fiiconnect.api.didactic.models.CourseMaterial;
 import com.fiiconnect.api.didactic.models.Teaching;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,14 +28,16 @@ public class CourseService {
     private final TeachingService teachingService;
     private final EnrollmentRepository enrollmentRepo;
     private final EnrollmentService enrollmentService;
+    private final SftpService sftpService;
 
-    public CourseService(CourseRepository courseRepository, CourseMaterialRepository materialRepository, TeachingRepository teachingRepo, TeachingService teachingService, EnrollmentRepository enrollmentRepo, EnrollmentService enrollmentService) {
+    public CourseService(CourseRepository courseRepository, CourseMaterialRepository materialRepository, TeachingRepository teachingRepo, TeachingService teachingService, EnrollmentRepository enrollmentRepo, EnrollmentService enrollmentService, SftpService sftpService) {
         this.courseRepository = courseRepository;
         this.materialRepository = materialRepository;
         this.teachingRepo = teachingRepo;
         this.teachingService = teachingService;
         this.enrollmentRepo = enrollmentRepo;
         this.enrollmentService = enrollmentService;
+        this.sftpService = sftpService;
     }
 
     public void addCourse(Course course){
@@ -103,5 +109,33 @@ public class CourseService {
     public void attachEnrollments(Course course)
     {
         course.setEnrollments(enrollmentService.getCourseEnrollments(course.getId()));
+    }
+
+    public void attachDescription(Course course)
+    {
+        try
+        {
+            File descriptionFile = sftpService.downloadFile("didactic/" + course.getId() + "/description.txt", "didactic/" + course.getId() + "/description.txt");
+            FileInputStream input = new FileInputStream(descriptionFile);
+            String description = new String(input.readAllBytes());
+            course.setDescription(description);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void saveDescription(Long idCourse, String description)
+    {
+        if(courseRepository.findById(idCourse).isEmpty())
+        {
+            throw new CourseNotFoundException(idCourse);
+        }
+
+        MockMultipartFile descriptionFile = new MockMultipartFile("description.txt", description.getBytes());
+        try {
+            sftpService.uploadFile(descriptionFile, "didactic/" + idCourse + "/");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
