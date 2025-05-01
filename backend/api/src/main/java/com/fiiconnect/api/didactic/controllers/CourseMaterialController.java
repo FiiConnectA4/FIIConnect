@@ -4,11 +4,14 @@ import com.fiiconnect.api.didactic.helpers.SQLExceptionMessageParser;
 import com.fiiconnect.api.didactic.models.CourseMaterial;
 import com.fiiconnect.api.didactic.exceptions.CourseMaterialNotFoundException;
 import com.fiiconnect.api.didactic.repositories.CourseMaterialRepository;
+import com.fiiconnect.api.didactic.services.SftpService;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.net.URI;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -19,10 +22,12 @@ import java.util.List;
 public class CourseMaterialController {
     private final SQLExceptionMessageParser exceptionHelper;
     private final CourseMaterialRepository repository;
+    private final SftpService sftpService;
 
-    public CourseMaterialController(SQLExceptionMessageParser exceptionHelper, CourseMaterialRepository repository) {
+    public CourseMaterialController(SQLExceptionMessageParser exceptionHelper, CourseMaterialRepository repository, SftpService sftpService) {
         this.exceptionHelper = exceptionHelper;
         this.repository = repository;
+        this.sftpService = sftpService;
     }
 
     @GetMapping("/didactic/course/material")
@@ -38,7 +43,7 @@ public class CourseMaterialController {
     }
 
     @PostMapping("/didactic/course/material")
-    public ResponseEntity<?> uploadMaterial(@RequestBody CourseMaterial material)
+    public ResponseEntity<?> addMaterial(@RequestBody CourseMaterial material)
     {
         //should get idProf from currently logged-in user, and check for permission
         material.setId(null);
@@ -47,6 +52,13 @@ public class CourseMaterialController {
 
         material = repository.save(material);
         return ResponseEntity.created(URI.create("/didactic/course/material/" + material.getId())).build();
+    }
+
+    @PostMapping("/didactic/course/material/{id}")
+    public void uploadFile(@PathVariable Long id, @RequestBody MultipartFile file) throws IOException {
+        CourseMaterial material = repository.findById(id).orElseThrow(()->new CourseMaterialNotFoundException(id));
+
+        sftpService.uploadFile(file, "faculty_files/didactic/course-" + material.getIdCourse() + "/materials/");
     }
 
     @DeleteMapping("/didactic/course/material/{id}")
