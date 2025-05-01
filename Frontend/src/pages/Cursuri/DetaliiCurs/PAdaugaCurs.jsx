@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import './DetaliiCurs.css';
 import Ceas from './../Components/Ceas';
-import Edit from './../Components/Edit';
 
 const PAdaugaCurs = ({ professorId, onBack, onCreated }) => {
     const [title, setTitle] = useState('');
@@ -14,9 +13,9 @@ const PAdaugaCurs = ({ professorId, onBack, onCreated }) => {
         const newCourse = {
             title,
             code,
-            year,
-            semester,
-            credits,
+            year: parseInt(year),
+            semester: parseInt(semester),
+            credits: parseInt(credits),
             archived: false
         };
 
@@ -41,32 +40,31 @@ const PAdaugaCurs = ({ professorId, onBack, onCreated }) => {
             <button className="buton-inapoi" onClick={onBack}>&lt; Înapoi</button>
             <div className="titlu-curs">
                 <h1><u>Adaugă curs nou</u></h1>
-                <Ceas />
             </div>
 
             <div className="sectiune">
                 <h2>Titlu:</h2>
-                <Edit value={title} onChange={setTitle} />
+                <input className="input-curs" value={title} onChange={e => setTitle(e.target.value)} />
             </div>
 
             <div className="sectiune">
                 <h2>Cod curs:</h2>
-                <Edit value={code} onChange={setCode} />
+                <input className="input-curs" value={code} onChange={e => setCode(e.target.value)} />
             </div>
 
             <div className="sectiune">
                 <h2>Anul:</h2>
-                <Edit value={year} onChange={setYear} />
+                <input className="input-curs" value={year} onChange={e => setYear(e.target.value)} />
             </div>
 
             <div className="sectiune">
                 <h2>Semestrul:</h2>
-                <Edit value={semester} onChange={setSemester} />
+                <input className="input-curs" value={semester} onChange={e => setSemester(e.target.value)} />
             </div>
 
             <div className="sectiune">
                 <h2>Credite:</h2>
-                <Edit value={credits} onChange={setCredits} />
+                <input className="input-curs" value={credits} onChange={e => setCredits(e.target.value)} />
             </div>
 
             <button className="save-button" onClick={handleCreate}>Creează cursul</button>
