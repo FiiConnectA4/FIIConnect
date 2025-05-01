@@ -1,11 +1,11 @@
-import { BrowserRouter } from "react-router-dom";
+import { BrowserRouter as Router } from "react-router-dom";
 import AppRoutes from "./app/router"; // ✅ import centralized routes
 
 function App() {
   return (
-    <BrowserRouter>
+    <Router>
       <AppRoutes />
-    </BrowserRouter>
+    </Router>
   );
 }
 

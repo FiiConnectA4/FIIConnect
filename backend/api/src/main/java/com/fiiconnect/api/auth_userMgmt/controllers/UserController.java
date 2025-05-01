@@ -1,11 +1,16 @@
 package com.fiiconnect.api.auth_userMgmt.controllers;
 
+import com.fiiconnect.api.auth_userMgmt.core.ApiResponse;
+import com.fiiconnect.api.auth_userMgmt.dtos.RegisterRequest;
+import com.fiiconnect.api.auth_userMgmt.models.Role;
 import com.fiiconnect.api.auth_userMgmt.models.User;
+import com.fiiconnect.api.auth_userMgmt.repositories.RoleRepository;
 import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository;
 import com.fiiconnect.api.auth_userMgmt.core.ApiResponse;
 import com.fiiconnect.api.auth_userMgmt.core.AuthResponse;
 import com.fiiconnect.api.auth_userMgmt.services.JwtService;
 import com.fiiconnect.api.auth_userMgmt.validators.EmailValidator;
+import com.fiiconnect.api.auth_userMgmt.validators.IbanValidator;
 import com.fiiconnect.api.auth_userMgmt.validators.PasswordValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +25,9 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -53,6 +61,13 @@ public class UserController {
             if (userRepository.findByUsername(user.getUsername()) != null) {
                 return ResponseEntity.badRequest().body(
                         new ApiResponse("Username-ul este deja folosit.", false));
+            }
+
+            if (user.getIban() != null && !user.getIban().isEmpty()) {
+                if (!IbanValidator.isValid(user.getIban())) {
+                    return ResponseEntity.badRequest().body(
+                            new ApiResponse("IBAN invalid.", false));
+                }
             }
 
             user.setPassword(passwordEncoder.encode(user.getPassword()));

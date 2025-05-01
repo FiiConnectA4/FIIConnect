@@ -1,5 +1,6 @@
 package com.fiiconnect.api.auth_userMgmt.models;
 
+import com.fiiconnect.api.auth_userMgmt.models.Permission;
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
@@ -26,5 +27,12 @@ public class Role {
     private Set<Permission> permissions = new HashSet<>();
 
     // Constructori, getteri, setteri, etc.
+
+    public String getRoleName() {
+        return roleName;
+    }
+    public void setRoleName(String roleName) {
+        this.roleName = roleName;
+    }
 }
 
