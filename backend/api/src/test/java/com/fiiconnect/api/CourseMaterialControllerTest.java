@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.List;
@@ -109,7 +110,7 @@ public class CourseMaterialControllerTest {
     }
 
     @Test
-    void deleteMaterial_DeletesSuccessfully() {
+    void deleteMaterial_DeletesSuccessfully() throws IOException {
         doNothing().when(repository).deleteById(1L);
 
         controller.deleteMaterial(1L);

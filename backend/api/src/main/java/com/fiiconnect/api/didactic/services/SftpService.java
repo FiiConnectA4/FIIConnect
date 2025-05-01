@@ -93,13 +93,55 @@ public class SftpService {
         return localFile;
     }
 
-    public void deleteFile(String remoteFilePath) throws IOException {
+    public boolean checkExists(String remoteFilePath) throws IOException {
+        try {
+            sftpRemoteFileTemplate.execute(session -> {
+                if (!session.exists(remoteFilePath)) {
+                    throw new FileNotFoundException("Remote file not found: " + remoteFilePath);
+                }
+
+                return null;
+            });
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof FileNotFoundException) {
+                return false;
+            } else if (e.getCause() instanceof IOException) {
+                throw (IOException) e.getCause();
+            }
+            throw e;
+        }
+        return true;
+    }
+
+    public void deleteFile(String remoteFilePath, boolean isDirectory) throws IOException {
         try {
             sftpRemoteFileTemplate.execute(session -> {
                     if (!session.exists(remoteFilePath)) {
                         throw new FileNotFoundException("Remote file not found: " + remoteFilePath);
                     }
-                    session.remove(remoteFilePath);
+                    if(!isDirectory)
+                        session.remove(remoteFilePath);
+                    else
+                        session.rmdir(remoteFilePath);
+                return null;
+            });
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof FileNotFoundException) {
+                throw (FileNotFoundException) e.getCause();
+            } else if (e.getCause() instanceof IOException) {
+                throw (IOException) e.getCause();
+            }
+            throw e;
+        }
+    }
+
+    public void renameFile(String originalFilePath, String newFilePath) throws IOException {
+        try {
+            sftpRemoteFileTemplate.execute(session -> {
+                if (!session.exists(originalFilePath)) {
+                    throw new FileNotFoundException("Remote file not found: " + originalFilePath);
+                }
+                session.rename(originalFilePath, newFilePath);
                 return null;
             });
         } catch (RuntimeException e) {

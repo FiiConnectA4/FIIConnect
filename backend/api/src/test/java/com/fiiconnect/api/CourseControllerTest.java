@@ -18,6 +18,7 @@ import org.springframework.hateoas.Link;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.ResponseEntity;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -197,7 +198,7 @@ public class CourseControllerTest {
     }
 
     @Test
-    void deleteCourse_DeletesCourseSuccessfully() {
+    void deleteCourse_DeletesCourseSuccessfully() throws IOException {
         doNothing().when(repository).deleteById(1L);
 
         ResponseEntity<?> response = controller.deleteCourse(1L);

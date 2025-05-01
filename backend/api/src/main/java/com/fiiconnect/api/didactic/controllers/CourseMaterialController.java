@@ -4,6 +4,7 @@ import com.fiiconnect.api.didactic.helpers.SQLExceptionMessageParser;
 import com.fiiconnect.api.didactic.models.CourseMaterial;
 import com.fiiconnect.api.didactic.exceptions.CourseMaterialNotFoundException;
 import com.fiiconnect.api.didactic.repositories.CourseMaterialRepository;
+import com.fiiconnect.api.didactic.services.CourseMaterialService;
 import com.fiiconnect.api.didactic.services.SftpService;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpHeaders;
@@ -27,11 +28,13 @@ import java.util.List;
 public class CourseMaterialController {
     private final SQLExceptionMessageParser exceptionHelper;
     private final CourseMaterialRepository repository;
+    private final CourseMaterialService service;
     private final SftpService sftpService;
 
-    public CourseMaterialController(SQLExceptionMessageParser exceptionHelper, CourseMaterialRepository repository, SftpService sftpService) {
+    public CourseMaterialController(SQLExceptionMessageParser exceptionHelper, CourseMaterialRepository repository, CourseMaterialService service, SftpService sftpService) {
         this.exceptionHelper = exceptionHelper;
         this.repository = repository;
+        this.service = service;
         this.sftpService = sftpService;
     }
 
@@ -47,25 +50,42 @@ public class CourseMaterialController {
         return repository.findById(id).orElseThrow(() -> new CourseMaterialNotFoundException(id));
     }
 
+//    @PostMapping("/didactic/course/material")
+//    public ResponseEntity<?> addMaterial(@RequestBody CourseMaterial material)
+//    {
+//        //should get idProf from currently logged-in user, and check for permission
+//        material.setId(null);
+//        material.setUploadDate(Date.from(Instant.now()));
+//        material.setUpdateDate(Date.from(Instant.now()));
+//
+//        material = repository.save(material);
+//        return ResponseEntity.created(URI.create("/didactic/course/material/" + material.getId())).build();
+//    }
+
     @PostMapping("/didactic/course/material")
-    public ResponseEntity<?> addMaterial(@RequestBody CourseMaterial material)
+    public ResponseEntity<?> uploadFile(@RequestParam Long idProf, @RequestParam Long idCourse, @RequestBody MultipartFile file) throws IOException
     {
+        CourseMaterial material = new CourseMaterial();
+        material.setIdCourse(idCourse);
+        material.setIdProfessor(idProf);
         //should get idProf from currently logged-in user, and check for permission
         material.setId(null);
         material.setUploadDate(Date.from(Instant.now()));
         material.setUpdateDate(Date.from(Instant.now()));
-
-        material = repository.save(material);
-        return ResponseEntity.created(URI.create("/didactic/course/material/" + material.getId())).build();
-    }
-
-    @PostMapping("/didactic/course/material/{id}/file")
-    public void uploadFile(@PathVariable Long id, @RequestBody MultipartFile file) throws IOException
-    {
-        CourseMaterial material = repository.findById(id).orElseThrow(()->new CourseMaterialNotFoundException(id));
         material.setFilename(file.getOriginalFilename());
-        sftpService.uploadFile(file, "faculty_files/didactic/course-" + material.getIdCourse() + "/materials/");
         repository.save(material);
+
+        try
+        {
+            sftpService.uploadFile(file, "faculty_files/didactic/course-" + material.getIdCourse() + "/materials/");
+        }
+        catch (IOException e)
+        {
+            repository.delete(material);
+            throw e;
+        }
+
+        return ResponseEntity.created(URI.create("/didactic/course/material/" + material.getId())).build();
     }
 
     @GetMapping("/didactic/course/material/{id}/file")
@@ -84,9 +104,21 @@ public class CourseMaterialController {
     }
 
     @DeleteMapping("/didactic/course/material/{id}")
-    public void deleteMaterial(@PathVariable Long id)
-    {
-        repository.deleteById(id);
+    public void deleteMaterial(@PathVariable Long id) throws IOException {
+        CourseMaterial material = repository.findById(id).orElseThrow(() -> new CourseMaterialNotFoundException(id));
+        service.deleteMaterial(material);
+    }
+
+    @PutMapping("/didactic/course/material/{id}")
+    public void changeFilename(@PathVariable Long id, @RequestBody String newFilename) throws IOException {
+        CourseMaterial material = repository.findById(id).orElseThrow(() -> new CourseMaterialNotFoundException(id));
+
+        String oldFilename = material.getFilename();
+        material.setFilename(newFilename);
+        repository.save(material);
+
+        String pathPrefix = "faculty_files/didactic/course-" + material.getIdCourse() + "/materials/";
+        sftpService.renameFile(pathPrefix + oldFilename, pathPrefix + newFilename);
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)

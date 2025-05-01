@@ -93,13 +93,13 @@ public class SftpControllerTest {
     void deleteFile_ReturnsOk_WhenFileIsDeleted() throws IOException {
         String remoteFile = "file.txt";
 
-        doNothing().when(sftpService).deleteFile("/faculty_files/" + remoteFile);
+        doNothing().when(sftpService).deleteFile("/faculty_files/" + remoteFile, false);
 
         ResponseEntity<String> result = controller.deleteFile(remoteFile);
 
         assertEquals(HttpStatus.OK, result.getStatusCode());
         assertEquals("File deleted successfully.", result.getBody());
-        verify(sftpService, times(1)).deleteFile("/faculty_files/" + remoteFile);
+        verify(sftpService, times(1)).deleteFile("/faculty_files/" + remoteFile, false);
     }
 
     @Test
@@ -107,14 +107,14 @@ public class SftpControllerTest {
         String remoteFile = "test";
 
         doThrow(new FileNotFoundException("Remote file not found: /faculty_files/" + remoteFile))
-                .when(sftpService).deleteFile("/faculty_files/" + remoteFile);
+                .when(sftpService).deleteFile("/faculty_files/" + remoteFile, false);
 
         ResponseEntity<String> response = controller.deleteFile(remoteFile);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertTrue(response.getBody().contains("File not found"));
 
-        verify(sftpService, times(1)).deleteFile("/faculty_files/" + remoteFile);
+        verify(sftpService, times(1)).deleteFile("/faculty_files/" + remoteFile, false);
     }
 
 
