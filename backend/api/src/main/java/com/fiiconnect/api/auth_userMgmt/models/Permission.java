@@ -1,4 +1,4 @@
-package com.fiiconnect.api.auth_userMgmt.permissions.model;
+package com.fiiconnect.api.auth_userMgmt.models;
 
 
 import jakarta.persistence.*;

@@ -1,6 +1,5 @@
 package com.fiiconnect.api.auth_userMgmt.models;
 
-import com.fiiconnect.api.auth_userMgmt.permissions.model.Role;
 import jakarta.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
