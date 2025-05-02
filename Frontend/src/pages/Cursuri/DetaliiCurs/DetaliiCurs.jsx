@@ -150,20 +150,24 @@ return (
         <div className="sectiune bibliografie">
             <h2>Materiale de curs:</h2>
             {materials.length > 0 ? (
-                materials.map(material => (
-                    <div
-                        key={material.id}
-                        style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}
-                    >
-                        <span>{material.filename}</span>
-                        <button
-                            style={{ marginLeft: '10px' }}
-                            onClick={() => downloadMaterial(material.id, material.filename)}
+                <div>
+                    {materials.map(material => (
+                        <div
+                            key={material.id}
+                            style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}
                         >
-                            Descarcă
-                        </button>
-                    </div>
-                ))
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <span style={{ flex: 1 }}>{material.filename}</span>
+                                <button
+                                    style={{ marginLeft: '10px' }}
+                                    onClick={() => downloadMaterial(material.id, material.filename)}
+                                >
+                                    Descarcă
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
             ) : (
                 <p>Nu sunt materiale disponibile</p>
             )}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import './DetaliiCurs.css';
 import Ceas from './../Components/Ceas';
 import Edit from './../Components/Edit';
@@ -21,6 +21,7 @@ const PDetaliiCurs = ({ curs, onBack }) => {
     const [renameMaterialId, setRenameMaterialId] = useState(null);
     const [newFilename, setNewFilename] = useState('');
     const [userId, setUserId] = useState(null);
+    const fileInputRef = useRef(null);
 
     useEffect(() => {
         // Fetch materials
@@ -160,8 +161,8 @@ const saveFormula = () => {
         });
 };
 
-const addMaterial = () => {
-    if (!newMaterialFile) {
+const addMaterial = (file) => {
+    if (!file) {
         alert('Vă rugăm să selectați un fișier pentru încărcare');
         return;
     }
@@ -172,7 +173,7 @@ const addMaterial = () => {
     }
 
     const formData = new FormData();
-    formData.append('file', newMaterialFile);
+    formData.append('file', file);
     formData.append('idCourse', curs.id);
     formData.append('idProf', userId);
 
@@ -199,7 +200,7 @@ const addMaterial = () => {
         .then(newMaterial => {
             setMaterials(prev => [...prev, newMaterial]);
             setNewMaterialFile(null);
-            document.getElementById('fileInput').value = '';
+            fileInputRef.current.value = '';
             alert('Material încărcat cu succes!');
         })
         .catch(err => {
@@ -293,6 +294,22 @@ const cancelRename = () => {
     setNewFilename('');
 };
 
+const handleIconClick = () => {
+    if (userId) {
+        fileInputRef.current.click();
+    } else {
+        alert('Eroare: ID-ul profesorului nu este disponibil. Vă rugăm să reîncărcați pagina sau să contactați suportul.');
+    }
+};
+
+const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+        setNewMaterialFile(file);
+        addMaterial(file);
+    }
+};
+
 if (loading) return <div>Se încarcă cursul...</div>;
 
 return (
@@ -354,59 +371,88 @@ return (
         <div className="sectiune bibliografie">
             <h2>Materiale (Resurse):</h2>
             {materials.length > 0 ? (
-                materials.map((m) => (
-                    <div key={m.id} style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
-                        {renameMaterialId === m.id ? (
-                            <div>
-                                <input
-                                    type="text"
-                                    value={newFilename}
-                                    onChange={(e) => setNewFilename(e.target.value)}
-                                    placeholder="Nume nou fișier"
-                                />
-                                <button onClick={saveNewFilename}>Salvează</button>
-                                <button onClick={cancelRename}>Anulează</button>
-                            </div>
-                        ) : (
-                            <>
-                                <span>{m.filename}</span>
-                                <button
-                                    style={{ marginLeft: '10px' }}
-                                    onClick={() => downloadMaterial(m.id, m.filename)}
-                                >
-                                    Descarcă
-                                </button>
-                                <button
-                                    style={{ marginLeft: '10px' }}
-                                    onClick={() => startRenameMaterial(m.id, m.filename)}
-                                >
-                                    Redenumește
-                                </button>
-                                <button
-                                    className="stergere"
-                                    style={{ marginLeft: '10px' }}
-                                    onClick={() => deleteMaterial(m.id)}
-                                >
-                                    Șterge
-                                </button>
-                            </>
-                        )}
-                    </div>
-                ))
+                <div>
+                    {materials.map((m) => (
+                        <div
+                            key={m.id}
+                            style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}
+                        >
+                            {renameMaterialId === m.id ? (
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <input
+                                        type="text"
+                                        value={newFilename}
+                                        onChange={(e) => setNewFilename(e.target.value)}
+                                        placeholder="Nume nou fișier"
+                                        style={{ marginRight: '10px' }}
+                                    />
+                                    <button onClick={saveNewFilename}>Salvează</button>
+                                    <button
+                                        style={{ marginLeft: '10px' }}
+                                        onClick={cancelRename}
+                                    >
+                                        Anulează
+                                    </button>
+                                </div>
+                            ) : (
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <span style={{ flex: 1 }}>{m.filename}</span>
+                                    <div style={{ display: 'flex' }}>
+                                        <button
+                                            style={{ marginLeft: '10px' }}
+                                            onClick={() => downloadMaterial(m.id, m.filename)}
+                                        >
+                                            Descarcă
+                                        </button>
+                                        <button
+                                            style={{ marginLeft: '10px' }}
+                                            onClick={() => startRenameMaterial(m.id, m.filename)}
+                                        >
+                                            Redenumește
+                                        </button>
+                                        <button
+                                            className="stergere"
+                                            style={{ marginLeft: '10px' }}
+                                            onClick={() => deleteMaterial(m.id)}
+                                        >
+                                            Șterge
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
             ) : (
                 <p>Fără materiale disponibile</p>
             )}
             <div style={{ marginTop: '20px' }}>
-                <h3>Încarcă material nou:</h3>
-                <input
-                    id="fileInput"
-                    type="file"
-                    onChange={(e) => setNewMaterialFile(e.target.files[0])}
+                <button
+                    onClick={handleIconClick}
+                    style={{
+                        backgroundColor: '#28a745',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '50%',
+                        width: '40px',
+                        height: '40px',
+                        fontSize: '24px',
+                        cursor: userId ? 'pointer' : 'not-allowed',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
                     disabled={!userId}
-                />
-                <button onClick={addMaterial} disabled={!newMaterialFile || !userId}>
-                    Încarcă
+                    title="Încarcă material nou"
+                >
+                    +
                 </button>
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    style={{ display: 'none' }}
+                    onChange={handleFileChange}
+                />
             </div>
         </div>
     </div>
