@@ -73,14 +73,12 @@ const PDetaliiCurs = ({ curs, onBack }) => {
                     setUserId(null);
                 }
                 setDescription(data.description || '');
-                setLoading(false);
             })
             .catch(error => {
                 console.error('Eroare la încărcarea profesorilor:', error);
                 alert('Eroare la încărcarea profesorilor: ' + error.message);
                 setProfesori([]);
                 setUserId(null);
-                setLoading(false);
             });
 
         // Fetch formula
@@ -98,11 +96,13 @@ const PDetaliiCurs = ({ curs, onBack }) => {
         setFormula(data);
         setFormulaText(data?.text || '');
         setGradingMethod(data?.text || '');
+        setLoading(false);
     })
     .catch(error => {
         console.error('Eroare la încărcarea formulei:', error);
         alert('Eroare la încărcarea formulei: ' + error.message);
         setFormula(null);
+        setLoading(false);
     });
 }, [curs.id]);
 
@@ -369,15 +369,13 @@ return (
                             </div>
                         ) : (
                             <>
-                                <a
-                                    href="#"
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        downloadMaterial(m.id, m.filename);
-                                    }}
+                                <span>{m.filename}</span>
+                                <button
+                                    style={{ marginLeft: '10px' }}
+                                    onClick={() => downloadMaterial(m.id, m.filename)}
                                 >
-                                    {m.filename}
-                                </a>
+                                    Descarcă
+                                </button>
                                 <button
                                     style={{ marginLeft: '10px' }}
                                     onClick={() => startRenameMaterial(m.id, m.filename)}
