@@ -1,38 +1,45 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import './DetaliiCurs.css';
 import Ceas from './../Components/Ceas';
 import ButonExtensibil from '../Components/ButonExtensibil';
+
+// Backend base URL (remove if using package.json proxy)
+const API_BASE_URL = ''; // Set to 'http://localhost:8080' if no proxy, or leave empty with proxy
 
 const DetaliiCurs = ({ curs, onBack }) => {
     const [profesori, setProfesori] = useState([]);
     const [materials, setMaterials] = useState([]);
     const [formula, setFormula] = useState(null);
-    const [description, setDescription] = useState(''); // New state for description
+    const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         console.log('ID-ul cursului:', curs.id);
 
         // Fetch materials
-        fetch(`/didactic/course/material/${curs.id}`)
-            .then(response => response.json())
+        fetch(`${API_BASE_URL}/didactic/course/material`)
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.json();
+            })
             .then(data => {
-                setMaterials(Array.isArray(data) ? data : []);
-                setLoading(false);
+                console.log('Răspuns API pentru materiale:', data);
+                setMaterials(Array.isArray(data) ? data.filter(m => m.idCourse === curs.id) : []);
             })
             .catch(error => {
-                console.error('Error fetching materials:', error);
-                setLoading(false);
+                console.error('Eroare la încărcarea materialelor:', error);
+                alert('Eroare la încărcarea materialelor: ' + error.message);
+                setMaterials([]);
             });
 
         // Fetch professors and description
-        fetch(`/didactic/course/${curs.id}`)
+        fetch(`${API_BASE_URL}/didactic/course/${curs.id}`)
             .then(response => {
                 if (!response.ok) {
                     console.error(`HTTP error! Status: ${response.status}`);
                     setProfesori([]);
                     setDescription('');
-                    return [];
+                    return {};
                 }
                 return response.json();
             })
@@ -49,88 +56,120 @@ const DetaliiCurs = ({ curs, onBack }) => {
                     console.error('Răspuns invalid: nu conține un array de profesori.', data);
                     setProfesori([]);
                 }
-                setDescription(data.description || 'Fara descriere');
+                setDescription(data.description || 'Fără descriere');
             })
             .catch(error => {
-                console.error('Error fetching professors:', error);
+                console.error('Eroare la încărcarea profesorilor:', error);
+                alert('Eroare la încărcarea profesorilor: ' + error.message);
                 setProfesori([]);
-                setDescription('');
+                setDescription('Fără descriere');
             });
 
         // Fetch formula
-        fetch(`/didactic/course/${curs.id}/formula`)
-            .then(response => {
-                if (!response.ok) {
-                    console.error(`No formula found for course ${curs.id}`);
-                    setFormula(null);
-                    return null;
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Răspuns API formula:', data);
-                setFormula(data);
-            })
-            .catch(error => {
-                console.error('Error fetching formula:', error);
-                setFormula(null);
-            });
-    }, [curs.id]);
+        fetch(`${API_BASE_URL}/didactic/course/${curs.id}/formula`)
+    .then(response => {
+        if (!response.ok) {
+            console.error(`Nicio formulă găsită pentru cursul ${curs.id}`);
+            setFormula(null);
+            return null;
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Răspuns API formula:', data);
+        setFormula(data);
+        setLoading(false);
+    })
+    .catch(error => {
+        console.error('Eroare la încărcarea formulei:', error);
+        alert('Eroare la încărcarea formulei: ' + error.message);
+        setFormula(null);
+        setLoading(false);
+    });
+}, [curs.id]);
 
-    if (loading) {
-        return <div>Loading course details...</div>;
-    }
+const downloadMaterial = (materialId, filename) => {
+    fetch(`${API_BASE_URL}/didactic/course/material/${materialId}/file`)
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(`HTTP error! Status: ${response.status}, Message: ${text}`);
+                });
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        })
+        .catch(err => {
+            console.error('Eroare la descărcarea materialului:', err);
+            alert('Eroare la descărcarea materialului: ' + err.message);
+        });
+};
 
-    return (
-        <div className="detalii-container">
-            <button className="buton-inapoi" onClick={onBack}>{'< Înapoi'}</button>
-            <div className="titlu-curs">
-                <h1><u>{curs.title}</u></h1>
-                <Ceas />
-            </div>
-            <ButonExtensibil
-                text="Profesori"
-                professors={profesori}
-            />
-            <div className="sectiune">
-                <h2>DESCRIERE CURS:</h2>
-                <p>{description}</p>
-            </div>
-            <div className="sectiune">
-                <h2>Metoda notare:(componente)</h2>
-                {formula ? (
-                    <div>
-                        <p>{formula.text}</p>
-                        {formula.components?.length > 0 && (
-                            <ul>
-                                {formula.components.map(comp => (
-                                    <li key={comp.id}>{comp.name}</li>
-                                ))}
-                            </ul>
-                        )}
-                    </div>
-                ) : (
-                    <p>No formula defined</p>
-                )}
-            </div>
-            <div className="sectiune bibliografie">
-                <h2>Materiale de curs:</h2>
-                {materials.length > 0 ? (
-                    <ul>
-                        {materials.map(material => (
-                            <li key={material.id}>
-                                <a href={material.link} target="_blank" rel="noopener noreferrer">
-                                    {material.name}
-                                </a>
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <p>Nu sunt materiale disponibile</p>
-                )}
-            </div>
+if (loading) {
+    return <div>Se încarcă detaliile cursului...</div>;
+}
+
+return (
+    <div className="detalii-container">
+        <button className="buton-inapoi" onClick={onBack}>{'< Înapoi'}</button>
+        <div className="titlu-curs">
+            <h1><u>{curs.title}</u></h1>
+            <Ceas />
         </div>
-    );
+        <ButonExtensibil text="Profesori" professors={profesori} />
+        <div className="sectiune">
+            <h2>Descriere curs:</h2>
+            <p>{description}</p>
+        </div>
+        <div className="sectiune">
+            <h2>Metoda de notare (componente):</h2>
+            {formula ? (
+                <div>
+                    <p>{formula.text}</p>
+                    {formula.components?.length > 0 && (
+                        <ul>
+                            {formula.components.map(comp => (
+                                <li key={comp.id}>{comp.name}</li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+            ) : (
+                <p>Fără formulă definită</p>
+            )}
+        </div>
+        <div className="sectiune bibliografie">
+            <h2>Materiale de curs:</h2>
+            {materials.length > 0 ? (
+                materials.map(material => (
+                    <div
+                        key={material.id}
+                        style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}
+                    >
+                        <span>{material.filename}</span>
+                        <button
+                            style={{ marginLeft: '10px' }}
+                            onClick={() => downloadMaterial(material.id, material.filename)}
+                        >
+                            Descarcă
+                        </button>
+                    </div>
+                ))
+            ) : (
+                <p>Nu sunt materiale disponibile</p>
+            )}
+        </div>
+    </div>
+);
 };
 
 export default DetaliiCurs;
