@@ -39,7 +39,7 @@ The platform is split into a backend (Spring Boot) and a frontend (React), and i
 
 ### Schedule for students
 
-![Schedule](Screenshots/Schedule.png)
+![Schedule](Screenshots/schedule.png)
 
 
 
