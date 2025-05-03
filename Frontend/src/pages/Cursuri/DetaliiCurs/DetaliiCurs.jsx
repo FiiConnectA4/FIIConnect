@@ -67,113 +67,113 @@ const DetaliiCurs = ({ curs, onBack }) => {
 
         // Fetch formula
         fetch(`${API_BASE_URL}/didactic/course/${curs.id}/formula`)
-    .then(response => {
-        if (!response.ok) {
-            console.error(`Nicio formulă găsită pentru cursul ${curs.id}`);
-            setFormula(null);
-            return null;
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Răspuns API formula:', data);
-        setFormula(data);
-        setLoading(false);
-    })
-    .catch(error => {
-        console.error('Eroare la încărcarea formulei:', error);
-        alert('Eroare la încărcarea formulei: ' + error.message);
-        setFormula(null);
-        setLoading(false);
-    });
-}, [curs.id]);
+            .then(response => {
+                if (!response.ok) {
+                    console.error(`Nicio formulă găsită pentru cursul ${curs.id}`);
+                    setFormula(null);
+                    return null;
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Răspuns API formula:', data);
+                setFormula(data);
+                setLoading(false);
+            })
+            .catch(error => {
+                console.error('Eroare la încărcarea formulei:', error);
+                alert('Eroare la încărcarea formulei: ' + error.message);
+                setFormula(null);
+                setLoading(false);
+            });
+    }, [curs.id]);
 
-const downloadMaterial = (materialId, filename) => {
-    fetch(`${API_BASE_URL}/didactic/course/material/${materialId}/file`)
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => {
-                    throw new Error(`HTTP error! Status: ${response.status}, Message: ${text}`);
-                });
-            }
-            return response.blob();
-        })
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(url);
-        })
-        .catch(err => {
-            console.error('Eroare la descărcarea materialului:', err);
-            alert('Eroare la descărcarea materialului: ' + err.message);
-        });
-};
+    const downloadMaterial = (materialId, filename) => {
+        fetch(`${API_BASE_URL}/didactic/course/material/${materialId}/file`)
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(`HTTP error! Status: ${response.status}, Message: ${text}`);
+                    });
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(err => {
+                console.error('Eroare la descărcarea materialului:', err);
+                alert('Eroare la descărcarea materialului: ' + err.message);
+            });
+    };
 
-if (loading) {
-    return <div>Se încarcă detaliile cursului...</div>;
-}
+    if (loading) {
+        return <div>Se încarcă detaliile cursului...</div>;
+    }
 
-return (
-    <div className="detalii-container">
-        <button className="buton-inapoi" onClick={onBack}>{'< Înapoi'}</button>
-        <div className="titlu-curs">
-            <h1><u>{curs.title}</u></h1>
-            <Ceas />
-        </div>
-        <ButonExtensibil text="Profesori" professors={profesori} />
-        <div className="sectiune">
-            <h2>Descriere curs:</h2>
-            <p>{description}</p>
-        </div>
-        <div className="sectiune">
-            <h2>Metoda de notare (componente):</h2>
-            {formula ? (
-                <div>
-                    <p>{formula.text}</p>
-                    {formula.components?.length > 0 && (
-                        <ul>
-                            {formula.components.map(comp => (
-                                <li key={comp.id}>{comp.name}</li>
-                            ))}
-                        </ul>
-                    )}
-                </div>
-            ) : (
-                <p>Fără formulă definită</p>
-            )}
-        </div>
-        <div className="sectiune bibliografie">
-            <h2>Materiale de curs:</h2>
-            {materials.length > 0 ? (
-                <div>
-                    {materials.map(material => (
-                        <div
-                            key={material.id}
-                            style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}
-                        >
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <span style={{ flex: 1 }}>{material.filename}</span>
-                                <button
-                                    style={{ marginLeft: '10px' }}
-                                    onClick={() => downloadMaterial(material.id, material.filename)}
-                                >
-                                    Descarcă
-                                </button>
+    return (
+        <div className="detalii-container">
+            <button className="buton-inapoi" onClick={onBack}>{'< Înapoi'}</button>
+            <div className="titlu-curs">
+                <h1><u>{curs.title}</u></h1>
+                <Ceas />
+            </div>
+            <ButonExtensibil text="Profesori" professors={profesori} />
+            <div className="sectiune">
+                <h2>Descriere curs:</h2>
+                <p>{description}</p>
+            </div>
+            <div className="sectiune">
+                <h2>Metoda de notare (componente):</h2>
+                {formula ? (
+                    <div>
+                        <p>{formula.text}</p>
+                        {formula.components?.length > 0 && (
+                            <ul>
+                                {formula.components.map(comp => (
+                                    <li key={comp.id}>{comp.name}</li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                ) : (
+                    <p>Fără formulă definită</p>
+                )}
+            </div>
+            <div className="sectiune bibliografie">
+                <h2>Materiale de curs:</h2>
+                {materials.length > 0 ? (
+                    <div>
+                        {materials.map(material => (
+                            <div
+                                key={material.id}
+                                style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}
+                            >
+                                <div style={{ display: 'flex', alignItems: 'center' }}>
+                                    <span style={{ flex: 1 }}>{material.filename}</span>
+                                    <button
+                                        className='buton-optiune'
+                                        onClick={() => downloadMaterial(material.id, material.filename)}
+                                    >
+                                        Descarcă
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                    ))}
-                </div>
-            ) : (
-                <p>Nu sunt materiale disponibile</p>
-            )}
+                        ))}
+                    </div>
+                ) : (
+                    <p>Nu sunt materiale disponibile</p>
+                )}
+            </div>
         </div>
-    </div>
-);
+    );
 };
 
 export default DetaliiCurs;

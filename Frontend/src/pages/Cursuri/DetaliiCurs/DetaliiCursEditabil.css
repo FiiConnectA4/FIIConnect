@@ -1,0 +1,87 @@
+.detalii-container {
+    padding: 20px;
+}
+
+.buton-inapoi {
+    margin-bottom: 20px;
+}
+
+.titlu-curs h1 {
+    text-align: center;
+}
+
+.sectiune {
+    margin-bottom: 20px;
+}
+
+.bibliografie-material {
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.material-rename-container {
+    display: flex;
+    align-items: center;
+}
+
+.material-rename-input {
+    margin-right: 10px;
+}
+
+.material-rename-button {
+    margin-left: 10px;
+}
+
+.material-container {
+    display: flex;
+    align-items: center;
+}
+
+.material-filename {
+    flex: 1;
+}
+
+.material-buttons {
+    display: flex;
+}
+
+.material-button {
+    margin-left: 10px;
+}
+
+.upload-button-container {
+    margin-top: 20px;
+}
+
+.upload-button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.upload-button:disabled {
+    cursor: not-allowed;
+}
+
+.upload-input {
+    display: none;
+}
+
+.buton-optiune {
+    margin-left: 10px;
+    background-color: #537A9C;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+}

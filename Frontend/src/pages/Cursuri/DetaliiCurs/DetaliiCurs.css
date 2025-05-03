@@ -89,3 +89,14 @@ a {
 .link {
     margin-top: 10px;
 }
+
+.buton-optiune {
+    margin-left: 10px;
+    background-color: #537A9C;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+}
