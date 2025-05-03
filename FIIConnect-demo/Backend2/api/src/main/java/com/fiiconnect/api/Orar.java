@@ -3,8 +3,8 @@ package com.fiiconnect.api;
 import jakarta.persistence.*;
 import java.util.Objects;
 
-@Entity // o clasa ca o entitate jpa(o clas care va fi mapata la o tabela)
-@Table(name = "orar") //tabela se numeste orar
+@Entity 
+@Table(name = "orar")
 public class Orar {
     @Id // marcat id ca PK
 @SequenceGenerator(name = "orar_seq", sequenceName = "ORAR_SEQ", allocationSize = 1)
@@ -24,7 +24,7 @@ private Integer id;
     private String an;
 
 
-    public Orar() {} // obligatoriu pt jpa(cosntructor gol)
+    public Orar() {} 
 
     public Orar(String zi, String oraStart, String oraEnd, String saptamana,
                 String sala, String disciplina, String profesor,

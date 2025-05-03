@@ -209,11 +209,11 @@ const OrarToti = () => {
         Switch la Orar Secretariat
       </button>
 
-      {currentSection && ["studenti", "profesori", "sali", "discipline"].includes(currentSection) && (
-        <button className="orar-button inapoi" onClick={handleBackToMain}>
-          🔙 Înapoi la Orar Secretariat
-        </button>
-      )}
+      {["/app/orar/studenti", "/app/orar/profesori", "/app/orar/sali", "/app/orar/discipline"].includes(location.pathname) && (
+  <button className="orar-button inapoi" onClick={handleBackToMain}>
+    🔙 Înapoi
+  </button>
+)}
 
       {selectedGroup || selectedProfessor || selectedRoom || selectedDiscipline ? (
         <div className="orar-afisat">

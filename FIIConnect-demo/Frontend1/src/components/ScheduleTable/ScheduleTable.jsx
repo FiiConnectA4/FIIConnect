@@ -1,32 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import "./ScheduleTable.css";
 
 const zileSaptamana = ["Luni", "Marti", "Miercuri", "Joi", "Vineri", "Sambata", "Duminica"];
 
-const sorteazaOrar = (orar) => {
-  return orar.sort((a, b) => {
-    // Sortează după ziua săptămânii
+export const sorteazaOrar = (orar) => {
+  return [...orar].sort((a, b) => {
     const ziA = zileSaptamana.indexOf(a.zi);
     const ziB = zileSaptamana.indexOf(b.zi);
 
-    if (ziA !== ziB) {
-      return ziA - ziB; // Compară zilele
-    }
+    if (ziA !== ziB) return ziA - ziB;
 
-    // Verifică dacă oraStart există pentru ambele obiecte
-    if (!a.oraStart || !b.oraStart) {
-      return 0; // Dacă lipsește oraStart, păstrează ordinea inițială
-    }
+    const oraStartA = a.interval?.split(" - ")[0] || "00:00";
+    const oraStartB = b.interval?.split(" - ")[0] || "00:00";
 
-    // Compară orele de început
-    const [oraA, minutA] = a.oraStart.split(":").map(Number); // Transformă ora în [HH, MM]
-    const [oraB, minutB] = b.oraStart.split(":").map(Number);
+    const [oraA, minutA] = oraStartA.split(":").map(Number);
+    const [oraB, minutB] = oraStartB.split(":").map(Number);
 
-    if (oraA !== oraB) {
-      return oraA - oraB; // Compară orele (HH)
-    }
-
-    return minutA - minutB; // Compară minutele (MM) dacă orele sunt egale
+    return oraA !== oraB ? oraA - oraB : minutA - minutB;
   });
 };
 
@@ -35,18 +25,11 @@ const ScheduleTable = ({ schedule, title, showSala = true, editable = false, onD
   const [selectedEntry, setSelectedEntry] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({});
-  const [scheduleData, setScheduleData] = useState(schedule);
-  useEffect(() => {
-    const sortedData = sorteazaOrar(schedule); // Sortează datele
-    setScheduleData(sortedData);
-  }, [schedule]);
+
+  const sortedSchedule = sorteazaOrar(schedule);
 
   const handleEditClick = (entry) => {
-    const entryWithId = {
-      ...entry,
-      id: entry.id ?? entry._id ?? null // fallback dacă folosești Mongo sau ai id-ul în altă formă
-    };
-  
+    const entryWithId = { ...entry, id: entry.id ?? entry._id ?? null };
     setSelectedEntry(entryWithId);
     setFormData(entryWithId);
     setShowPopup(true);
@@ -70,69 +53,58 @@ const ScheduleTable = ({ schedule, title, showSala = true, editable = false, onD
     })
       .then((res) => {
         if (res.ok) {
-          // Actualizează lista de date după ștergere
-          onDataChange(schedule.filter((item) => item.id !== selectedEntry.id));
+          const updated = schedule.filter((item) => item.id !== selectedEntry.id);
+          onDataChange(updated);
           closePopup();
         }
       })
       .catch((err) => console.error("Eroare la ștergere:", err));
   };
 
-const handleSaveEdit = () => {
-  const isNew = !formData.id;
+  const handleSaveEdit = () => {
+    const isNew = !formData.id;
+    let oraStart = null, oraEnd = null;
 
-  // 🧠 Sparge intervalul nou introdus în oraStart și oraEnd
-  let oraStart = null;
-  let oraEnd = null;
+    if (formData.interval && formData.interval.includes(" - ")) {
+      const parts = formData.interval.split(" - ");
+      oraStart = parts[0].trim();
+      oraEnd = parts[1].trim();
+    }
 
-  if (formData.interval && formData.interval.includes(" - ")) {
-    const parts = formData.interval.split(" - ");
-    oraStart = parts[0].trim();
-    oraEnd = parts[1].trim();
-  }
+    const payload = { ...formData, oraStart, oraEnd };
 
-  const payload = {
-    ...formData,
-    oraStart,
-    oraEnd
+    const url = isNew
+      ? "http://localhost:34101/orar"
+      : `http://localhost:34101/orar/${formData.id}`;
+    const method = isNew ? "POST" : "PUT";
+
+    fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Eroare la salvare");
+        return res.json();
+      })
+      .then((data) => {
+        if (!data.interval && data.oraStart && data.oraEnd) {
+          data.interval = `${data.oraStart} - ${data.oraEnd}`;
+        }
+
+        const updated = isNew
+          ? [...schedule, data]
+          : schedule.map((item) => (item.id === data.id ? data : item));
+
+        onDataChange(updated);
+        closePopup();
+      })
+      .catch((err) => console.error("Eroare la salvare:", err));
   };
-
-  const url = isNew
-    ? "http://localhost:34101/orar"
-    : `http://localhost:34101/orar/${formData.id}`;
-  const method = isNew ? "POST" : "PUT";
-
-  fetch(url, {
-    method,
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
-  })
-    .then((res) => {
-      if (!res.ok) throw new Error("Eroare la salvare");
-      return res.json();
-    })
-    .then((data) => {
-      // reconstruim intervalul din datele salvate
-      if (!data.interval && data.oraStart && data.oraEnd) {
-        data.interval = `${data.oraStart} - ${data.oraEnd}`;
-      }
-
-      if (isNew) {
-        setScheduleData((prev) => [...prev, data]);
-      } else {
-        setScheduleData((prev) =>
-          prev.map((item) => (item.id === data.id ? data : item))
-        );
-      }
-
-      closePopup();
-    })
-    .catch((err) => console.error("Eroare la salvare:", err));
-};
 
   const handleAddNew = () => {
     const newEntry = {
-      id: null, // Fără ID pentru intrarea nouă
+      id: null,
       zi: "Luni",
       interval: "08:00 - 10:00",
       oraStart: "08:00",
@@ -169,7 +141,7 @@ const handleSaveEdit = () => {
           </tr>
         </thead>
         <tbody>
-          {scheduleData.length === 0 ? (
+          {sortedSchedule.length === 0 ? (
             <tr>
               <td colSpan={showSala ? (editable ? 9 : 8) : (editable ? 8 : 7)} style={{ textAlign: "center" }}>
                 Nu există date disponibile pentru afișare.
@@ -181,7 +153,7 @@ const handleSaveEdit = () => {
               </td>
             </tr>
           ) : (
-            scheduleData.map((entry) => (
+            sortedSchedule.map((entry) => (
               <tr key={`${entry.id ?? entry.disciplina}-${entry.zi}-${entry.interval}`}>
                 <td>{entry.zi}</td>
                 <td>{entry.interval}</td>
@@ -193,9 +165,7 @@ const handleSaveEdit = () => {
                 <td>{entry.an}</td>
                 {editable && (
                   <td>
-                    <button className="edit-button" onClick={() => handleEditClick(entry)}>
-                      ✏️ Editare
-                    </button>
+                    <button className="edit-button" onClick={() => handleEditClick(entry)}>✏️ Editare</button>
                   </td>
                 )}
               </tr>
@@ -228,67 +198,59 @@ const handleSaveEdit = () => {
                       ))}
                     </select>
                   </label>
-
                   <label>
                     Interval:
-                    <input name="interval" value={formData.interval} onChange={handleChange} />
+                    <input name="interval" value={formData.interval || ""} onChange={handleChange} />
                   </label>
-
                   <label>
                     Disciplina:
-                    <input name="disciplina" value={formData.disciplina} onChange={handleChange} list="discipline-list" />
+                    <input name="disciplina" value={formData.disciplina || ""} onChange={handleChange} list="discipline-list" />
                     <datalist id="discipline-list">
-                      {[...new Set(scheduleData.map(e => e.disciplina).filter(Boolean))].map((d) => (
+                      {[...new Set(schedule.map(e => e.disciplina).filter(Boolean))].map((d) => (
                         <option key={d} value={d} />
                       ))}
                     </datalist>
                   </label>
-
                   <label>
                     Tip:
-                    <select name="tip" value={formData.tip} onChange={handleChange}>
+                    <select name="tip" value={formData.tip || "Curs"} onChange={handleChange}>
                       <option value="Curs">Curs</option>
                       <option value="Laborator">Laborator</option>
                       <option value="Seminar">Seminar</option>
                     </select>
                   </label>
-
                   <label>
                     Grupa:
-                    <input name="grupa" value={formData.grupa} onChange={handleChange} list="grupe-list" />
+                    <input name="grupa" value={formData.grupa || ""} onChange={handleChange} list="grupe-list" />
                     <datalist id="grupe-list">
-                      {[...new Set(scheduleData.map(e => e.grupa).filter(Boolean))].map((g) => (
+                      {[...new Set(schedule.map(e => e.grupa).filter(Boolean))].map((g) => (
                         <option key={g} value={g} />
                       ))}
                     </datalist>
                   </label>
-
                   <label>
                     Sala:
-                    <input name="sala" value={formData.sala} onChange={handleChange} list="sali-list" />
+                    <input name="sala" value={formData.sala || ""} onChange={handleChange} list="sali-list" />
                     <datalist id="sali-list">
-                      {[...new Set(scheduleData.map(e => e.sala).filter(Boolean))].map((s) => (
+                      {[...new Set(schedule.map(e => e.sala).filter(Boolean))].map((s) => (
                         <option key={s} value={s} />
                       ))}
                     </datalist>
                   </label>
-
                   <label>
                     Profesor:
-                    <input name="profesor" value={formData.profesor} onChange={handleChange} list="profesori-list" />
+                    <input name="profesor" value={formData.profesor || ""} onChange={handleChange} list="profesori-list" />
                     <datalist id="profesori-list">
-                      {[...new Set(scheduleData.map(e => e.profesor).filter(Boolean))].map((p) => (
+                      {[...new Set(schedule.map(e => e.profesor).filter(Boolean))].map((p) => (
                         <option key={p} value={p} />
                       ))}
                     </datalist>
                   </label>
-
                   <label>
                     An:
-                    <input name="an" type="number" value={formData.an} onChange={handleChange} />
+                    <input name="an" type="number" value={formData.an || ""} onChange={handleChange} />
                   </label>
                 </form>
-
                 <button onClick={handleSaveEdit}>💾 Salvează</button>
                 <button onClick={closePopup}>Anulează</button>
               </>
