@@ -56,6 +56,64 @@ const Profesor = () => {
             });
     };
 
+    const handleToggleArchiveCourse = (id, currentArchived) => {
+        const isArchiving = currentArchived === 0;
+        const confirmText = isArchiving
+            ? "Ești sigur că vrei să arhivezi acest curs?"
+            : "Ești sigur că vrei să dezarhivezi acest curs?";
+
+        if (!window.confirm(confirmText)) return;
+
+        if (isArchiving) {
+            fetch(`/didactic/course/${id}/archive`, {
+                method: 'PUT'
+            })
+                .then((res) => {
+                    if (!res.ok) throw new Error("Eroare la arhivare");
+                    setCourses(prev =>
+                        prev.map(c =>
+                            c.course?.id === id ? { ...c, course: { ...c.course, archived: 1 } } : c
+                        )
+                    );
+                })
+                .catch((err) => {
+                    console.error("⛔ Arhivare eșuată:", err);
+                    alert("Nu s-a putut arhiva cursul.");
+                });
+        } else {
+            const curs = courses.find(c => c.course?.id === id);
+            if (!curs || !curs.course) {
+                alert("Cursul nu a fost găsit local.");
+                return;
+            }
+
+            const updatedCurs = {
+                ...curs.course,
+                archived: 0
+            };
+
+            fetch(`/didactic/course/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedCurs)
+            })
+                .then((res) => {
+                    if (!res.ok) throw new Error("Eroare la dezarhivare");
+                    setCourses(prev =>
+                        prev.map(c =>
+                            c.course?.id === id ? { ...c, course: { ...c.course, archived: 0 } } : c
+                        )
+                    );
+                })
+                .catch((err) => {
+                    console.error("⛔ Dezarhivare eșuată:", err);
+                    alert("Nu s-a putut dezarhiva cursul.");
+                });
+        }
+    };
+
     if (loading) return <div>Loading...</div>;
 
     if (selectedCourseId) {
@@ -113,8 +171,13 @@ const Profesor = () => {
                                 <Buton
                                     text={cursuri.course.title || 'Titlu indisponibil'}
                                     onNavigate={() => setSelectedCourseId(id)}
+                                    className={cursuri.course.archived === 1 ? 'buton-arhivat' : ''}
                                 />
-                                <PageControl onDelete={() => handleDeleteCourse(id)} />
+                                <PageControl
+                                    onDelete={() => handleDeleteCourse(id)}
+                                    onArchive={() => handleToggleArchiveCourse(id, cursuri.course.archived)}
+                                    archived={cursuri.course.archived}
+                                />
                             </div>
                         );
                     })

@@ -1,11 +1,7 @@
 import React from "react";
 import "./Component.css";
 
-function Optiuni({ onDelete }) {
-    const handleDownload = () => {
-        console.log("Descarcă ceva...");
-    };
-
+function Optiuni({ onDelete, onArchive }) {
     return (
         <div className="icon-buttons-container">
             <button
@@ -21,10 +17,16 @@ function Optiuni({ onDelete }) {
                     className="icon-image"
                 />
             </button>
-            <button className="icon-button" onClick={handleDownload}>
+            <button
+                className="icon-button"
+                onClick={() => {
+                    console.log("📦 Ai apăsat pe ARHIVARE");
+                    if (onArchive) onArchive();
+                }}
+            >
                 <img
                     src="/Archive.png"
-                    alt="Download icon"
+                    alt="Archive icon"
                     className="icon-image"
                 />
             </button>
