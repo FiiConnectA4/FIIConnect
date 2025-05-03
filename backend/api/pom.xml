@@ -27,6 +27,8 @@
 		<url/>
 	</scm>
 	<properties>
+		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.target>21</maven.compiler.target>
 		<java.version>21</java.version>
 		<sonar.organization>fiiconnecta4</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -79,7 +81,6 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <scope>provided</scope>
         </dependency>
 
     </dependencies>
