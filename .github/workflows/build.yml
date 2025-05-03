@@ -82,14 +82,18 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
-          mvn -B verify \
+           mvn -B verify \
             -Dspring.datasource.url=jdbc:oracle:thin:@localhost:1521/FREE \
             -Dspring.datasource.username=api_test \
             -Dspring.datasource.password=api_test \
             -Dsftp.host=localhost \
             -Dsftp.port=2222 \
             org.sonarsource.scanner.maven:sonar-maven-plugin:sonar \
-            -Dsonar.projectKey=FiiConnectA4_FIIConnect
+            -Dsonar.projectKey=FiiConnectA4_FIIConnect \
+            -Dsonar.organization=fiiconnecta4 \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
+            -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
       - name: Dump surefire logs (on failure)
         if: failure()
         run: cat backend/api/target/surefire-reports/*.txt || true
