@@ -34,11 +34,12 @@ The platform is split into a backend (Spring Boot) and a frontend (React), and i
 
 ### Secretariat Panel
 
-![Secretariat Panel](screenshots/secretariat.png)
+![Secretariat Pane](Screenshots/Secretary.png)
+![Secretariat Panel](Screenshots/Decontari.png)
 
 ### Schedule for students
 
-![Schedule](screenshots/schedule.png)
+![Schedule](Screenshots/Schedule.png)
 
 
 
