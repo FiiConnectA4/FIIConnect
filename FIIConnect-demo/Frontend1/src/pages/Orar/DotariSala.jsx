@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 
 const DotariSala = ({ isSecretariat = false }) => {
-  const { sala } = useParams(); // Preia parametrul "sala" din URL
-  const navigate = useNavigate(); // Hook pentru navigare
+  const { sala } = useParams(); 
+  const navigate = useNavigate(); 
   const [dotari, setDotari] = useState(null);
 
   useEffect(() => {
     // Preia dotările sălii din API
     fetch(`http://localhost:34101/sali/nume/${sala}`)
       .then(res => res.json())
-      .then(data => setDotari(data[0])) // Folosește primul element din răspunsul JSON
+      .then(data => setDotari(data[0])) 
       .catch(err => console.error('Eroare la preluarea dotărilor:', err));
   }, [sala]);
 

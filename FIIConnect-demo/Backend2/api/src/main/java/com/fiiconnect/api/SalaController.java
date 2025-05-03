@@ -31,7 +31,7 @@ public class SalaController {
 
     @DeleteMapping("/{id}")
     public void stergeSala(@PathVariable Long id) {
-        salaRepository.deleteById(id); // șterge înregistrările din DB după id
+        salaRepository.deleteById(id); 
     }
 
     @GetMapping("/nume/{nume}")
@@ -39,9 +39,9 @@ public class SalaController {
         // Obținem lista de orare din baza de date
         List<Sala> SalaList = salaRepository.findByNume(nume);
 
-        // Mapează entitățile Orar în OrarDTO, fără a include frecventa
+        
         return SalaList.stream().map(sala -> {
-            // Creăm obiectul DTO
+           
             return new SalaDTO(
                 sala.getCapacitate(),
                 sala.getDotari(),

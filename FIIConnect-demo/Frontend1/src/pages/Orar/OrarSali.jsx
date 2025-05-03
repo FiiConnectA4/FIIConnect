@@ -11,8 +11,8 @@ const OrarSali = ({ onRoomClick }) => {
 
   // Selectează sala și navighează către URL-ul corespunzător
   const handleSalaSelect = (sala) => {
-    navigate(`/app/orar/sali/${sala}`); // Navighează la URL-ul sălii
-    onRoomClick(sala); // Apelează funcția prop pentru a seta sala selectată
+    navigate(`/app/orar/sali/${sala}`); 
+    onRoomClick(sala); 
   };
 
   return (

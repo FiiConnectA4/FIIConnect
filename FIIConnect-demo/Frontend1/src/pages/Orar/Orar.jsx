@@ -10,9 +10,9 @@ const Orar = () => {
 
   const handleSwitch = () => {
     if (isSecretariat) {
-      navigate("/app/orar"); // Navighează la pagina "Orar"
+      navigate("/app/orar"); 
     } else {
-      navigate("/app/orar-secretariat"); // Navighează la pagina "OrarSecretariat"
+      navigate("/app/orar-secretariat"); 
     }
   };
 

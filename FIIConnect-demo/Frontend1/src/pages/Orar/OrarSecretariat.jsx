@@ -6,6 +6,7 @@ import OrarProfesori from "./OrarProfesori";
 import OrarDiscipline from "./OrarDiscipline";
 import OrarSali from "./OrarSali";
 import "./OrarToti.css";
+import { sorteazaOrar } from "../../components/ScheduleTable/ScheduleTable";
 
 const OrarSecretariat = () => {
   const navigate = useNavigate();
@@ -19,19 +20,20 @@ const OrarSecretariat = () => {
   const [selectedRoom, setSelectedRoom] = useState(sala || null);
   const [selectedDiscipline, setSelectedDiscipline] = useState(disciplina || null);
 
-  const fetchSchedule = async (url, setEntity) => {
+  const fetchSchedule = async (url) => {
     try {
       const response = await fetch(url);
       const data = await response.json();
 
+      console.log("Server data:", data);
+
       if (Array.isArray(data)) {
-        setScheduleData(data);
+        const sortedData = sorteazaOrar(data);
+        setScheduleData(sortedData);
       } else {
         console.warn("Răspuns invalid:", data);
         setScheduleData([]);
       }
-
-      if (setEntity) setEntity();
     } catch (err) {
       console.error("Eroare la preluarea datelor:", err);
       setScheduleData([]);
@@ -61,6 +63,26 @@ const OrarSecretariat = () => {
     }
   }, [location]);
 
+  useEffect(() => {
+    if (currentSection) {
+      let url = "";
+      if (currentSection === "studenti" && selectedGroup) {
+        const [an, grupa] = selectedGroup.split(" - ");
+        url = `http://localhost:34101/orar-secretariat/grupa/${an.replace("Anul ", "")}/${grupa}`;
+      } else if (currentSection === "profesori" && selectedProfessor) {
+        url = `http://localhost:34101/orar-secretariat/profesor/${selectedProfessor}`;
+      } else if (currentSection === "sali" && selectedRoom) {
+        url = `http://localhost:34101/orar-secretariat/sala/${selectedRoom}`;
+      } else if (currentSection === "discipline" && selectedDiscipline) {
+        url = `http://localhost:34101/orar-secretariat/disciplina/${selectedDiscipline}`;
+      }
+
+      if (url) {
+        fetchSchedule(url);
+      }
+    }
+  }, [currentSection, selectedGroup, selectedProfessor, selectedRoom, selectedDiscipline]);
+
   const handleDataUpdated = () => {
     if (selectedGroup) {
       const [an, grupa] = selectedGroup.split(" - ");
@@ -81,7 +103,6 @@ const OrarSecretariat = () => {
       fetchSchedule(url);
     }
   };
-  
 
   useEffect(() => {
     if (an && grupa) {
@@ -158,9 +179,9 @@ const OrarSecretariat = () => {
         Switch la Orar
       </button>
 
-      {currentSection && (
+      {["/app/orar-secretariat/studenti", "/app/orar-secretariat/profesori", "/app/orar-secretariat/sali", "/app/orar-secretariat/discipline"].includes(location.pathname) && (
         <button className="orar-button inapoi" onClick={handleBackToMain}>
-          🔙 Înapoi la Orar Secretariat
+          🔙 Înapoi
         </button>
       )}
 
@@ -175,15 +196,16 @@ const OrarSecretariat = () => {
           </h3>
 
           <ScheduleTable
-  schedule={Array.isArray(scheduleData) ? scheduleData : []}
-  title={`Orar pentru ${selectedGroup || `Profesor ${selectedProfessor}` || `Sala ${selectedRoom}` || `Disciplina ${selectedDiscipline}`}`}
-  editable={true}
-  onDataChange={(newData) => {
-    setScheduleData(newData);
-    handleDataUpdated();
-  }}
-/>
-
+            schedule={Array.isArray(scheduleData) ? scheduleData : []}
+            
+            editable={true}
+            onDataChange={(newData) => {
+              console.log("Updated data:", newData);
+              const sortedData = sorteazaOrar(newData);
+              setScheduleData(sortedData);
+              handleDataUpdated();
+            }}
+          />
 
           <button className="orar-button inapoi" onClick={handleBackButtonClick}>
             🔙 Înapoi

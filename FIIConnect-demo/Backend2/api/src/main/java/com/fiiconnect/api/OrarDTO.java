@@ -8,7 +8,7 @@ public class OrarDTO {
     private String grupa;
     private String sala;
     private String profesor;
-    private String an; // <-- Adaugă acest câmp pentru anul respectiv
+    private String an; 
     private Integer id;
    
 
@@ -34,7 +34,7 @@ public class OrarDTO {
     public String getProfesor() {
         return profesor;
     }
-    public String getAn() { return an; } // Getter pentru an
-    public Integer getId() { return id; } // Getter pentru id
+    public String getAn() { return an; } 
+    public Integer getId() { return id; } 
   
 }
