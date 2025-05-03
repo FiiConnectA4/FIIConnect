@@ -66,16 +66,20 @@ public class SftpController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Missing or invalid remote file name.");
             }
 
-            String remoteFilePath = "faculty_files/" + remoteFile;
+            String remoteFilePath = "/faculty_files/" + remoteFile;
             sftpService.deleteFile(remoteFilePath, false);
             return ResponseEntity.ok("File deleted successfully.");
         } catch (FileNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("File not found: " + e.getMessage() + " - " + e.getCause());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("File not found: " + e.getMessage());
         } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Permission denied to delete file: " + e.getMessage() + " - " + e.getCause());
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Permission denied to delete file: " + e.getMessage());
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("I/O error: " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete file: " + e.getMessage() + " - " + e.getCause());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete file: " + e.getMessage());
         }
     }
+
+
 
 }

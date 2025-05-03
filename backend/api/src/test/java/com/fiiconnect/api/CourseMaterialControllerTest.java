@@ -5,6 +5,8 @@ import com.fiiconnect.api.didactic.exceptions.CourseMaterialNotFoundException;
 import com.fiiconnect.api.didactic.helpers.SQLExceptionMessageParser;
 import com.fiiconnect.api.didactic.models.CourseMaterial;
 import com.fiiconnect.api.didactic.repositories.CourseMaterialRepository;
+import com.fiiconnect.api.didactic.services.CourseMaterialService;
+import com.fiiconnect.api.didactic.services.SftpService;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,9 +25,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 import static org.junit.jupiter.api.Assertions.*;
-
 @ExtendWith(MockitoExtension.class)
 public class CourseMaterialControllerTest {
 
@@ -34,6 +36,12 @@ public class CourseMaterialControllerTest {
 
     @Mock
     private SQLExceptionMessageParser exceptionHelper;
+
+    @Mock
+    private SftpService sftpService;
+
+    @Mock
+    private CourseMaterialService service;
 
     @InjectMocks
     private CourseMaterialController controller;
@@ -83,40 +91,83 @@ public class CourseMaterialControllerTest {
         verify(repository, times(1)).findById(1L);
     }
 
-    /*@Test
-    void uploadMaterial_SavesMaterialAndReturns201() {
+    @Test
+    void uploadMaterial_SavesMaterialAndReturns201() throws IOException {
         CourseMaterial input = new CourseMaterial();
-        input.setIdCourse(101L);
-        input.setIdProfessor(201L);
+        input.setIdCourse(1010L);
+        input.setIdProfessor(2010L);
         input.setFilename("lab1.pdf");
         input.setUploadDate(new Date());
         input.setUpdateDate(new Date());
 
         CourseMaterial saved = new CourseMaterial();
-        saved.setId(2L);
+        saved.setId(2L);  // Set the ID explicitly
         saved.setIdCourse(input.getIdCourse());
         saved.setIdProfessor(input.getIdProfessor());
         saved.setFilename(input.getFilename());
         saved.setUploadDate(input.getUploadDate());
         saved.setUpdateDate(input.getUpdateDate());
 
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.getOriginalFilename()).thenReturn("lab1.pdf");
+
         when(repository.save(any(CourseMaterial.class))).thenReturn(saved);
-        // addMaterial -> uploadFile need to test
-        ResponseEntity<?> response = controller.addMaterial(input);
+        doNothing().when(sftpService).uploadFile(any(), any());
+
+        ResponseEntity<?> response = controller.uploadFile(2010L, 1010L, file);
 
         assertEquals(201, response.getStatusCode().value());
-        assertEquals("/didactic/course/material/2", response.getHeaders().getLocation().toString());
         verify(repository, times(1)).save(any());
-    }*/
+        verify(sftpService, times(1)).uploadFile(any(), any());
+    }
+
 
     @Test
     void deleteMaterial_DeletesSuccessfully() throws IOException {
-        doNothing().when(repository).deleteById(1L);
+        when(repository.findById(1L)).thenReturn(Optional.of(material));
+        doNothing().when(service).deleteMaterial(material);
 
         controller.deleteMaterial(1L);
 
-        verify(repository, times(1)).deleteById(1L);
+        verify(repository, times(1)).findById(1L);
+        verify(service, times(1)).deleteMaterial(material);
     }
+
+    @Test
+    void changeFilename_UpdatesSuccessfully() throws IOException {
+        String oldFilename = "lecture1.pdf";
+        String newFilename = "lecture1-updated.pdf";
+        material.setFilename(oldFilename);
+
+        when(repository.findById(1L)).thenReturn(Optional.of(material));
+        when(repository.save(any())).thenReturn(material);
+        doNothing().when(sftpService).renameFile(
+                "faculty_files/didactic/course-" + material.getIdCourse() + "/materials/" + oldFilename,
+                "faculty_files/didactic/course-" + material.getIdCourse() + "/materials/" + newFilename
+        );
+
+        controller.changeFilename(1L, newFilename);
+
+        assertEquals(newFilename, material.getFilename());
+        verify(repository, times(1)).findById(1L);
+        verify(repository, times(1)).save(material);
+        verify(sftpService, times(1)).renameFile(
+                "faculty_files/didactic/course-" + material.getIdCourse() + "/materials/" + oldFilename,
+                "faculty_files/didactic/course-" + material.getIdCourse() + "/materials/" + newFilename
+        );
+    }
+
+    @Test
+    void changeFilename_MaterialNotFound_ThrowsException() throws IOException {
+        when(repository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(CourseMaterialNotFoundException.class, () -> controller.changeFilename(1L, "anyname.pdf"));
+
+        verify(repository, times(1)).findById(1L);
+        verify(repository, never()).save(any());
+        verify(sftpService, never()).renameFile(any(), any());
+    }
+
 
     @Test
     void integrityViolation_ReturnsParsedMessage() {
@@ -140,4 +191,3 @@ public class CourseMaterialControllerTest {
         assertTrue(response.contains("999"));
     }
 }
-

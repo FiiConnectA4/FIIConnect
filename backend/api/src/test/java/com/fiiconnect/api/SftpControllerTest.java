@@ -117,6 +117,5 @@ public class SftpControllerTest {
         verify(sftpService, times(1)).deleteFile("/faculty_files/" + remoteFile, false);
     }
 
-
 }
 
