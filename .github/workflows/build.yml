@@ -4,12 +4,12 @@ on:
     branches:
       - main
       - dev
-      - tudor/sonarQubeTesting
+      - tudor/sonarQube
   pull_request:
     branches:
       - main
       - dev
-      - tudor/sonarQubeTesting
+      - tudor/sonarQube
     types: [opened, synchronize, reopened]
 jobs:
   sonarqube:
