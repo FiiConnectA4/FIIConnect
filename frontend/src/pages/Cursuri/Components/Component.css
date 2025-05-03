@@ -26,6 +26,15 @@
     transform: scale(1.1);
 }
 
+.buton-arhivat {
+    background-color: #6c757d !important; /* gri Bootstrap */
+    color: white;
+}
+
+.buton-arhivat:hover {
+    background-color: #5a6268 !important;
+}
+
 .icon-curs {
     width: 32px;
     height: 32px;

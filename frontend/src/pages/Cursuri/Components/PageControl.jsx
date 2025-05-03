@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import Optiuni from './Optiuni';
 import './Component.css';
 
-const PageControl = ({ onDelete, ariaLabel = "Menu" }) => {
-    console.log("✅ PageControl: onDelete primit:", onDelete);
-    
+const PageControl = ({ onDelete, onArchive, ariaLabel = "Menu" }) => {
     const [isVisible, setIsVisible] = useState(false);
     const toggleVisibility = () => setIsVisible(prev => !prev);
 
@@ -17,7 +15,7 @@ const PageControl = ({ onDelete, ariaLabel = "Menu" }) => {
             >
                 <span className="dots"></span>
             </button>
-            {isVisible && <Optiuni onDelete={onDelete} />}
+            {isVisible && <Optiuni onDelete={onDelete} onArchive={onArchive} />}
         </div>
     );
 };

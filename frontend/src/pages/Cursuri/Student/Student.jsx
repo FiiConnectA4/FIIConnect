@@ -26,7 +26,9 @@ const Student = () => {
                 console.log("👨‍🎓 Student info:", data);
                 setStudent(data);
                 const inscrieri = data.enrollments || [];
-                const cursuri = inscrieri.map((e) => e.course);
+                const cursuri = inscrieri
+                    .map((e) => e.course)
+                    .filter((c) => c.archived !== 1);
                 setCourses(cursuri);
                 setLoading(false);
             })

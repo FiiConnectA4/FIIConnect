@@ -51,6 +51,62 @@ const Administrator = () => {
             });
     };
 
+    const handleToggleArchiveCourse = (id, currentArchived) => {
+        const isArchiving = currentArchived === 0;
+        const confirmText = isArchiving
+            ? "Ești sigur că vrei să arhivezi acest curs?"
+            : "Ești sigur că vrei să dezarhivezi acest curs?";
+
+        if (!window.confirm(confirmText)) return;
+
+        if (isArchiving) {
+            // apelăm direct endpointul de arhivare simplă
+            fetch(`/didactic/course/${id}/archive`, {
+                method: 'PUT'
+            })
+                .then((res) => {
+                    if (!res.ok) throw new Error("Eroare la arhivare");
+                    setCursuri(prev =>
+                        prev.map(c => c.id === id ? { ...c, archived: 1 } : c)
+                    );
+                })
+                .catch((err) => {
+                    console.error("⛔ Arhivare eșuată:", err);
+                    alert("Nu s-a putut arhiva cursul.");
+                });
+        } else {
+            // trimitem întreg obiectul cursului cu archived = 0
+            const curs = cursuri.find(c => c.id === id);
+            if (!curs) {
+                alert("Cursul nu a fost găsit local.");
+                return;
+            }
+
+            const updatedCurs = {
+                ...curs,
+                archived: 0
+            };
+
+            fetch(`/didactic/course/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(updatedCurs)
+            })
+                .then((res) => {
+                    if (!res.ok) throw new Error("Eroare la dezarhivare");
+                    setCursuri(prev =>
+                        prev.map(c => c.id === id ? { ...c, archived: 0 } : c)
+                    );
+                })
+                .catch((err) => {
+                    console.error("⛔ Dezarhivare eșuată:", err);
+                    alert("Nu s-a putut dezarhiva cursul.");
+                });
+        }
+    };
+
     if (loading) return <div>Loading...</div>;
 
     if (selectedCursId) {
@@ -89,20 +145,25 @@ const Administrator = () => {
             <div className="lista-cursuri">
                 {cursuri.length > 0 ? (
                     cursuri.map((curs) => (
-                        <div key={curs.id} className="rand-curs">
+                        <div key={curs.id} className={`rand-curs ${curs.archived === 1 ? 'archived-course' : ''}`}>
                             <Carte
                                 key={curs.id}
                                 id={curs.id}
                                 userType='professor'
                             />
                             <Ceas idCurs={curs.id} />
-                            <Buton text={curs.title} onNavigate={() => setSelectedCursId(curs.id)} />
+                            <Buton
+                                text={curs.title}
+                                onNavigate={() => setSelectedCursId(curs.id)}
+                                className={curs.archived === 1 ? 'buton-arhivat' : ''}
+                            />
                             <PageControl
                                 id={curs.id}
                                 title={curs.title}
                                 description={curs.description}
                                 professorId={curs.professorId}
                                 onDelete={() => handleDeleteCourse(curs.id)}
+                                onArchive={() => handleToggleArchiveCourse(curs.id, curs.archived)}
                             />
                         </div>
                     ))
