@@ -1,6 +1,5 @@
 package com.fiiconnect.api.didactic.controllers;
 
-import com.fiiconnect.api.didactic.exceptions.FormulaNotFoundException;
 import com.fiiconnect.api.didactic.helpers.SQLExceptionMessageParser;
 import com.fiiconnect.api.didactic.models.Formula;
 import com.fiiconnect.api.didactic.models.FormulaComponent;
@@ -68,7 +67,7 @@ public class FormulaController {
     }
 
     @PostMapping("/formula")
-    public ResponseEntity<?> newFormula(@RequestBody FormulaRequest request) {
+    public ResponseEntity<?> newFormula(@RequestBody Formula request) {
         LOGGER.info("Creating new formula for course ID: " + request.getIdCourse());
         Formula newFormula = new Formula();
         newFormula.setIdCourse(request.getIdCourse());
@@ -91,7 +90,7 @@ public class FormulaController {
     }
 
     @PutMapping("/formula/{id}")
-    public ResponseEntity<?> replaceFormula(@PathVariable("id") Long id, @RequestBody FormulaRequest request) {
+    public ResponseEntity<?> replaceFormula(@PathVariable("id") Long id, @RequestBody Formula request) {
         LOGGER.info("Updating formula with ID: " + id);
         Formula updatedFormula = service.getFormula(id);
         updatedFormula.setIdCourse(request.getIdCourse());

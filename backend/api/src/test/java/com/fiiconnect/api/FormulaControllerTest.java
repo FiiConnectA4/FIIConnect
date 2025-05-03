@@ -16,11 +16,12 @@ import java.util.List;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.mockito.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.CollectionModel;
-/*
+
+import java.util.ArrayList;
+
 @ExtendWith(MockitoExtension.class)
 public class FormulaControllerTest {
 
@@ -42,6 +43,7 @@ public class FormulaControllerTest {
         formula.setId(1L);
         formula.setIdCourse(100L);
         formula.setText("A + B");
+        formula.setComponents(new ArrayList<>()); // Initialize components list
 
         component = new FormulaComponent();
         component.setId(10L);
@@ -81,7 +83,7 @@ public class FormulaControllerTest {
         ResponseEntity<?> response = controller.newFormula(newFormula);
 
         assertEquals(201, response.getStatusCodeValue());
-        verify(service).addFormula(newFormula);
+        verify(service).addFormula(any(Formula.class)); // Use any() to match any Formula object
     }
 
     @Test
@@ -95,7 +97,7 @@ public class FormulaControllerTest {
         ResponseEntity<?> response = controller.replaceFormula(1L, updated);
 
         assertEquals(201, response.getStatusCodeValue());
-        verify(service).addFormula(any(Formula.class));
+        verify(service,times(2)).addFormula(any(Formula.class));
     }
 
     @Test
@@ -164,6 +166,5 @@ public class FormulaControllerTest {
         assertEquals(204, response.getStatusCodeValue());
         verify(service).deleteFormulaComponent(10L);
     }
-}*/
-
+}
 
