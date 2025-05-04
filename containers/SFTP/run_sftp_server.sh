@@ -26,7 +26,7 @@ else
 fi
 
 echo "Run with user: fiiconnect -- password: fiiconnect"
-rm -rf /Users/stefaniancu/.ssh/known_hosts
+rm -rf ~/.ssh/known_hosts
 
 cd "$sftp_dir"
 sftp -P 2222 fiiconnect@localhost
