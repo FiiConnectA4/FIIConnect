@@ -148,6 +148,13 @@ public class CourseController {
         course.setArchived(1);
         repository.save(course);
     }
+    @PutMapping("/didactic/course/{id}/desarchive")
+    public void desarchiveCourse(@PathVariable Long id)
+    {
+        Course course = repository.findById(id).orElseThrow(() -> new CourseNotFoundException(id));
+        course.setArchived(0);
+        repository.save(course);
+    }
 
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(ConstraintViolationException.class)
