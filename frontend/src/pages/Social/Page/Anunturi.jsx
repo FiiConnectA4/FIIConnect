@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../styles/Anunturi.css";
+import "../Styles/Anunturi.css";
 
 function Anunturi() {
   const [announcements, setAnnouncements] = useState([]);
@@ -30,7 +30,7 @@ function Anunturi() {
       const authUser = await authResponse.json();
       setCurrentUser(authUser);
 
-      // Fetch user details
+      // Fetch user details 
       const userResponse = await fetch(`http://localhost:34101/users/${authUser.id}`);
       if (!userResponse.ok) throw new Error("Failed to fetch user details");
       const userDetails = await userResponse.json();
