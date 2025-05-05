@@ -1,0 +1,130 @@
+.detalii-container {
+    height: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    font-family: sans-serif;
+    color: #1a355e;
+    overflow-y: auto;
+}
+
+.buton-inapoi {
+    align-self: flex-start;
+    background-color: #537A9C;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-bottom: 20px;
+}
+
+.save-button {
+    background-color: #537A9C;
+    color: white;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 20px;
+    max-width:30%;
+    margin: 20px 0;         /* ❌ elimină auto */
+    display: inline-block;  /* ❌ nu block */
+}
+
+.buton-curs {
+    width: fit-content;
+    margin-bottom: 20px;
+}
+
+.titlu-curs {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.titlu-curs h1 {
+    font-size: 40px;
+    font-weight: 600;
+    margin: 0;
+    color: #1a355e;
+}
+
+.sectiune {
+    gap: 10px;
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    background-color: #ccc;
+    border-radius: 10px;
+    padding: 1rem;
+    max-width: 50%;
+    margin-right: auto;
+}
+
+.bibliografie {
+    margin-top: 110px;
+}
+
+a {
+    text-decoration: none;
+    color: #1a355e;
+}
+
+.sectiune h2 {
+    width: 150px;
+    margin: 0;
+    font-size: 1.2rem;
+    color: #234;
+}
+
+
+.stergere {
+    background-color: #537A9C;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+}
+
+.link {
+    margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+    .sectiune {
+        flex-direction: column;
+        align-items: flex-start;
+        max-width: 90%;
+    }
+
+    .sectiune h2 {
+        margin-bottom: 0.5rem;
+        width: 100%;
+    }
+
+    .input-curs {
+        width: 100%;
+    }
+
+    .save-button {
+        width: 100%;
+        max-width: none;
+        font-size: 18px;
+        padding: 14px 24px;
+    }
+
+    .titlu-curs {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .titlu-curs h1 {
+        font-size: 30px;
+    }
+}
