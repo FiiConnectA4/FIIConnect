@@ -1,4 +1,5 @@
 import { useSearchParams } from 'react-router-dom';
+
 import Student from "./Student/Student";
 import Profesor from "./Profesor/Profesor";
 import Administrator from "./Administrator/Administrator";
