@@ -3,12 +3,12 @@ on:
   push:
     branches:
       - main
-      - dev
+     # - dev for integrating 
       - tudor/sonarQube
   pull_request:
     branches:
       - main
-      - dev
+     # - dev
       - tudor/sonarQube
     types: [opened, synchronize, reopened]
 jobs:
