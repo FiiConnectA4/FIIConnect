@@ -11,6 +11,7 @@ import Chat from "../pages/Social/Page/Chat";
 import Contul from "../pages/Contul";
 import Contact from "../pages/Contact";
 import Login from "../pages/Login";
+import PrivateRoute from "../components/PrivateRoute"; // ✅ importăm PrivateRoute
 
 const AppRoutes = () => {
   return (
@@ -19,7 +20,14 @@ const AppRoutes = () => {
       <Route path="/" element={<Login />} />
 
       {/* Protected routes inside layout */}
-      <Route path="/app" element={<MainLayout />}>
+      <Route
+        path="/app"
+        element={
+          <PrivateRoute>
+            <MainLayout />
+          </PrivateRoute>
+        }
+      >
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="anunturi" element={<Anunturi />} />
         <Route path="harta" element={<Harta />} />
