@@ -1,5 +1,6 @@
 package com.fiiconnect.api.didactic.services;
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.sftp.session.SftpRemoteFileTemplate;
@@ -20,6 +21,7 @@ import java.util.Objects;
 @Service
 public class SftpService {
 
+    @Getter
     private final SftpRemoteFileTemplate sftpRemoteFileTemplate;
     private final MessageChannel outboundChannel;
     @Value("${sftp.inbound.local.dir}")
