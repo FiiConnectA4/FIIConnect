@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
+
 import Dashboard from "../pages/Dashboard";
 import Anunturi from "../pages/Anunturi";
 import Harta from "../pages/Harta";
@@ -13,8 +14,7 @@ import Contact from "../pages/Contact";
 import Login from "../pages/Login";
 import DotariSala from "../pages/Orar/DotariSala";
 import OrarSecretariat from "../pages/Orar/OrarSecretariat";
-
-
+import PrivateRoute from "../components/PrivateRoute"; // ✅ importăm PrivateRoute
 
 const AppRoutes = () => {
   return (
@@ -23,7 +23,16 @@ const AppRoutes = () => {
       <Route path="/" element={<Login />} />
 
       {/* Protected routes inside layout */}
-      <Route path="/app" element={<MainLayout />}>
+
+      <Route
+        path="/app"
+        element={
+          <PrivateRoute>
+            <MainLayout />
+          </PrivateRoute>
+        }
+      >
+
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="anunturi" element={<Anunturi />} />
         <Route path="harta" element={<Harta />} />
@@ -58,7 +67,6 @@ const AppRoutes = () => {
         <Route path="chat" element={<Chat />} />
         <Route path="contul" element={<Contul />} />
         <Route path="contact" element={<Contact />} />
-
         <Route index element={<Navigate to="/app/dashboard" replace />} />
       </Route>
 

@@ -17,7 +17,6 @@ const Sidebar = () => {
     { name: "Contul", icon: "👤" },
     { name: "Contact", icon: "📧" },
     { name: "Secretariat", icon: "🏛️"},
-
   ];
 
   return (
