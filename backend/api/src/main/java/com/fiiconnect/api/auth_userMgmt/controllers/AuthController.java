@@ -4,7 +4,7 @@
 //import com.fiiconnect.api.auth_userMgmt.core.ApiResponse;
 //import com.fiiconnect.api.auth_userMgmt.validators.PasswordValidator;
 //import com.fiiconnect.api.auth_userMgmt.models.User;
-//import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository;
+//import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository2;
 //import com.fiiconnect.api.auth_userMgmt.services.TwoFactorAuthenticationService;
 //import com.fiiconnect.api.auth_userMgmt.dtos.LoginRequest;
 //import com.fiiconnect.api.auth_userMgmt.dtos.RegisterRequest;
@@ -22,7 +22,7 @@
 //public class AuthController {
 //
 //    @Autowired
-//    private UserRepository userRepository;
+//    private UserRepository2 userRepository;
 //
 //    @Autowired
 //    private PasswordEncoder passwordEncoder;

@@ -3,7 +3,7 @@ package com.fiiconnect.api.social_secretary.controller;
 import com.fiiconnect.api.social_secretary.DTO.UserDTO;
 import com.fiiconnect.api.social_secretary.DTO.TagDTO;
 import com.fiiconnect.api.social_secretary.service.TagService;
-import com.fiiconnect.api.social_secretary.service.UserService;
+import com.fiiconnect.api.social_secretary.service.UserService2;
 import com.fiiconnect.api.social_secretary.classes.Tag;
 import com.fiiconnect.api.social_secretary.classes.User_Anunturi;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,10 +15,10 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/users")
-public class UserController {
+public class UserController2 {
 
     @Autowired
-    private UserService userService;  // Changed from UserRepository to UserService
+    private UserService2 userService2;  // Changed from UserRepository2 to UserService2
     @Autowired
     private TagService tagService;
     @PostMapping
@@ -39,23 +39,23 @@ public class UserController {
         System.out.println(tags);
         User_Anunturi user = new User_Anunturi(user_request.getName(),user_request.getType(),tags);
         System.out.println(user);
-        return userService.createUser(user);
+        return userService2.createUser(user);
     }
 
     @GetMapping
     public List<User_Anunturi> getAllUsers() {
-        return userService.getAllUsers();
+        return userService2.getAllUsers();
     }
 
     // You can add more endpoints as needed
     @GetMapping("/{id}")
     public User_Anunturi getUserById(@PathVariable Long id) {
-        return userService.getUserById(id);
+        return userService2.getUserById(id);
     }
 
     @GetMapping("/{id}/tags")
     public Set<Tag> getUserTags(@PathVariable Long id) {
-        User_Anunturi user = userService.getUserById(id);
+        User_Anunturi user = userService2.getUserById(id);
         if (user == null) {
             throw new RuntimeException("User not found");
         }
@@ -64,11 +64,11 @@ public class UserController {
 
     @PutMapping("/{id}")
     public User_Anunturi updateUser(@PathVariable Long id, @RequestBody UserDTO updatedUser){
-        return userService.updateUser(id,updatedUser);
+        return userService2.updateUser(id,updatedUser);
     }
 
     @DeleteMapping("/{id}")
     public void deleteUser(@PathVariable Long id) {
-        userService.deleteUser(id);
+        userService2.deleteUser(id);
     }
 }
