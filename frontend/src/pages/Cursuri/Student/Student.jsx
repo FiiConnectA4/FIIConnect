@@ -1,48 +1,91 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Ceas from './../Components/Ceas';
 import Carte from '../Components/Carte';
 import Buton from '../Components/Buton';
-import './Student.css';
-import DetaliiCurs from './DetaliiCurs';
+import PageControl from '../Components/PageControl'; // doar dacă vrei și acțiuni extra
+import './../Student/Student.css';
+import PDetaliiCurs from '../DetaliiCurs/DetaliiCurs';
+import { useSearchParams } from 'react-router-dom';
 
 const Student = () => {
-    const [selectedCursId, setSelectedCursId] = useState(null);
-    const [cursuri] = useState([
-        { id: 1, nume: 'Technologii Web', bifat: false },
-        { id: 2, nume: 'Ingineria Programării', bifat: false },
-        { id: 3, nume: 'Introducere în programare', bifat: false },
-        { id: 4, nume: 'Sisteme de operare', bifat: false },
-    ]);
+    const [searchParams] = useSearchParams();
+    const studentId = searchParams.get('studentId') || 4;
 
-    const an = 2;
-    const semestru = 2;
+    const [student, setStudent] = useState(null);
+    const [courses, setCourses] = useState([]);
+    const [selectedCourseId, setSelectedCourseId] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    if (selectedCursId) {
-        const cursSelectat = cursuri.find(c => c.id === selectedCursId);
-        return <DetaliiCurs
-            curs={cursSelectat}
-            onBack={() => setSelectedCursId(null)}
-        />;
+    useEffect(() => {
+        fetch(`/didactic/student/${studentId}`)
+            .then((res) => {
+                if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+                return res.json();
+            })
+            .then((data) => {
+                console.log("👨‍🎓 Student info:", data);
+                setStudent(data);
+                const inscrieri = data.enrollments || [];
+                const cursuri = inscrieri
+                    .map((e) => e.course)
+                    .filter((c) => c.archived !== 1);
+                setCourses(cursuri);
+                setLoading(false);
+            })
+            .catch((err) => {
+                console.error("⛔ Eroare la încărcarea studentului:", err);
+                setCourses([]);
+                setLoading(false);
+            });
+    }, [studentId]);
+
+    if (loading) return <div>Loading...</div>;
+
+    if (selectedCourseId) {
+        const course = courses.find(c => c.id === selectedCourseId);
+        if (!course) {
+            console.error(`Cursul cu ID ${selectedCourseId} nu a fost găsit`);
+            setSelectedCourseId(null);
+            return <div>Cursul nu a fost găsit</div>;
+        }
+        return (
+            <PDetaliiCurs
+                curs={course}
+                onBack={() => setSelectedCourseId(null)}
+            />
+        );
     }
 
     return (
         <div className="container-cursuri">
             <div className="cursuri-titlu">
-                <h1>Cursuri</h1>
-                <h2>Anul {an} semestrul {semestru}</h2>
+                <h1>Cursurile mele</h1>
+                <Ceas />
             </div>
+
+            {student && (
+                <div className="student-info">
+                    <p>Student: {student.firstName} {student.lastName} — grupa {student.facultyGroup}, anul {student.year}</p>
+                </div>
+            )}
+
             <div className="lista-cursuri">
-                {cursuri.map((curs) => (
-                    <div key={curs.id} className="rand-curs">
-                        <Carte />
-                        <Ceas />
-                        <Buton
-                            className="nume-curs"
-                            text={curs.nume}
-                            onNavigate={() => setSelectedCursId(curs.id)}
-                        />
-                    </div>
-                ))}
+                {courses.length > 0 ? (
+                    courses.map((curs) => (
+                        <div key={curs.id} className="rand-curs">
+                            <Carte
+                                userType='student'
+                            />
+                            <Ceas />
+                            <Buton
+                                text={curs.title || 'Titlu indisponibil'}
+                                onNavigate={() => setSelectedCourseId(curs.id)}
+                            />
+                        </div>
+                    ))
+                ) : (
+                    <p>Nu există cursuri la care ești înscris.</p>
+                )}
             </div>
         </div>
     );
