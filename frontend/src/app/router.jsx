@@ -2,13 +2,13 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 
 import Dashboard from "../pages/Dashboard";
-import Anunturi from "../pages/Anunturi";
+import Anunturi from "../pages/Social/Page/Anunturi";
 import Harta from "../pages/Harta";
 import Cursuri from "../pages/Cursuri/Cursuri";
 import Catalog from "../pages/Catalog";
 import OrarToti from "../pages/Orar/OrarToti"; 
 import Secretariat from "../pages/Secretariat/Secretariat";
-import Chat from "../pages/Chat";
+import Chat from "../pages/Social/Page/Chat";
 import Contul from "../pages/Contul";
 import Contact from "../pages/Contact";
 import Login from "../pages/Login";

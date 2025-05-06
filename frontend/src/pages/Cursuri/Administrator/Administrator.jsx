@@ -14,23 +14,29 @@ const Administrator = () => {
     const [adaugaCurs, setAdaugaCurs] = useState(false);
 
     const fetchCourses = () => {
-        setLoading(true);
-        fetch('/didactic/course')
-            .then((response) => {
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                return response.json();
-            })
-            .then((data) => {
-                const courses = data._embedded?.courseList || [];
-                setCursuri(courses);
-                setLoading(false);
-            })
-            .catch((error) => {
-                console.error('Eroare la încărcarea cursurilor:', error);
-                setCursuri([]);
-                setLoading(false);
-            });
-    };
+    const token = localStorage.getItem('token'); 
+
+    setLoading(true);
+    fetch('/didactic/course', {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    })
+    .then((response) => {
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        return response.json();
+    })
+    .then((data) => {
+        const courses = data._embedded?.courses || [];
+        setCursuri(courses);
+        setLoading(false);
+    })
+    .catch((error) => {
+        console.error('Eroare la încărcarea cursurilor:', error);
+        setCursuri([]);
+        setLoading(false);
+    });
+};
 
     useEffect(() => {
         fetchCourses();
