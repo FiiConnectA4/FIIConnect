@@ -136,6 +136,17 @@ public class CourseService {
         }
     }
 
+    public void attachIcon(Course course){
+        var sftp = sftpService.getSftpRemoteFileTemplate();
+        var remoteFilePath = "faculty_files/didactic/course-" + course.getId() + "/icon.png";
+            sftp.execute(session -> {
+                if (!session.exists(remoteFilePath)) {
+                    course.setIcon_url("faculty_files/didactic/default_course_icon.png");
+                } else course.setIcon_url("didactic/course/" + course.getId() + "/icon.png");
+                return null;
+            });
+    }
+
     public void saveDescription(Long idCourse, String description)
     {
         if(courseRepository.findById(idCourse).isEmpty())

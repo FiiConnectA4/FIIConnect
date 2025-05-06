@@ -32,6 +32,9 @@ public class Course{
 	@Transient
 	private String description = null;
 
+	@Transient
+	private String icon_url = null;
+
 	public Course() {}
 
 	public Course(Long id, String code, String title, int credits, int year, int semester, int archived, Date academicYear) {

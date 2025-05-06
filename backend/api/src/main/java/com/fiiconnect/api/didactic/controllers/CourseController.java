@@ -4,6 +4,7 @@ package com.fiiconnect.api.didactic.controllers;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import com.fiiconnect.api.didactic.exceptions.CourseNotFoundException;
+import com.fiiconnect.api.didactic.exceptions.IconNotFoundException;
 import com.fiiconnect.api.didactic.helpers.SQLExceptionMessageParser;
 import com.fiiconnect.api.didactic.models.Course;
 import com.fiiconnect.api.didactic.models.CourseMaterial;
@@ -15,14 +16,20 @@ import com.fiiconnect.api.didactic.services.CourseService;
 import com.fiiconnect.api.didactic.services.EnrollmentService;
 import com.fiiconnect.api.didactic.services.SftpService;
 import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.hateoas.EntityModel;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.management.DescriptorKey;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -53,6 +60,7 @@ public class CourseController {
     @GetMapping("/didactic/course")
      public CollectionModel<EntityModel<Course>> all() {
         List<Course> courseList = repository.findAll();
+        courseList.forEach(service::attachIcon);
         List<EntityModel<Course>> courses = courseList.stream().map(assembler::toModel).collect(Collectors.toList());
         return CollectionModel.of(courses, linkTo(methodOn(CourseController.class).all()).withSelfRel());
     }
@@ -60,7 +68,7 @@ public class CourseController {
     @GetMapping("didactic/courses/{year}/{semester}")
     public CollectionModel<EntityModel<Course>> allCourse(@PathVariable("year") Integer year, @PathVariable("semester") Integer semester) {
         List<Course> courseList = service.viewAllCoursesAvailable(year, semester);
-        courseList.forEach((c) -> {c.setMaterials(null);});
+        courseList.forEach((c) -> {c.setMaterials(null); service.attachIcon(c);});
         List<EntityModel<Course>>  courses = courseList.stream().map(assembler::toModel).toList();
         return CollectionModel.of(courses, linkTo(methodOn(CourseController.class).all()).withSelfRel());
     }
@@ -71,6 +79,7 @@ public class CourseController {
         service.attachProfessors(course);
         service.attachMaterials(course);
         service.attachDescription(course);
+        service.attachIcon(course);
         return assembler.toModel(course);
     }
 
@@ -98,6 +107,7 @@ public class CourseController {
                     course.setSemester(newCourse.getSemester());
                     course.setTitle(newCourse.getTitle());
                     course.setArchived(newCourse.getArchived());
+                    service.attachIcon(course);
                     return repository.save(course);
                 }).orElseGet(() -> repository.save(newCourse));
         EntityModel<Course> entityModel = assembler.toModel(temp);
@@ -127,6 +137,12 @@ public class CourseController {
             {
                 //do nothing
             }
+            try{
+                sftpService.deleteFile(pathPrefix + "icon.png", false);
+            }catch(FileNotFoundException e)
+            {
+                //do nothing
+            }
 
             sftpService.deleteFile(pathPrefix, true);
         }
@@ -140,6 +156,64 @@ public class CourseController {
     {
         service.saveDescription(id, description);
     }
+
+    @GetMapping("/didactic/course/{id}/icon.png")
+    public ResponseEntity<?> getIcon(@PathVariable Long id) {
+        try {
+            File iconFile = sftpService.downloadFile("/faculty_files/didactic/course-" + id + "/icon.png");
+            InputStreamResource resource = new InputStreamResource(new FileInputStream(iconFile));
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_PNG)
+                    .body(resource);
+        } catch (IOException e) {
+            if (e instanceof FileNotFoundException) {
+                String defaultIconUrl = "/didactic/course/default_course_icon.png";
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Icon not found. Use default icon: " + defaultIconUrl);
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving icon.");
+        }
+    }
+    @GetMapping("/didactic/course/default_course_icon.png")
+    public ResponseEntity<?> getDefaultIcon() {
+        try {
+            File iconFile = sftpService.downloadFile("/faculty_files/didactic/default_course_icon.png");
+            InputStreamResource resource = new InputStreamResource(new FileInputStream(iconFile));
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_PNG)
+                    .body(resource);
+
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error retrieving default course icon.");
+        }
+    }
+
+    @PutMapping("didactic/course/{id}/icon")
+    public ResponseEntity<?> updateIcon(@PathVariable Long id, @RequestParam MultipartFile iconFile) {
+        try{
+            sftpService.uploadFile(iconFile, "faculty_files/didactic/course-" + id, "icon.png");
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading icon.");
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("didactic/course/{id}/icon")
+    public ResponseEntity<?> deleteIcon(@PathVariable Long id) {
+        try{
+            sftpService.deleteFile("faculty_files/didactic/course-" + id + "/icon.png", false);
+        }
+        catch (IOException e) {
+            if (e instanceof FileNotFoundException)
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Icon not found.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting icon.");
+        }
+        return ResponseEntity.ok().build();
+    }
+
 
     @PutMapping("/didactic/course/{id}/archive")
     public void archiveCourse(@PathVariable Long id)
