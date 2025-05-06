@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../Styles/Anunturi.css";
+import "../Style/Anunturi.css";
 
 function Anunturi() {
   const [announcements, setAnnouncements] = useState([]);
