@@ -25,7 +25,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.management.DescriptorKey;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -188,6 +190,31 @@ public class CourseController {
                     .body("Error retrieving default course icon.");
         }
     }
+
+    @PutMapping("didactic/course/{id}/icon")
+    public ResponseEntity<?> updateIcon(@PathVariable Long id, @RequestParam MultipartFile iconFile) {
+        try{
+            sftpService.uploadFile(iconFile, "faculty_files/didactic/course-" + id, "icon.png");
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading icon.");
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("didactic/course/{id}/icon")
+    public ResponseEntity<?> deleteIcon(@PathVariable Long id) {
+        try{
+            sftpService.deleteFile("faculty_files/didactic/course-" + id + "/icon.png", false);
+        }
+        catch (IOException e) {
+            if (e instanceof FileNotFoundException)
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Icon not found.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting icon.");
+        }
+        return ResponseEntity.ok().build();
+    }
+
+
     @PutMapping("/didactic/course/{id}/archive")
     public void archiveCourse(@PathVariable Long id)
     {

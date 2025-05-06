@@ -32,12 +32,13 @@ public class SftpService {
         this.outboundChannel = outboundChannel;
     }
 
-    public void uploadFile(MultipartFile multipartFile, String remoteTargetDir) throws IOException {
+    public void uploadFile(MultipartFile multipartFile, String remoteTargetDir, String... desiredFileName) throws IOException {
         File file = null;
         try {
             // Convert MultipartFile to File
-            file = convertToFile(multipartFile);
-
+            assert desiredFileName.length <= 1;
+            String desiredName = desiredFileName.length > 0 ? desiredFileName[0] : null;
+            file = convertToFile(multipartFile, desiredName);
             // Send to SFTP via outboundChannel
             outboundChannel.send(MessageBuilder.withPayload(file)
                     .setHeader("remote-target-dir", remoteTargetDir)
@@ -159,12 +160,13 @@ public class SftpService {
         }
     }
 
-    private File convertToFile(MultipartFile multipartFile) throws IOException {
+    private File convertToFile(MultipartFile multipartFile, String... desiredFileName) throws IOException {
         if (multipartFile.isEmpty()) {
             throw new IOException("Cannot convert empty MultipartFile to file.");
         }
-
-        Path tempPath = Path.of(System.getProperty("java.io.tmpdir"), Objects.requireNonNull(multipartFile.getOriginalFilename()));
+        assert desiredFileName.length <= 1;
+        String desiredName = desiredFileName.length > 0 ? desiredFileName[0] : multipartFile.getOriginalFilename();
+        Path tempPath = Path.of(System.getProperty("java.io.tmpdir"), Objects.requireNonNull(desiredName));
         Files.write(tempPath, multipartFile.getBytes());
         return tempPath.toFile();
     }
