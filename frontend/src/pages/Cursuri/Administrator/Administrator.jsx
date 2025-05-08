@@ -14,7 +14,7 @@ const Administrator = () => {
     const [adaugaCurs, setAdaugaCurs] = useState(false);
 
     const fetchCourses = () => {
-    const token = localStorage.getItem('token'); 
+    const token = localStorage.getItem('token');
 
     setLoading(true);
     fetch('/didactic/course', {
@@ -132,7 +132,7 @@ const token = localStorage.getItem('token');
         }
         return (
             <PDetaliiCurs
-                curs={cursSelectat.course}
+                curs={cursSelectat}
                 onBack={() => setSelectedCursId(null)}
             />
         );
