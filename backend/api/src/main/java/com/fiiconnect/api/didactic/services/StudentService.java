@@ -1,8 +1,10 @@
 package com.fiiconnect.api.didactic.services;
 
 import com.fiiconnect.api.didactic.models.Enrollment;
+import com.fiiconnect.api.didactic.models.Grade;
 import com.fiiconnect.api.didactic.models.Student;
 import com.fiiconnect.api.didactic.repositories.EnrollmentRepository;
+import com.fiiconnect.api.didactic.repositories.GradeRepository;
 import com.fiiconnect.api.didactic.repositories.StudentRepository;
 import org.springframework.stereotype.Service;
 
@@ -13,11 +15,13 @@ public class StudentService {
     private final StudentRepository repository;
     private final EnrollmentRepository enrollmentRepository;
     private final EnrollmentService enrollmentService;
+    private final GradeService gradeService;
 
-    public StudentService(StudentRepository repository, EnrollmentRepository enrollmentRepository, EnrollmentService enrollmentService) {
+    public StudentService(StudentRepository repository, EnrollmentRepository enrollmentRepository, EnrollmentService enrollmentService, GradeService gradeService) {
         this.repository = repository;
         this.enrollmentRepository = enrollmentRepository;
         this.enrollmentService = enrollmentService;
+        this.gradeService = gradeService;
     }
 
     public void attachEnrollments(Student student)
@@ -25,5 +29,11 @@ public class StudentService {
         List<Enrollment> enrollments = enrollmentRepository.findByIdIdStud(student.getId());
         enrollments.forEach(enrollmentService::attachCourse);
         student.setEnrollments(enrollments);
+    }
+
+    public void attachGrades(Student student)
+    {
+        List<Grade> grades = gradeService.getStudentGrades(student.getId());
+        student.setGrades(grades);
     }
 }

@@ -1,8 +1,10 @@
 package com.fiiconnect.api.didactic.models;
 
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.List;
 import java.util.Objects;
@@ -10,6 +12,8 @@ import java.util.Objects;
 @Entity
 @Getter
 @Setter
+@EqualsAndHashCode
+@ToString
 public class Student {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "student_id_gen")
@@ -24,28 +28,6 @@ public class Student {
     @Transient
     private List<Enrollment> enrollments;
 
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof Student student)) return false;
-        return Objects.equals(getId(), student.getId()) && Objects.equals(getCnp(), student.getCnp()) && Objects.equals(getRegNumber(), student.getRegNumber()) && Objects.equals(getFirstName(), student.getFirstName()) && Objects.equals(getLastName(), student.getLastName()) && Objects.equals(getYear(), student.getYear()) && Objects.equals(getFacultyGroup(), student.getFacultyGroup()) && Objects.equals(getEnrollments(), student.getEnrollments());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId(), getCnp(), getRegNumber(), getFirstName(), getLastName(), getYear(), getFacultyGroup(), getEnrollments());
-    }
-
-    @Override
-    public String toString() {
-        return "Student{" +
-                "id=" + id +
-                ", cnp='" + cnp + '\'' +
-                ", regNumber='" + regNumber + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", year=" + year +
-                ", facultyGroup='" + facultyGroup + '\'' +
-                ", enrollments=" + enrollments +
-                '}';
-    }
+    @Transient
+    private List<Grade> grades;
 }
