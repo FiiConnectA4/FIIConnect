@@ -5,15 +5,9 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import com.fiiconnect.api.didactic.exceptions.CourseNotFoundException;
 import com.fiiconnect.api.didactic.helpers.SQLExceptionMessageParser;
-import com.fiiconnect.api.didactic.models.Course;
-import com.fiiconnect.api.didactic.models.CourseMaterial;
-import com.fiiconnect.api.didactic.models.CourseModelAssembler;
-import com.fiiconnect.api.didactic.models.Enrollment;
+import com.fiiconnect.api.didactic.models.*;
 import com.fiiconnect.api.didactic.repositories.CourseRepository;
-import com.fiiconnect.api.didactic.services.CourseMaterialService;
-import com.fiiconnect.api.didactic.services.CourseService;
-import com.fiiconnect.api.didactic.services.EnrollmentService;
-import com.fiiconnect.api.didactic.services.SftpService;
+import com.fiiconnect.api.didactic.services.*;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.hateoas.EntityModel;
 
@@ -37,15 +31,17 @@ public class CourseController {
     private final SQLExceptionMessageParser exceptionHelper;
     private final EnrollmentService enrollmentService;
     private final CourseMaterialService materialService;
+    private final GradeService gradeService;
     private final SftpService sftpService;
 
-    public CourseController(CourseRepository repository, CourseModelAssembler assembler, CourseService service, SQLExceptionMessageParser exceptionHelper, EnrollmentService enrollmentService, CourseMaterialService materialService, SftpService sftpService) {
+    public CourseController(CourseRepository repository, CourseModelAssembler assembler, CourseService service, SQLExceptionMessageParser exceptionHelper, EnrollmentService enrollmentService, CourseMaterialService materialService, GradeService gradeService, SftpService sftpService) {
         this.repository = repository;
         this.assembler = assembler;
         this.service = service;
         this.exceptionHelper = exceptionHelper;
         this.enrollmentService = enrollmentService;
         this.materialService = materialService;
+        this.gradeService = gradeService;
         this.sftpService = sftpService;
     }
 
@@ -77,7 +73,19 @@ public class CourseController {
     @GetMapping("/didactic/course/{id}/enrolled")
     public List<Enrollment> getEnrolledStudents(@PathVariable Long id)
     {
-        return enrollmentService.getCourseEnrollments(id);
+        if(!repository.existsById(id)) throw new CourseNotFoundException(id);
+        List<Enrollment> enrollments = enrollmentService.getCourseEnrollments(id);
+        enrollments.forEach(enrollmentService::attachStudent);
+        return enrollments;
+    }
+
+    @GetMapping("/didactic/course/{id}/grades")
+    public List<Grade> getStudentGrades(@PathVariable Long id)
+    {
+        if(!repository.existsById(id)) throw new CourseNotFoundException(id);
+        List<Grade> grades = gradeService.getCourseGrades(id);
+        grades.forEach(gradeService::attachStudent);
+        return grades;
     }
 
     @PostMapping("/didactic/course")
