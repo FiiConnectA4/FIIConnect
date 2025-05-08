@@ -27,7 +27,7 @@ const Administrator = () => {
         return response.json();
     })
     .then((data) => {
-        const courses = data._embedded?.courses || [];
+        const courses = data._embedded?.courseList || [];
         setCursuri(courses);
         setLoading(false);
     })
@@ -124,7 +124,7 @@ const token = localStorage.getItem('token');
     if (loading) return <div>Loading...</div>;
 
     if (selectedCursId) {
-        const cursSelectat = cursuri.find(c => c.course?.id === selectedCursId);
+        const cursSelectat = cursuri.find(c => c.id === selectedCursId);
         if (!cursSelectat) {
             console.error(`Cursul cu ID ${selectedCursId} nu a fost găsit`);
             setSelectedCursId(null);
@@ -132,7 +132,7 @@ const token = localStorage.getItem('token');
         }
         return (
             <PDetaliiCurs
-                curs={cursSelectat.course}
+                curs={cursSelectat}
                 onBack={() => setSelectedCursId(null)}
             />
         );
