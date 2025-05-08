@@ -41,11 +41,15 @@ const Administrator = () => {
     useEffect(() => {
         fetchCourses();
     }, []);
-
+const token = localStorage.getItem('token');
     const handleDeleteCourse = (id) => {
         if (!window.confirm("Ești sigur că vrei să ștergi acest curs?")) return;
         fetch(`/didactic/course/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+
         })
             .then((res) => {
                 if (!res.ok) throw new Error("Eroare la ștergere");
@@ -68,7 +72,10 @@ const Administrator = () => {
         if (isArchiving) {
             // apelăm direct endpointul de arhivare simplă
             fetch(`/didactic/course/${id}/archive`, {
-                method: 'PUT'
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             })
                 .then((res) => {
                     if (!res.ok) throw new Error("Eroare la arhivare");
@@ -96,7 +103,8 @@ const Administrator = () => {
             fetch(`/didactic/course/${id}`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
                 },
                 body: JSON.stringify(updatedCurs)
             })
@@ -116,7 +124,7 @@ const Administrator = () => {
     if (loading) return <div>Loading...</div>;
 
     if (selectedCursId) {
-        const cursSelectat = cursuri.find((c) => c.id === selectedCursId);
+        const cursSelectat = cursuri.find(c => c.course?.id === selectedCursId);
         if (!cursSelectat) {
             console.error(`Cursul cu ID ${selectedCursId} nu a fost găsit`);
             setSelectedCursId(null);
@@ -124,7 +132,7 @@ const Administrator = () => {
         }
         return (
             <PDetaliiCurs
-                curs={cursSelectat}
+                curs={cursSelectat.course}
                 onBack={() => setSelectedCursId(null)}
             />
         );
