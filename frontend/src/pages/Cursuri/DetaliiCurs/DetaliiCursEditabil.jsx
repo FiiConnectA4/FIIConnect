@@ -22,10 +22,16 @@ const PDetaliiCurs = ({ curs, onBack }) => {
     const [newFilename, setNewFilename] = useState('');
     const [userId, setUserId] = useState(null);
     const fileInputRef = useRef(null);
+    const token = localStorage.getItem('token');
 
     useEffect(() => {
         // Fetch materials
-        fetch(`${API_BASE_URL}/didactic/course/material`)
+        fetch(`${API_BASE_URL}/didactic/course/material`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
             .then((res) => {
                 if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
                 return res.json();
@@ -41,7 +47,12 @@ const PDetaliiCurs = ({ curs, onBack }) => {
             });
 
         // Fetch professors and userId
-        fetch(`${API_BASE_URL}/didactic/course/${curs.id}`)
+        fetch(`${API_BASE_URL}/didactic/course/${curs.id}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
             .then(response => {
                 if (!response.ok) {
                     console.error(`HTTP error! Status: ${response.status}`);
@@ -83,7 +94,12 @@ const PDetaliiCurs = ({ curs, onBack }) => {
             });
 
         // Fetch formula
-        fetch(`${API_BASE_URL}/didactic/course/${curs.id}/formula`)
+        fetch(`${API_BASE_URL}/didactic/course/${curs.id}/formula`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
     .then(response => {
         if (!response.ok) {
             console.error(`Nicio formulă găsită pentru cursul ${curs.id}`);
@@ -112,7 +128,8 @@ const saveCourseChanges = () => {
     fetch(`${API_BASE_URL}/didactic/course/${curs.id}/description`, {
         method: 'PUT',
         headers: {
-            'Content-Type': 'text/plain'
+            'Content-Type': 'text/plain' ,
+            Authorization: `Bearer ${token}`
         },
         body: description
     })
@@ -138,10 +155,12 @@ const saveFormula = () => {
         text: formulaText
     };
     const isExistingFormula = formula && formula.id;
-
+    console.log(isExistingFormula);
+    console.log(formula);
     fetch(`${API_BASE_URL}${isExistingFormula ? `/didactic/formula/${formula.id}` : '/didactic/formula'}`, {
         method: isExistingFormula ? 'PUT' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json' ,
+        Authorization: `Bearer ${token}`},
         body: JSON.stringify(requestBody)
     })
         .then(response => {
@@ -179,7 +198,10 @@ const addMaterial = (file) => {
 
     fetch(`${API_BASE_URL}/didactic/course/material`, {
         method: 'POST',
-        body: formData
+        body: formData ,
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
     })
         .then(response => {
             if (!response.ok) {
@@ -191,7 +213,12 @@ const addMaterial = (file) => {
         })
         .then(location => {
             const materialId = location.split('/').pop();
-            return fetch(`${API_BASE_URL}/didactic/course/material/${materialId}`);
+            return fetch(`${API_BASE_URL}/didactic/course/material/${materialId}`,
+                {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
         })
         .then(response => {
             if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
@@ -210,7 +237,12 @@ const addMaterial = (file) => {
 };
 
 const downloadMaterial = (materialId, filename) => {
-    fetch(`${API_BASE_URL}/didactic/course/material/${materialId}/file`)
+    fetch(`${API_BASE_URL}/didactic/course/material/${materialId}/file`,
+        {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
         .then(response => {
             if (!response.ok) {
                 return response.text().then(text => {
@@ -236,7 +268,12 @@ const downloadMaterial = (materialId, filename) => {
 };
 
 const deleteMaterial = (materialId) => {
-    fetch(`${API_BASE_URL}/didactic/course/material/${materialId}`, { method: 'DELETE' })
+    fetch(`${API_BASE_URL}/didactic/course/material/${materialId}`, { method: 'DELETE' ,
+
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
         .then(response => {
             if (!response.ok) {
                 return response.text().then(text => {
@@ -265,7 +302,8 @@ const saveNewFilename = () => {
 
     fetch(`${API_BASE_URL}/didactic/course/material/${renameMaterialId}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'text/plain' },
+        headers: { 'Content-Type': 'text/plain' ,
+        Authorization: `Bearer ${token}`},
         body: newFilename.trim()
     })
         .then(response => {
