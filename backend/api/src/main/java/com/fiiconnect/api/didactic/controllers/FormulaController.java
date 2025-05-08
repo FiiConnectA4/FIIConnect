@@ -61,6 +61,9 @@ public class FormulaController {
     public EntityModel<Formula> getFormulaByCourse(@PathVariable("idCourse") Long idCourse) {
         LOGGER.info("Fetching formula for course ID: " + idCourse);
         Formula formula = service.getFormulaByCourseId(idCourse);
+        System.out.println(EntityModel.of(formula,
+                linkTo(methodOn(FormulaController.class).getFormulaByCourse(idCourse)).withSelfRel(),
+                linkTo(methodOn(FormulaController.class).allFormulas()).withRel("formulas")));
         return EntityModel.of(formula,
                 linkTo(methodOn(FormulaController.class).getFormulaByCourse(idCourse)).withSelfRel(),
                 linkTo(methodOn(FormulaController.class).allFormulas()).withRel("formulas"));
@@ -96,10 +99,12 @@ public class FormulaController {
         updatedFormula.setIdCourse(request.getIdCourse());
         updatedFormula.setText(request.getText());
 
+        service.deleteFormula(id);
+
         // Update components in place to preserve Hibernate's collection reference
         List<FormulaComponent> currentComponents = updatedFormula.getComponents();
         currentComponents.clear();
-        service.addFormula(updatedFormula);
+        //service.addFormula(updatedFormula);
         // Remove existing components (orphanRemoval will delete them)
         List<FormulaComponent> newComponents = parseFormulaComponents(request.getText(), updatedFormula);
         currentComponents.addAll(newComponents);// Add new components to the same collection
