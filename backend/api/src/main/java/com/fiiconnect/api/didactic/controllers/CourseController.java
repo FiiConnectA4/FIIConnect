@@ -60,7 +60,7 @@ public class CourseController {
     @GetMapping("didactic/courses/{year}/{semester}")
     public CollectionModel<EntityModel<Course>> allCourse(@PathVariable("year") Integer year, @PathVariable("semester") Integer semester) {
         List<Course> courseList = service.viewAllCoursesAvailable(year, semester);
-        courseList.forEach((c) -> {c.setMaterials(null);});
+        courseList.forEach((c) -> c.setMaterials(null));
         List<EntityModel<Course>>  courses = courseList.stream().map(assembler::toModel).toList();
         return CollectionModel.of(courses, linkTo(methodOn(CourseController.class).all()).withSelfRel());
     }

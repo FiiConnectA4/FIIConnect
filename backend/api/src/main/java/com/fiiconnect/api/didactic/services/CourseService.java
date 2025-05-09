@@ -1,9 +1,8 @@
 package com.fiiconnect.api.didactic.services;
 
-import com.fiiconnect.api.didactic.models.Enrollment;
+
 import com.fiiconnect.api.didactic.repositories.CourseMaterialRepository;
 import com.fiiconnect.api.didactic.repositories.CourseRepository;
-import com.fiiconnect.api.didactic.repositories.EnrollmentRepository;
 import com.fiiconnect.api.didactic.repositories.TeachingRepository;
 import com.fiiconnect.api.didactic.exceptions.CourseNotFoundException;
 import com.fiiconnect.api.didactic.models.Course;
@@ -27,16 +26,15 @@ public class CourseService {
     private final CourseMaterialRepository materialRepository;
     private final TeachingRepository teachingRepo;
     private final TeachingService teachingService;
-    private final EnrollmentRepository enrollmentRepo;
+
     private final EnrollmentService enrollmentService;
     private final SftpService sftpService;
 
-    public CourseService(CourseRepository courseRepository, CourseMaterialRepository materialRepository, TeachingRepository teachingRepo, TeachingService teachingService, EnrollmentRepository enrollmentRepo, EnrollmentService enrollmentService, SftpService sftpService) {
+    public CourseService(CourseRepository courseRepository, CourseMaterialRepository materialRepository, TeachingRepository teachingRepo, TeachingService teachingService, EnrollmentService enrollmentService, SftpService sftpService) {
         this.courseRepository = courseRepository;
         this.materialRepository = materialRepository;
         this.teachingRepo = teachingRepo;
         this.teachingService = teachingService;
-        this.enrollmentRepo = enrollmentRepo;
         this.enrollmentService = enrollmentService;
         this.sftpService = sftpService;
     }
