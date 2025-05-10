@@ -176,4 +176,5 @@ public class AnnouncementController {
     public void deleteAnnouncement(@PathVariable Long id) {
         announcementService.deleteAnnouncement(id);
     }
+
 }

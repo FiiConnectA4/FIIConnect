@@ -43,12 +43,15 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/users/register").hasRole("ADMIN")
+                      /*  .requestMatchers("/users/register").hasRole("ADMIN")
                         .requestMatchers("/users/role").hasRole("ADMIN")
                         .requestMatchers("/users/login", "/users/login/**").permitAll()
                         .requestMatchers("/users/forgot-password").permitAll()
                         .requestMatchers("/users/reset-password").permitAll()
                         .anyRequest().authenticated()
+
+                       */.anyRequest().permitAll()
+                        /// terbuie  schimbat inapoit eventual
                 )
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

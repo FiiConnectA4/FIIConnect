@@ -1,4 +1,4 @@
-package com.fiiconnect.api.didactic.configs;
+/*package com.fiiconnect.api.didactic.configs;
 
 import org.springframework.integration.annotation.Gateway;
 import org.springframework.integration.annotation.MessagingGateway;
@@ -16,3 +16,5 @@ public interface SftpGateway {
     @Gateway(requestChannel = "sftpInboundChannel")
     File receiveFile(@Header("remote-target-dir") String targetDir);
 }
+
+ */
