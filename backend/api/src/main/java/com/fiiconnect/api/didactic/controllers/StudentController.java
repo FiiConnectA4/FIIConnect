@@ -31,6 +31,7 @@ public class StudentController {
     {
         Student student = repository.findById(id).orElseThrow(() -> new StudentNotFoundException(id));
         service.attachEnrollments(student);
+        service.attachGrades(student);
         return student;
     }
 
