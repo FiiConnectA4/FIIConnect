@@ -6,11 +6,15 @@ import Anunturi from "../pages/Social/Page/Anunturi";
 import Harta from "../pages/Harta";
 import Cursuri from "../pages/Cursuri/Cursuri";
 import Catalog from "../pages/Catalog";
-import Orar from "../pages/Orar";
+import OrarToti from "../pages/Orar/OrarToti"; 
+import Secretariat from "../pages/Secretariat/Secretariat";
 import Chat from "../pages/Social/Page/Chat";
 import Contul from "../pages/Contul";
 import Contact from "../pages/Contact";
 import Login from "../pages/Login";
+import DotariSala from "../pages/Orar/DotariSala";
+import OrarSecretariat from "../pages/Orar/OrarSecretariat";
+import PrivateRoute from "../components/PrivateRoute"; // ✅ importăm PrivateRoute
 
 const AppRoutes = () => {
   return (
@@ -19,13 +23,47 @@ const AppRoutes = () => {
       <Route path="/" element={<Login />} />
 
       {/* Protected routes inside layout */}
-      <Route path="/app" element={<MainLayout />}>
+
+      <Route
+        path="/app"
+        element={
+          <PrivateRoute>
+            <MainLayout />
+          </PrivateRoute>
+        }
+      >
+
         <Route path="dashboard" element={<Dashboard />} />
         <Route path="anunturi" element={<Anunturi />} />
         <Route path="harta" element={<Harta />} />
         <Route path="cursuri" element={<Cursuri />} />
         <Route path="catalog" element={<Catalog />} />
-        <Route path="orar" element={<Orar />} />
+
+        {/* Rutele pentru orar */}
+        <Route path="/app/orar" element={<OrarToti />} />
+<Route path="/app/orar/studenti" element={<OrarToti />} />
+<Route path="/app/orar/studenti/:an/:grupa" element={<OrarToti />} />
+<Route path="/app/orar/profesori" element={<OrarToti />} />
+<Route path="/app/orar/profesori/:profesor" element={<OrarToti />} />
+<Route path="/app/orar/sali" element={<OrarToti />} />
+<Route path="/app/orar/sali/:sala" element={<OrarToti />} />
+<Route path="/app/orar/sali/:sala/dotari" element={<DotariSala />} />
+<Route path="/app/orar/discipline" element={<OrarToti />} />
+<Route path="/app/orar/discipline/:disciplina" element={<OrarToti />} />
+
+
+<Route path="/app/orar-secretariat" element={<OrarSecretariat />} />
+<Route path="/app/orar-secretariat/studenti" element={<OrarSecretariat />} />
+<Route path="/app/orar-secretariat/studenti/:an/:grupa" element={<OrarSecretariat />} />
+<Route path="/app/orar-secretariat/profesori" element={<OrarSecretariat />} />
+<Route path="/app/orar-secretariat/profesori/:profesor" element={<OrarSecretariat />} />
+<Route path="/app/orar-secretariat/sali" element={<OrarSecretariat />} />
+<Route path="/app/orar-secretariat/sali/:sala" element={<OrarSecretariat />} />
+<Route path="/app/orar-secretariat/discipline" element={<OrarSecretariat />} />
+<Route path="/app/orar-secretariat/discipline/:disciplina" element={<OrarSecretariat />} />
+
+
+        <Route path="secretariat" element={<Secretariat />} />
         <Route path="chat" element={<Chat />} />
         <Route path="contul" element={<Contul />} />
         <Route path="contact" element={<Contact />} />

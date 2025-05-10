@@ -27,7 +27,7 @@ public class AnnouncementService {
     private UserLogatService userLogatService;
 
     @Autowired
-    private UserService userService;
+    private UserService2 userService;
 
     // Obține toate anunțurile din baza de date
     public List<Announcement> getAllAnnouncements() {

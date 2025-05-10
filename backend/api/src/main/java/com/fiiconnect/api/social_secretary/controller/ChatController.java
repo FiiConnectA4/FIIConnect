@@ -1,7 +1,7 @@
 package com.fiiconnect.api.social_secretary.controller;
 
 import com.fiiconnect.api.social_secretary.service.ChatService;
-import com.fiiconnect.api.social_secretary.service.UserService;
+import com.fiiconnect.api.social_secretary.service.UserService2;
 import com.fiiconnect.api.social_secretary.classes.Chat;
 import com.fiiconnect.api.social_secretary.classes.Emoji;
 import com.fiiconnect.api.social_secretary.classes.User_Anunturi;
@@ -29,7 +29,7 @@ public class ChatController {
     private ChatService chatService;
 
     @Autowired
-    private UserService userService;
+    private UserService2 userService2;
 
     @GetMapping
     public List<Chat> getAllChatMessages() {
@@ -61,11 +61,11 @@ public class ChatController {
         message=processEmojis(message);
 
         long senderId = chatMessage.getSender().getId();
-        User_Anunturi sender=userService.getUserById(senderId);
+        User_Anunturi sender= userService2.getUserById(senderId);
         chatMessage.setSender(sender);
         chatMessage.setTimestamp(LocalDateTime.now().toString());
         chatMessage.setMessage(message);
-        if(userService.getUserById(senderId)==null){
+        if(userService2.getUserById(senderId)==null){
             System.out.println("user ul nu exista");
             return new Chat("user-ul nu exista",null,null, null);
         }

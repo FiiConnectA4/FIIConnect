@@ -16,6 +16,7 @@ const Sidebar = () => {
   const managementLinks = [
     { name: "Contul", icon: "👤" },
     { name: "Contact", icon: "📧" },
+    { name: "Secretariat", icon: "🏛️"},
   ];
 
   return (

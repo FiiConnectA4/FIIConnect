@@ -9,7 +9,7 @@ import { useSearchParams } from 'react-router-dom';
 
 const Student = () => {
     const [searchParams] = useSearchParams();
-    const studentId = searchParams.get('studentId') || 4;
+    const studentId = searchParams.get('studentId') || 37;
 
     const [student, setStudent] = useState(null);
     const [courses, setCourses] = useState([]);

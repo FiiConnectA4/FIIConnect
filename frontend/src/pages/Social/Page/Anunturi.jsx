@@ -23,9 +23,13 @@ function Anunturi() {
   const fetchUserData = async () => {
     try {
       setUserLoading(true);
-      
+      const token = localStorage.getItem('token');
       // Fetch current user
-      const authResponse = await fetch("http://localhost:34101/auth/current-user");
+      const authResponse = await fetch("http://localhost:34101/auth/current-user", {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
       if (!authResponse.ok) throw new Error("Failed to fetch current user");
       const authUser = await authResponse.json();
       setCurrentUser(authUser);
