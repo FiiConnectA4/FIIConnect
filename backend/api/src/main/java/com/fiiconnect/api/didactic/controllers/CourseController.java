@@ -14,6 +14,7 @@ import com.fiiconnect.api.didactic.services.CourseMaterialService;
 import com.fiiconnect.api.didactic.services.CourseService;
 import com.fiiconnect.api.didactic.services.EnrollmentService;
 import com.fiiconnect.api.didactic.services.SftpService;
+import jakarta.annotation.security.RolesAllowed;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.hateoas.EntityModel;
 
@@ -21,6 +22,11 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.FileNotFoundException;
@@ -74,12 +80,14 @@ public class CourseController {
         return assembler.toModel(course);
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @GetMapping("/didactic/course/{id}/enrolled")
     public List<Enrollment> getEnrolledStudents(@PathVariable Long id)
     {
         return enrollmentService.getCourseEnrollments(id);
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PostMapping("/didactic/course")
     public ResponseEntity<?> newCourse(@RequestBody Course newCourse) {
         newCourse.setId(null); // enforcing to choose a random id the db should create a sequence for id generation
@@ -87,6 +95,7 @@ public class CourseController {
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).build();
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PutMapping("/didactic/course/{id}")
     public ResponseEntity<?> replaceCourse(@PathVariable("id") Long id, @RequestBody Course newCourse) {
         Course temp = repository.findById(id)
@@ -104,6 +113,7 @@ public class CourseController {
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @DeleteMapping("/didactic/course/{id}")
     public ResponseEntity<?> deleteCourse(@PathVariable("id") Long id) throws CourseNotFoundException, IOException {
         Course course = repository.findById(id).orElseThrow(() -> new CourseNotFoundException(id));
@@ -135,12 +145,14 @@ public class CourseController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PutMapping("/didactic/course/{id}/description")
     public void addDescription(@PathVariable Long id, @RequestBody String description)
     {
         service.saveDescription(id, description);
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PutMapping("/didactic/course/{id}/archive")
     public void archiveCourse(@PathVariable Long id)
     {
@@ -148,6 +160,8 @@ public class CourseController {
         course.setArchived(1);
         repository.save(course);
     }
+
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PutMapping("/didactic/course/{id}/desarchive")
     public void desarchiveCourse(@PathVariable Long id)
     {
