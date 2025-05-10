@@ -10,6 +10,7 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
@@ -66,6 +67,7 @@ public class FormulaController {
                 linkTo(methodOn(FormulaController.class).allFormulas()).withRel("formulas"));
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PostMapping("/formula")
     public ResponseEntity<?> newFormula(@RequestBody Formula request) {
         LOGGER.info("Creating new formula for course ID: " + request.getIdCourse());
@@ -89,6 +91,7 @@ public class FormulaController {
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PutMapping("/formula/{id}")
     public ResponseEntity<?> replaceFormula(@PathVariable("id") Long id, @RequestBody Formula request) {
         LOGGER.info("Updating formula with ID: " + id);
@@ -116,6 +119,7 @@ public class FormulaController {
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @DeleteMapping("/formula/{id}")
     public ResponseEntity<?> deleteFormula(@PathVariable("id") Long id) {
         LOGGER.info("Deleting formula with ID: " + id);
@@ -144,6 +148,7 @@ public class FormulaController {
                 linkTo(methodOn(FormulaController.class).allFormulaComponents()).withRel("formulas-components"));
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PostMapping("/formula-component")
     public ResponseEntity<?> newFormulaComponent(@RequestBody FormulaComponent newComponent) {
         LOGGER.info("Creating new formula component");
@@ -154,6 +159,7 @@ public class FormulaController {
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).build();
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PutMapping("/formula-component/{id}")
     public ResponseEntity<?> replaceFormulaComponent(@PathVariable("id") Long id, @RequestBody FormulaComponent newComponent) {
         LOGGER.info("Updating formula component with ID: " + id);
@@ -166,6 +172,7 @@ public class FormulaController {
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @DeleteMapping("/formula-component/{id}")
     public ResponseEntity<?> deleteFormulaComponent(@PathVariable("id") Long id) {
         LOGGER.info("Deleting formula component with ID: " + id);
