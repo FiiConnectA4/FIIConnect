@@ -13,6 +13,6 @@ public interface SftpGateway {
     @Gateway(requestChannel = "outboundChannel")
     void sendFile(@Payload File file, @Header("remote-target-dir") String targetDir);
 
-    @Gateway(requestChannel = "sftpInboundChannel")
-    File receiveFile(@Header("remote-target-dir") String targetDir);
+//    @Gateway(requestChannel = "sftpInboundChannel")
+//    File receiveFile(@Header("remote-target-dir") String targetDir);
 }
