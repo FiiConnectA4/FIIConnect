@@ -8,6 +8,7 @@ import com.fiiconnect.api.social_secretary.repository.ChannelRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -69,5 +70,14 @@ public class ChannelService {
 
     public List<Channel> getAllChannelsWithTag(Long id) {
         return channelRepository.findAllChannelsWithTag(id);
+    }
+
+
+    public List<Channel> getAllChannelsWithTags(List<Long> tagIds) {
+        Set<Channel> channels = new HashSet<>();
+        for(Long id : tagIds) {
+            channels.addAll(channelRepository.findAllChannelsWithTag(id));
+        }
+        return new ArrayList<>(channels);
     }
 }

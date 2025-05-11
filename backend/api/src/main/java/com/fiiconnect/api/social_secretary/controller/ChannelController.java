@@ -6,9 +6,11 @@ import com.fiiconnect.api.social_secretary.service.ChannelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/channel")
@@ -29,13 +31,22 @@ public class ChannelController {
 
 
     //returneaza toate channel-urile care au macar unul din tag-urile din lista de tag-ids
-    @GetMapping("/with-tag")
+   /* @GetMapping("/with-tag")
     public List<Channel> getAllChannelsWithTags(@RequestParam List<Long> tagIds){
         Set<Channel> channels = new HashSet<>();
         for(Long id : tagIds){
             channels.addAll(getAllChannelsWithTag(id));
         }
         return channels.stream().toList();
+    }
+
+    */
+    @GetMapping("/with-tags")
+    public List<Channel> getAllChannelsWithTags(@RequestParam String tagIds) {
+        List<Long> ids = Arrays.stream(tagIds.split(","))
+                .map(Long::parseLong)
+                .collect(Collectors.toList());
+        return channelService.getAllChannelsWithTags(ids);
     }
 
     //adauga un canal in baza de date
