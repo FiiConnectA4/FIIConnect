@@ -15,7 +15,7 @@ public class TokenCleanupService {
     @Autowired
     private PasswordResetTokenRepository tokenRepository;
 
-    @Scheduled(fixedRate = 3600000) // 1 oră în milisecunde
+    @Scheduled(fixedRate = 3600000)
     public void cleanupExpiredTokens() {
         List<PasswordResetToken> tokens = tokenRepository.findAll();
         LocalDateTime now = LocalDateTime.now();
