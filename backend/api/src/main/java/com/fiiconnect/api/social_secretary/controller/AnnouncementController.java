@@ -8,7 +8,7 @@ import com.fiiconnect.api.social_secretary.classes.User_Anunturi;
 import com.fiiconnect.api.social_secretary.service.AnnouncementService;
 import com.fiiconnect.api.social_secretary.service.TagService;
 import com.fiiconnect.api.social_secretary.service.UserLogatService;
-import com.fiiconnect.api.social_secretary.service.UserService;
+import com.fiiconnect.api.social_secretary.service.UserService2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,7 +26,7 @@ public class AnnouncementController {
     private TagService tagService;
 
     @Autowired
-    private UserService userService;
+    private UserService2 userService2;
 
     @Autowired
     private UserLogatService userLogatService;
@@ -67,7 +67,7 @@ public class AnnouncementController {
 
         // Validarea utilizatorului care creează anunțul
         UserDTO userRequest = announcementRequest.getProfessor();
-        User_Anunturi user = userService.getUserById(userRequest.getId());
+        User_Anunturi user = userService2.getUserById(userRequest.getId());
 
         try{
             if(!Objects.equals(userLogatService.getUserLogat().getId(), user.getId())){

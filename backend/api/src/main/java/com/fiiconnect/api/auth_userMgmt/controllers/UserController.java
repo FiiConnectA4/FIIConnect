@@ -56,6 +56,22 @@ public class UserController {
     @Autowired
     private EmailService emailService;
 
+    @GetMapping("/role")
+    public ResponseEntity<?> getRoles() {
+        List<Role> roles = roleRepository.findAll();
+        return ResponseEntity.ok(roles);
+    }
+
+    @PostMapping("/role")
+    public ResponseEntity<?> createRole(@RequestBody Role role) {
+        if (roleRepository.findByRoleName(role.getRoleName()) != null) {
+            return ResponseEntity.badRequest().body("Rolul există deja.");
+        }
+        roleRepository.save(role);
+        return ResponseEntity.ok(role);
+    }
+
+
     // Test Token Repository
     @PostConstruct
     public void testTokenRepo() {
@@ -114,7 +130,6 @@ public class UserController {
     }
 
     @PostMapping("/register")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse> registerUser(@RequestBody RegisterRequest registerRequest) {
         try {
             if (registerRequest.getUsername() == null || registerRequest.getPassword() == null || registerRequest.getEmail() == null || registerRequest.getRole() == null) {
@@ -164,15 +179,18 @@ public class UserController {
             user.setIban(registerRequest.getIban());
             user.setActive(true);
 
-            // Two Factor Authentication
-            String secret = twoFactorAuthenticationService.generateSecretKey();
-            user.setTwoFactorSecret(secret);
 
+            //Two Factor Authentication - currently off
+            //String secret = twoFactorAuthenticationService.generateSecretKey();
+            //user.setTwoFactorSecret(secret);
+
+            user.setTwoFactorSecret(null);
             userRepository.save(user);
 
-            String qrUrl = twoFactorAuthenticationService.getQRCodeUrl(user.getEmail(), secret);
+            //String qrUrl = twoFactorAuthenticationService.getQRCodeUrl(user.getEmail(), secret);
 
-            return ResponseEntity.ok(new ApiResponse("Utilizator înregistrat cu succes. Scanează acest QR în Google Authenticator: " + qrUrl, true));
+            //return ResponseEntity.ok(new ApiResponse("Utilizator înregistrat cu succes. Scanează acest QR în Google Authenticator: " + qrUrl, true));
+            return ResponseEntity.ok(new ApiResponse("Register successful. Username: " + registerRequest.getUsername() + ", Password: " + registerRequest.getPassword(), true));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body(

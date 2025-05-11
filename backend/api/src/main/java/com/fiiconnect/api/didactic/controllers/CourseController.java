@@ -5,24 +5,25 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import com.fiiconnect.api.didactic.exceptions.CourseNotFoundException;
 import com.fiiconnect.api.didactic.helpers.SQLExceptionMessageParser;
-import com.fiiconnect.api.didactic.models.Course;
-import com.fiiconnect.api.didactic.models.CourseMaterial;
-import com.fiiconnect.api.didactic.models.CourseModelAssembler;
-import com.fiiconnect.api.didactic.models.Enrollment;
+import com.fiiconnect.api.didactic.models.*;
 import com.fiiconnect.api.didactic.repositories.CourseRepository;
-import com.fiiconnect.api.didactic.services.CourseMaterialService;
-import com.fiiconnect.api.didactic.services.CourseService;
-import com.fiiconnect.api.didactic.services.EnrollmentService;
-import com.fiiconnect.api.didactic.services.SftpService;
+import com.fiiconnect.api.didactic.services.*;
 import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.hateoas.EntityModel;
 
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.management.DescriptorKey;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.SQLException;
@@ -37,15 +38,17 @@ public class CourseController {
     private final SQLExceptionMessageParser exceptionHelper;
     private final EnrollmentService enrollmentService;
     private final CourseMaterialService materialService;
+    private final GradeService gradeService;
     private final SftpService sftpService;
 
-    public CourseController(CourseRepository repository, CourseModelAssembler assembler, CourseService service, SQLExceptionMessageParser exceptionHelper, EnrollmentService enrollmentService, CourseMaterialService materialService, SftpService sftpService) {
+    public CourseController(CourseRepository repository, CourseModelAssembler assembler, CourseService service, SQLExceptionMessageParser exceptionHelper, EnrollmentService enrollmentService, CourseMaterialService materialService, GradeService gradeService, SftpService sftpService) {
         this.repository = repository;
         this.assembler = assembler;
         this.service = service;
         this.exceptionHelper = exceptionHelper;
         this.enrollmentService = enrollmentService;
         this.materialService = materialService;
+        this.gradeService = gradeService;
         this.sftpService = sftpService;
     }
 
@@ -53,6 +56,7 @@ public class CourseController {
     @GetMapping("/didactic/course")
      public CollectionModel<EntityModel<Course>> all() {
         List<Course> courseList = repository.findAll();
+        courseList.forEach(service::attachIcon);
         List<EntityModel<Course>> courses = courseList.stream().map(assembler::toModel).collect(Collectors.toList());
         return CollectionModel.of(courses, linkTo(methodOn(CourseController.class).all()).withSelfRel());
     }
@@ -60,7 +64,7 @@ public class CourseController {
     @GetMapping("didactic/courses/{year}/{semester}")
     public CollectionModel<EntityModel<Course>> allCourse(@PathVariable("year") Integer year, @PathVariable("semester") Integer semester) {
         List<Course> courseList = service.viewAllCoursesAvailable(year, semester);
-        courseList.forEach((c) -> {c.setMaterials(null);});
+        courseList.forEach((c) -> {c.setMaterials(null); service.attachIcon(c);});
         List<EntityModel<Course>>  courses = courseList.stream().map(assembler::toModel).toList();
         return CollectionModel.of(courses, linkTo(methodOn(CourseController.class).all()).withSelfRel());
     }
@@ -71,15 +75,30 @@ public class CourseController {
         service.attachProfessors(course);
         service.attachMaterials(course);
         service.attachDescription(course);
+        service.attachIcon(course);
         return assembler.toModel(course);
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @GetMapping("/didactic/course/{id}/enrolled")
     public List<Enrollment> getEnrolledStudents(@PathVariable Long id)
     {
-        return enrollmentService.getCourseEnrollments(id);
+        if(!repository.existsById(id)) throw new CourseNotFoundException(id);
+        List<Enrollment> enrollments = enrollmentService.getCourseEnrollments(id);
+        enrollments.forEach(enrollmentService::attachStudent);
+        return enrollments;
     }
 
+    @GetMapping("/didactic/course/{id}/grades")
+    public List<Grade> getStudentGrades(@PathVariable Long id)
+    {
+        if(!repository.existsById(id)) throw new CourseNotFoundException(id);
+        List<Grade> grades = gradeService.getCourseGrades(id);
+        grades.forEach(gradeService::attachStudent);
+        return grades;
+    }
+
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PostMapping("/didactic/course")
     public ResponseEntity<?> newCourse(@RequestBody Course newCourse) {
         newCourse.setId(null); // enforcing to choose a random id the db should create a sequence for id generation
@@ -87,6 +106,7 @@ public class CourseController {
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).build();
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PutMapping("/didactic/course/{id}")
     public ResponseEntity<?> replaceCourse(@PathVariable("id") Long id, @RequestBody Course newCourse) {
         Course temp = repository.findById(id)
@@ -98,12 +118,14 @@ public class CourseController {
                     course.setSemester(newCourse.getSemester());
                     course.setTitle(newCourse.getTitle());
                     course.setArchived(newCourse.getArchived());
+                    service.attachIcon(course);
                     return repository.save(course);
                 }).orElseGet(() -> repository.save(newCourse));
         EntityModel<Course> entityModel = assembler.toModel(temp);
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @DeleteMapping("/didactic/course/{id}")
     public ResponseEntity<?> deleteCourse(@PathVariable("id") Long id) throws CourseNotFoundException, IOException {
         Course course = repository.findById(id).orElseThrow(() -> new CourseNotFoundException(id));
@@ -127,6 +149,12 @@ public class CourseController {
             {
                 //do nothing
             }
+            try{
+                sftpService.deleteFile(pathPrefix + "icon.png", false);
+            }catch(FileNotFoundException e)
+            {
+                //do nothing
+            }
 
             sftpService.deleteFile(pathPrefix, true);
         }
@@ -135,12 +163,74 @@ public class CourseController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PutMapping("/didactic/course/{id}/description")
     public void addDescription(@PathVariable Long id, @RequestBody String description)
     {
         service.saveDescription(id, description);
     }
 
+    @GetMapping("/didactic/course/{id}/icon.png")
+    public ResponseEntity<?> getIcon(@PathVariable Long id) {
+        try {
+            File iconFile = sftpService.downloadFile("/faculty_files/didactic/course-" + id + "/icon.png");
+            InputStreamResource resource = new InputStreamResource(new FileInputStream(iconFile));
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_PNG)
+                    .body(resource);
+        } catch (IOException e) {
+            if (e instanceof FileNotFoundException) {
+                String defaultIconUrl = "/didactic/course/default_course_icon.png";
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Icon not found. Use default icon: " + defaultIconUrl);
+            }
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving icon.");
+        }
+    }
+
+    @GetMapping("/didactic/course/default_course_icon.png")
+    public ResponseEntity<?> getDefaultIcon() {
+        try {
+            File iconFile = sftpService.downloadFile("/faculty_files/didactic/default_course_icon.png");
+            InputStreamResource resource = new InputStreamResource(new FileInputStream(iconFile));
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.IMAGE_PNG)
+                    .body(resource);
+
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error retrieving default course icon.");
+        }
+    }
+
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
+    @PutMapping("didactic/course/{id}/icon")
+    public ResponseEntity<?> updateIcon(@PathVariable Long id, @RequestParam MultipartFile iconFile) {
+        try{
+            sftpService.uploadFile(iconFile, "faculty_files/didactic/course-" + id, "icon.png");
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error uploading icon.");
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
+    @DeleteMapping("didactic/course/{id}/icon")
+    public ResponseEntity<?> deleteIcon(@PathVariable Long id) {
+        try{
+            sftpService.deleteFile("faculty_files/didactic/course-" + id + "/icon.png", false);
+        }
+        catch (IOException e) {
+            if (e instanceof FileNotFoundException)
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Icon not found.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error deleting icon.");
+        }
+        return ResponseEntity.ok().build();
+    }
+
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PutMapping("/didactic/course/{id}/archive")
     public void archiveCourse(@PathVariable Long id)
     {
@@ -148,6 +238,8 @@ public class CourseController {
         course.setArchived(1);
         repository.save(course);
     }
+
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PutMapping("/didactic/course/{id}/desarchive")
     public void desarchiveCourse(@PathVariable Long id)
     {
