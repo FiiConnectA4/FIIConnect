@@ -64,7 +64,7 @@ public class AnnouncementDTO {
 
     @Override
     public String toString() {
-        return "CreateAnnouncementRequest{" +
+        return "AnnouncementDTO{" +
                 "title='" + title + '\'' +
                 ", message='" + message + '\'' +
                 ", professor=" + professor +

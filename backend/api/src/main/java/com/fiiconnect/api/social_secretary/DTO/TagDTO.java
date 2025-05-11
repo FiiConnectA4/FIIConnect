@@ -29,7 +29,7 @@ public class TagDTO {
 
     @Override
     public String toString() {
-        return "TagRequest{" +
+        return "TagDTO{" +
                 "name='" + name + '\'' +
                 ", type=" + type +
                 '}';
