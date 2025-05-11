@@ -18,6 +18,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
         registry.setApplicationDestinationPrefixes("/app");
-        registry.enableSimpleBroker("/topic");///toate locatiile in care trimitem trb sa inceapa cu asta
+        registry.enableSimpleBroker("/topic","/topic/channel");///toate locatiile in care trimitem trb sa inceapa cu asta
     }
 }
