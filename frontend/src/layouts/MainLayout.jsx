@@ -1,15 +1,9 @@
 import Sidebar from "../components/Sidebar/Sidebar";
 import NotificationBell from "../components/notifications/NotificationBell";
-import { Outlet, useNavigate } from "react-router-dom";
+import LogoutButton from "../components/logout-button/LogoutButton";
+import { Outlet } from "react-router-dom";
 
 const MainLayout = () => {
-    const navigate = useNavigate();
-
-    const handleLogout = () => {
-        localStorage.removeItem("token");
-        navigate("/");
-    };
-
     return (
         <div style={{ display: "flex", height: "100vh" }}>
             <Sidebar />
@@ -24,7 +18,7 @@ const MainLayout = () => {
                     }}
                 >
                     <NotificationBell />
-                    <button onClick={handleLogout}>Logout</button>
+                    <LogoutButton />
                 </div>
 
                 <Outlet />

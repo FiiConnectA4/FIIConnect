@@ -1,4 +1,5 @@
 import { useNavigate } from "react-router-dom";
+import "./LogoutButton.css";
 
 function LogoutButton() {
   const navigate = useNavigate();
@@ -9,7 +10,7 @@ function LogoutButton() {
     if (token) {
       try {
         // Trimite cererea de logout către backend
-        await fetch("http://localhost:8080/users/logout", {
+        await fetch("http://localhost:34101/users/logout", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -26,7 +27,9 @@ function LogoutButton() {
     navigate("/");
   };
 
-  return <button onClick={handleLogout}>Logout</button>;
+  return (
+      <button className="logout-button" onClick={handleLogout}> 🔓 Logout </button>
+  );
 }
 
 export default LogoutButton;

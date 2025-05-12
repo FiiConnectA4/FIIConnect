@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import "./NotificationBell.css";
+import { FaBell } from "react-icons/fa";
+
 
 const NotificationBell = () => {
     const [notifications, setNotifications] = useState([]);
@@ -81,9 +83,12 @@ const NotificationBell = () => {
     return (
         <div className="notification-bell">
             <div className="icon" onClick={toggleDropdown}>
-                🔔
+                <div className="icon-bg">
+                    <FaBell size={20} color="white" />
+                </div>
                 {unreadCount > 0 && <span className="badge">{unreadCount}</span>}
             </div>
+
 
             {dropdownOpen && (
                 <div className="dropdown">
