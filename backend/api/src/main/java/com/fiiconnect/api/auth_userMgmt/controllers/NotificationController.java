@@ -1,6 +1,7 @@
 package com.fiiconnect.api.auth_userMgmt.controllers;
 
 import com.fiiconnect.api.auth_userMgmt.dtos.NotificationRequest;
+import com.fiiconnect.api.auth_userMgmt.dtos.NotificationResponse;
 import com.fiiconnect.api.auth_userMgmt.models.User;
 import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository;
 import com.fiiconnect.api.auth_userMgmt.models.Notification;
@@ -14,9 +15,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/notifications")
+@RequestMapping("/notifications")
 public class NotificationController {
 
     @Autowired
@@ -46,20 +49,29 @@ public class NotificationController {
 
         notificationRepo.save(notif);
 
+        NotificationResponse dto = mapToDto(notif);
+
         // WebSocket push to specific user
         messagingTemplate.convertAndSendToUser(
-                user.getUsername(), // must match Principal.getName()
+                user.getUsername(),
                 "/queue/notifications",
-                notif
+                dto
         );
 
-        return ResponseEntity.ok("Sent");
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/unread")
     public ResponseEntity<?> getUnread(@AuthenticationPrincipal UserDetails userDetails) {
         User user = userRepo.findByUsername(userDetails.getUsername());
-        return ResponseEntity.ok(notificationRepo.findByRecipientAndReadFalse(user));
+
+        List<NotificationResponse> dtos = notificationRepo
+                .findByRecipientAndReadFalse(user)
+                .stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtos);
     }
 
     @PutMapping("/{id}/read")
@@ -69,5 +81,16 @@ public class NotificationController {
         notif.setRead(true);
         notificationRepo.save(notif);
         return ResponseEntity.ok().build();
+    }
+
+    private NotificationResponse mapToDto(Notification notif) {
+        return new NotificationResponse(
+                notif.getId(),
+                notif.getTitle(),
+                notif.getContent(),
+                notif.getType(),
+                notif.isRead(),
+                notif.getTimestamp()
+        );
     }
 }

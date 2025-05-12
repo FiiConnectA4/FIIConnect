@@ -3,9 +3,9 @@ package com.fiiconnect.api.auth_userMgmt.models;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import net.minidev.json.annotate.JsonIgnore;
 
 import java.time.LocalDateTime;
-
 
 @Setter
 @Getter
@@ -13,8 +13,10 @@ import java.time.LocalDateTime;
 @Table(name = "notifications")
 public class Notification {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "notification_seq_gen")
+    @SequenceGenerator(name = "notification_seq_gen", sequenceName = "notifications_seq", allocationSize = 1)
     private Long id;
+
 
     private String title;
     private String content;
@@ -25,5 +27,7 @@ public class Notification {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User recipient;
+
 }

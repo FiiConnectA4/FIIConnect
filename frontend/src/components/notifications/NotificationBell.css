@@ -1,0 +1,50 @@
+.notification-bell {
+    position: relative;
+    margin-right: 1rem;
+    cursor: pointer;
+}
+
+.icon {
+    font-size: 1.5rem;
+    position: relative;
+}
+
+.badge {
+    position: absolute;
+    top: -6px;
+    right: -8px;
+    background: red;
+    color: white;
+    font-size: 0.7rem;
+    padding: 2px 6px;
+    border-radius: 50%;
+}
+
+.dropdown {
+    position: absolute;
+    right: 0;
+    top: 2rem;
+    width: 250px;
+    background: white;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 6px;
+    z-index: 10;
+    padding: 0.5rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.notif-item {
+    padding: 0.4rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.notif-item:last-child {
+    border-bottom: none;
+}
+
+.empty {
+    text-align: center;
+    color: gray;
+    padding: 1rem 0;
+}

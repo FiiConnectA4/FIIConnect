@@ -25,6 +25,6 @@ public class TokenCleanupService {
                 tokenRepository.delete(token);
             }
         }
-        System.out.println("Token-uri expirate șterse la ora: " + now);
+        System.out.println("Token-uri de Resetare-Parola expirate șterse la ora: " + now);
     }
 }
