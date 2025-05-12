@@ -54,8 +54,29 @@ const NotificationBell = () => {
 
     const toggleDropdown = () => {
         setDropdownOpen(!dropdownOpen);
-        setUnreadCount(0); // reset badge
     };
+
+    const handleMarkAsRead = (id) => {
+        fetch(`/notifications/${id}/read`, {
+            method: "PUT",
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+        })
+            .then(() => {
+                setNotifications((prev) =>
+                    prev.map((n) =>
+                        n.id === id ? { ...n, read: true } : n
+                    )
+                );
+                setUnreadCount((prev) => Math.max(prev - 1, 0));
+            })
+            .catch((err) =>
+                console.error(`❌ Eroare la marcarea notificării ${id} ca citită`, err)
+            );
+    };
+
+
 
     return (
         <div className="notification-bell">
@@ -69,12 +90,33 @@ const NotificationBell = () => {
                     {notifications.length === 0 ? (
                         <div className="empty">Fără notificări</div>
                     ) : (
-                        notifications.slice(0, 5).map((notif, idx) => (
-                            <div className="notif-item" key={idx}>
-                                <strong>{notif.title}</strong>
+                        notifications.slice(0, 10).map((notif) => (
+                            <div className={`notif-item ${notif.read ? "read" : ""}`} key={notif.id}>
+
+                            <div className="notif-header">
+                                    <strong>{notif.title}</strong>
+                                    <span className="notif-timestamp">
+        {new Date(notif.timestamp).toLocaleString("ro-RO", {
+            day: "2-digit",
+            month: "long",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        })}
+      </span>
+                                </div>
                                 <p>{notif.content}</p>
+                                {!notif.read && (
+                                    <button
+                                        className="mark-read-btn"
+                                        onClick={() => handleMarkAsRead(notif.id)}
+                                    >
+                                        Mark as read ✔️
+                                    </button>
+                                )}
                             </div>
                         ))
+
                     )}
                 </div>
             )}

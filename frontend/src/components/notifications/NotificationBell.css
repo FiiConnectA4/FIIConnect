@@ -48,3 +48,49 @@
     color: gray;
     padding: 1rem 0;
 }
+
+.dropdown {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    background-color: white;
+    border: 1px solid #ccc;
+    width: 300px; /* lărgită */
+    max-height: 400px; /* mai înaltă */
+    overflow-y: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    z-index: 1000;
+    padding: 10px;
+}
+
+.notif-item {
+    border-bottom: 1px solid #eee;
+    padding: 10px 0;
+    position: relative;
+}
+
+.notif-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.notif-timestamp {
+    font-size: 12px;
+    color: #999;
+    margin-left: 8px;
+}
+
+.mark-read-btn {
+    background-color: transparent;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    color: green;
+    margin-top: 5px;
+}
+
+.mark-read-btn:hover {
+    color: darkgreen;
+}

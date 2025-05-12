@@ -199,6 +199,10 @@ public class AuthController {
             return ResponseEntity.ok(new ApiResponse("2FA_REQUIRED", true));
         }
 
+
+        user.setActive(true); // activează user-ul
+        userRepository.save(user); // salvează modificarea
+
         // Extrage rolurile utilizatorului
         List<GrantedAuthority> authorities = user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.getRoleName()))
@@ -206,6 +210,7 @@ public class AuthController {
 
         // Generăm token-ul cu rolurile
         String jwtToken = jwtService.generateToken(user.getUsername(), authorities);
+
 
         return ResponseEntity.ok(new AuthResponse(jwtToken));
     }
@@ -229,6 +234,10 @@ public class AuthController {
                     new ApiResponse("Cod 2FA invalid.", false));
         }
 
+
+        user.setActive(true); // activează user-ul
+        userRepository.save(user); // salvează modificarea
+
         // Extrage rolurile utilizatorului
         List<GrantedAuthority> authorities = user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.getRoleName()))
@@ -238,6 +247,31 @@ public class AuthController {
         String jwtToken = jwtService.generateToken(user.getUsername(), authorities);
 
         return ResponseEntity.ok(new AuthResponse(jwtToken));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().body(new ApiResponse("Token invalid sau lipsă.", false));
+        }
+
+        String token = authHeader.substring(7);
+        String username;
+        try {
+            username = jwtService.extractUsername(token);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new ApiResponse("Token invalid.", false));
+        }
+
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            return ResponseEntity.status(404).body(new ApiResponse("Utilizator inexistent.", false));
+        }
+
+        user.setActive(false);
+        userRepository.save(user);
+
+        return ResponseEntity.ok(new ApiResponse("Utilizator delogat și dezactivat.", true));
     }
 
 }
