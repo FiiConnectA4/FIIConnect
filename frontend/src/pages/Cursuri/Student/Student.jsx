@@ -9,15 +9,24 @@ import { useSearchParams } from 'react-router-dom';
 
 const Student = () => {
     const [searchParams] = useSearchParams();
-    const studentId = searchParams.get('studentId') || 4;
+    const studentId = searchParams.get('studentId') || 5;
 
     const [student, setStudent] = useState(null);
     const [courses, setCourses] = useState([]);
     const [selectedCourseId, setSelectedCourseId] = useState(null);
     const [loading, setLoading] = useState(true);
 
+
     useEffect(() => {
-        fetch(`/didactic/student/${studentId}`)
+
+        const token = localStorage.getItem('token');
+        console.log(token);
+        fetch(`/didactic/student/${studentId}`,
+        {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
             .then((res) => {
                 if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
                 return res.json();

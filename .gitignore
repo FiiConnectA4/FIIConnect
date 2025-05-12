@@ -1,3 +1,4 @@
 .idea/
 SFTP_remote_files/
 .DS_Store
+node_modules/

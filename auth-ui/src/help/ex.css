@@ -1,0 +1,2243 @@
+/* Login */
+
+box-sizing: border-box;
+
+position: relative;
+width: 1440px;
+height: 900px;
+
+background: #EDF2F7;
+border: 1px solid #000000;
+
+
+/* Sign-In-Form-Desktop-Layout-1440x900 */
+
+position: absolute;
+width: 456px;
+height: 900px;
+left: calc(50% - 456px/2);
+top: 0px;
+
+border-radius: 24px;
+
+
+/* Sign-In-Form-Desktop */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+padding: 0px;
+
+position: absolute;
+left: 0px;
+right: 359px;
+top: 0px;
+bottom: 0px;
+
+
+
+/* Frame 28986 */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+align-items: flex-start;
+padding: 48px;
+gap: 228px;
+
+width: 456px;
+height: 900px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Frame 28985 */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+gap: 48px;
+
+margin: 0 auto;
+width: 360px;
+height: 565.5px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Frame 28984 */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: space-between;
+align-items: center;
+padding: 0px;
+gap: 61px;
+
+width: 360px;
+height: 53px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* UI-Unicorn-Logo */
+
+margin: 0 auto;
+width: 149.17px;
+height: 48px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* FiiConnect 1 */
+
+position: absolute;
+width: 340px;
+height: 66px;
+left: 25px;
+top: 11.5px;
+
+background: url(FiiConnect-removebg-preview.png);
+
+
+/* BG-Tab-switcher-32px */
+
+box-sizing: border-box;
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+padding: 2px;
+
+margin: 0 auto;
+width: 150px;
+height: 32px;
+
+/* Black-100 (#E5E5E5) */
+background: #E5E5E5;
+opacity: 0;
+border: 0.5px solid rgba(204, 204, 204, 0.25);
+border-radius: 8px;
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Tab switcher-button-28px */
+
+box-sizing: border-box;
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+padding: 4px 16px;
+
+width: 71px;
+height: 28px;
+
+/* White (#FFFFFF) */
+background: #FFFFFF;
+/* Black-100 (#E5E5E5) */
+border: 0.5px solid #E5E5E5;
+border-radius: 6px;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Frame 3 */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 8px;
+
+width: 39px;
+height: 20px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Типографика для (Dis */
+
+width: 39px;
+height: 20px;
+
+/* Micro-button-label */
+font-family: 'Roboto';
+font-style: normal;
+font-weight: 500;
+font-size: 12px;
+line-height: 20px;
+/* identical to box height, or 167% */
+display: flex;
+align-items: center;
+text-align: center;
+letter-spacing: 0.3px;
+
+/* Black (#000000) */
+color: #000000;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Tab switcher-button-28px */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+padding: 4px 16px;
+
+width: 75px;
+height: 28px;
+
+border-radius: 4px;
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Frame 1 */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 8px;
+
+width: 43px;
+height: 20px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Типографика для (Dis */
+
+width: 43px;
+height: 20px;
+
+/* Micro-button-label */
+font-family: 'Roboto';
+font-style: normal;
+font-weight: 500;
+font-size: 12px;
+line-height: 20px;
+/* identical to box height, or 167% */
+display: flex;
+align-items: center;
+text-align: center;
+letter-spacing: 0.3px;
+
+/* Black-600 (#666666) */
+color: #666666;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Sign-In-Forms */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: 0px;
+gap: 24px;
+
+width: 360px;
+height: 464.5px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Sign-In-Form-Web */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+gap: 32px;
+
+width: 360px;
+height: 420.5px;
+
+border-radius: 8px;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Frame 28976 */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+gap: 24px;
+
+width: 360px;
+height: 244px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* 48 000,00 ₽ */
+
+width: 360px;
+height: 28px;
+
+/* Title */
+font-family: 'Poppins';
+font-style: normal;
+font-weight: 600;
+font-size: 20px;
+line-height: 28px;
+/* identical to box height, or 140% */
+display: flex;
+align-items: center;
+
+color: #1E5595;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Frame 28968 */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+gap: 20px;
+
+width: 360px;
+height: 192px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Frame 28977 */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+gap: 16px;
+
+width: 360px;
+height: 152px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Input-Configurator */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+
+width: 360px;
+height: 68px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Input-Configurator */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+gap: 8px;
+
+width: 360px;
+height: 68px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Satellite-Input */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+padding: 0px 16px;
+
+width: 360px;
+height: 12px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Login-Input */
+
+width: 360px;
+height: 48px;
+
+border-radius: 20px;
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Input-BG */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+/* Black-50 (#F2F2F2) */
+background: #F2F2F2;
+/* Black-100 (#E5E5E5) */
+border: 0.5px solid #E5E5E5;
+border-radius: 6px;
+
+
+/* Regular-Input-Double-Row */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: space-between;
+align-items: center;
+padding: 8px 8px 8px 16px;
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+border-radius: 6px;
+
+
+/* Placeholder & Value */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: flex-start;
+padding: 0px;
+
+margin: 0 auto;
+width: 155px;
+height: 20px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Frame 28880 */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 1px;
+
+width: 155px;
+height: 20px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Email or phone number */
+
+width: 155px;
+height: 20px;
+
+/* Placeholder-Value */
+font-family: 'Roboto';
+font-style: normal;
+font-weight: 400;
+font-size: 15px;
+line-height: 20px;
+/* identical to box height, or 133% */
+display: flex;
+align-items: flex-end;
+
+/* Black-500 (#808080) */
+color: #808080;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Print-Line */
+
+display: none;
+width: 1px;
+height: 20px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Rectangle */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+/* Black-900 (#1A1A1A) */
+background: #1A1A1A;
+
+
+/* Input-Icons */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+padding: 8px;
+gap: 16px;
+
+margin: 0 auto;
+width: 32px;
+height: 32px;
+
+opacity: 0;
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Login-Icons */
+
+width: 16px;
+height: 16px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Frame 28875 */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+padding: 5px;
+gap: 10px;
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+/* Black-700 (#4D4D4D) */
+background: #4D4D4D;
+border-radius: 8px;
+
+
+/* Union */
+
+width: 6px;
+height: 6px;
+
+/* White (#FFFFFF) */
+background: #FFFFFF;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Path */
+
+position: absolute;
+left: 31.25%;
+right: 31.25%;
+top: 31.25%;
+bottom: 31.25%;
+
+background: #FFFFFF;
+
+
+/* Path */
+
+position: absolute;
+left: 31.25%;
+right: 31.25%;
+top: 31.25%;
+bottom: 31.25%;
+
+background: #FFFFFF;
+
+
+/* Arow-Icons-16 / Medium */
+
+display: none;
+width: 16px;
+height: 16px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Vector */
+
+position: absolute;
+left: 25%;
+right: 25%;
+top: 37.5%;
+bottom: 37.5%;
+
+/* Black-700 (#4D4D4D) */
+border: 2px solid #4D4D4D;
+
+
+/* Satellite-Input */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+padding: 0px 16px;
+
+display: none;
+width: 336px;
+height: 12px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Link Button Label */
+
+display: none;
+width: 152px;
+height: 12px;
+
+/* Hint-Placeholder */
+font-family: 'SF Pro Display';
+font-style: normal;
+font-weight: 400;
+font-size: 11px;
+line-height: 12px;
+/* identical to box height, or 109% */
+letter-spacing: 0.3px;
+
+/* System-Blue (#007AFF) */
+color: #007AFF;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 1;
+
+
+/* Link Button Label */
+
+width: 304px;
+height: 12px;
+
+/* Hint-Placeholder */
+font-family: 'SF Pro Display';
+font-style: normal;
+font-weight: 400;
+font-size: 11px;
+line-height: 12px;
+/* identical to box height, or 109% */
+text-align: right;
+letter-spacing: 0.3px;
+
+/* System-Blue (#007AFF) */
+color: #007AFF;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 1;
+
+
+/* Satellite-Input */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+padding: 0px 16px;
+
+display: none;
+width: 336px;
+height: 12px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Description */
+
+width: 304px;
+height: 12px;
+
+/* Hint-Placeholder */
+font-family: 'SF Pro Display';
+font-style: normal;
+font-weight: 400;
+font-size: 11px;
+line-height: 12px;
+/* identical to box height, or 109% */
+letter-spacing: 0.3px;
+
+/* Black-800 (#333333) */
+color: #333333;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 1;
+
+
+/* Satellite-Input */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+padding: 0px 16px;
+
+display: none;
+width: 336px;
+height: 12px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 4;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Error */
+
+width: 304px;
+height: 12px;
+
+/* Hint-Placeholder */
+font-family: 'SF Pro Display';
+font-style: normal;
+font-weight: 400;
+font-size: 11px;
+line-height: 12px;
+/* identical to box height, or 109% */
+letter-spacing: 0.3px;
+
+/* System-Red (#FF3B30) */
+color: #FF3B30;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 1;
+
+
+/* Satellite-Input */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+padding: 0px 16px;
+
+display: none;
+width: 336px;
+height: 12px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 5;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Warning */
+
+width: 304px;
+height: 12px;
+
+/* Hint-Placeholder */
+font-family: 'SF Pro Display';
+font-style: normal;
+font-weight: 400;
+font-size: 11px;
+line-height: 12px;
+/* identical to box height, or 109% */
+letter-spacing: 0.3px;
+
+/* System-Orange (#FF9500) */
+color: #FF8C00;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 1;
+
+
+/* Satellite-Input */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+padding: 0px 16px;
+
+display: none;
+width: 336px;
+height: 12px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 6;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Success */
+
+width: 304px;
+height: 12px;
+
+/* Hint-Placeholder */
+font-family: 'SF Pro Display';
+font-style: normal;
+font-weight: 400;
+font-size: 11px;
+line-height: 12px;
+/* identical to box height, or 109% */
+letter-spacing: 0.3px;
+
+/* System-Green (#26A212) */
+color: #26A212;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 1;
+
+
+/* Input-Configurator */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+
+width: 360px;
+height: 68px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Input-Configurator */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+align-items: flex-start;
+padding: 0px;
+gap: 8px;
+
+width: 360px;
+height: 68px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Satellite-Input */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+padding: 0px 16px;
+
+width: 360px;
+height: 12px;
+
+opacity: 0;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Hint */
+
+width: 328px;
+height: 12px;
+
+/* Hint-Placeholder */
+font-family: 'SF Pro Display';
+font-style: normal;
+font-weight: 400;
+font-size: 11px;
+line-height: 12px;
+/* identical to box height, or 109% */
+letter-spacing: 0.3px;
+
+/* Black-800 (#333333) */
+color: #333333;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 1;
+
+
+/* Password-Input */
+
+width: 360px;
+height: 48px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Input-BG */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+/* Black-50 (#F2F2F2) */
+background: #F2F2F2;
+/* Black-100 (#E5E5E5) */
+border: 0.5px solid #E5E5E5;
+border-radius: 6px;
+
+
+/* Regular-Input-Double-Row */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: space-between;
+align-items: center;
+padding: 8px 8px 8px 16px;
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+border-radius: 40px;
+
+
+/* Placeholder & Value */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: flex-start;
+padding: 0px;
+
+margin: 0 auto;
+width: 104px;
+height: 20px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Frame 28880 */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 1px;
+
+width: 104px;
+height: 20px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Enter password */
+
+width: 104px;
+height: 20px;
+
+/* Placeholder-Value */
+font-family: 'Roboto';
+font-style: normal;
+font-weight: 400;
+font-size: 15px;
+line-height: 20px;
+/* identical to box height, or 133% */
+display: flex;
+align-items: flex-end;
+
+/* Black-500 (#808080) */
+color: #808080;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Print-Line */
+
+display: none;
+width: 1px;
+height: 20px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Rectangle */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+/* Black-900 (#1A1A1A) */
+background: #1A1A1A;
+
+
+/* Input-Icons */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+padding: 8px;
+gap: 16px;
+
+margin: 0 auto;
+width: 32px;
+height: 32px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Login-Icons */
+
+display: none;
+width: 16px;
+height: 16px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Frame 28875 */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+padding: 5px;
+gap: 10px;
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+/* Black-700 (#4D4D4D) */
+background: #4D4D4D;
+border-radius: 8px;
+
+
+/* Union */
+
+width: 6px;
+height: 6px;
+
+/* White (#FFFFFF) */
+background: #FFFFFF;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Path */
+
+position: absolute;
+left: 31.25%;
+right: 31.25%;
+top: 31.25%;
+bottom: 31.25%;
+
+background: #FFFFFF;
+
+
+/* Path */
+
+position: absolute;
+left: 31.25%;
+right: 31.25%;
+top: 31.25%;
+bottom: 31.25%;
+
+background: #FFFFFF;
+
+
+/* Login-Icons */
+
+width: 16px;
+height: 16px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Rectangle 473 */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+
+
+/* Vector */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 16.67%;
+bottom: 15.15%;
+
+/* Black-700 (#4D4D4D) */
+background: #4D4D4D;
+
+
+/* Satellite-Input */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+padding: 0px 16px;
+
+display: none;
+width: 336px;
+height: 12px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Link Button Label */
+
+display: none;
+width: 152px;
+height: 12px;
+
+/* Hint-Placeholder */
+font-family: 'SF Pro Display';
+font-style: normal;
+font-weight: 400;
+font-size: 11px;
+line-height: 12px;
+/* identical to box height, or 109% */
+letter-spacing: 0.3px;
+
+/* System-Blue (#007AFF) */
+color: #007AFF;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 1;
+
+
+/* Link Button Label */
+
+width: 304px;
+height: 12px;
+
+/* Hint-Placeholder */
+font-family: 'SF Pro Display';
+font-style: normal;
+font-weight: 400;
+font-size: 11px;
+line-height: 12px;
+/* identical to box height, or 109% */
+text-align: right;
+letter-spacing: 0.3px;
+
+/* System-Blue (#007AFF) */
+color: #007AFF;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 1;
+
+
+/* Satellite-Input */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+padding: 0px 16px;
+
+display: none;
+width: 336px;
+height: 12px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Description */
+
+width: 304px;
+height: 12px;
+
+/* Hint-Placeholder */
+font-family: 'SF Pro Display';
+font-style: normal;
+font-weight: 400;
+font-size: 11px;
+line-height: 12px;
+/* identical to box height, or 109% */
+letter-spacing: 0.3px;
+
+/* Black-800 (#333333) */
+color: #333333;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 1;
+
+
+/* Satellite-Input */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+padding: 0px 16px;
+
+display: none;
+width: 336px;
+height: 12px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 4;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Error */
+
+width: 304px;
+height: 12px;
+
+/* Hint-Placeholder */
+font-family: 'SF Pro Display';
+font-style: normal;
+font-weight: 400;
+font-size: 11px;
+line-height: 12px;
+/* identical to box height, or 109% */
+letter-spacing: 0.3px;
+
+/* System-Red (#FF3B30) */
+color: #FF3B30;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 1;
+
+
+/* Satellite-Input */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+padding: 0px 16px;
+
+display: none;
+width: 336px;
+height: 12px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 5;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Warning */
+
+width: 304px;
+height: 12px;
+
+/* Hint-Placeholder */
+font-family: 'SF Pro Display';
+font-style: normal;
+font-weight: 400;
+font-size: 11px;
+line-height: 12px;
+/* identical to box height, or 109% */
+letter-spacing: 0.3px;
+
+/* System-Orange (#FF9500) */
+color: #FF8C00;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 1;
+
+
+/* Satellite-Input */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+padding: 0px 16px;
+
+display: none;
+width: 336px;
+height: 12px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 6;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Success */
+
+width: 304px;
+height: 12px;
+
+/* Hint-Placeholder */
+font-family: 'SF Pro Display';
+font-style: normal;
+font-weight: 400;
+font-size: 11px;
+line-height: 12px;
+/* identical to box height, or 109% */
+letter-spacing: 0.3px;
+
+/* System-Green (#26A212) */
+color: #26A212;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 1;
+
+
+/* Frame 28978 */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+padding: 0px;
+gap: 16px;
+
+width: 360px;
+height: 20px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Switcher-Item-Left */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 8px;
+
+width: 172px;
+height: 20px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 1;
+
+
+/* Switcher */
+
+display: none;
+width: 40px;
+height: 20px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* BG-Switcher */
+
+position: absolute;
+width: 40px;
+height: 20px;
+left: 0px;
+top: 0px;
+
+
+
+/* Default */
+
+box-sizing: border-box;
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+/* Black-50 (#F2F2F2) */
+background: #F2F2F2;
+/* Black-100 (#E5E5E5) */
+border: 0.5px solid #E5E5E5;
+border-radius: 36.5px;
+
+
+/* Knob-Icon */
+
+position: absolute;
+width: 20px;
+height: 20px;
+left: 0px;
+top: 0px;
+
+
+
+/* Knob-20 */
+
+position: absolute;
+left: 10%;
+right: 10%;
+top: 10%;
+bottom: 10%;
+
+/* White (#FFFFFF) */
+background: #FFFFFF;
+box-shadow: 1px 1px 2px -1px rgba(51, 51, 51, 0.3);
+border-radius: 12px;
+
+
+/* Description */
+
+display: none;
+width: 124px;
+height: 20px;
+
+/* Checkbox */
+font-family: 'SF Pro Display';
+font-style: normal;
+font-weight: 400;
+font-size: 12px;
+line-height: 20px;
+/* identical to box height, or 167% */
+letter-spacing: 0.3px;
+
+/* Black-900 (#1A1A1A) */
+color: #1A1A1A;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 1;
+
+
+/* Description */
+
+width: 172px;
+height: 20px;
+
+/* Checkbox */
+font-family: 'SF Pro Display';
+font-style: normal;
+font-weight: 400;
+font-size: 12px;
+line-height: 20px;
+/* identical to box height, or 167% */
+text-align: right;
+letter-spacing: 0.3px;
+
+color: #1E5595;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 1;
+
+
+/* Primary-button-40px */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+padding: 10px 24px;
+
+width: 360px;
+height: 40px;
+
+background: #1E5595;
+border-radius: 6px;
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Типографика для (Dis */
+
+width: 49px;
+height: 20px;
+
+/* Button-label */
+font-family: 'Roboto';
+font-style: normal;
+font-weight: 700;
+font-size: 15px;
+line-height: 20px;
+/* identical to box height, or 133% */
+display: flex;
+align-items: center;
+text-align: center;
+letter-spacing: 0.3px;
+
+/* White (#FFFFFF) */
+color: #FFFFFF;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Nav */
+
+width: 360px;
+height: 0.5px;
+
+/* Black-100 (#E5E5E5) */
+background: #E5E5E5;
+
+/* Inside auto layout */
+flex: none;
+order: 2;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Frame 28981 */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+padding: 0px;
+gap: 8px;
+
+width: 360px;
+height: 40px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 3;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Facebook-Small-Button-40px */
+
+/* Auto layout */
+display: flex;
+flex-direction: column;
+justify-content: center;
+align-items: center;
+padding: 12px 24px;
+
+display: none;
+width: 164px;
+height: 40px;
+
+/* Black-800 (#333333) */
+background: #333333;
+border-radius: 6px;
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 1;
+
+
+/* Other-Pay-Method */
+
+width: 20px;
+height: 20px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Facebook */
+
+position: absolute;
+width: 20px;
+height: 20px;
+left: 0px;
+top: 0px;
+
+
+
+/* Path */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0.61%;
+
+background: #1877F2;
+
+
+/* Path */
+
+position: absolute;
+left: 29.49%;
+right: 27.73%;
+top: 19.53%;
+bottom: 0%;
+
+background: #FFFFFF;
+
+
+/* Sign-Up-Offer */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: flex-start;
+padding: 0px;
+gap: 8px;
+
+width: 195px;
+height: 20px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Description */
+
+width: 122px;
+height: 20px;
+
+/* Checkbox */
+font-family: 'SF Pro Display';
+font-style: normal;
+font-weight: 400;
+font-size: 12px;
+line-height: 20px;
+/* identical to box height, or 167% */
+letter-spacing: 0.3px;
+
+/* Black-900 (#1A1A1A) */
+color: #1A1A1A;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Description */
+
+width: 65px;
+height: 20px;
+
+/* Checkbox */
+font-family: 'SF Pro Display';
+font-style: normal;
+font-weight: 400;
+font-size: 12px;
+line-height: 20px;
+/* identical to box height, or 167% */
+text-align: right;
+letter-spacing: 0.3px;
+
+color: #1E5595;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;
+
+
+/* Bottom-Panel */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+justify-content: space-between;
+align-items: center;
+padding: 0px;
+gap: 332px;
+
+margin: 0 auto;
+width: 360px;
+height: 24px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+align-self: stretch;
+flex-grow: 0;
+
+
+/* Frame 28987 */
+
+/* Auto layout */
+display: flex;
+flex-direction: row;
+align-items: center;
+padding: 0px;
+gap: 4px;
+
+margin: 0 auto;
+width: 93px;
+height: 24px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Figma */
+
+width: 24px;
+height: 24px;
+
+
+/* Inside auto layout */
+flex: none;
+order: 0;
+flex-grow: 0;
+
+
+/* Figma */
+
+position: absolute;
+visibility: hidden;
+width: 24px;
+height: 24px;
+left: 0px;
+top: 0px;
+
+
+
+/* Color */
+
+position: absolute;
+width: 24px;
+height: 24px;
+left: 0px;
+top: 0px;
+
+
+
+/* Taobao */
+
+position: absolute;
+width: 24px;
+height: 24px;
+left: 0px;
+top: 0px;
+
+
+
+/* back */
+
+position: absolute;
+width: 24px;
+height: 24px;
+left: 0px;
+top: 0px;
+
+
+
+/* path0_fill-link */
+
+position: absolute;
+width: 24px;
+height: 24px;
+left: 0px;
+top: 0px;
+
+
+
+/* path0_fill */
+
+position: absolute;
+left: 0%;
+right: 0%;
+top: 0%;
+bottom: 0%;
+
+background: #333333;
+
+
+/* Group */
+
+position: absolute;
+width: 9.6px;
+height: 14.4px;
+left: 7.2px;
+top: 4.8px;
+
+
+
+/* 5 */
+
+position: absolute;
+width: 4.8px;
+height: 4.8px;
+left: 7.2px;
+top: 14.4px;
+
+
+
+/* path1_fill-link */
+
+position: absolute;
+width: 4.8px;
+height: 4.8px;
+left: 7.2px;
+top: 14.4px;
+
+
+
+/* path1_fill */
+
+position: absolute;
+left: 30%;
+right: 50%;
+top: 60%;
+bottom: 20%;
+
+background: #0ACF83;
+
+
+/* 4 */
+
+position: absolute;
+width: 4.8px;
+height: 4.8px;
+left: 7.2px;
+top: 9.6px;
+
+
+
+/* path2_fill-link */
+
+position: absolute;
+width: 4.8px;
+height: 4.8px;
+left: 7.2px;
+top: 9.6px;
+
+
+
+/* path2_fill */
+
+position: absolute;
+left: 30%;
+right: 50%;
+top: 40%;
+bottom: 40%;
+
+background: #A259FF;
+
+
+/* 3 */
+
+position: absolute;
+width: 4.8px;
+height: 4.8px;
+left: 7.2px;
+top: 4.8px;
+
+
+
+/* path2_fill-link */
+
+position: absolute;
+width: 4.8px;
+height: 4.8px;
+left: 7.2px;
+top: 4.8px;
+
+
+
+/* path2_fill */
+
+position: absolute;
+left: 30%;
+right: 50%;
+top: 20%;
+bottom: 60%;
+
+background: #F24E1E;
+
+
+/* 2 */
+
+position: absolute;
+width: 4.8px;
+height: 4.8px;
+left: 12px;
+top: 4.8px;
+
+
+
+/* path3_fill-link */
+
+position: absolute;
+width: 4.8px;
+height: 4.8px;
+left: 12px;
+top: 4.8px;
+
+
+
+/* path3_fill */
+
+position: absolute;
+left: 50%;
+right: 30%;
+top: 20%;
+bottom: 60%;
+
+background: #FF7262;
+
+
+/* 1 */
+
+position: absolute;
+width: 4.8px;
+height: 4.8px;
+left: 12px;
+top: 9.6px;
+
+
+
+/* path4_fill-link */
+
+position: absolute;
+width: 4.8px;
+height: 4.8px;
+left: 12px;
+top: 9.6px;
+
+
+
+/* path4_fill */
+
+position: absolute;
+left: 50%;
+right: 30%;
+top: 40%;
+bottom: 40%;
+
+background: #1ABCFE;
+
+
+/* raw 1 */
+
+position: absolute;
+width: 23.86px;
+height: 24px;
+left: 0.5px;
+top: -0.25px;
+
+background: url(raw-removebg-preview.png);
+
+
+/* Head */
+
+width: 65px;
+height: 16px;
+
+font-family: 'Roboto';
+font-style: normal;
+font-weight: 400;
+font-size: 12px;
+line-height: 16px;
+/* identical to box height, or 133% */
+letter-spacing: -0.4px;
+
+color: #1E5595;
+
+
+/* Inside auto layout */
+flex: none;
+order: 1;
+flex-grow: 0;

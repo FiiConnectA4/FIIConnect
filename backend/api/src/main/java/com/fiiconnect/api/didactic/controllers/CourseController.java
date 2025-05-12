@@ -4,7 +4,6 @@ package com.fiiconnect.api.didactic.controllers;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 import com.fiiconnect.api.didactic.exceptions.CourseNotFoundException;
-import com.fiiconnect.api.didactic.exceptions.IconNotFoundException;
 import com.fiiconnect.api.didactic.helpers.SQLExceptionMessageParser;
 import com.fiiconnect.api.didactic.models.*;
 import com.fiiconnect.api.didactic.repositories.CourseRepository;
@@ -18,6 +17,7 @@ import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -79,6 +79,7 @@ public class CourseController {
         return assembler.toModel(course);
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @GetMapping("/didactic/course/{id}/enrolled")
     public List<Enrollment> getEnrolledStudents(@PathVariable Long id)
     {
@@ -97,6 +98,7 @@ public class CourseController {
         return grades;
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PostMapping("/didactic/course")
     public ResponseEntity<?> newCourse(@RequestBody Course newCourse) {
         newCourse.setId(null); // enforcing to choose a random id the db should create a sequence for id generation
@@ -104,6 +106,7 @@ public class CourseController {
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).build();
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PutMapping("/didactic/course/{id}")
     public ResponseEntity<?> replaceCourse(@PathVariable("id") Long id, @RequestBody Course newCourse) {
         Course temp = repository.findById(id)
@@ -122,6 +125,7 @@ public class CourseController {
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @DeleteMapping("/didactic/course/{id}")
     public ResponseEntity<?> deleteCourse(@PathVariable("id") Long id) throws CourseNotFoundException, IOException {
         Course course = repository.findById(id).orElseThrow(() -> new CourseNotFoundException(id));
@@ -159,6 +163,7 @@ public class CourseController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PutMapping("/didactic/course/{id}/description")
     public void addDescription(@PathVariable Long id, @RequestBody String description)
     {
@@ -183,6 +188,7 @@ public class CourseController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving icon.");
         }
     }
+
     @GetMapping("/didactic/course/default_course_icon.png")
     public ResponseEntity<?> getDefaultIcon() {
         try {
@@ -199,6 +205,7 @@ public class CourseController {
         }
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PutMapping("didactic/course/{id}/icon")
     public ResponseEntity<?> updateIcon(@PathVariable Long id, @RequestParam MultipartFile iconFile) {
         try{
@@ -209,6 +216,7 @@ public class CourseController {
         return ResponseEntity.ok().build();
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @DeleteMapping("didactic/course/{id}/icon")
     public ResponseEntity<?> deleteIcon(@PathVariable Long id) {
         try{
@@ -222,7 +230,7 @@ public class CourseController {
         return ResponseEntity.ok().build();
     }
 
-
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PutMapping("/didactic/course/{id}/archive")
     public void archiveCourse(@PathVariable Long id)
     {
@@ -230,6 +238,8 @@ public class CourseController {
         course.setArchived(1);
         repository.save(course);
     }
+
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PutMapping("/didactic/course/{id}/desarchive")
     public void desarchiveCourse(@PathVariable Long id)
     {

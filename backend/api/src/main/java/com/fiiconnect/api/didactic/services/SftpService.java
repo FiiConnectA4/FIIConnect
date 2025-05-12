@@ -49,13 +49,13 @@ public class SftpService {
             throw new RuntimeException("Unexpected error during SFTP upload", e);
         } finally {
             if (file != null && file.exists()) {
-                file.delete();
+                if (!file.delete())
+                    System.err.println("Failed to delete file: " + file.getAbsolutePath());
             }
         }
     }
 
-    public File downloadFile(String remoteFilePath) throws IOException
-    {
+    public File downloadFile(String remoteFilePath) throws IOException {
         return this.downloadFile(remoteFilePath, new File(remoteFilePath).getName());
     }
 
@@ -63,7 +63,8 @@ public class SftpService {
         File localFile = new File(localDir, localPath);
 
         try {
-            localFile.getParentFile().mkdirs(); //create all directories leading to file if necessary
+            if (!localFile.getParentFile().mkdirs()) //create all directories leading to file if necessary
+                throw new IOException("Failed to create directory: " + localFile.getParentFile().getAbsolutePath());
             sftpRemoteFileTemplate.execute(session -> {
                 try {
                     if (!session.exists(remoteFilePath)) {
@@ -74,7 +75,7 @@ public class SftpService {
                         session.read(remoteFilePath, os);
                     }
 
-                } catch(FileNotFoundException e) {
+                } catch (FileNotFoundException e) {
                     throw e;
                 } catch (IOException e) {
                     throw new IOException("I/O error while reading remote file: " + remoteFilePath, e);

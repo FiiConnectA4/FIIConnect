@@ -12,12 +12,18 @@ const DetaliiCurs = ({ curs, onBack }) => {
     const [formula, setFormula] = useState(null);
     const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(true);
+    const token = localStorage.getItem('token');
 
     useEffect(() => {
         console.log('ID-ul cursului:', curs.id);
 
         // Fetch materials
-        fetch(`${API_BASE_URL}/didactic/course/material`)
+        fetch(`${API_BASE_URL}/didactic/course/material`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
             .then(response => {
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
                 return response.json();
@@ -33,7 +39,12 @@ const DetaliiCurs = ({ curs, onBack }) => {
             });
 
         // Fetch professors and description
-        fetch(`${API_BASE_URL}/didactic/course/${curs.id}`)
+        fetch(`${API_BASE_URL}/didactic/course/${curs.id}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
             .then(response => {
                 if (!response.ok) {
                     console.error(`HTTP error! Status: ${response.status}`);
@@ -66,7 +77,12 @@ const DetaliiCurs = ({ curs, onBack }) => {
             });
 
         // Fetch formula
-        fetch(`${API_BASE_URL}/didactic/course/${curs.id}/formula`)
+        fetch(`${API_BASE_URL}/didactic/course/${curs.id}/formula`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
     .then(response => {
         if (!response.ok) {
             console.error(`Nicio formulă găsită pentru cursul ${curs.id}`);
@@ -89,7 +105,12 @@ const DetaliiCurs = ({ curs, onBack }) => {
 }, [curs.id]);
 
 const downloadMaterial = (materialId, filename) => {
-    fetch(`${API_BASE_URL}/didactic/course/material/${materialId}/file`)
+    fetch(`${API_BASE_URL}/didactic/course/material/${materialId}/file`,
+        {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
         .then(response => {
             if (!response.ok) {
                 return response.text().then(text => {
