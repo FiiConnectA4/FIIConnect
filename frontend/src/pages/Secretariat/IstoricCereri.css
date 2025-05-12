@@ -1,0 +1,36 @@
+.istoric-cereri-container {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.istoric-cereri-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.istoric-cereri-table th,
+.istoric-cereri-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.istoric-cereri-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+.back-button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.back-button:hover {
+  background-color: #0056b3;
+}

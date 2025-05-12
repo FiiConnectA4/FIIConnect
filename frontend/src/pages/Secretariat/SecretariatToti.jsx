@@ -1,28 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
+import { Link } from "react-router-dom";
 import "./SecretariatToti.css";
-import CerereDecontari from "./CerereDecontari";
-import CerereAdeverinte from "./CerereAdeverinte";
-import CerereBursaSociala from "./CerereBursaSociala";
 
 const SecretariatToti = () => {
-  const [selectedOption, setSelectedOption] = useState(null);
-
-  const handleBackClick = () => {
-    setSelectedOption(null); // Revine la pagina principală
-  };
-
-  if (selectedOption === "decontari") {
-    return <CerereDecontari onBack={handleBackClick} />;
-  }
-
-  if (selectedOption === "adeverinte") {
-    return <CerereAdeverinte onBack={handleBackClick} />;
-  }
-
-  if (selectedOption === "bursa-sociala") {
-    return <CerereBursaSociala onBack={handleBackClick} />;
-  }
-
   return (
     <div className="secretariat-container">
       <div className="secretariat-titlu">
@@ -30,40 +10,27 @@ const SecretariatToti = () => {
         <h2>Alege o opțiune</h2>
       </div>
       <div className="secretariat-buttons">
-        <button
-          className="secretariat-button"
-          onClick={() => setSelectedOption("decontari")}
-        >
-          <span className="icon">🧾</span>
-          Cerere Decontări
-        </button>
-        <button
-          className="secretariat-button"
-          onClick={() => setSelectedOption("adeverinte")}
-        >
+        <Link to="/app/secretariat/cerere-decontare" className="secretariat-button">
+          <span className="icon">🚌</span>
+          Cerere Decontare CTP
+        </Link>
+        <Link to="/app/secretariat/cerere-adeverinte" className="secretariat-button">
           <span className="icon">📝</span>
           Cerere Adeverințe
-        </button>
-        <button
-          className="secretariat-button"
-          onClick={() => setSelectedOption("bursa-sociala")}
-        >
+        </Link>
+        <Link to="/app/secretariat/cerere-bursa-sociala" className="secretariat-button">
           <span className="icon">💰</span>
           Cerere Bursă Socială
-        </button>
-        <button
-          className="secretariat-button"
-          onClick={() => setSelectedOption("vezi-cereri")}
-        >
+        </Link>
+        <Link to="/app/secretariat/cerere-caz-social" className="secretariat-button">
+          <span className="icon">📂</span>
+          Cerere Caz Social
+        </Link>
+        <Link to="/app/secretariat/istoric-cereri" className="secretariat-button">
           <span className="icon">📄</span>
           Istoric Cereri
-        </button>
+        </Link>
       </div>
-      {selectedOption === "vezi-cereri" && (
-        <div className="secretariat-output">
-          <h2>Istoric Cereri</h2>
-        </div>
-      )}
     </div>
   );
 };

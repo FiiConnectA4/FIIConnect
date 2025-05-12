@@ -1,15 +1,14 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; // Importăm useNavigate
-import "./CerereDecontari.css"; // Reutilizăm stilurile din CerereDecontari.css
+import "./CerereDecontari.css"; // Reutilizăm stilurile existente
 
-const CerereBursaSociala = () => {
+const CerereCazSocial = () => {
   const [formData, setFormData] = useState({
     nume: "",
     prenume: "",
-    an: "",
-    specializare: "",
-    facultate: "",
-    dosar: null,
+    numarMatricol: "",
+    justificare: "",
+    documente: null,
   });
 
   const navigate = useNavigate(); // Inițializăm useNavigate
@@ -25,29 +24,28 @@ const CerereBursaSociala = () => {
   const handleFileChange = (event) => {
     setFormData((prevData) => ({
       ...prevData,
-      dosar: event.target.files[0],
+      documente: event.target.files[0],
     }));
   };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    alert("Cererea pentru Bursă Socială a fost trimisă cu succes!");
+    alert("Cererea pentru Caz Social a fost trimisă cu succes!");
     console.log("Datele trimise:", formData);
     // Resetare formular
     setFormData({
       nume: "",
       prenume: "",
-      an: "",
-      specializare: "",
-      facultate: "",
-      dosar: null,
+      numarMatricol: "",
+      justificare: "",
+      documente: null,
     });
     navigate(-1); // Navighează înapoi la pagina anterioară
   };
 
   return (
     <div className="cerere-decontari-container">
-      <h1>Cerere Bursă Socială</h1>
+      <h1>Cerere Caz Social</h1>
       <form className="cerere-decontari-form" onSubmit={handleSubmit}>
         <label>
           Nume:
@@ -83,33 +81,22 @@ const CerereBursaSociala = () => {
           />
         </label>
         <label>
-          An:
-          <input
-            type="number"
-            name="an"
-            value={formData.an}
+          Justificare:
+          <textarea
+            name="justificare"
+            value={formData.justificare}
             onChange={handleInputChange}
-            placeholder="Introdu anul de studiu"
+            placeholder="Introdu justificarea"
+            rows="4"
             required
           />
         </label>
         <label>
-          Facultate:
-          <input
-            type="text"
-            name="facultate"
-            value={formData.facultate}
-            onChange={handleInputChange}
-            placeholder="Introdu facultatea"
-            required
-          />
-        </label>
-        <label>
-          Încarcă dosar cu documentele necesare (.zip):
+          Atașament Documente:
           <input
             type="file"
-            name="dosar"
-            accept=".zip"
+            name="documente"
+            accept=".pdf,.jpg,.jpeg,.png"
             onChange={handleFileChange}
             required
           />
@@ -121,4 +108,4 @@ const CerereBursaSociala = () => {
   );
 };
 
-export default CerereBursaSociala;
+export default CerereCazSocial;

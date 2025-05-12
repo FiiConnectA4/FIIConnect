@@ -6,15 +6,21 @@ import Anunturi from "../pages/Social/Page/Anunturi";
 import Harta from "../pages/Harta";
 import Cursuri from "../pages/Cursuri/Cursuri";
 import Catalog from "../pages/Catalog";
-import OrarToti from "../pages/Orar/OrarToti"; 
+import OrarToti from "../pages/Orar/OrarToti";
 import Secretariat from "../pages/Secretariat/Secretariat";
+import SecretariatToti from "../pages/Secretariat/SecretariatToti";
+import CerereDecontari from "../pages/Secretariat/CerereDecontari"; // ✅ Import corect
+import CerereAdeverinte from "../pages/Secretariat/CerereAdeverinte"; // ✅ Import corect
+import CerereBursaSociala from "../pages/Secretariat/CerereBursaSociala"; // ✅ Import corect
+import CerereCazSocial from "../pages/Secretariat/CerereCazSocial"; // ✅ Import corect
+import IstoricCereri from "../pages/Secretariat/IstoricCereri"; // ✅ Import corect
 import Chat from "../pages/Social/Page/Chat";
 import Contul from "../pages/Contul";
 import Contact from "../pages/Contact";
 import Login from "../pages/Login";
 import DotariSala from "../pages/Orar/DotariSala";
 import OrarSecretariat from "../pages/Orar/OrarSecretariat";
-import PrivateRoute from "../components/PrivateRoute"; // ✅ importăm PrivateRoute
+import PrivateRoute from "../components/PrivateRoute"; // ✅ Importăm PrivateRoute
 
 const AppRoutes = () => {
   return (
@@ -62,6 +68,15 @@ const AppRoutes = () => {
 <Route path="/app/orar-secretariat/discipline" element={<OrarSecretariat />} />
 <Route path="/app/orar-secretariat/discipline/:disciplina" element={<OrarSecretariat />} />
 
+
+        <Route path="secretariat" element={<Secretariat />}>
+          <Route index element={<SecretariatToti />} />
+          <Route path="cerere-decontare" element={<CerereDecontari />} />
+          <Route path="cerere-adeverinte" element={<CerereAdeverinte />} />
+          <Route path="cerere-bursa-sociala" element={<CerereBursaSociala />} />
+          <Route path="cerere-caz-social" element={<CerereCazSocial />} />
+          <Route path="istoric-cereri" element={<IstoricCereri />} /> {/* Adăugat ruta */}
+        </Route>
 
         <Route path="secretariat" element={<Secretariat />} />
         <Route path="chat" element={<Chat />} />
