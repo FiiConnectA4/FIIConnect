@@ -73,12 +73,8 @@ public class FormulaService {
         LOGGER.info("Attaching components for formula ID: " + formula.getId() + ", type: " + formula.getId().getClass().getName());
         List<FormulaComponent> components = componentRepository.findByIdFormula(formula.getId());
         LOGGER.info("Found " + components.size() + " components");
-        //components.forEach(component -> {component.setFormula(null);});
         formula.getComponents().clear();
         formula.getComponents().addAll(components);
-       // components.forEach(component -> component.setFormula(formula));
-
-        //formula.setComponents(components);
 
     }
 }

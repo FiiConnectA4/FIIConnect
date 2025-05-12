@@ -1,5 +1,6 @@
 package com.fiiconnect.api.didactic.services;
 
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.sftp.session.SftpRemoteFileTemplate;
@@ -20,6 +21,7 @@ import java.util.Objects;
 @Service
 public class SftpService {
 
+    @Getter
     private final SftpRemoteFileTemplate sftpRemoteFileTemplate;
     private final MessageChannel outboundChannel;
     @Value("${sftp.inbound.local.dir}")
@@ -30,12 +32,13 @@ public class SftpService {
         this.outboundChannel = outboundChannel;
     }
 
-    public void uploadFile(MultipartFile multipartFile, String remoteTargetDir) throws IOException {
+    public void uploadFile(MultipartFile multipartFile, String remoteTargetDir, String... desiredFileName) throws IOException {
         File file = null;
         try {
             // Convert MultipartFile to File
-            file = convertToFile(multipartFile);
-
+            assert desiredFileName.length <= 1;
+            String desiredName = desiredFileName.length > 0 ? desiredFileName[0] : null;
+            file = convertToFile(multipartFile, desiredName);
             // Send to SFTP via outboundChannel
             outboundChannel.send(MessageBuilder.withPayload(file)
                     .setHeader("remote-target-dir", remoteTargetDir)
@@ -46,13 +49,13 @@ public class SftpService {
             throw new RuntimeException("Unexpected error during SFTP upload", e);
         } finally {
             if (file != null && file.exists()) {
-                file.delete();
+                if (!file.delete())
+                    System.err.println("Failed to delete file: " + file.getAbsolutePath());
             }
         }
     }
 
-    public File downloadFile(String remoteFilePath) throws IOException
-    {
+    public File downloadFile(String remoteFilePath) throws IOException {
         return this.downloadFile(remoteFilePath, new File(remoteFilePath).getName());
     }
 
@@ -60,7 +63,8 @@ public class SftpService {
         File localFile = new File(localDir, localPath);
 
         try {
-            localFile.getParentFile().mkdirs(); //create all directories leading to file if necessary
+            if (!localFile.getParentFile().mkdirs()) //create all directories leading to file if necessary
+                throw new IOException("Failed to create directory: " + localFile.getParentFile().getAbsolutePath());
             sftpRemoteFileTemplate.execute(session -> {
                 try {
                     if (!session.exists(remoteFilePath)) {
@@ -71,7 +75,7 @@ public class SftpService {
                         session.read(remoteFilePath, os);
                     }
 
-                } catch(FileNotFoundException e) {
+                } catch (FileNotFoundException e) {
                     throw e;
                 } catch (IOException e) {
                     throw new IOException("I/O error while reading remote file: " + remoteFilePath, e);
@@ -157,12 +161,13 @@ public class SftpService {
         }
     }
 
-    private File convertToFile(MultipartFile multipartFile) throws IOException {
+    private File convertToFile(MultipartFile multipartFile, String... desiredFileName) throws IOException {
         if (multipartFile.isEmpty()) {
             throw new IOException("Cannot convert empty MultipartFile to file.");
         }
-
-        Path tempPath = Path.of(System.getProperty("java.io.tmpdir"), Objects.requireNonNull(multipartFile.getOriginalFilename()));
+        assert desiredFileName.length <= 1;
+        String desiredName = desiredFileName.length > 0 ? desiredFileName[0] : multipartFile.getOriginalFilename();
+        Path tempPath = Path.of(System.getProperty("java.io.tmpdir"), Objects.requireNonNull(desiredName));
         Files.write(tempPath, multipartFile.getBytes());
         return tempPath.toFile();
     }

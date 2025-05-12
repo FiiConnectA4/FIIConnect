@@ -1,36 +1,35 @@
 package com.fiiconnect.api.didactic.controllers;
 
 import com.fiiconnect.api.didactic.helpers.SQLExceptionMessageParser;
-import com.fiiconnect.api.didactic.models.Enrollment;
-import com.fiiconnect.api.didactic.models.EnrollmentCompositeKey;
-import com.fiiconnect.api.didactic.repositories.EnrollmentRepository;
+import com.fiiconnect.api.didactic.models.Grade;
+import com.fiiconnect.api.didactic.models.GradeCompositeKey;
+import com.fiiconnect.api.didactic.repositories.GradeRepository;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
 
 @RestController
-public class EnrollmentController {
-    private final EnrollmentRepository repository;
+public class GradeController {
+    private final GradeRepository repository;
     private final SQLExceptionMessageParser exceptionHelper;
 
-    public EnrollmentController(EnrollmentRepository repository, SQLExceptionMessageParser exceptionHelper) {
+    public GradeController(GradeRepository repository, SQLExceptionMessageParser exceptionHelper) {
         this.repository = repository;
         this.exceptionHelper = exceptionHelper;
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("/didactic/enroll")
-    public void addEnrollment(@RequestBody Enrollment enrollment) {
-        repository.save(enrollment);
+    @PostMapping("/didactic/grade")
+    public void addGrade(@RequestBody Grade gradeInfo)
+    {
+        repository.save(gradeInfo);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/didactic/enroll")
-    public void deleteEnrollment(@RequestParam Long idStud, @RequestParam Long idCourse) {
-        EnrollmentCompositeKey compKey = new EnrollmentCompositeKey(idStud, idCourse);
+    @DeleteMapping("/didactic/grade")
+    public void deleteTeaching(@RequestParam Long idStud, @RequestParam Long idCourse)
+    {
+        GradeCompositeKey compKey = new GradeCompositeKey(idStud, idCourse);
         repository.deleteById(compKey);
     }
 

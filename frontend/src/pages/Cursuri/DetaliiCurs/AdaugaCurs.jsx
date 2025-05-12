@@ -8,6 +8,7 @@ const AdaugaCurs = ({onBack, onCreated }) => {
     const [semester, setSemester] = useState('');
     const [credits, setCredits] = useState('');
     const [academicYear, setAcademicYear] = useState('');
+    const token = localStorage.getItem('token');
 
     const handleCreate = () => {
         const newCourse = {
@@ -24,7 +25,8 @@ const AdaugaCurs = ({onBack, onCreated }) => {
 
         fetch('/didactic/course', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 'Content-Type': 'application/json' ,
+            Authorization: `Bearer ${token}`},
             body: JSON.stringify(newCourse)
         })
             .then(res => {

@@ -6,11 +6,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.dsl.IntegrationFlow;
-import org.springframework.integration.file.FileNameGenerator;
 import org.springframework.integration.file.remote.session.SessionFactory;
 import org.springframework.integration.file.support.FileExistsMode;
 import org.springframework.integration.sftp.dsl.Sftp;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 
 import java.io.File;
@@ -33,15 +31,12 @@ public class SftpOutboundConfig {
                         .remoteDirectoryExpression("headers['remote-target-dir']")
                         .remoteFileSeparator("/")        // normal separator
                         .autoCreateDirectory(true)
-                        .fileNameGenerator(new FileNameGenerator() {
-                            @Override
-                            public String generateFileName(Message<?> message) {
-                                Object payload = message.getPayload();
-                                if (payload instanceof File) {
-                                    return ((File) payload).getName();
-                                }
-                                throw new IllegalArgumentException("Payload is not a file.");
+                        .fileNameGenerator(message -> {
+                            Object payload = message.getPayload();
+                            if (payload instanceof File) {
+                                return ((File) payload).getName();
                             }
+                            throw new IllegalArgumentException("Payload is not a file.");
                         })
                 )
                 .get();

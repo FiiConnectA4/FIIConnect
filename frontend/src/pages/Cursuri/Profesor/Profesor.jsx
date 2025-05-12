@@ -16,10 +16,16 @@ const Profesor = () => {
     const [selectedCourseId, setSelectedCourseId] = useState(null);
     const [loading, setLoading] = useState(true);
     const [adaugaCurs, setAdaugaCurs] = useState(false);
+    const token = localStorage.getItem('token');
 
     const fetchCourses = () => {
         setLoading(true);
-        fetch(`/didactic/professor/${professorId}`)
+        fetch(`/didactic/professor/${professorId}`,
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
             .then((res) => {
                 if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
                 return res.json();
@@ -45,7 +51,12 @@ const Profesor = () => {
 
         fetch(`/didactic/course/${id}`, {
             method: 'DELETE'
-        })
+        },
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
             .then((res) => {
                 if (!res.ok) throw new Error('Eroare la ștergere');
                 setCourses(prev => prev.filter(c => c.course.id !== id));
@@ -66,8 +77,11 @@ const Profesor = () => {
 
         if (isArchiving) {
             fetch(`/didactic/course/${id}/archive`, {
-                method: 'PUT'
-            })
+                method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
                 .then((res) => {
                     if (!res.ok) throw new Error("Eroare la arhivare");
                     setCourses(prev =>
@@ -95,7 +109,8 @@ const Profesor = () => {
             fetch(`/didactic/course/${id}`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
                 body: JSON.stringify(updatedCurs)
             })
