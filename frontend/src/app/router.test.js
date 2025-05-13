@@ -20,7 +20,7 @@ jest.mock('../pages/Cursuri/Cursuri', () => () => <div>Cursuri Page</div>);
 jest.mock('../pages/Catalog', () => () => <div>Catalog Page</div>);
 jest.mock('../pages/Orar', () => () => <div>Orar Page</div>);
 jest.mock('../pages/Chat', () => () => <div>Chat Page</div>);
-jest.mock('../pages/Contul', () => () => <div>Contul Page</div>);
+jest.mock('../pages/Profil', () => () => <div>Contul Page</div>);
 jest.mock('../pages/Contact', () => () => <div>Contact Page</div>);
 
 describe('AppRoutes Component', () => {

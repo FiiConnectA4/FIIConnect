@@ -14,9 +14,9 @@ const Sidebar = () => {
   ];
 
   const managementLinks = [
-    { name: "Contul", icon: "👤" },
+    { name: "Profile", icon: "👤", to: "profile" },
     { name: "Contact", icon: "📧" },
-    { name: "Secretariat", icon: "🏛️"},
+    { name: "Secretariat", icon: "🏛️" },
   ];
 
   return (
@@ -41,12 +41,13 @@ const Sidebar = () => {
         <div className="section">MANAGEMENT</div>
         <ul className="nav-list">
           {managementLinks.map((link, index) => (
-            <SidebarButton
-              key={index}
-              icon={link.icon}
-              label={link.name}
-              to={`/app/${link.name.toLowerCase()}`}
-            />
+              <SidebarButton
+                  key={index}
+                  icon={link.icon}
+                  label={link.name}
+                  to={`/app/${link.to || link.name.toLowerCase()}`}
+              />
+
           ))}
         </ul>
       </div>
