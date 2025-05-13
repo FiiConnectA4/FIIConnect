@@ -25,9 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -59,6 +57,53 @@ public class AuthController {
     @PostConstruct
     public void testTokenRepo() {
         tokenRepository.count();
+    }
+
+    @PostMapping("/setup-2fa")
+    public ResponseEntity<?> setupTwoFactor(@RequestHeader("Authorization") String authHeader) {
+
+        // 1.  Verifică și extrage token-ul JWT
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse("Token invalid sau lipsă.", false));
+        }
+        String token = authHeader.substring(7);
+
+        String username;
+        try {
+            username = jwtService.extractUsername(token);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse("Token invalid.", false));
+        }
+
+        // 2.  Găsește utilizatorul
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            return ResponseEntity.status(404)
+                    .body(new ApiResponse("Utilizator inexistent.", false));
+        }
+
+        // 3.  Nu permite reactualizarea 2FA dacă e deja activat
+        if (user.getTwoFactorSecret() != null) {
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse("2FA este deja activat.", false));
+        }
+
+        // 4.  Generează secretul + URL-ul cu QR
+        String secret = twoFactorAuthenticationService.generateSecretKey();
+        String qrUrl = twoFactorAuthenticationService.getQRCodeUrl(user.getEmail(), secret);
+
+        // 5.  Salvează secretul în baza de date
+        user.setTwoFactorSecret(secret);
+        userRepository.save(user);
+
+        // 6.  Trimite datele către frontend
+        Map<String, String> body = new HashMap<>();
+        body.put("qrUrl", qrUrl);   // imaginea QR (otpauth://…)
+        body.put("secret", secret); // pentru backup manual în app
+
+        return ResponseEntity.ok(body);
     }
 
     @PostMapping("/forgot-password")

@@ -9,8 +9,10 @@ import Catalog from "../pages/Catalog";
 import OrarToti from "../pages/Orar/OrarToti"; 
 import Secretariat from "../pages/Secretariat/Secretariat";
 import Chat from "../pages/Social/Page/Chat";
-import Contul from "../pages/Contul";
+import SetupProfile from "../pages/SetupProfile";
+import Profil from "../pages/Profil";
 import Contact from "../pages/Contact";
+import Setup2FA from "../pages/Setup2FA";
 import Login from "../pages/Login";
 import DotariSala from "../pages/Orar/DotariSala";
 import OrarSecretariat from "../pages/Orar/OrarSecretariat";
@@ -61,12 +63,12 @@ const AppRoutes = () => {
 <Route path="/app/orar-secretariat/sali/:sala" element={<OrarSecretariat />} />
 <Route path="/app/orar-secretariat/discipline" element={<OrarSecretariat />} />
 <Route path="/app/orar-secretariat/discipline/:disciplina" element={<OrarSecretariat />} />
-
-
-        <Route path="secretariat" element={<Secretariat />} />
+          <Route path="secretariat" element={<Secretariat />} />
         <Route path="chat" element={<Chat />} />
-        <Route path="contul" element={<Contul />} />
-        <Route path="contact" element={<Contact />} />
+          <Route path="profile" element={<Profil />} />
+          <Route path="setup-2fa" element={<Setup2FA />} />
+          <Route path="setup-profile" element={<SetupProfile />} />
+          <Route path="contact" element={<Contact />} />
         <Route index element={<Navigate to="/app/dashboard" replace />} />
       </Route>
 
