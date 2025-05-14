@@ -16,6 +16,7 @@ import Setup2FA from "../pages/Setup2FA";
 import Login from "../pages/Login";
 import DotariSala from "../pages/Orar/DotariSala";
 import OrarSecretariat from "../pages/Orar/OrarSecretariat";
+import TwoFAVerify from "../pages/TwoFAVerify";
 import PrivateRoute from "../components/PrivateRoute"; // ✅ importăm PrivateRoute
 
 const AppRoutes = () => {
@@ -23,6 +24,7 @@ const AppRoutes = () => {
     <Routes>
       {/* Public route (login page) */}
       <Route path="/" element={<Login />} />
+      <Route path="/app/2fa"     element={<TwoFAVerify />} />
 
       {/* Protected routes inside layout */}
 

@@ -23,7 +23,6 @@ public class UserProfileController {
     @Autowired
     private UserProfileService profileService;
 
-    // ✅ 1. Obține profilul logatului
     @GetMapping
     public ResponseEntity<?> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
         User user = userRepository.findByUsername(userDetails.getUsername());
@@ -37,14 +36,12 @@ public class UserProfileController {
     }
 
 
-    // ✅ 2. Actualizează profilul
     @PutMapping
     public ResponseEntity<?> updateProfile(@AuthenticationPrincipal UserDetails userDetails,
                                            @RequestBody UpdateUserProfileRequest dto) {
         User user = userRepository.findByUsername(userDetails.getUsername());
         UserProfile profile = profileService.getByUser(user);
 
-        // doar câmpurile editabile
         profile.setPhone(dto.getPhone());
         profile.setAbout(dto.getAbout());
         profile.setFirstName(dto.getFirstName());

@@ -1,0 +1,58 @@
+/* Login.css */
+.login-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 30% 30%, #2563eb 0%, #1e40af 40%, #0f172a 100%);
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 420px;
+    padding: 3rem 2.5rem;
+    border-radius: 1rem;
+    background: #ffffff;
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+}
+
+.login-card h1 {
+    margin-bottom: 2rem;
+    font-size: 1.9rem;
+    text-align: center;
+    color: #1e293b;
+}
+
+.login-card input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.25rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+}
+
+.login-card input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+}
+
+.login-card button {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1.05rem;
+    font-weight: 600;
+    background-color: #2563eb;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.login-card button:hover {
+    background-color: #1e40af;
+}
