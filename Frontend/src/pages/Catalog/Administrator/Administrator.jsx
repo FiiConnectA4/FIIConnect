@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import './Administrator.css';
 
 const Administrator = () => {
-    const [grupe] = useState(['1A1', '1A2', '1A3', '1A4', '1A5']);
-    const [selectedGrupa, setSelectedGrupa] = useState('1A1');
+    const [grupe, setGrupe] = useState([]);
+    const [selectedGrupa, setSelectedGrupa] = useState('');
 
     const [cursuri] = useState(['Introducere Programare', 'Programare Avansata']);
     const [selectedCurs, setSelectedCurs] = useState('Introducere Programare');
@@ -27,8 +27,17 @@ const Administrator = () => {
         '1A4': [],
         '1A5': [],
     };
-    
+
+    // Setează grupele automat din cheile mockCatalog
     useEffect(() => {
+        const mockGrupe = Object.keys(mockCatalog);
+        setGrupe(mockGrupe);
+        setSelectedGrupa(mockGrupe[0]); // selectează prima grupă
+    }, []);
+
+    // Când se schimbă grupa sau cursul, încarcă catalogul
+    useEffect(() => {
+        if (!selectedGrupa) return; // evită erori dacă încă nu e setată grupa
         setLoading(true);
         setTimeout(() => {
             const grupaData = mockCatalog[selectedGrupa] || [];
