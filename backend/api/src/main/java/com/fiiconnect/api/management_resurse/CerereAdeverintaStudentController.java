@@ -3,7 +3,6 @@ package com.fiiconnect.api.management_resurse;
 import com.fiiconnect.api.didactic.repositories.StudentRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -22,14 +21,12 @@ public class CerereAdeverintaStudentController {
     public ResponseEntity<?> create(@RequestBody CerereAdeverintaStudentDTO dto) {
         var studentOpt = studentRepository.findById(dto.getStudentId());
         if (studentOpt.isEmpty()) return ResponseEntity.badRequest().body("Student inexistent");
-
         CerereAdeverintaStudent cerere = new CerereAdeverintaStudent();
         cerere.setStudent(studentOpt.get());
         cerere.setStatus(dto.getStatus());
         cerere.setDataTrimitere(dto.getDataTrimitere());
         cerere.setComentariu(dto.getComentariu());
         cerere.setAdresa(dto.getAdresa());
-
         return ResponseEntity.ok(repository.save(cerere));
     }
 
