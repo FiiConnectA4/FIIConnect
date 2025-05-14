@@ -5,7 +5,7 @@ import Dashboard from "../pages/Dashboard";
 import Anunturi from "../pages/Social/Page/Anunturi";
 import Harta from "../pages/Harta";
 import Cursuri from "../pages/Cursuri/Cursuri";
-import Catalog from "../pages/Catalog";
+import Catalog from "../pages/Catalog/Catalog";
 import OrarToti from "../pages/Orar/OrarToti"; 
 import Secretariat from "../pages/Secretariat/Secretariat";
 import Chat from "../pages/Social/Page/Chat";
