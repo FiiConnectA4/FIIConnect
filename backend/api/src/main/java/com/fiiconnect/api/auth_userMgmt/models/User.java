@@ -33,7 +33,9 @@ public class User {
     @Column(name = "iban")
     private String iban;
 
-    private boolean isActive = true;
+    private boolean isActive = false;
+    private String pendingTwoFactorSecret;
+    private boolean twoFactorEnabled = false;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

@@ -59,52 +59,56 @@ public class AuthController {
         tokenRepository.count();
     }
 
-    @PostMapping("/setup-2fa")
-    public ResponseEntity<?> setupTwoFactor(@RequestHeader("Authorization") String authHeader) {
+    @PostMapping("/2fa/start")
+    public ResponseEntity<?> start2FA(@RequestHeader("Authorization") String authHeader) {
+        User user = validateAndGetUser(authHeader);
+        if (user.isTwoFactorEnabled())
+            return ResponseEntity.badRequest().body(new ApiResponse("2FA este deja activ.", false));
 
-        // 1.  Verifică și extrage token-ul JWT
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.badRequest()
-                    .body(new ApiResponse("Token invalid sau lipsă.", false));
-        }
-        String token = authHeader.substring(7);
-
-        String username;
-        try {
-            username = jwtService.extractUsername(token);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest()
-                    .body(new ApiResponse("Token invalid.", false));
-        }
-
-        // 2.  Găsește utilizatorul
-        User user = userRepository.findByUsername(username);
-        if (user == null) {
-            return ResponseEntity.status(404)
-                    .body(new ApiResponse("Utilizator inexistent.", false));
-        }
-
-        // 3.  Nu permite reactualizarea 2FA dacă e deja activat
-        if (user.getTwoFactorSecret() != null) {
-            return ResponseEntity.badRequest()
-                    .body(new ApiResponse("2FA este deja activat.", false));
-        }
-
-        // 4.  Generează secretul + URL-ul cu QR
         String secret = twoFactorAuthenticationService.generateSecretKey();
-        String qrUrl = twoFactorAuthenticationService.getQRCodeUrl(user.getEmail(), secret);
-
-        // 5.  Salvează secretul în baza de date
-        user.setTwoFactorSecret(secret);
+        user.setPendingTwoFactorSecret(secret);
         userRepository.save(user);
 
-        // 6.  Trimite datele către frontend
-        Map<String, String> body = new HashMap<>();
-        body.put("qrUrl", qrUrl);   // imaginea QR (otpauth://…)
-        body.put("secret", secret); // pentru backup manual în app
-
-        return ResponseEntity.ok(body);
+        String qrUrl = twoFactorAuthenticationService.getQRCodeUrl(user.getEmail(), secret);
+        return ResponseEntity.ok(Map.of("qrUrl", qrUrl, "secret", secret));
     }
+
+    @PostMapping("/2fa/confirm")
+    public ResponseEntity<?> confirm2FA(@RequestHeader("Authorization") String authHeader,
+                                        @RequestBody Map<String,String> body) {
+        User user = validateAndGetUser(authHeader);
+        String code = body.get("code");
+
+        String pending = user.getPendingTwoFactorSecret();
+        if (pending == null)
+            return ResponseEntity.badRequest().body(new ApiResponse("Nu ai început configurarea 2FA.", false));
+
+        if (!twoFactorAuthenticationService.verifyCode(pending, code))
+            return ResponseEntity.status(401).body(new ApiResponse("Cod 2FA invalid.", false));
+
+        user.setTwoFactorSecret(pending);          // devine secret “oficial”
+        user.setPendingTwoFactorSecret(null);
+        user.setTwoFactorEnabled(true);
+        userRepository.save(user);
+        return ResponseEntity.ok(new ApiResponse("2FA activat!", true));
+    }
+
+    @PostMapping("/2fa/cancel")
+    public ResponseEntity<?> cancel2FA(@RequestHeader("Authorization") String authHeader) {
+        User user = validateAndGetUser(authHeader);
+        user.setPendingTwoFactorSecret(null);
+        userRepository.save(user);
+        return ResponseEntity.ok(new ApiResponse("Setup 2FA anulat.", true));
+    }
+
+    private User validateAndGetUser(String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer "))
+            throw new RuntimeException("Token lipsă");
+        String username = jwtService.extractUsername(authHeader.substring(7));
+        return Optional.ofNullable(userRepository.findByUsername(username))
+                .orElseThrow(() -> new RuntimeException("User inexistent"));
+    }
+
 
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestParam String email) {
@@ -198,7 +202,6 @@ public class AuthController {
                 }
             }
 
-            // Creăm user-ul
             User user = new User();
             user.setUsername(registerRequest.getUsername());
             user.setEmail(registerRequest.getEmail());
@@ -207,17 +210,9 @@ public class AuthController {
             user.setIban(registerRequest.getIban());
             user.setActive(true);
 
-
-            //Two Factor Authentication - currently off
-            //String secret = twoFactorAuthenticationService.generateSecretKey();
-            //user.setTwoFactorSecret(secret);
-
             user.setTwoFactorSecret(null);
             userRepository.save(user);
 
-            //String qrUrl = twoFactorAuthenticationService.getQRCodeUrl(user.getEmail(), secret);
-
-            //return ResponseEntity.ok(new ApiResponse("Utilizator înregistrat cu succes. Scanează acest QR în Google Authenticator: " + qrUrl, true));
             return ResponseEntity.ok(new ApiResponse("Register successful. Username: " + registerRequest.getUsername() + ", Password: " + registerRequest.getPassword(), true));
         } catch (Exception e) {
             e.printStackTrace();
@@ -240,22 +235,18 @@ public class AuthController {
                     new ApiResponse("Parolă greșită.", false));
         }
 
-        if (user.getTwoFactorSecret() != null) {
+        if (user.isTwoFactorEnabled()) {
             return ResponseEntity.ok(new ApiResponse("2FA_REQUIRED", true));
         }
 
+        user.setActive(true);
+        userRepository.save(user);
 
-        user.setActive(true); // activează user-ul
-        userRepository.save(user); // salvează modificarea
-
-        // Extrage rolurile utilizatorului
         List<GrantedAuthority> authorities = user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.getRoleName()))
                 .collect(Collectors.toList());
 
-        // Generăm token-ul cu rolurile
         String jwtToken = jwtService.generateToken(user.getUsername(), authorities);
-
 
         return ResponseEntity.ok(new AuthResponse(jwtToken));
     }
@@ -264,35 +255,32 @@ public class AuthController {
     public ResponseEntity<?> verifyTwoFactor(@RequestBody LoginRequest loginRequest) {
         User user = userRepository.findByUsername(loginRequest.getUsername());
 
-        if (user == null || user.getTwoFactorSecret() == null) {
-            return ResponseEntity.status(401).body(
-                    new ApiResponse("Autentificare invalidă.", false));
+        if (user == null || !user.isTwoFactorEnabled() || user.getTwoFactorSecret() == null) {
+            return ResponseEntity.status(401)
+                    .body(new ApiResponse("2FA nu e activat.", false));
         }
 
-        boolean is2FACodeValid = twoFactorAuthenticationService.verifyCode(
+        boolean ok = twoFactorAuthenticationService.verifyCode(
                 user.getTwoFactorSecret(),
                 loginRequest.getTwoFactorCode()
         );
 
-        if (!is2FACodeValid) {
-            return ResponseEntity.status(401).body(
-                    new ApiResponse("Cod 2FA invalid.", false));
+        if (!ok) {
+            return ResponseEntity.status(401)
+                    .body(new ApiResponse("Cod 2FA invalid.", false));
         }
 
+        user.setActive(true);
+        userRepository.save(user);
 
-        user.setActive(true); // activează user-ul
-        userRepository.save(user); // salvează modificarea
-
-        // Extrage rolurile utilizatorului
         List<GrantedAuthority> authorities = user.getRoles().stream()
                 .map(role -> new SimpleGrantedAuthority(role.getRoleName()))
                 .collect(Collectors.toList());
 
-        // Generăm token-ul cu rolurile
         String jwtToken = jwtService.generateToken(user.getUsername(), authorities);
-
         return ResponseEntity.ok(new AuthResponse(jwtToken));
     }
+
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader) {

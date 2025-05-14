@@ -1,0 +1,81 @@
+/* Setup2FA.css */
+.setup2fa-wrapper {
+    min-height: calc(100vh - 4rem);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f8fafc;        /* very light gray-blue */
+    padding: 1rem;
+}
+
+.setup2fa-card {
+    width: 100%;
+    max-width: 420px;
+    background: #ffffff;
+    border-radius: 1.25rem;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    padding: 2.5rem 2rem;
+}
+
+.setup2fa-card h1 {
+    font-size: 1.6rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: #1e293b;
+}
+
+.qr-box {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.secret-box {
+    background: #f1f5f9;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    text-align: center;
+    word-break: break-all;
+    margin-bottom: 1.5rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: #4338ca;
+}
+
+.setup2fa-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.75rem;
+    font-size: 1.25rem;
+    text-align: center;
+    letter-spacing: 0.2em;
+    margin-bottom: 1.25rem;
+}
+
+.main-btn,
+.secondary-btn {
+    width: 100%;
+    padding: 0.9rem;
+    border: none;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, background-color 0.2s ease;
+}
+
+.main-btn {
+    background: #4338ca;
+    color: #ffffff;
+    margin-bottom: 0.75rem;
+}
+
+.main-btn:hover { background: #3730a3; transform: translateY(-2px); }
+
+.secondary-btn {
+    background: #ffffff;
+    color: #0f172a;
+    border: 1px solid #e2e8f0;
+}
+
+.secondary-btn:hover { background: #f8fafc; transform: translateY(-2px); }

@@ -48,8 +48,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    /** DaoAuthenticationProvider → folosit de AuthenticationManager
-     *  (chiar dacă intri doar cu JWT, e bine pt. /login) */
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -91,29 +89,19 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
-
-                /* ————————————————— AUTH RULES ————————————————— */
                 .authorizeHttpRequests(auth -> auth
                         // public WebSocket handshake (token e în query param)
                         .requestMatchers("/ws/**").permitAll()
-
-                        // auth endpoints
-                        .requestMatchers(HttpMethod.POST, "/users/login", "/users/forgot-password", "/users/reset-password")
+                        .requestMatchers(HttpMethod.POST, "/users/login", "/users/login/verify", "/users/forgot-password", "/users/reset-password")
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, "/users/register", "/users/role")
                         .hasRole("ADMIN")
 
                         .anyRequest().authenticated()
                 )
-
-                /* ————————————————— FILTERS ————————————————— */
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-
-                /* ————————————————— LOGOUT ————————————————— */
                 .logout(logout -> logout.logoutUrl("/users/logout").permitAll());
 
-        /*  Atașăm provider-ul explicit;
-            nu e obligatoriu, dar evită ambiguități când ai mai mulți */
         http.authenticationProvider(authenticationProvider());
 
         return http.build();
