@@ -7,8 +7,6 @@ function Anunturi() {
   const [userLoading, setUserLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [editingAnnouncement, setEditingAnnouncement] = useState(null);
   const [newAnnouncement, setNewAnnouncement] = useState({
     title: "",
     message: "",
@@ -22,24 +20,16 @@ function Anunturi() {
   const [fullUser, setFullUser] = useState(null);
   const [userTags, setUserTags] = useState([]);
 
-  // Helper function to normalize user type
-  const normalizeUserType = (type) => {
-    if (!type) return null;
-    return type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
-  };
-
   const fetchUserData = async () => {
     try {
       setUserLoading(true);
       const token = localStorage.getItem('token');
-      
       // Fetch current user
       const authResponse = await fetch("http://localhost:34101/auth/current-user", {
         headers: {
-          'Authorization': `Bearer ${token}`
+            'Authorization': `Bearer ${token}`
         }
-      });
-      
+    });
       if (!authResponse.ok) throw new Error("Failed to fetch current user");
       const authUser = await authResponse.json();
       setCurrentUser(authUser);
@@ -47,10 +37,7 @@ function Anunturi() {
       // Fetch user details 
       const userResponse = await fetch(`http://localhost:34101/users/${authUser.id}`);
       if (!userResponse.ok) throw new Error("Failed to fetch user details");
-      let userDetails = await userResponse.json();
-      
-      // Normalize user type
-      userDetails.type = normalizeUserType(userDetails.type);
+      const userDetails = await userResponse.json();
       setFullUser(userDetails);
 
       // Fetch user tags from join table
@@ -90,20 +77,6 @@ function Anunturi() {
       if (!response.ok) throw new Error("Failed to fetch announcements");
       let announcementsData = await response.json();
 
-      announcementsData = announcementsData.map(announcement => ({
-  ...announcement,
-  // Păstrează atât autorul original cât și profesorul
-  author: { 
-    id: announcement.author_id || announcement.author?.id,
-    name: announcement.author?.name,
-    type: announcement.author?.type 
-  },
-  professor: announcement.author ? {
-    ...announcement.author,
-    type: normalizeUserType(announcement.author.type)
-  } : null
-}));
-
       // Sort by date (newest first)
       announcementsData = announcementsData.sort((a, b) => {
         return new Date(b.publishedDate) - new Date(a.publishedDate);
@@ -133,11 +106,6 @@ function Anunturi() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewAnnouncement(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleEditInputChange = (e) => {
-    const { name, value } = e.target;
-    setEditingAnnouncement(prev => ({ ...prev, [name]: value }));
   };
 
   const handleTagInputChange = (e) => {
@@ -191,61 +159,8 @@ function Anunturi() {
     setCurrentTag({ name: "", type: "GENERAL" });
   };
 
-  const addEditTag = () => {
-    setError(null);
-
-    const tagName = currentTag.name.trim();
-    const tagType = currentTag.type;
-
-    if (!tagName) {
-      setError("Te rugăm să introduci un nume pentru etichetă");
-      return;
-    }
-
-    if (userTags.length === 0) {
-      setError("Nu ai nicio etichetă atribuită. Contactează administratorul.");
-      return;
-    }
-
-    // Check for duplicates (case insensitive)
-    const isDuplicate = editingAnnouncement.tags.some(
-      tag => tag.name.toLowerCase() === tagName.toLowerCase() && tag.type === tagType
-    );
-
-    if (isDuplicate) {
-      setError(`Eticheta "${tagName}" (${tagType}) a fost deja adăugată`);
-      return;
-    }
-
-    // Verify user has this tag
-    const userHasTag = userTags.some(
-      tag => tag.name.toLowerCase() === tagName.toLowerCase() && tag.type === tagType
-    );
-
-    if (!userHasTag) {
-      setError(`Nu ai permisiunea să folosești eticheta "${tagName}" (${tagType})`);
-      return;
-    }
-
-    // Add the tag
-    setEditingAnnouncement(prev => ({
-      ...prev,
-      tags: [...prev.tags, { name: tagName, type: tagType }]
-    }));
-
-    // Reset input
-    setCurrentTag({ name: "", type: "GENERAL" });
-  };
-
   const removeTag = (index) => {
     setNewAnnouncement(prev => ({
-      ...prev,
-      tags: prev.tags.filter((_, i) => i !== index)
-    }));
-  };
-
-  const removeEditTag = (index) => {
-    setEditingAnnouncement(prev => ({
       ...prev,
       tags: prev.tags.filter((_, i) => i !== index)
     }));
@@ -284,7 +199,6 @@ function Anunturi() {
         publishedDate: new Date().toISOString()
       };
 
-      
       const response = await fetch("http://localhost:34101/announcement/prof-secretar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -302,89 +216,6 @@ function Anunturi() {
     } catch (err) {
       setError(err.message);
     }
-  };
-
-  const handleEditSubmit = async (e) => {
-    e.preventDefault();
-    setError(null);
-    
-    try {
-      if (userLoading) {
-        throw new Error("Datele utilizatorului se încarcă. Te rugăm să aștepți...");
-      }
-
-      if (!fullUser) {
-        throw new Error("Informațiile utilizatorului nu sunt disponibile.");
-      }
-
-      if (!editingAnnouncement.title.trim()) {
-        throw new Error("Te rugăm să introduci un titlu");
-      }
-
-      if (!editingAnnouncement.message.trim()) {
-        throw new Error("Te rugăm să introduci un mesaj");
-      }
-
-      const payload = {
-        title: editingAnnouncement.title.trim(),
-        message: editingAnnouncement.message.trim(),
-        professor: {
-          id: fullUser.id,
-          name: fullUser.name,
-          type: fullUser.type
-        },
-        tags: editingAnnouncement.tags,
-        publishedDate: editingAnnouncement.publishedDate
-      };
-
-      const response = await fetch(`http://localhost:34101/announcement/prof-secretar/${editingAnnouncement.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Eroare la actualizarea anunțului");
-      }
-      
-      setShowEditModal(false);
-      setEditingAnnouncement(null);
-      await fetchAnnouncements(fullUser);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  const handleDelete = async (announcementId) => {
-    try {
-      if (!window.confirm("Sigur dorești să ștergi acest anunț?")) {
-        return;
-      }
-
-      const response = await fetch(`http://localhost:34101/announcement/prof-secretar/${announcementId}`, {
-        method: "DELETE"
-      });
-
-      if (!response.ok) {
-        throw new Error("Eroare la ștergerea anunțului");
-      }
-
-      await fetchAnnouncements(fullUser);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
-
-  const handleEdit = (announcement) => {
-    setEditingAnnouncement({
-      id: announcement.id,
-      title: announcement.title,
-      message: announcement.message,
-      tags: announcement.tags || [],
-      publishedDate: announcement.publishedDate
-    });
-    setShowEditModal(true);
   };
 
   const filterAnnouncements = (allAnnouncements, tags) => {
@@ -409,21 +240,20 @@ function Anunturi() {
   const announcementsToDisplay = fullUser.type === "Student"
     ? filterAnnouncements(announcements, userTags)
     : announcements;
-    
 
   return (
     <div className="announcements-container">
       <div className="announcements-header">
         <h1>Anunțuri</h1>
-       {(normalizeUserType(fullUser.type) === "Profesor" || normalizeUserType(fullUser.type) === "Secretar") && (
-        <button 
-          className="add-button"
-          onClick={() => setShowModal(true)}
-          disabled={userLoading}
-        >
-          +
-        </button>
-      )}
+        {(fullUser.type === "Profesor" || fullUser.type === "Secretar") && (
+          <button 
+            className="add-button"
+            onClick={() => setShowModal(true)}
+            disabled={userLoading}
+          >
+            +
+          </button>
+        )}
       </div>
 
       {showModal && (
@@ -526,156 +356,35 @@ function Anunturi() {
         </div>
       )}
 
-      {showEditModal && editingAnnouncement && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h2>Editează Anunț</h2>
-            {error && <div className="error-message">{error}</div>}
-            <form onSubmit={handleEditSubmit}>
-              <div className="form-group">
-                <label>Titlu:</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={editingAnnouncement.title}
-                  onChange={handleEditInputChange}
-                  required  
-                />
-              </div>
-              <div className="form-group">
-                <label>Mesaj:</label>
-                <textarea
-                  name="message"
-                  value={editingAnnouncement.message}
-                  onChange={handleEditInputChange}
-                  required
-                />
-              </div>
-              
-              <div className="form-group">
-                <label>Etichete:</label>
-                <div className="tag-input-container">
-                  <input
-                    type="text"
-                    name="name"
-                    placeholder="Nume etichetă"
-                    value={currentTag.name}
-                    onChange={handleTagInputChange}
-                    disabled={userLoading || userTags.length === 0}
-                  />
-                  <select
-                    name="type"
-                    value={currentTag.type}
-                    onChange={handleTagInputChange}
-                    disabled={userLoading || userTags.length === 0}
-                  >
-                    <option value="GENERAL">GENERAL</option>
-                    <option value="MATERIE">MATERIE</option>
-                    <option value="AN">AN</option>
-                    <option value="SEMINAR">SEMINAR</option>
-                    <option value="GRUPA">GRUPA</option>
-                  </select>
-                  <button 
-                    type="button" 
-                    onClick={addEditTag}
-                    className="add-tag-button"
-                    disabled={userLoading || userTags.length === 0}
-                  >
-                    Adaugă
-                  </button>
-                </div>
-                
-                {userTags.length === 0 && (
-                  <div className="no-tags-warning">
-                    Nu ai nicio etichetă atribuită. Contactează administratorul.
-                  </div>
-                )}
-                
-                <div className="tags-list">
-                  {editingAnnouncement.tags.map((tag, index) => (
-                    <div key={index} className="tag-item">
-                      <span>{tag.name} ({tag.type})</span>
-                      <button 
-                        type="button" 
-                        onClick={() => removeEditTag(index)}
-                        className="remove-tag-button"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="modal-actions">
-                <button type="submit" disabled={userLoading}>
-                  Salvează
-                </button>
-                <button 
-                  type="button" 
-                  onClick={() => {
-                    setShowEditModal(false);
-                    setError(null);
-                  }}
-                >
-                  Anulează
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
       <div className="announcements-list">
         {announcementsToDisplay.length === 0 ? (
           <p>Nu există anunțuri disponibile.</p>
         ) : (
           announcementsToDisplay.map((announcement) => (
             <div key={announcement.id} className="announcement-card">
-  <div className="announcement-header">
-    <div className="announcement-title-container">
-      <h2>{announcement.title}</h2>
-      <div className="announcement-meta">
-        <span className="announcement-author-date">
-          {announcement.professor && (
-            <span className="announcement-author">
-              Postat de: {announcement.professor.name}
-              <span className="separator"> • </span>
-            </span>
-          )}
-          {announcement.publishedDate && (
-            <span className="announcement-date">
-              {new Date(announcement.publishedDate).toLocaleDateString('ro-RO', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
-            </span>
-          )}
-        </span>
-        {(normalizeUserType(fullUser.type) === "Profesor" || normalizeUserType(fullUser.type) === "Secretar") && 
-       fullUser.id === announcement.author_id && (
-        <div className="announcement-actions">
-          <button 
-            className="edit-button"
-            onClick={() => handleEdit(announcement)}
-            title="Editează"
-          >
-            ✏️
-          </button>
-          <button 
-            className="delete-button"
-            onClick={() => handleDelete(announcement.id)}
-            title="Șterge"
-          >
-            🗑️
-          </button>
-        </div>
-      )}
-      </div>
-    </div>
-  </div>
-  <p className="announcement-message">{announcement.message}</p>
+              <div className="announcement-header">
+                <h2>{announcement.title}</h2>
+                <div className="announcement-meta">
+                  <span className="announcement-author-date">
+                    {announcement.professor && (
+                      <span className="announcement-author">
+                        Postat de: {announcement.professor.name}
+                        <span className="separator"> • </span>
+                      </span>
+                    )}
+                    {announcement.publishedDate && (
+                      <span className="announcement-date">
+                        {new Date(announcement.publishedDate).toLocaleDateString('ro-RO', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </span>
+                    )}
+                  </span>
+                </div>
+              </div>
+              <p className="announcement-message">{announcement.message}</p>
               {announcement.tags && announcement.tags.length > 0 && (
                 <div className="announcement-tags-container">
                   <div className="announcement-tags-header">Destinatar:</div>
