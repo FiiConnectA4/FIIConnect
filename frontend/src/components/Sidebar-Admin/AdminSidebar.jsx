@@ -13,12 +13,6 @@ const AdminSidebar = () => {
     { name: "Chat", icon: "💬" },
   ];
 
-  const managementLinks = [
-    { name: "Profile", icon: "👤", to: "profile" },
-    { name: "Contact", icon: "📧" },
-    { name: "Secretariat", icon: "🏛️" },
-  ];
-
   const adminLinks = [
     { name: "Admin Dashboard", icon: "🔧" },
     { name: "Management Utilizatori", icon: "🔧" },
@@ -41,19 +35,6 @@ const AdminSidebar = () => {
               label={link.name}
               to={`/app/${link.name.toLowerCase()}`}
             />
-          ))}
-        </ul>
-
-        <div className="section">MANAGEMENT</div>
-        <ul className="nav-list">
-          {managementLinks.map((link, index) => (
-              <SidebarButton
-                  key={index}
-                  icon={link.icon}
-                  label={link.name}
-                  to={`/app/${link.to || link.name.toLowerCase()}`}
-              />
-
           ))}
         </ul>
 
