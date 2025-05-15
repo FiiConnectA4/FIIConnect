@@ -27,7 +27,8 @@
 }
 
 .buton-arhivat {
-    background-color: #6c757d !important; /* gri Bootstrap */
+    background-color: #6c757d !important;
+    /* gri Bootstrap */
     color: white;
 }
 
@@ -76,8 +77,10 @@
 .image-upload {
     position: absolute;
     top: -15%;
-    right: -15%;
+    width: 130%;
     z-index: 10;
+    display: flex;
+    justify-content: space-between;
 }
 
 .plus-button {
@@ -102,7 +105,24 @@
     background-color: #567998;
 }
 
-.plus-button:hover {
+.sterge-upload {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 25px;
+    height: 25px;
+    background-color: #537A9C;
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+}
+
+.sterge-upload:hover {
     transform: scale(1.1);
     background-color: #567998;
 }
