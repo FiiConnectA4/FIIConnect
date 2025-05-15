@@ -8,6 +8,16 @@ import Cursuri from "../pages/Cursuri/Cursuri";
 import Catalog from "../pages/Catalog/Catalog";
 import OrarToti from "../pages/Orar/OrarToti"; 
 import Secretariat from "../pages/Secretariat/Secretariat";
+import SecretariatToti from "../pages/Secretariat/SecretariatToti";
+import CerereDecontari from "../pages/Secretariat/CerereDecontari"; // ✅ Import corect
+import CerereAdeverinte from "../pages/Secretariat/CerereAdeverinte"; // ✅ Import corect
+import CerereBursaSociala from "../pages/Secretariat/CerereBursaSociala"; // ✅ Import corect
+import CerereCazSocial from "../pages/Secretariat/CerereCazSocial"; // ✅ Import corect
+import IstoricCereri from "../pages/Secretariat/IstoricCereri"; // ✅ Import corect
+
+import SecretariatCerereAdeverinte from "../pages/Secretariat/SecretariatCerereAdeverinte"; // ✅ Import corect
+import SecretariatBursaSociala from "../pages/Secretariat/SecretariatBursaSociala"; // ✅ Import corect
+import SecretariatCazSocial from "../pages/Secretariat/SecretariatCazSocial"; // ✅ Import corect
 import Chat from "../pages/Social/Page/Chat";
 import SetupProfile from "../pages/Dashboard/SetupProfile";
 import Profil from "../pages/Dashboard/Profil";
@@ -80,7 +90,22 @@ const AppRoutes = () => {
                 <Route path="/app/orar-secretariat/sali/:sala" element={<OrarSecretariat />} />
                 <Route path="/app/orar-secretariat/discipline" element={<OrarSecretariat />} />
                 <Route path="/app/orar-secretariat/discipline/:disciplina" element={<OrarSecretariat />} />
-                <Route path="secretariat" element={<Secretariat />} />
+                <Route path="secretariat" element={<Secretariat />}>
+                          <Route index element={<SecretariatToti />} />
+                          <Route path="cerere-decontare" element={<CerereDecontari />} />
+                          <Route path="cerere-adeverinte" element={<SecretariatCerereAdeverinte />} />
+                          <Route path="cerere-bursa-sociala" element={<SecretariatBursaSociala />} />
+                          <Route path="cerere-caz-social" element={<SecretariatCazSocial />} />
+
+                        </Route>
+                        <Route path="student" element={<Secretariat />}>
+                          <Route index element={<SecretariatToti />} />
+                          <Route path="cerere-decontare" element={<CerereDecontari />} />
+                          <Route path="cerere-adeverinte" element={<CerereAdeverinte />} />
+                          <Route path="cerere-bursa-sociala" element={<CerereBursaSociala />} />
+                          <Route path="cerere-caz-social" element={<CerereCazSocial />} />
+                          <Route path="istoric-cereri" element={<IstoricCereri />} />
+                        </Route>
                 <Route path="chat" element={<Chat />} />
                 <Route path="profile" element={<Profil />} />
                 <Route path="/app/reset-password" element={<ChangePassword />} />
