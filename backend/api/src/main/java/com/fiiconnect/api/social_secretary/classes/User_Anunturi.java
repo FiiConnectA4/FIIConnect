@@ -21,7 +21,7 @@ public class User_Anunturi {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
-    @JsonIgnore
+ //   @JsonIgnore
     private Set<Tag> tags;
 
     public User_Anunturi() {}
