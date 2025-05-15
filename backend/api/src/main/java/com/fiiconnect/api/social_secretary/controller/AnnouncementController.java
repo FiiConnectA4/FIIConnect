@@ -20,6 +20,8 @@ import com.fiiconnect.api.social_secretary.service.UserLogatService;
 
 import com.fiiconnect.api.social_secretary.service.UserService2;
 
+import org.springframework.data.domain.Page;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 
 import java.util.*;
-
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -68,9 +70,10 @@ public class AnnouncementController {
 
     @GetMapping
 
-    public List<Announcement> getAllAnnouncements() {
+    public Page<Announcement> getAllAnnouncements(@RequestParam(defaultValue = "0")int page,
+                                                  @RequestParam(defaultValue = "15")int size) {
 
-        return announcementService.getAllAnnouncements();
+        return announcementService.getAllAnnouncements(page,size);
 
     }
 
@@ -86,11 +89,12 @@ public class AnnouncementController {
 
     // Obtine toate anunturile existente pt profi si secretari
 
-    @GetMapping("/prof-secretar")
+    @GetMapping("/page/prof-secretar")
 
-    public List<Announcement> getAllAnnouncementsForProfAndSecretary() {
+    public Page<Announcement> getAllAnnouncementsForProfAndSecretary(@RequestParam(defaultValue = "0")int page,
+                                                                     @RequestParam(defaultValue = "15")int size) {
 
-        return announcementService.getAllAnnouncements();
+        return announcementService.getAllAnnouncements(page,size);
 
     }
 
@@ -226,9 +230,13 @@ public class AnnouncementController {
 
 
 
-    private List<Announcement> getAllAnnouncementsWithTagId(Long tagId){
+    private List<Announcement> getAllAnnouncementsWithTagId(Long tagId,int page, int size){
 
-        List<Long> announcementsId = announcementService.getAllAnnouncementsId(tagId);
+        Page<Object[]> Page = announcementService.getAllAnnouncementsId(tagId, page, size);
+
+        List<Long> announcementsId = Page.getContent().stream()
+                .map(row -> ((Number) row[0]).longValue())
+                .collect(Collectors.toList());
 
         List<Announcement> allAnnouncements = new ArrayList<>();
 
@@ -248,13 +256,15 @@ public class AnnouncementController {
 
     @GetMapping("/prof-secretar/with-tag")
 
-    public List<Announcement> getAnnouncementsWithTagsForProfAndSecretary(@RequestParam List<Long> tagIds){
+    public List<Announcement> getAnnouncementsWithTagsForProfAndSecretary(@RequestParam List<Long> tagIds,
+                                                                          @RequestParam(defaultValue="0")int page,
+                                                                          @RequestParam(defaultValue = "15")int size){
 
         List<Announcement> allAnnouncements = new ArrayList<>();
 
         for (Long id : tagIds){
 
-            allAnnouncements.addAll(getAllAnnouncementsWithTagId(id));
+            allAnnouncements.addAll(getAllAnnouncementsWithTagId(id,page,size));
 
         }
 
@@ -268,13 +278,15 @@ public class AnnouncementController {
 
     @GetMapping("/with-tag")
 
-    public Set<Announcement> getAnnouncementsWithTags(@RequestParam List<Long> tagIds){
+    public Set<Announcement> getAnnouncementsWithTags(@RequestParam List<Long> tagIds,
+                                                      @RequestParam(defaultValue = "0")int page,
+                                                      @RequestParam(defaultValue = "15")int size){
 
         Set<Announcement> allAnnouncements = new HashSet<>();
 
         for (Long id : tagIds){
 
-            allAnnouncements.addAll(getAllAnnouncementsWithTagId(id));
+            allAnnouncements.addAll(getAllAnnouncementsWithTagId(id,page,size));
 
         }
 
@@ -288,9 +300,11 @@ public class AnnouncementController {
 
     @GetMapping("/with-user-id/{id}")
 
-    public Set<Announcement> getAnnouncementsWithUserId(@PathVariable Long id){
+    public Page<Announcement> getAnnouncementsWithUserId(@PathVariable Long id,
+                                                        @RequestParam(defaultValue = "0")int page,
+                                                        @RequestParam(defaultValue = "15")int size){
 
-        return announcementService.getAnnouncementsByUserId(id);
+        return announcementService.getAnnouncementsByUserId(id,page,size);
 
     }
 
@@ -300,9 +314,11 @@ public class AnnouncementController {
 
     @GetMapping("/prof-secretar/with-user-id/{id}")
 
-    public Set<Announcement> getAnnouncementsWithUserIdForProfAndSecretary(@PathVariable Long id){
+    public Page<Announcement> getAnnouncementsWithUserIdForProfAndSecretary(@PathVariable Long id,
+                                                                           @RequestParam(defaultValue = "0")int page,
+                                                                           @RequestParam(defaultValue = "15")int size){
 
-        return announcementService.getAnnouncementsByUserId(id);
+        return announcementService.getAnnouncementsByUserId(id,page,size);
 
     }
 
