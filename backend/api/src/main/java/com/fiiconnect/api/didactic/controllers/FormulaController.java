@@ -133,13 +133,7 @@ public class FormulaController {
         updatedFormula.setIdCourse(request.getIdCourse());
         updatedFormula.setText(request.getText());
 
-        try
-        {
-            FormulaParser.createSyntaxTree(updatedFormula);
-        }catch(RuntimeException e)
-        {
-            throw new RuntimeException("Invalid formula syntax: " + e);
-        }
+        FormulaParser.createSyntaxTree(updatedFormula);
 
         // Update components in place to preserve Hibernate's collection reference
         List<FormulaComponent> currentComponents = updatedFormula.getComponents();

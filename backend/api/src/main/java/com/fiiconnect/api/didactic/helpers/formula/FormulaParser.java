@@ -131,11 +131,11 @@ public class FormulaParser {
         return switch(operator)
         {
             case "(" -> 0;
-            case "+", "-" -> 1;
-            case "*", "/" -> 2;
-            case "^" -> 3;
-            case "min", "max", "clamp", "round", "floor", "ceil" -> 4;
-            case "," -> 10;
+            case "," -> 1;
+            case "+", "-" -> 2;
+            case "*", "/" -> 3;
+            case "^" -> 4;
+            case "min", "max", "clamp", "round", "floor", "ceil" -> 5;
             default -> throw new FormulaParseException("Invalid operator: " + operator);
         };
     }
