@@ -60,7 +60,7 @@ CREATE TABLE CHANNEL_TAGS (
 CREATE TABLE ANNOUNCEMENT (
                               ID NUMBER PRIMARY KEY,
                               TITLE VARCHAR2(255),
-                              MESSAGE CLOB,
+                              MESSAGE VARCHAR2(255),
                               AUTHOR_ID NUMBER(19),
                               PUBLISHED_DATE DATE,
                               CONSTRAINT FK_ANNOUNCEMENT_AUTHOR FOREIGN KEY (AUTHOR_ID) REFERENCES USERS(ID) ON DELETE CASCADE
@@ -86,7 +86,7 @@ CREATE TABLE ANNOUNCEMENT_TAGS (
 CREATE TABLE ACHIEVEMENT (
                              ID NUMBER PRIMARY KEY,
                              NAME VARCHAR2(255),
-                             DESCRIPTION CLOB,
+                             DESCRIPTION VARCHAR2(255),
                              USER_ID NUMBER(19),
                              DATE_ACHIEVED VARCHAR2(50),
                              CONSTRAINT FK_ACHIEVEMENT_USER FOREIGN KEY (USER_ID) REFERENCES USERS(ID) ON DELETE CASCADE
@@ -98,7 +98,7 @@ CREATE TABLE ACHIEVEMENT (
 
 CREATE TABLE CHAT (
                       ID NUMBER PRIMARY KEY,
-                      MESSAGE CLOB,
+                      MESSAGE VARCHAR2(255),
                       SENDER_ID NUMBER(19),
                       TIMESTAMP VARCHAR2(100),
                       TYPE VARCHAR2(50),

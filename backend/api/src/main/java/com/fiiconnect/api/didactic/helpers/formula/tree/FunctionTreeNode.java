@@ -13,7 +13,7 @@ public class FunctionTreeNode extends AbstractTreeNode {
 
     public FunctionTreeNode(String function)
     {
-        this.type = TreeNodeType.OPERATOR_NODE;
+        this.type = TreeNodeType.FUNCTION_NODE;
         this.function = function;
     }
 
