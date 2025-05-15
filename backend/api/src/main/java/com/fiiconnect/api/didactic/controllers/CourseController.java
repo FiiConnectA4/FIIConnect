@@ -21,7 +21,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.management.DescriptorKey;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -192,7 +191,7 @@ public class CourseController {
     @GetMapping("/didactic/course/default_course_icon.png")
     public ResponseEntity<?> getDefaultIcon() {
         try {
-            File iconFile = sftpService.downloadFile("/faculty_files/didactic/default_course_icon.png");
+            File iconFile = sftpService.downloadFile("/faculty_files/didactic/default_course_icon.png", "didactic/default_course_icon.png");
             InputStreamResource resource = new InputStreamResource(new FileInputStream(iconFile));
 
             return ResponseEntity.ok()
