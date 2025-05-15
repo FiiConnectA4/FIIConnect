@@ -14,34 +14,34 @@ const Administrator = () => {
     const [adaugaCurs, setAdaugaCurs] = useState(false);
 
     const fetchCourses = () => {
-    const token = localStorage.getItem('token'); 
+        const token = localStorage.getItem('token');
 
-    setLoading(true);
-    fetch('/didactic/course', {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    })
-    .then((response) => {
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-        return response.json();
-    })
-    .then((data) => {
-        const courses = data._embedded?.courseList || [];
-        setCursuri(courses);
-        setLoading(false);
-    })
-    .catch((error) => {
-        console.error('Eroare la încărcarea cursurilor:', error);
-        setCursuri([]);
-        setLoading(false);
-    });
-};
+        setLoading(true);
+        fetch('/didactic/course', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then((response) => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.json();
+            })
+            .then((data) => {
+                const courses = data._embedded?.courseList || [];
+                setCursuri(courses);
+                setLoading(false);
+            })
+            .catch((error) => {
+                console.error('Eroare la încărcarea cursurilor:', error);
+                setCursuri([]);
+                setLoading(false);
+            });
+    };
 
     useEffect(() => {
         fetchCourses();
     }, []);
-const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token');
     const handleDeleteCourse = (id) => {
         if (!window.confirm("Ești sigur că vrei să ștergi acest curs?")) return;
         fetch(`/didactic/course/${id}`, {
