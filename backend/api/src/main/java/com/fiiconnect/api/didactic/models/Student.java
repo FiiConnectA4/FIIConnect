@@ -1,5 +1,6 @@
 package com.fiiconnect.api.didactic.models;
 
+import com.fiiconnect.api.auth_userMgmt.models.User;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;

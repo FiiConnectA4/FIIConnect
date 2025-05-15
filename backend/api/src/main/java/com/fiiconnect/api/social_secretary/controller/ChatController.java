@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +31,9 @@ public class ChatController {
 
     @Autowired
     private UserService2 userService2;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     @GetMapping
     public List<Chat> getAllChatMessages() {
@@ -54,8 +58,8 @@ public class ChatController {
 
 
     @MessageMapping("/chat.sendMessage")//de aici invocam aceasta metoda
-    @SendTo("/topic/public")//unde trimitem
     public Chat createChatMessage(@Payload Chat chatMessage) {
+        System.out.println("am ajuns la chat.sendMessage");
         //niste procesare pe viitor pt emoji uri si chestii
         String message = chatMessage.getMessage();
         message=processEmojis(message);
@@ -67,10 +71,11 @@ public class ChatController {
         chatMessage.setMessage(message);
         if(userService2.getUserById(senderId)==null){
             System.out.println("user ul nu exista");
-            return new Chat("user-ul nu exista",null,null, null);
+            return new Chat("user-ul nu exista",null,null, null,null);
         }
 
-
+        Long channelId = chatMessage.getChannelId();
+        messagingTemplate.convertAndSend("/topic/channel/" + channelId, chatMessage);
         return chatService.saveChatMessages(chatMessage);
     }
 
@@ -86,11 +91,14 @@ public class ChatController {
 
      */
 
-    @GetMapping("/{channelId}")
+    @GetMapping("/get-chats/{channelId}")
     public ResponseEntity<List<Chat>> getChannelMessages(
             @PathVariable Long channelId) {
 
+        System.out.println("aducem mesajele de pe un anumit canal");
         List<Chat> messages = chatService.findByChannelIdOrderByTimestampAsc(channelId);
+        if(!messages.isEmpty())
+            System.out.println("lista nu e goala");
         return ResponseEntity.ok(messages);
     }
 
