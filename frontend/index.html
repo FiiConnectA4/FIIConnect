@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Chat App with Channels</title>
+</head>
+<body>
+<div>
+    <input id="id" placeholder="Your ID" />
+    <input id="message" placeholder="Type a message..." />
+    <button onclick="sendMessage()">Send</button>
+</div>
+<ul id="messages"></ul>
+
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+<script>
+    let stompClient = null;
+    let currentChannelId = 3;
+
+    function connect(channelId) {
+      console.log("Connecting to channel:", channelId);
+      const socket = new SockJS("http://localhost:34101/ws");
+      stompClient = Stomp.over(socket);
+
+      stompClient.connect({}, function (frame) {
+        console.log("Connected: " + frame);
+
+        stompClient.subscribe("/topic/channel/" + channelId, function (messageOutput) {
+          const message = JSON.parse(messageOutput.body);
+          console.log("Received:", message);
+
+          const msgList = document.getElementById('messages');
+          const el = document.createElement('li');
+          el.textContent = (message.sender?.name || "Unknown") + ": " + (message.message || "...");
+          msgList.appendChild(el);
+        });
+      });
+    }
+
+    function sendMessage() {
+      const senderId = document.getElementById('id').value;
+      const content = document.getElementById('message').value;
+
+      if (!stompClient || !stompClient.connected) {
+        console.error("Not connected to WebSocket.");
+        return;
+      }
+
+      stompClient.send("/app/chat.sendMessage", {}, JSON.stringify({
+        sender: { id: senderId },
+        message: content,
+        type: 'CHAT',
+        channelId: currentChannelId
+      }));
+    }
+
+    function loadChatHistory(channelId) {
+      fetch("http://localhost:34101/chat/get-chats/" + channelId)
+        .then(response => response.json())
+        .then(data => {
+          const msgList = document.getElementById('messages');
+          msgList.innerHTML = "";
+          data.forEach(msg => {
+            const el = document.createElement('li');
+            el.textContent = (msg.sender?.name || "Unknown") + ": " + (msg.message || "...");
+            msgList.appendChild(el);
+          });
+        })
+        .catch(err => console.error("Failed to load chat history:", err));
+    }
+
+    window.onload = function () {
+      loadChatHistory(currentChannelId);
+      connect(currentChannelId);
+    };
+</script>
+</body>
+</html>

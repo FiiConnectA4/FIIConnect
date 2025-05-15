@@ -22,7 +22,7 @@ public class Announcement {
 
     @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "author_id")
-    @JsonIgnore
+    //@JsonIgnore
     private User_Anunturi author;
 
     @ManyToMany//(cascade = CascadeType.PERSIST)
@@ -32,7 +32,7 @@ public class Announcement {
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
 
-    @JsonIgnore
+    //@JsonIgnore
     private Set<Tag> tags = new HashSet<>();
 
     private LocalDate publishedDate;

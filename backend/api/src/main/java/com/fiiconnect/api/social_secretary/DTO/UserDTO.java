@@ -49,7 +49,7 @@ public class UserDTO {
 
     @Override
     public String toString() {
-        return "CreateUserRequest{" +
+        return "UserDTO{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", tags=" + tags +
