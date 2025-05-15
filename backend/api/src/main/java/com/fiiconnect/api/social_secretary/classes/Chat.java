@@ -18,21 +18,24 @@ public class Chat {
     @JoinColumn(name = "sender_id")
     private User_Anunturi sender;
 
-    private Long channel_id;
 
     private String timestamp;
 
     @Enumerated(EnumType.STRING)
     private ChatType type;
+
+
+    private Long channelId;
     // Constructors, getters, setters
 
     public Chat() {}
 
-    public Chat(String message, User_Anunturi sender, String timestamp, ChatType type) {
+    public Chat(String message, User_Anunturi sender, String timestamp, ChatType type, Long channelId) {
         this.message = message;
         this.sender = sender;
         this.timestamp = timestamp;
         this.type = type;
+        this.channelId=channelId;
     }
 
     public ChatType getType() {
@@ -67,13 +70,7 @@ public class Chat {
         this.sender = sender;
     }
 
-    public Long getChannel_id() {
-        return channel_id;
-    }
 
-    public void setChannel_id(Long channel_id) {
-        this.channel_id = channel_id;
-    }
 
     public String getTimestamp() {
         return timestamp;
@@ -81,5 +78,13 @@ public class Chat {
 
     public void setTimestamp(String timestamp) {
         this.timestamp = timestamp;
+    }
+
+    public Long getChannelId() {
+        return channelId;
+    }
+
+    public void setChannelId(Long channelId) {
+        this.channelId = channelId;
     }
 }

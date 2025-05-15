@@ -1,7 +1,9 @@
 package com.fiiconnect.api.didactic.models;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Objects;
@@ -9,6 +11,8 @@ import java.util.Objects;
 @Setter
 @Getter
 @Entity
+@AllArgsConstructor
+@NoArgsConstructor
 public class Teaching {
     @EmbeddedId
     private TeachingCompositeKey id;
@@ -20,16 +24,6 @@ public class Teaching {
     private Professor professor = null;
 
     private String role;
-
-    public Teaching() {
-    }
-
-    public Teaching(TeachingCompositeKey id, Course course, Professor professor, String role) {
-        this.id = id;
-        this.course = course;
-        this.professor = professor;
-        this.role = role;
-    }
 
     @Override
     public String toString() {
