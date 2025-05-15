@@ -1,0 +1,25 @@
+/* dotarisala.css */
+.dotari-container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  background-color: #e9f5f9;
+}
+
+.dotari-header {
+  font-size: 2em;
+  color: #1A3C5A;
+}
+
+.dotari-info {
+  font-size: 1.2em;
+  color: #537A9C;
+}
+
+.dotari-imagine img {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 10px;
+  margin-top: 10px;
+}
