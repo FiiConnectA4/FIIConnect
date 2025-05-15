@@ -114,7 +114,7 @@ END;
 CREATE TABLE NOTIFICATIONS (
                                ID        NUMBER(19)     NOT NULL,
                                TITLE     VARCHAR2(255)  NOT NULL,
-                               CONTENT   CLOB           NOT NULL,
+                               CONTENT   VARCHAR2(255)  NOT NULL,
                                TYPE      VARCHAR2(100),
                                IS_READ   NUMBER(1)      DEFAULT 0 NOT NULL,
                                TS        TIMESTAMP      DEFAULT CURRENT_TIMESTAMP NOT NULL,

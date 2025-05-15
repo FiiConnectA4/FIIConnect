@@ -13,10 +13,11 @@ import java.util.Set;
 @Table(name = "roles")
 public class Role {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "roles_seq_gen")
+    @SequenceGenerator(name = "roles_seq_gen", sequenceName = "roles_seq", allocationSize = 1)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "role_name", nullable = false, unique = true)
     private String roleName;
 
     @ManyToMany(mappedBy = "roles")

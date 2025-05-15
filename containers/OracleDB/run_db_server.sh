@@ -3,7 +3,7 @@ docker run --name oracle-free -d -p 1521:1521 -e ORACLE_PASSWORD=api_test gvenzl
 docker cp create_user.sql oracle-free:/tmp/
 docker cp ../../backend/scripts/fiiconnect/didactic_table_create.sql oracle-free:/tmp/
 docker cp ../../backend/scripts/fiiconnect/didactic_sequence_create.sql oracle-free:/tmp/
-docker cp ../../backend/scripts/fiiconnect/auth_sequence_creategit oracle-free:/tmp/
+docker cp ../../backend/scripts/fiiconnect/auth_sequence_create.sql oracle-free:/tmp/
 docker cp ../../backend/scripts/fiiconnect/auth_table_create.sql oracle-free:/tmp/
 docker cp ../../backend/scripts/fiiconnect/secretariat_sequence_create.sql oracle-free:/tmp/
 docker cp ../../backend/scripts/fiiconnect/secretariat_table_create.sql oracle-free:/tmp/
