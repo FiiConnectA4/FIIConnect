@@ -5,7 +5,9 @@ import com.fiiconnect.api.auth_userMgmt.dtos.LoginDTO;
 import com.fiiconnect.api.auth_userMgmt.dtos.RegisterDTO;
 import com.fiiconnect.api.auth_userMgmt.models.Role;
 import com.fiiconnect.api.auth_userMgmt.models.User;
+import com.fiiconnect.api.auth_userMgmt.models.UserProfile;
 import com.fiiconnect.api.auth_userMgmt.repositories.RoleRepository;
+import com.fiiconnect.api.auth_userMgmt.repositories.UserProfileRepository;
 import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository;
 import com.fiiconnect.api.auth_userMgmt.services.EmailService;
 import com.fiiconnect.api.auth_userMgmt.core.AuthResponse;
@@ -63,6 +65,9 @@ public class AuthController {
     @Autowired
     private ProfessorRepository professorRepository;
 
+    @Autowired
+    private UserProfileRepository userProfileRepository;
+
     // Test Token Repository
     @PostConstruct
     public void testTokenRepo() {
@@ -99,6 +104,13 @@ public class AuthController {
         user.setTwoFactorSecret(pending);
         user.setPendingTwoFactorSecret(null);
         user.setTwoFactorEnabled(true);
+
+        UserProfile profile = user.getProfile();
+        if (profile != null) {
+            profile.setTwoFactorEnabled(true);
+            userProfileRepository.save(profile);
+        }
+
         userRepository.save(user);
         return ResponseEntity.ok(new ApiResponse("2FA activat!", true));
     }
@@ -118,6 +130,42 @@ public class AuthController {
         return Optional.ofNullable(userRepository.findByUsername(username))
                 .orElseThrow(() -> new RuntimeException("User inexistent"));
     }
+
+    @PostMapping("/disable-2fa")
+    public ResponseEntity<?> disable2FA(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().body(new ApiResponse("Token lipsă sau invalid.", false));
+        }
+
+        String token = authHeader.substring(7);
+        String username;
+        try {
+            username = jwtService.extractUsername(token);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new ApiResponse("Token invalid.", false));
+        }
+
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            return ResponseEntity.status(404).body(new ApiResponse("Utilizator inexistent.", false));
+        }
+
+        user.setTwoFactorSecret(null);
+        user.setTwoFactorEnabled(false);
+
+
+        UserProfile profile = user.getProfile();
+        if (profile != null) {
+            profile.setTwoFactorEnabled(false);
+            userProfileRepository.save(profile);
+        }
+
+        userRepository.save(user);
+
+
+        return ResponseEntity.ok(new ApiResponse("2FA a fost dezactivat cu succes.", true));
+    }
+
 
 
     @PostMapping("/forgot-password")
