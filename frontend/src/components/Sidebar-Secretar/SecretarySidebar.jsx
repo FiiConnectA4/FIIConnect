@@ -9,11 +9,12 @@ const SecretarySidebar = () => {
     { name: "Harta", icon: "🗺️" },
     { name: "Cursuri", icon: "📚" },
     { name: "Catalog", icon: "📘" },
-    { name: "Orar", icon: "🕒" },
+    { name: "Orar", icon: "🕒", to: "orar-secretariat" },
     { name: "Chat", icon: "💬" },
   ];
 
   const managementLinks = [
+    { name: "Profile", icon: "👤", to: "profile" },
     { name: "Management Studenti", icon: "👤", },
     { name: "Management Profesori", icon: "👤", },
     { name: "Secretariat", icon: "🏛️" },
@@ -29,12 +30,12 @@ const SecretarySidebar = () => {
         <div className="section">GENERAL</div>
         <ul className="nav-list">
           {generalLinks.map((link, index) => (
-            <SidebarButton
-              key={index}
-              icon={link.icon}
-              label={link.name}
-              to={`/app/${link.name.toLowerCase()}`}
-            />
+              <SidebarButton
+                  key={index}
+                  icon={link.icon}
+                  label={link.name}
+                  to={`/secretar/${link.to || link.name.toLowerCase()}`}
+              />
           ))}
         </ul>
 

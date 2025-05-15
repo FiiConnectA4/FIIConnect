@@ -1,8 +1,8 @@
 package com.fiiconnect.api.auth_userMgmt.controllers;
 
 import com.fiiconnect.api.auth_userMgmt.core.ApiResponse;
-import com.fiiconnect.api.auth_userMgmt.dtos.LoginRequest;
-import com.fiiconnect.api.auth_userMgmt.dtos.RegisterRequest;
+import com.fiiconnect.api.auth_userMgmt.dtos.LoginDTO;
+import com.fiiconnect.api.auth_userMgmt.dtos.RegisterDTO;
 import com.fiiconnect.api.auth_userMgmt.models.Role;
 import com.fiiconnect.api.auth_userMgmt.models.User;
 import com.fiiconnect.api.auth_userMgmt.repositories.RoleRepository;
@@ -16,6 +16,10 @@ import com.fiiconnect.api.auth_userMgmt.validators.IbanValidator;
 import com.fiiconnect.api.auth_userMgmt.validators.PasswordValidator;
 import com.fiiconnect.api.auth_userMgmt.models.PasswordResetToken;
 import com.fiiconnect.api.auth_userMgmt.repositories.PasswordResetTokenRepository;
+import com.fiiconnect.api.didactic.models.Professor;
+import com.fiiconnect.api.didactic.models.Student;
+import com.fiiconnect.api.didactic.repositories.ProfessorRepository;
+import com.fiiconnect.api.didactic.repositories.StudentRepository;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -52,6 +56,12 @@ public class AuthController {
 
     @Autowired
     private EmailService emailService;
+
+    @Autowired
+    private StudentRepository studentRepository;
+
+    @Autowired
+    private ProfessorRepository professorRepository;
 
     // Test Token Repository
     @PostConstruct
@@ -162,7 +172,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse> registerUser(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<ApiResponse> registerUser(@RequestBody RegisterDTO registerRequest) {
         try {
             if (registerRequest.getUsername() == null || registerRequest.getPassword() == null || registerRequest.getEmail() == null || registerRequest.getRole() == null) {
                 return ResponseEntity.badRequest().body(
@@ -195,21 +205,28 @@ public class AuthController {
                         new ApiResponse("Rol invalid. Roluri posibile: STUDENT sau PROFESOR.", false));
             }
 
-            if (registerRequest.getIban() != null && !registerRequest.getIban().isEmpty()) {
-                if (!IbanValidator.isValid(registerRequest.getIban())) {
-                    return ResponseEntity.badRequest().body(
-                            new ApiResponse("IBAN invalid.", false));
-                }
-            }
-
+            //users
             User user = new User();
             user.setUsername(registerRequest.getUsername());
             user.setEmail(registerRequest.getEmail());
             user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
             user.getRoles().add(role);
             user.setActive(true);
-
             user.setTwoFactorSecret(null);
+
+            if (role.getRoleName().equals("ROLE_STUDENT")) {
+                Student student = studentRepository.findById(registerRequest.getStudentId())
+                        .orElseThrow(() -> new IllegalArgumentException("Studentul nu există"));
+                user.setStudent(student);
+            }
+
+
+            if (role.getRoleName().equals("ROLE_PROFESOR")) {
+                Professor prof = professorRepository.findById(registerRequest.getProfessorId())
+                        .orElseThrow(() -> new IllegalArgumentException("Profesorul nu există"));
+                user.setProfessor(prof);
+            }
+
             userRepository.save(user);
 
             return ResponseEntity.ok(new ApiResponse("Register successful. Username: " + registerRequest.getUsername() + ", Password: " + registerRequest.getPassword(), true));
@@ -221,7 +238,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> login(@RequestBody LoginDTO loginRequest) {
         User user = userRepository.findByUsername(loginRequest.getUsername());
 
         if (user == null) {
@@ -251,7 +268,7 @@ public class AuthController {
     }
 
     @PostMapping("/login/verify")
-    public ResponseEntity<?> verifyTwoFactor(@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<?> verifyTwoFactor(@RequestBody LoginDTO loginRequest) {
         User user = userRepository.findByUsername(loginRequest.getUsername());
 
         if (user == null || !user.isTwoFactorEnabled() || user.getTwoFactorSecret() == null) {

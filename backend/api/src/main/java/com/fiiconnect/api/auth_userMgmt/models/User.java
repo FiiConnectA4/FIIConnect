@@ -1,5 +1,7 @@
 package com.fiiconnect.api.auth_userMgmt.models;
 
+import com.fiiconnect.api.didactic.models.Professor;
+import com.fiiconnect.api.didactic.models.Student;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,7 +38,7 @@ public class User {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "user_roles",
+            name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
@@ -44,4 +46,16 @@ public class User {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private UserProfile profile;
+
+    @OneToOne
+    @JoinTable(name = "users_students",
+            joinColumns        = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_id"))
+    private Student student;
+
+    @OneToOne
+    @JoinTable(name = "users_professors",
+            joinColumns        = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "professor_id"))
+    private Professor professor;
 }
