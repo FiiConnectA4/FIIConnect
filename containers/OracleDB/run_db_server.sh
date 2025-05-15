@@ -1,9 +1,15 @@
 docker run --name oracle-free -d -p 1521:1521 -e ORACLE_PASSWORD=api_test gvenzl/oracle-free
 
 docker cp create_user.sql oracle-free:/tmp/
-docker cp ../../backend/scripts/didactic/didactic_table_create.sql oracle-free:/tmp/
-docker cp ../../backend/scripts/didactic/didactic_sequence_create.sql oracle-free:/tmp/
-docker cp ../../backend/scripts/didactic/didactic_table_populate.sql oracle-free:/tmp/
+docker cp ../../backend/scripts/fiiconnect/didactic_table_create.sql oracle-free:/tmp/
+docker cp ../../backend/scripts/fiiconnect/didactic_sequence_create.sql oracle-free:/tmp/
+docker cp ../../backend/scripts/fiiconnect/auth_sequence_creategit oracle-free:/tmp/
+docker cp ../../backend/scripts/fiiconnect/auth_table_create.sql oracle-free:/tmp/
+docker cp ../../backend/scripts/fiiconnect/secretariat_sequence_create.sql oracle-free:/tmp/
+docker cp ../../backend/scripts/fiiconnect/secretariat_table_create.sql oracle-free:/tmp/
+docker cp ../../backend/scripts/fiiconnect/social_sequence_create.sql oracle-free:/tmp/
+docker cp ../../backend/scripts/fiiconnect/social_table_create.sql oracle-free:/tmp/
+docker cp ../../backend/scripts/fiiconnect/fiiconnect_populate.sql oracle-free:/tmp/
 
 echo "Waiting for Oracle to be ready..."
 until docker logs oracle-free 2>&1 | grep -q "DATABASE IS READY TO USE"; do

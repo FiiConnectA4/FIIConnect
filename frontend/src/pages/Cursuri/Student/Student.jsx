@@ -22,11 +22,11 @@ const Student = () => {
         const token = localStorage.getItem('token');
         console.log(token);
         fetch(`/didactic/student/${studentId}`,
-        {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
             .then((res) => {
                 if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
                 return res.json();
@@ -84,6 +84,7 @@ const Student = () => {
                         <div key={curs.id} className="rand-curs">
                             <Carte
                                 userType='student'
+                                id={curs.id}
                             />
                             <Ceas />
                             <Buton
