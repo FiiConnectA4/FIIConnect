@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/cereri/adeverinta-student")
+@RequestMapping({"/cereri/adeverinta-student","/cereri-secretariat/adeverinta-student"})
 public class CerereAdeverintaStudentController {
 
     private final CerereAdeverintaStudentRepository repository;

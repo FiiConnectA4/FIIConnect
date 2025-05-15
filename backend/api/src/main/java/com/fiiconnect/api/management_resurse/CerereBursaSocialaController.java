@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/cereri/bursa-sociala")
+@RequestMapping({"/cereri/bursa-sociala","/cereri-secretariat/bursa-sociala"})
 public class CerereBursaSocialaController {
 
     private final CerereBursaSocialaRepository repository;

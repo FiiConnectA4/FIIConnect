@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/cereri/cerere-decontare")
+@RequestMapping({"/cereri/cerere-decontare","/cereri-secretariat/cerere-decontare"})
 public class CerereDecontareController {
 
     private final CerereDecontareRepository repository;

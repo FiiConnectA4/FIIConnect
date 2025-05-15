@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/cereri/caz-social")
+@RequestMapping({"/cereri/caz-social","/cereri-secretariat/caz-social"})
 public class CerereCazSocialController {
 
     private final CerereCazSocialRepository repository;
