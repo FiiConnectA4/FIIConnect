@@ -17,7 +17,7 @@ public class RoleInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        List<String> defaultRoles = List.of("ROLE_ADMIN", "ROLE_PROFESOR", "ROLE_STUDENT");
+        List<String> defaultRoles = List.of("ROLE_ADMIN", "ROLE_PROFESOR", "ROLE_STUDENT", "ROLE_SECRETARY");
 
         for (String roleName : defaultRoles) {
             if (roleRepository.findByRoleName(roleName) == null) {

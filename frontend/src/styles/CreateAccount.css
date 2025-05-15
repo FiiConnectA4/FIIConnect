@@ -1,0 +1,82 @@
+.create-page {
+    flex: 1;
+    min-height: 80vh;
+    background: #f0f4f8; /* match your app background */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.create-card {
+    width: 100%;
+    max-width: 480px;
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.create-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #1a202c;
+}
+
+.message {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+}
+.message.success {
+    background: #e6fffa;
+    color: #2c7a7b;
+}
+.message.error {
+    background: #ffe6e6;
+    color: #cc0000;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1.25rem;
+}
+.form-group label {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #4a5568;
+}
+.form-control {
+    padding: 0.75rem 1rem;
+    border: 1px solid #cbd5e0;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-control:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.3);
+}
+
+.btn-create {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #003087;
+    color: white;
+    font-weight: 600;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s, opacity 0.2s;
+}
+.btn-create:hover:not(:disabled) {
+    background-color: #00205b;
+}
+.btn-create:disabled {
+    opacity: 0.6;
+    cursor: default;
+}

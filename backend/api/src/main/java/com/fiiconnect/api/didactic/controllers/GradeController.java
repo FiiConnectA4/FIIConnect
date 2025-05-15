@@ -27,7 +27,7 @@ public class GradeController {
     }
 
     @DeleteMapping("/didactic/grade")
-    public void deleteTeaching(@RequestParam Long idStud, @RequestParam Long idCourse)
+    public void deleteGrade(@RequestParam Long idStud, @RequestParam Long idCourse)
     {
         GradeCompositeKey compKey = new GradeCompositeKey(idStud, idCourse);
         repository.deleteById(compKey);
