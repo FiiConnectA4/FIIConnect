@@ -17,19 +17,47 @@ const CerereAdeverintaStudent = ({ onBack }) => {
     }));
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
+ const handleSubmit = async (event) => {
+  event.preventDefault();
+
+  const studentId = 7; // hardcodat pentru test
+
+  const cerereDto = {
+    studentId: studentId,
+    status: "Trimis",
+    dataTrimitere: new Date().toISOString(),
+    comentariu: "",
+    adresa: formData.adresa,
+  };
+
+  try {
+    const response = await fetch("http://localhost:34101/cereri/adeverinta-student", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(cerereDto),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      alert("Eroare la trimiterea cererii: " + errorText);
+      return;
+    }
+
     alert("Cererea pentru Adeverință Student a fost trimisă cu succes!");
-    console.log("Datele trimise:", formData);
-    // Resetare formular
     setFormData({
       nume: "",
       prenume: "",
       numarMatricol: "",
       adresa: "",
     });
-    onBack(); // Revine la meniul anterior
-  };
+    onBack();
+  } catch (error) {
+    alert("Eroare la trimiterea cererii: " + error.message);
+  }
+};
+
 
   return (
     <div className="cerere-decontari-container">

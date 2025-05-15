@@ -41,6 +41,36 @@ public class CerereAdeverintaStudentController {
                 .filter(c -> c.getStudent().getId().equals(studentId)).toList());
     }
 
+
+    @GetMapping("/toate")
+public ResponseEntity<List<CerereAdeverintaStudentViewDTO>> getAllCereriCuStudenti() {
+    List<CerereAdeverintaStudent> cereri = repository.findAll();
+
+    List<CerereAdeverintaStudentViewDTO> dtoList = cereri.stream().map(cerere -> {
+        var dto = new CerereAdeverintaStudentViewDTO();
+        dto.setId(cerere.getId());
+        dto.setStatus(cerere.getStatus());
+        dto.setComentariu(cerere.getComentariu());
+        dto.setDataTrimitere(cerere.getDataTrimitere());
+        dto.setAdresa(cerere.getAdresa());
+        dto.setTip(cerere.getTip());
+
+        var student = cerere.getStudent();
+        dto.setStudentId(student.getId());
+        dto.setNume(student.getLastName());
+        dto.setPrenume(student.getFirstName());
+        dto.setRegNumber(student.getRegNumber());
+        dto.setGrupa(student.getFacultyGroup());
+        dto.setAn(student.getYear());
+
+        return dto;
+    }).toList();
+
+    return ResponseEntity.ok(dtoList);
+}
+
+
+
     @PutMapping("/{id}")
     public ResponseEntity<?> updateStatus(@PathVariable Integer id,
                                           @RequestParam String status,
@@ -52,6 +82,8 @@ public class CerereAdeverintaStudentController {
         cerere.setComentariu(comentariu);
         return ResponseEntity.ok(repository.save(cerere));
     }
+
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Integer id) {

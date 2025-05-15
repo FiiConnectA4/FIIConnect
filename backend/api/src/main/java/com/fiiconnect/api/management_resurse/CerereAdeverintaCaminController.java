@@ -57,6 +57,33 @@ public class CerereAdeverintaCaminController {
         );
     }
 
+
+    @GetMapping("/toate")
+public ResponseEntity<List<CerereAdeverintaCaminViewDTO>> getAllView() {
+    List<CerereAdeverintaCaminViewDTO> result = repository.findAll().stream().map(c -> {
+        var dto = new CerereAdeverintaCaminViewDTO();
+        dto.setId(c.getId());
+        dto.setStatus(c.getStatus());
+        dto.setComentariu(c.getComentariu());
+        dto.setDataTrimitere(c.getDataTrimitere());
+        dto.setCamin(c.getCamin());
+        dto.setTip(c.getTip());
+
+        var student = c.getStudent();
+        dto.setStudentId(student.getId());
+        dto.setNume(student.getLastName());
+        dto.setPrenume(student.getFirstName());
+        dto.setRegNumber(student.getRegNumber());
+        dto.setGrupa(student.getFacultyGroup());
+        dto.setAn(student.getYear());
+
+        return dto;
+    }).toList();
+
+    return ResponseEntity.ok(result);
+}
+
+
     // PUT: actualizare status și comentariu
     @PutMapping("/{id}")
     public ResponseEntity<?> updateStatus(@PathVariable Integer id,

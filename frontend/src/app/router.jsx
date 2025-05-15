@@ -14,6 +14,10 @@ import CerereAdeverinte from "../pages/Secretariat/CerereAdeverinte"; // ✅ Imp
 import CerereBursaSociala from "../pages/Secretariat/CerereBursaSociala"; // ✅ Import corect
 import CerereCazSocial from "../pages/Secretariat/CerereCazSocial"; // ✅ Import corect
 import IstoricCereri from "../pages/Secretariat/IstoricCereri"; // ✅ Import corect
+
+import SecretariatCerereAdeverinte from "../pages/Secretariat/SecretariatCerereAdeverinte"; // ✅ Import corect
+import SecretariatBursaSociala from "../pages/Secretariat/SecretariatBursaSociala"; // ✅ Import corect
+import SecretariatCazSocial from "../pages/Secretariat/SecretariatCazSocial"; // ✅ Import corect
 import Chat from "../pages/Social/Page/Chat";
 import Contul from "../pages/Contul";
 import Contact from "../pages/Contact";
@@ -72,11 +76,21 @@ const AppRoutes = () => {
         <Route path="secretariat" element={<Secretariat />}>
           <Route index element={<SecretariatToti />} />
           <Route path="cerere-decontare" element={<CerereDecontari />} />
-          <Route path="cerere-adeverinte" element={<CerereAdeverinte />} />
-          <Route path="cerere-bursa-sociala" element={<CerereBursaSociala />} />
-          <Route path="cerere-caz-social" element={<CerereCazSocial />} />
-          <Route path="istoric-cereri" element={<IstoricCereri />} /> {/* Adăugat ruta */}
+          <Route path="cerere-adeverinte" element={<SecretariatCerereAdeverinte />} />
+          <Route path="cerere-bursa-sociala" element={<SecretariatBursaSociala />} />
+          <Route path="cerere-caz-social" element={<SecretariatCazSocial />} />
+         
         </Route>
+
+<Route path="student" element={<Secretariat />}>
+  <Route index element={<SecretariatToti />} />
+  <Route path="cerere-decontare" element={<CerereDecontari />} />
+  <Route path="cerere-adeverinte" element={<CerereAdeverinte />} />
+  <Route path="cerere-bursa-sociala" element={<CerereBursaSociala />} />
+  <Route path="cerere-caz-social" element={<CerereCazSocial />} />
+  <Route path="istoric-cereri" element={<IstoricCereri />} />
+</Route>
+
 
         <Route path="secretariat" element={<Secretariat />} />
         <Route path="chat" element={<Chat />} />

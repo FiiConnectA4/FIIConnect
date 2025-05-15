@@ -76,6 +76,45 @@ public class CerereDecontareController {
                 .toList());
     }
 
+
+    @GetMapping("/view")
+public ResponseEntity<List<CerereDecontareViewDTO>> getAllView() {
+    List<CerereDecontareViewDTO> result = repository.findAll().stream().map(c -> {
+        CerereDecontareViewDTO dto = new CerereDecontareViewDTO();
+        dto.setId(c.getId());
+        dto.setComentariu(c.getComentariu());
+        dto.setContinut(c.getContinut());
+        dto.setDataTrimitere(c.getDataTrimitere());
+        dto.setStatus(c.getStatus());
+        dto.setTip(c.getTip());
+
+        dto.setChitantaAbonamentPath(c.getChitantaAbonamentPath());
+        dto.setDataAchizitie(c.getDataAchizitie());
+        dto.setDovadaPlataPath(c.getDovadaPlataPath());
+        dto.setDurataAbonament(c.getDurataAbonament());
+        dto.setIban(c.getIban());
+        dto.setNumarBonFiscal(c.getNumarBonFiscal());
+        dto.setNumarCardTransport(c.getNumarCardTransport());
+        dto.setProcentSolicitat(c.getProcentSolicitat());
+        dto.setSerieBonFiscal(c.getSerieBonFiscal());
+        dto.setSerieCardTransport(c.getSerieCardTransport());
+        dto.setTipAbonament(c.getTipAbonament());
+
+        var student = c.getStudent();
+        dto.setStudentId(student.getId());
+        dto.setNume(student.getLastName());
+        dto.setPrenume(student.getFirstName());
+        dto.setRegNumber(student.getRegNumber());
+        dto.setGrupa(student.getFacultyGroup());
+        dto.setAn(student.getYear());
+
+        return dto;
+    }).toList();
+
+    return ResponseEntity.ok(result);
+}
+
+
     @PutMapping("/{id}")
     public ResponseEntity<?> updateStatus(@PathVariable Integer id,
                                           @RequestParam String status,

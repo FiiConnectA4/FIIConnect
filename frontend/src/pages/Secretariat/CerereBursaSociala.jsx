@@ -1,18 +1,21 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Importăm useNavigate
-import "./CerereDecontari.css"; // Reutilizăm stilurile din CerereDecontari.css
+import { useNavigate } from "react-router-dom";
+import "./CerereDecontari.css";
 
 const CerereBursaSociala = () => {
+  // PENTRU TEST: setează manual studentId, de ex 7
+  const studentId = 7;
+
   const [formData, setFormData] = useState({
     nume: "",
     prenume: "",
+    numarMatricol: "",
     an: "",
-    specializare: "",
     facultate: "",
-    dosar: null,
+    comentariu: "",
   });
 
-  const navigate = useNavigate(); // Inițializăm useNavigate
+  const navigate = useNavigate();
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -22,27 +25,47 @@ const CerereBursaSociala = () => {
     }));
   };
 
-  const handleFileChange = (event) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      dosar: event.target.files[0],
-    }));
-  };
-
   const handleSubmit = (event) => {
     event.preventDefault();
-    alert("Cererea pentru Bursă Socială a fost trimisă cu succes!");
-    console.log("Datele trimise:", formData);
-    // Resetare formular
-    setFormData({
-      nume: "",
-      prenume: "",
-      an: "",
-      specializare: "",
-      facultate: "",
-      dosar: null,
-    });
-    navigate(-1); // Navighează înapoi la pagina anterioară
+
+    const jsonData = {
+      studentId: studentId,
+      status: "Asteptare",
+      dataTrimitere: new Date().toISOString().split("T")[0], // format yyyy-MM-dd
+      comentariu: formData.comentariu || "",
+      anStudent: parseInt(formData.an, 10),
+      facultate: formData.facultate,
+      // dacă backend vrea și dosarPath, poți pune null sau ""
+      dosarPath: null,
+    };
+
+    console.log("Trimitem JSON:", jsonData);
+
+    fetch("/cereri/bursa-sociala", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(jsonData),
+    })
+      .then(async (res) => {
+        const text = await res.text();
+        if (!res.ok) throw new Error(text || "Eroare la trimiterea cererii");
+        alert("Cererea pentru Bursă Socială a fost trimisă cu succes!");
+        setFormData({
+          nume: "",
+          prenume: "",
+          numarMatricol: "",
+          an: "",
+          facultate: "",
+          comentariu: "",
+        });
+        navigate(-1);
+      })
+      .catch((err) => {
+        console.error("Eroare la fetch:", err);
+        alert("A apărut o eroare la trimiterea cererii.");
+      });
   };
 
   return (
@@ -105,18 +128,22 @@ const CerereBursaSociala = () => {
           />
         </label>
         <label>
-          Încarcă dosar cu documentele necesare (.zip):
+          Comentariu (opțional):
           <input
-            type="file"
-            name="dosar"
-            accept=".zip"
-            onChange={handleFileChange}
-            required
+            type="text"
+            name="comentariu"
+            value={formData.comentariu}
+            onChange={handleInputChange}
+            placeholder="Comentariu"
           />
         </label>
-        <button type="submit" className="submit-button">Trimite Cererea</button>
+        <button type="submit" className="submit-button">
+          Trimite Cererea
+        </button>
       </form>
-      <button onClick={() => navigate(-1)} className="back-button">Înapoi</button>
+      <button onClick={() => navigate(-1)} className="back-button">
+        Înapoi
+      </button>
     </div>
   );
 };

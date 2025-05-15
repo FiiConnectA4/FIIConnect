@@ -3,6 +3,9 @@ package com.fiiconnect.api.management_resurse;
 import jakarta.persistence.*;
 import java.util.Objects;
 
+import com.fiiconnect.api.didactic.models.Course;
+import com.fiiconnect.api.didactic.models.Professor;
+
 @Entity 
 @Table(name = "orar")
 public class Orar {
@@ -15,8 +18,15 @@ private Integer id;
     private String oraStart;
     private String oraEnd;
     private String saptamana;
-    private String disciplina;
-    private String profesor;
+
+    @ManyToOne
+    @JoinColumn(name = "disciplina_id", referencedColumnName = "id")
+    private Course disciplina;
+
+    @ManyToOne
+    @JoinColumn(name = "profesor_id", referencedColumnName = "id") // FK către Professor
+    private Professor profesor;
+
     private String grupa;
     private String sala;
     @Column(name = "TIP_ACTIVITATE")
@@ -27,7 +37,7 @@ private Integer id;
     public Orar() {} 
 
     public Orar(String zi, String oraStart, String oraEnd, String saptamana,
-                String sala, String disciplina, String profesor,
+                String sala, Course disciplina, Professor profesor,
                 String grupa, String tip, String an) {
         this.zi = zi;
         this.oraStart = oraStart;
@@ -89,19 +99,19 @@ private Integer id;
         this.sala = sala;
     }
 
-    public String getDisciplina() {
+    public Course getDisciplina() {
         return disciplina;
     }
 
-    public void setDisciplina(String disciplina) {
+    public void setDisciplina(Course disciplina) {
         this.disciplina = disciplina;
     }
 
-    public String getProfesor() {
+    public Professor getProfesor() {
         return profesor;
     }
 
-    public void setProfesor(String profesor) {
+    public void setProfesor(Professor profesor) {
         this.profesor = profesor;
     }
 

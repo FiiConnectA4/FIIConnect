@@ -2,9 +2,22 @@ package com.fiiconnect.api.management_resurse;
 
 import com.fiiconnect.api.didactic.models.Student;
 import com.fiiconnect.api.didactic.repositories.StudentRepository;
+
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,6 +58,37 @@ public class CerereCazSocialController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+@GetMapping("/{id}/document")
+public ResponseEntity<?> getDocument(@PathVariable Integer id) {
+    Optional<CerereCazSocial> opt = repository.findById(id);
+    if (opt.isEmpty()) return ResponseEntity.notFound().build();
+
+    CerereCazSocial cerere = opt.get();
+    String path = cerere.getDocumentePath(); // presupunem că e calea completă sau relativă
+
+    if (path == null || path.isBlank()) {
+        return ResponseEntity.badRequest().body("Documentul nu este disponibil.");
+    }
+
+    File file = new File(path);
+    if (!file.exists()) {
+        return ResponseEntity.notFound().build();
+    }
+
+    try {
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+        return ResponseEntity.ok()
+                .header("Content-Disposition", "inline; filename=" + file.getName())
+                .contentLength(file.length())
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(resource);
+    } catch (FileNotFoundException e) {
+        return ResponseEntity.status(500).body("Eroare la deschiderea fișierului.");
+    }
+}
+
+
+
     // GET: cereri după student
     @GetMapping("/student/{studentId}")
     public ResponseEntity<List<CerereCazSocial>> getByStudent(@PathVariable Long studentId) {
@@ -54,6 +98,33 @@ public class CerereCazSocialController {
                         .toList()
         );
     }
+
+    @GetMapping("/toate")
+public ResponseEntity<List<CerereCazSocialViewDTO>> getAllView() {
+    List<CerereCazSocialViewDTO> result = repository.findAll().stream().map(c -> {
+        CerereCazSocialViewDTO dto = new CerereCazSocialViewDTO();
+        dto.setId(c.getId());
+        dto.setStatus(c.getStatus());
+        dto.setComentariu(c.getComentariu());
+        dto.setDataTrimitere(c.getDataTrimitere());
+        dto.setTip(c.getTip());
+        dto.setDocumentePath(c.getDocumentePath());
+        dto.setJustificare(c.getJustificare());
+
+        var student = c.getStudent();
+        dto.setStudentId(student.getId());
+        dto.setNume(student.getLastName());
+        dto.setPrenume(student.getFirstName());
+        dto.setRegNumber(student.getRegNumber());
+        dto.setGrupa(student.getFacultyGroup());
+        dto.setAn(student.getYear());
+
+        return dto;
+    }).toList();
+
+    return ResponseEntity.ok(result);
+}
+
 
     // PUT: actualizare status și comentariu
     @PutMapping("/{id}")

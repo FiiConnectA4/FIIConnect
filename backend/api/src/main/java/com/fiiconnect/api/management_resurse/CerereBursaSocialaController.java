@@ -24,11 +24,17 @@ public class CerereBursaSocialaController {
     }
 
     // POST: creare cerere bursă
-    @PostMapping
-    public ResponseEntity<?> create(@RequestBody CerereBursaSocialaDTO dto) {
-        Optional<Student> studentOpt = studentRepository.findById(dto.getStudentId());
-        if (studentOpt.isEmpty()) return ResponseEntity.badRequest().body("Student inexistent");
+   @PostMapping
+public ResponseEntity<?> create(@RequestBody CerereBursaSocialaDTO dto) {
+    System.out.println("Cerere primita DTO: " + dto);
+    Optional<Student> studentOpt = studentRepository.findById(dto.getStudentId());
+    
+    if (studentOpt.isEmpty()) {
+        System.out.println("Student inexistent cu id: " + dto.getStudentId());
+        return ResponseEntity.badRequest().body("Student inexistent");
+    }
 
+    try {
         CerereBursaSociala cerere = new CerereBursaSociala();
         cerere.setStudent(studentOpt.get());
         cerere.setStatus(dto.getStatus());
@@ -38,8 +44,16 @@ public class CerereBursaSocialaController {
         cerere.setFacultate(dto.getFacultate());
         cerere.setDosarPath(dto.getDosarPath());
 
-        return ResponseEntity.ok(repository.save(cerere));
+        CerereBursaSociala saved = repository.save(cerere);
+        System.out.println("Cerere salvata cu id: " + saved.getId());
+
+        return ResponseEntity.ok(saved);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(500).body("Eroare la salvare cerere: " + e.getMessage());
     }
+}
+
 
     // GET: cerere după ID
     @GetMapping("/{id}")
@@ -58,6 +72,34 @@ public class CerereBursaSocialaController {
                         .toList()
         );
     }
+
+    @GetMapping("/toate")
+public ResponseEntity<List<CerereBursaSocialaViewDTO>> getAllView() {
+    List<CerereBursaSocialaViewDTO> result = repository.findAll().stream().map(c -> {
+        CerereBursaSocialaViewDTO dto = new CerereBursaSocialaViewDTO();
+        dto.setId(c.getId());
+        dto.setStatus(c.getStatus());
+        dto.setComentariu(c.getComentariu());
+        dto.setDataTrimitere(c.getDataTrimitere());
+        dto.setTip(c.getTip());
+        dto.setAnStudent(c.getAnStudent());
+        dto.setDosarPath(c.getDosarPath());
+        dto.setFacultate(c.getFacultate());
+
+        var student = c.getStudent();
+        dto.setStudentId(student.getId());
+        dto.setNume(student.getLastName());
+        dto.setPrenume(student.getFirstName());
+        dto.setRegNumber(student.getRegNumber());
+        dto.setGrupa(student.getFacultyGroup());
+        dto.setAn(student.getYear());
+
+        return dto;
+    }).toList();
+
+    return ResponseEntity.ok(result);
+}
+
 
     // PUT: actualizare status și comentariu
     @PutMapping("/{id}")

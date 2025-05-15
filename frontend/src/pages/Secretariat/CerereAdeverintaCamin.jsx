@@ -17,19 +17,47 @@ const CerereAdeverintaCamin = ({ onBack }) => {
     }));
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    alert("Cererea pentru Adeverință Cămin a fost trimisă cu succes!");
-    console.log("Datele trimise:", formData);
-    // Resetare formular
-    setFormData({
-      nume: "",
-      prenume: "",
-      numarMatricol: "",
-      camin: "",
-    });
-    onBack(); // Revine la meniul anterior
+ const handleSubmit = (event) => {
+  event.preventDefault();
+
+  const payload = {
+    studentId: 7, // sau îl iei din context, localStorage, etc.
+    status: "trimisa",
+    dataTrimitere: new Date().toISOString().split("T")[0], // format YYYY-MM-DD
+    comentariu: `Cerere cazare în ${formData.camin}`,
+    camin: formData.camin
   };
+
+  fetch("/cereri/adeverinta-camin", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("Eroare la trimiterea cererii");
+      return res.json();
+    })
+    .then((data) => {
+      alert("Cererea pentru Adeverință Cămin a fost trimisă cu succes!");
+      console.log("Datele trimise:", data);
+
+      setFormData({
+        nume: "",
+        prenume: "",
+        numarMatricol: "",
+        camin: "",
+      });
+
+      onBack(); // Revine la meniul anterior
+    })
+    .catch((err) => {
+      console.error("Eroare:", err);
+      alert("Trimiterea cererii a eșuat.");
+    });
+};
+
 
   return (
     <div className="cerere-decontari-container">
