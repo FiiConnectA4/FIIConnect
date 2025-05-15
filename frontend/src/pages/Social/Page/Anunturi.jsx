@@ -30,6 +30,13 @@ function Anunturi() {
     return type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
   };
 
+  const getAvailableTagNames = (selectedType) => {
+    if (!userTags || userTags.length === 0) return [];
+    return userTags
+      .filter(tag => tag.type === selectedType)
+      .map(tag => tag.name);
+  };
+
   const fetchUserData = async () => {
   try {
     setUserLoading(true);
@@ -140,106 +147,89 @@ function Anunturi() {
     setCurrentTag(prev => ({ ...prev, [name]: value }));
   };
 
-  const addTag = () => {
-    setError(null);
+ const addTag = () => {
+  setError(null);
 
-    const tagName = currentTag.name.trim();
-    const tagType = currentTag.type;
+  const tagName = currentTag.name.trim();
+  const tagType = currentTag.type;
 
-    if (!tagName) {
-      setError("Te rugăm să introduci un nume pentru etichetă");
-      return;
-    }
-
-    if (availableTagTypes.length === 0) {
-    setError("Nu ai nicio etichetă atribuită. Contactează administratorul.");
+  if (!tagName) {
+    setError("Te rugăm să selectezi o etichetă");
     return;
   }
 
-  if (!availableTagTypes.includes(tagType)) {
-    setError(`Tipul de etichetă ${tagType} nu este disponibil pentru tine`);
+  // Verifică doar dacă tag-ul există deja în anunțul curent
+  const isDuplicate = newAnnouncement.tags.some(
+    tag => tag.name.toLowerCase() === tagName.toLowerCase() && tag.type === tagType
+  );
+
+  if (isDuplicate) {
+    setError(`Eticheta "${tagName}" (${tagType}) există deja în acest anunț`);
     return;
   }
 
-    // Check for duplicates (case insensitive)
-    const isDuplicate = newAnnouncement.tags.some(
-      tag => tag.name.toLowerCase() === tagName.toLowerCase() && tag.type === tagType
-    );
+  // Verifică doar dacă utilizatorul are dreptul să folosească tag-ul
+  const userHasTag = userTags.some(
+    tag => tag.name.toLowerCase() === tagName.toLowerCase() && tag.type === tagType
+  );
 
-    if (isDuplicate) {
-      setError(`Eticheta "${tagName}" (${tagType}) a fost deja adăugată`);
-      return;
-    }
+  if (!userHasTag) {
+    setError(`Nu ai permisiunea să folosești eticheta "${tagName}" (${tagType})`);
+    return;
+  }
 
-    // Verify user has this tag
-    const userHasTag = userTags.some(
-      tag => tag.name.toLowerCase() === tagName.toLowerCase() && tag.type === tagType
-    );
+  // Adaugă tag-ul
+  setNewAnnouncement(prev => ({
+    ...prev,
+    tags: [...prev.tags, { name: tagName, type: tagType }]
+  }));
 
-    if (!userHasTag) {
-      setError(`Nu ai permisiunea să folosești eticheta "${tagName}" (${tagType})`);
-      return;
-    }
-
-    // Add the tag
-    setNewAnnouncement(prev => ({
-      ...prev,
-      tags: [...prev.tags, { name: tagName, type: tagType }]
-    }));
-
-    
-
-    // Reset input
-    setCurrentTag({ name: "", type: "GENERAL" });
-  };
+  // Resetare input
+  setCurrentTag(prev => ({ ...prev, name: "" }));
+};
 
   
 
   const addEditTag = () => {
-    setError(null);
+  setError(null);
 
-    const tagName = currentTag.name.trim();
-    const tagType = currentTag.type;
+  const tagName = currentTag.name.trim();
+  const tagType = currentTag.type;
 
-    if (!tagName) {
-      setError("Te rugăm să introduci un nume pentru etichetă");
-      return;
-    }
+  if (!tagName) {
+    setError("Te rugăm să selectezi o etichetă");
+    return;
+  }
 
-    if (userTags.length === 0) {
-      setError("Nu ai nicio etichetă atribuită. Contactează administratorul.");
-      return;
-    }
+  // Verifică doar dacă tag-ul există deja în anunțul curent
+  const isDuplicate = editingAnnouncement.tags.some(
+    tag => tag.name.toLowerCase() === tagName.toLowerCase() && tag.type === tagType
+  );
 
-    // Check for duplicates (case insensitive)
-    const isDuplicate = editingAnnouncement.tags.some(
-      tag => tag.name.toLowerCase() === tagName.toLowerCase() && tag.type === tagType
-    );
+  if (isDuplicate) {
+    setError(`Eticheta "${tagName}" (${tagType}) există deja în acest anunț`);
+    return;
+  }
 
-    if (isDuplicate) {
-      setError(`Eticheta "${tagName}" (${tagType}) a fost deja adăugată`);
-      return;
-    }
+  // Verifică doar dacă utilizatorul are dreptul să folosească tag-ul
+  const userHasTag = userTags.some(
+    tag => tag.name.toLowerCase() === tagName.toLowerCase() && tag.type === tagType
+  );
 
-    // Verify user has this tag
-    const userHasTag = userTags.some(
-      tag => tag.name.toLowerCase() === tagName.toLowerCase() && tag.type === tagType
-    );
+  if (!userHasTag) {
+    setError(`Nu ai permisiunea să folosești eticheta "${tagName}" (${tagType})`);
+    return;
+  }
 
-    if (!userHasTag) {
-      setError(`Nu ai permisiunea să folosești eticheta "${tagName}" (${tagType})`);
-      return;
-    }
+  // Adaugă tag-ul
+  setEditingAnnouncement(prev => ({
+    ...prev,
+    tags: [...prev.tags, { name: tagName, type: tagType }]
+  }));
 
-    // Add the tag
-    setEditingAnnouncement(prev => ({
-      ...prev,
-      tags: [...prev.tags, { name: tagName, type: tagType }]
-    }));
-
-    // Reset input
-    setCurrentTag({ name: "", type: "GENERAL" });
-  };
+  // Resetare input
+  setCurrentTag(prev => ({ ...prev, name: "" }));
+};
 
   const removeTag = (index) => {
     setNewAnnouncement(prev => ({
@@ -391,6 +381,14 @@ function Anunturi() {
     setShowEditModal(true);
   };
 
+  const handleTagTypeChange = (e) => {
+    const newType = e.target.value;
+    setCurrentTag({
+      name: "", // Reset name when type changes
+      type: newType
+    });
+  };
+
   const filterAnnouncements = (allAnnouncements, tags) => {
     if (!tags || tags.length === 0) return [];
     
@@ -433,63 +431,71 @@ function Anunturi() {
       </div>
 
       {showModal && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h2>Adaugă Anunț Nou</h2>
-            {error && <div className="error-message">{error}</div>}
-            <form onSubmit={handleSubmit}>
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <h2>Adaugă Anunț Nou</h2>
+        {error && <div className="error-message">{error}</div>}
+        <form onSubmit={handleSubmit}>
+  <div className="form-group">
+    <label>Titlu:</label>
+    <input
+      type="text"
+      name="title"
+      value={newAnnouncement.title}
+      onChange={handleInputChange}
+      required  
+    />
+  </div>
+
+  <div className="form-group">
+    <label>Mesaj:</label>
+    <textarea
+      name="message"
+      value={newAnnouncement.message}
+      onChange={handleInputChange}
+      required
+    />
+  </div>
+
               <div className="form-group">
-                <label>Titlu:</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={newAnnouncement.title}
-                  onChange={handleInputChange}
-                  required  
-                />
-              </div>
-              <div className="form-group">
-                <label>Mesaj:</label>
-                <textarea
-                  name="message"
-                  value={newAnnouncement.message}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
+            <label>Adaugă Etichete:</label>
+            <div className="tag-input-container">
+              <select
+                name="type"
+                value={currentTag.type}
+                onChange={handleTagTypeChange}
+                disabled={userLoading || userTags.length === 0}
+              >
+                {availableTagTypes.map(type => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
               
-              <div className="form-group">
-                <label>Adaugă Etichete:</label>
-                <div className="tag-input-container">
-                  <input
-                    type="text"
-                    name="name"
-                    placeholder="Nume etichetă"
-                    value={currentTag.name}
-                    onChange={handleTagInputChange}
-                    disabled={userLoading || userTags.length === 0}
-                  />
-                  <select
-                  name="type"
-                  value={currentTag.type}
-                  onChange={handleTagInputChange}
-                  disabled={userLoading || userTags.length === 0}
-                >
-                  {availableTagTypes.map(type => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-                  <button 
-                    type="button" 
-                    onClick={addTag}
-                    className="add-tag-button"
-                    disabled={userLoading || userTags.length === 0}
-                  >
-                    Adaugă
-                  </button>
-                </div>
+              <select
+                name="name"
+                value={currentTag.name}
+                onChange={handleTagInputChange}
+                disabled={userLoading || userTags.length === 0 || !currentTag.type}
+              >
+                <option value="">Selectează etichetă</option>
+                {getAvailableTagNames(currentTag.type).map(name => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+              
+              <button 
+                type="button" 
+                onClick={addTag}
+                className="add-tag-button"
+                disabled={userLoading || userTags.length === 0 || !currentTag.name}
+              >
+                Adaugă
+              </button>
+            </div>
                 
                 {userTags.length === 0 && (
                   <div className="no-tags-warning">
@@ -533,63 +539,71 @@ function Anunturi() {
       )}
 
       {showEditModal && editingAnnouncement && (
-        <div className="modal-overlay">
-          <div className="modal-content">
-            <h2>Editează Anunț</h2>
-            {error && <div className="error-message">{error}</div>}
-            <form onSubmit={handleEditSubmit}>
-              <div className="form-group">
-                <label>Titlu:</label>
-                <input
-                  type="text"
-                  name="title"
-                  value={editingAnnouncement.title}
-                  onChange={handleEditInputChange}
-                  required  
-                />
-              </div>
-              <div className="form-group">
-                <label>Mesaj:</label>
-                <textarea
-                  name="message"
-                  value={editingAnnouncement.message}
-                  onChange={handleEditInputChange}
-                  required
-                />
-              </div>
+    <div className="modal-overlay">
+      <div className="modal-content">
+        <h2>Editează Anunț</h2>
+        {error && <div className="error-message">{error}</div>}
+        <form onSubmit={handleEditSubmit}>
+  <div className="form-group">
+    <label>Titlu:</label>
+    <input
+      type="text"
+      name="title"
+      value={editingAnnouncement.title}
+      onChange={handleEditInputChange}
+      required  
+    />
+  </div>
+
+<div className="form-group">
+    <label>Mesaj:</label>
+    <textarea
+      name="message"
+      value={editingAnnouncement.message}
+      onChange={handleEditInputChange}
+      required
+    />
+  </div>
+
+             <div className="form-group">
+            <label>Etichete:</label>
+            <div className="tag-input-container">
+              <select
+                name="type"
+                value={currentTag.type}
+                onChange={handleTagTypeChange}
+                disabled={userLoading || userTags.length === 0}
+              >
+                {availableTagTypes.map(type => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
               
-              <div className="form-group">
-                <label>Etichete:</label>
-                <div className="tag-input-container">
-                  <input
-                    type="text"
-                    name="name"
-                    placeholder="Nume etichetă"
-                    value={currentTag.name}
-                    onChange={handleTagInputChange}
-                    disabled={userLoading || userTags.length === 0}
-                  />
-                  <select
-                  name="type"
-                  value={currentTag.type}
-                  onChange={handleTagInputChange}
-                  disabled={userLoading || userTags.length === 0}
-                >
-                  {availableTagTypes.map(type => (
-                    <option key={type} value={type}>
-                      {type}
-                    </option>
-                  ))}
-                </select>
-                  <button 
-                    type="button" 
-                    onClick={addEditTag}
-                    className="add-tag-button"
-                    disabled={userLoading || userTags.length === 0}
-                  >
-                    Adaugă
-                  </button>
-                </div>
+              <select
+                name="name"
+                value={currentTag.name}
+                onChange={handleTagInputChange}
+                disabled={userLoading || userTags.length === 0 || !currentTag.type}
+              >
+                <option value="">Selectează etichetă</option>
+                {getAvailableTagNames(currentTag.type).map(name => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+              
+              <button 
+                type="button" 
+                onClick={addEditTag}
+                className="add-tag-button"
+                disabled={userLoading || userTags.length === 0 || !currentTag.name}
+              >
+                Adaugă
+              </button>
+            </div>
                 
                 {userTags.length === 0 && (
                   <div className="no-tags-warning">
