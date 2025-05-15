@@ -173,7 +173,7 @@ public class CourseController {
     @GetMapping("/didactic/course/{id}/icon.png")
     public ResponseEntity<?> getIcon(@PathVariable Long id) {
         try {
-            File iconFile = sftpService.downloadFile("/faculty_files/didactic/course-" + id + "/icon.png");
+            File iconFile = sftpService.downloadFile("/faculty_files/didactic/course-" + id + "/icon.png", "didactic/course-" + id + "/icon.png");
             InputStreamResource resource = new InputStreamResource(new FileInputStream(iconFile));
 
             return ResponseEntity.ok()

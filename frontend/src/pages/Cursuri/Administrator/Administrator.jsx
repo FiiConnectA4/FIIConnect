@@ -149,7 +149,7 @@ const Administrator = () => {
             />
         );
     }
-
+    console.log("Lista de cursuri:", cursuri); // <-- aici vezi array-ul complet
     return (
         <div className="container-cursuri">
             <div className="cursuri-titlu">
@@ -161,7 +161,6 @@ const Administrator = () => {
                     cursuri.map((curs) => (
                         <div key={curs.id} className={`rand-curs ${curs.archived === 1 ? 'archived-course' : ''}`}>
                             <Carte
-                                key={curs.id}
                                 id={curs.id}
                                 userType='professor'
                             />

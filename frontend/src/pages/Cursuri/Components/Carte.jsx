@@ -4,143 +4,130 @@ import "./Component.css";
 const Carte = ({ userType, id, onImageChange }) => {
     const [imageSrc, setImageSrc] = useState("/Book.png");
     const [isCustomImage, setIsCustomImage] = useState(false);
+    const urlRef = React.useRef(null);
 
-    // Adăugăm o referință statică pentru a ține evidența URL-urilor blob pe grupuri
-    const blobGroupRef = React.useRef({
-        group: Math.floor(id / 4), // Grupăm câte 4 imagini
-        urls: new Map()
-    });
+    const cleanupUrl = () => {
+        if (urlRef.current) {
+            URL.revokeObjectURL(urlRef.current);
+            urlRef.current = null;
+        }
+    };
+
+    const createNewBlobUrl = (blob) => {
+        cleanupUrl();
+        const newUrl = URL.createObjectURL(blob);
+        urlRef.current = newUrl;
+        return newUrl;
+    };
 
     useEffect(() => {
         let mounted = true;
-        const currentGroup = Math.floor(id / 4);
-
-        // Curățăm URL-urile vechi dacă am trecut la alt grup
-        if (blobGroupRef.current.group !== currentGroup) {
-            blobGroupRef.current.urls.forEach(url => URL.revokeObjectURL(url));
-            blobGroupRef.current.urls.clear();
-            blobGroupRef.current.group = currentGroup;
-        }
+        const timestamp = Date.now(); // Generăm timestamp-ul o singură dată
 
         const fetchImage = async () => {
             const token = localStorage.getItem("token");
+            const url = `/didactic/course/${id}/icon.png`;
+
             try {
-                const response = await fetch(`/didactic/course/${id}/icon.png`, {
+                const response = await fetch(url, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 });
 
+                console.log(`[FETCH] Răspuns pentru ID ${id}:`, response);
+
                 if (!response.ok) {
+                    const text = await response.text();
+                    console.log(`[FETCH] Răspuns text pentru ID ${id}:`, text);
                     setImageSrc("/Book.png");
                     setIsCustomImage(false);
                     return;
                 }
 
                 const blob = await response.blob();
+                console.log(blob);
                 if (mounted) {
-                    // Curățăm URL-ul vechi pentru acest ID dacă există
-                    if (blobGroupRef.current.urls.has(id)) {
-                        URL.revokeObjectURL(blobGroupRef.current.urls.get(id));
-                    }
-
-                    // Creăm noul URL și îl salvăm
-                    const newUrl = URL.createObjectURL(blob);
-                    blobGroupRef.current.urls.set(id, newUrl);
+                    const newUrl = createNewBlobUrl(blob);
+                    console.log(`[FETCH] Blob URL creat pentru ID ${id}:`, newUrl);
                     setImageSrc(newUrl);
                     setIsCustomImage(true);
                 }
-            } catch {
+            } catch (err) {
+                console.error(`[FETCH] Eroare la fetch pentru ID ${id}:`, err);
                 setImageSrc("/Book.png");
                 setIsCustomImage(false);
             }
         };
-
         fetchImage();
 
         return () => {
             mounted = false;
-            // Curățăm doar URL-ul pentru acest ID la unmount
-            if (blobGroupRef.current.urls.has(id)) {
-                URL.revokeObjectURL(blobGroupRef.current.urls.get(id));
-                blobGroupRef.current.urls.delete(id);
-            }
+            cleanupUrl();
         };
     }, [id]);
-    // Gestionarea încărcării unei imagini noi
+    // Mutăm handleImageChange în afara useEffect
     const handleImageChange = (event) => {
         const file = event.target.files[0];
-        if (!file) {
-            console.error("Nu a fost selectat niciun fișier.");
-            return;
-        }
+        if (!file) return;
 
         const token = localStorage.getItem("token");
-        if (!token) {
-            console.error("Token-ul lipsește. Utilizatorul nu este autentificat.");
-            return;
-        }
+        if (!token) return;
 
-        // Șterge imaginea existentă înainte de a încărca una nouă
+        console.log(`[UPLOAD] Încarc imagine pentru course ID: ${id}`);
+
         fetch(`/didactic/course/${id}/icon`, {
             method: "DELETE",
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
         })
-            .then((response) => {
-                if (!response.ok) {
-                    console.warn("Eroare la ștergerea imaginii existente. Continuăm cu upload-ul.");
-                }
-
-                // După ștergere, încarcă imaginea nouă
+            .then(() => {
                 const formData = new FormData();
                 formData.append("iconFile", file);
-
                 return fetch(`/didactic/course/${id}/icon`, {
                     method: "PUT",
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
+                    headers: { Authorization: `Bearer ${token}` },
                     body: formData,
                 });
             })
-            .then((response) => {
+            .then(response => {
+                console.log(`[UPLOAD] Răspuns upload pentru ID ${id}:`, response);
                 if (!response.ok) throw new Error("Eroare la actualizarea imaginii");
-                setImageSrc(`/didactic/course/${id}/icon.png?t=${new Date().getTime()}`); // Forțează reîncărcarea imaginii
+                return response.blob();
+            })
+            .then(blob => {
+                if (urlRef.current) {
+                    URL.revokeObjectURL(urlRef.current);
+                }
+                const newUrl = URL.createObjectURL(blob);
+                urlRef.current = newUrl;
+                setImageSrc(newUrl);
                 setIsCustomImage(true);
                 if (onImageChange) {
                     onImageChange(id, `/didactic/course/${id}/icon.png`);
                 }
             })
-            .catch((error) => {
-                console.error("Eroare la încărcarea imaginii:", error);
+            .catch(error => {
+                console.error(`[UPLOAD] Eroare la încărcarea imaginii pentru ID ${id}:`, error);
                 setImageSrc("/Book.png");
                 setIsCustomImage(false);
             });
     };
 
-    // Ștergerea imaginii cursului
+    // Mutăm handleDeleteImage în afara useEffect
     const handleDeleteImage = () => {
         const token = localStorage.getItem("token");
-        if (!token) {
-            console.error("Token-ul lipsește. Utilizatorul nu este autentificat.");
-            return;
-        }
+        if (!token) return;
 
         fetch(`/didactic/course/${id}/icon`, {
             method: "DELETE",
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
+            headers: { Authorization: `Bearer ${token}` },
         })
-            .then((response) => {
+            .then(response => {
                 if (!response.ok) throw new Error("Eroare la ștergerea imaginii");
-                setImageSrc("/Book.png"); // Actualizează imaginea afișată imediat
+                setImageSrc("/Book.png");
                 setIsCustomImage(false);
             })
             .catch(() => {
-                // În caz de eroare, setează imaginea implicită
                 setImageSrc("/Book.png");
                 setIsCustomImage(false);
             });
@@ -152,14 +139,12 @@ const Carte = ({ userType, id, onImageChange }) => {
                 src={imageSrc}
                 alt="Carte curs"
                 className={`carte-image ${isCustomImage ? "custom-image" : ""}`}
-                onError={() => setImageSrc("/Book.png")} // Fallback dacă imaginea nu se încarcă
+                onError={() => setImageSrc("/Book.png")}
             />
             {(userType === "professor" || userType === "admin") && (
                 <div className="image-upload">
                     <button className="sterge-upload" onClick={handleDeleteImage}>x</button>
-                    <label htmlFor={`upload-button-${id}`} className="plus-button">
-                        +
-                    </label>
+                    <label htmlFor={`upload-button-${id}`} className="plus-button">+</label>
                     <input
                         id={`upload-button-${id}`}
                         type="file"
