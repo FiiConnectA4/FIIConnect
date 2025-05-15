@@ -4,8 +4,16 @@ import "../Style/Anunturi.css";
 function Notification({ message, type, onClose }) {
   return (
     <div className={`notification ${type}`}>
-      <span className="notification-message">{message}</span>
-      <button className="notification-close" onClick={onClose}>×</button>
+      <span className="notification-message" title={message}>
+        {message}
+      </span>
+      <button 
+        className="notification-close" 
+        onClick={onClose}
+        aria-label="Închide notificarea"
+      >
+        ×
+      </button>
     </div>
   );
 }
@@ -34,7 +42,6 @@ const [notification, setNotification] = useState(null);
 
 const showNotification = (message, type) => {
   setNotification({ message, type });
-  setTimeout(() => setNotification(null), 3000);
 };
 
   const [currentUser, setCurrentUser] = useState(null);
@@ -224,7 +231,7 @@ const showNotification = (message, type) => {
   );
 
   if (isDuplicate) {
-    setError(`Eticheta "${tagName}" (${tagType}) există deja în acest anunț`);
+    showNotification(`Eticheta "${tagName}" (${tagType}) există deja`, 'error');
     return;
   }
 
