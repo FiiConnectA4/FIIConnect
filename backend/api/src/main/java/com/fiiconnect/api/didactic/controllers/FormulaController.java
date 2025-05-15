@@ -1,8 +1,10 @@
 package com.fiiconnect.api.didactic.controllers;
 
+import com.fiiconnect.api.didactic.exceptions.*;
 import com.fiiconnect.api.didactic.helpers.SQLExceptionMessageParser;
-import com.fiiconnect.api.didactic.models.Formula;
-import com.fiiconnect.api.didactic.models.FormulaComponent;
+import com.fiiconnect.api.didactic.helpers.formula.FormulaParser;
+import com.fiiconnect.api.didactic.models.*;
+import com.fiiconnect.api.didactic.services.EnrollmentService;
 import com.fiiconnect.api.didactic.services.FormulaService;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.hateoas.CollectionModel;
@@ -14,7 +16,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -29,10 +33,12 @@ public class FormulaController {
     private static final Logger LOGGER = Logger.getLogger(FormulaController.class.getName());
 
     private final FormulaService service;
+    private final EnrollmentService enrollmentService;
     private final SQLExceptionMessageParser exceptionHelper;
 
-    public FormulaController(FormulaService service, SQLExceptionMessageParser exceptionHelper) {
+    public FormulaController(FormulaService service, EnrollmentService enrollmentService, SQLExceptionMessageParser exceptionHelper) {
         this.service = service;
+        this.enrollmentService = enrollmentService;
         this.exceptionHelper = exceptionHelper;
     }
 
@@ -56,6 +62,34 @@ public class FormulaController {
         return EntityModel.of(formula,
                 linkTo(methodOn(FormulaController.class).oneFormula(id)).withSelfRel(),
                 linkTo(methodOn(FormulaController.class).allFormulas()).withRel("formulas"));
+    }
+
+    @GetMapping("/formula/{id}/evaluate")
+    public Grade evaluateFormulaForStudent(@PathVariable("id") Long id, @RequestParam Long idStud) {
+        LOGGER.info("Fetching formula with ID: " + id);
+        Formula formula = service.getFormula(id);
+        FormulaParser.createSyntaxTree(formula);
+        Double result = service.evaluateFormula(formula, idStud);
+        Grade newGrade = new Grade(new GradeCompositeKey(idStud, formula.getIdCourse()), result, Date.from(Instant.now()));
+        return newGrade;
+    }
+
+    @GetMapping("/formula/{id}/evaluate/all")
+    public List<Grade> evaluateFormulaForAllStudents(@PathVariable("id") Long id)
+    {
+        Formula formula = service.getFormula(id);
+        FormulaParser.createSyntaxTree(formula);
+        Long idCourse = formula.getIdCourse();
+        List<Enrollment> enrolled = enrollmentService.getCourseEnrollments(idCourse);
+        List<Grade> out = new ArrayList<>();
+        for(Enrollment enrollment : enrolled)
+        {
+            Long idStud = enrollment.getId().getIdStud();
+            Double result = service.evaluateFormula(formula, idStud);
+            Grade newGrade = new Grade(new GradeCompositeKey(idStud, idCourse), result, Date.from(Instant.now()));
+            out.add(newGrade);
+        }
+        return out;
     }
 
     @GetMapping("/course/{idCourse}/formula")
@@ -98,6 +132,14 @@ public class FormulaController {
         Formula updatedFormula = service.getFormula(id);
         updatedFormula.setIdCourse(request.getIdCourse());
         updatedFormula.setText(request.getText());
+
+        try
+        {
+            FormulaParser.createSyntaxTree(updatedFormula);
+        }catch(RuntimeException e)
+        {
+            throw new RuntimeException("Invalid formula syntax: " + e);
+        }
 
         // Update components in place to preserve Hibernate's collection reference
         List<FormulaComponent> currentComponents = updatedFormula.getComponents();
@@ -225,7 +267,7 @@ public class FormulaController {
 
         while (matcher.find()) {
             String componentName = matcher.group().replace(" ", "_");
-            if (!componentName.equals("Final_grade")) {
+            if (!componentName.equals("Final_grade") && !FormulaParser.functions.contains(componentName)) {
                 FormulaComponent component = new FormulaComponent();
                 component.setIdFormula(formula.getId());
                 component.setName(componentName);
@@ -234,5 +276,90 @@ public class FormulaController {
             }
         }
         return components;
+    }
+
+    @GetMapping("/component-score")
+    public ComponentScore getScore(@RequestParam Long idStud, @RequestParam Long idComponent)
+    {
+        return service.getComponentScore(new ComponentScoreCompositeKey(idStud, idComponent));
+    }
+
+    @GetMapping("/component-score/all/by-component")
+    public List<ComponentScore> getScoresByComponent(@RequestParam Long idComponent)
+    {
+        return service.getComponentScoresByIdComponent(idComponent);
+    }
+
+    @GetMapping("/component-score/all/by-student")
+    public List<ComponentScore> getScoresByStudent(@RequestParam Long idStud)
+    {
+        return service.getComponentScoresByIdStud(idStud);
+    }
+
+    @PostMapping("/component-score")
+    public void addScore(@RequestBody ComponentScore score)
+    {
+        service.addComponentScore(score);
+    }
+
+    @PutMapping("/component-score")
+    public void modifyScore(@RequestBody ComponentScore score)
+    {
+        ComponentScore existingScore = service.getComponentScore(score.getId());
+        existingScore.setValue(score.getValue());
+        service.addComponentScore(existingScore);
+    }
+
+    @DeleteMapping("/component-score")
+    public void deleteScore(@RequestParam Long idStud, @RequestParam Long idComponent)
+    {
+        ComponentScore score = service.getComponentScore(new ComponentScoreCompositeKey(idStud, idComponent));
+        service.deleteComponentScore(score);
+    }
+
+    @DeleteMapping("/component-score/all/by-component")
+    public void deleteAllScoresByComponent(@RequestParam Long idComponent)
+    {
+        List<ComponentScore> scores = service.getComponentScoresByIdComponent(idComponent);
+
+        scores.forEach(service::deleteComponentScore);
+    }
+
+    @DeleteMapping("/component-score/all/by-student")
+    public void deleteAllScoresByStudent(@RequestParam Long idStud)
+    {
+        List<ComponentScore> scores = service.getComponentScoresByIdStud(idStud);
+
+        scores.forEach(service::deleteComponentScore);
+    }
+
+    @ExceptionHandler(FormulaNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String formulaNotFound(FormulaNotFoundException e) {
+        return e.getMessage();
+    }
+
+    @ExceptionHandler(FormulaEvaluateException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String formulaEvaluateError(FormulaEvaluateException e) {
+        return e.getMessage();
+    }
+
+    @ExceptionHandler(FormulaParseException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String formulaParseError(FormulaParseException e) {
+        return e.getMessage();
+    }
+
+    @ExceptionHandler(ComponentNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String componentNotFound(ComponentNotFoundException e) {
+        return e.getMessage();
+    }
+
+    @ExceptionHandler(ComponentScoreNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String scoreNotFound(ComponentScoreNotFoundException e) {
+        return e.getMessage();
     }
 }

@@ -1,5 +1,6 @@
 package com.fiiconnect.api.didactic.models;
 
+import com.fiiconnect.api.didactic.helpers.formula.tree.AbstractTreeNode;
 import jakarta.persistence.*;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -27,4 +28,6 @@ public class Formula {
     @OneToMany(mappedBy = "idFormula", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FormulaComponent> components;
 
+    @Transient
+    private AbstractTreeNode treeRoot;
 }
