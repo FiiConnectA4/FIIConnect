@@ -1,7 +1,7 @@
 set sqlblanklines on;
 
-drop table orar;
-drop table sali;
+drop table orar cascade constraints;
+drop table sali cascade constraints;
 
 commit;
 
