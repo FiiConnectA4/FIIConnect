@@ -46,7 +46,7 @@ public class Announcement {
 
     @JoinColumn(name = "author_id")
 
-    @JsonIgnore
+  //  @JsonIgnore
 
     private User_Anunturi author;
 
