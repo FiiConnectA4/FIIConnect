@@ -32,7 +32,7 @@ public class UserProfileRequest {
         this.rating = profile.getRating();
         this.expertise = profile.getExpertise();
         this.achievements = profile.getAchievements();
-        this.profilePictureUrl = profile.getProfilePictureUrl();
+        this.profilePictureUrl = profile.getProfilePicture();
         this.email = user.getEmail();
     }
 }

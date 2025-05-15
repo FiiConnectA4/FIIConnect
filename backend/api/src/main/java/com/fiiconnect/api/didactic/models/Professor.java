@@ -1,5 +1,6 @@
 package com.fiiconnect.api.didactic.models;
 
+import com.fiiconnect.api.auth_userMgmt.models.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,6 +16,12 @@ public class Professor {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "professor_id_gen")
     @SequenceGenerator(name="professor_id_gen", sequenceName = "seq_professor_id", allocationSize = 1)
     private Long id;
+
+    //Adauga relatia cu User
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    private User user;
+
     private String cnp;
     private String firstName;
     private String lastName;
@@ -31,8 +38,7 @@ public class Professor {
         this.rank = rank;
     }
 
-    public Professor() {
-    }
+    public Professor() {}
 
     @Override
     public String toString() {
@@ -50,7 +56,11 @@ public class Professor {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Professor professor = (Professor) o;
-        return Objects.equals(id, professor.id) && Objects.equals(cnp, professor.cnp) && Objects.equals(firstName, professor.firstName) && Objects.equals(lastName, professor.lastName) && Objects.equals(rank, professor.rank);
+        return Objects.equals(id, professor.id) &&
+                Objects.equals(cnp, professor.cnp) &&
+                Objects.equals(firstName, professor.firstName) &&
+                Objects.equals(lastName, professor.lastName) &&
+                Objects.equals(rank, professor.rank);
     }
 
     @Override

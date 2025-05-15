@@ -96,7 +96,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // public WebSocket handshake (token e în query param)
                         .requestMatchers("/ws/**").permitAll()
-
+                        .requestMatchers(HttpMethod.GET, "/profile/photo").permitAll()
                         // auth endpoints
                         .requestMatchers(HttpMethod.POST, "/users/login", "/users/forgot-password", "/users/reset-password")
                         .permitAll()

@@ -45,4 +45,9 @@ public class User {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private UserProfile profile;
+
+    public Long getId()
+    {
+        return this.id;
+    }
 }

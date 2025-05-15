@@ -19,10 +19,7 @@ if [[ "$(uname -m)" == "arm64" ]]; then
     atmoz/sftp \
     fiiconnect:fiiconnect:::faculty_files
 else
-    sudo docker run -p 2222:22 -d \
-    -v "$volume_path":"$sftp_dir" \
-    atmoz/sftp \
-    fiiconnect:fiiconnect:::faculty_files
+    sudo docker run -p 2222:22 -d -v /Volumes/sftp-volume:\mnt\c\Users\40774\IdeaProjects\FIIConnect\containers\SFTP/../../SFTP_remote_files atmoz/sftp fiiconnect:fiiconnect:::faculty_files
 fi
 
 echo "Run with user: fiiconnect -- password: fiiconnect"

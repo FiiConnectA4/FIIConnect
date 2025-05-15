@@ -43,7 +43,7 @@ public class UserProfile {
     @ElementCollection
     private List<String> achievements;
 
-    private String profilePictureUrl;
+    private String profilePicture;
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
