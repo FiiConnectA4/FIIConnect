@@ -2,9 +2,6 @@ package com.fiiconnect.api.management_resurse;
 
 import com.fiiconnect.api.didactic.models.Student;
 import com.fiiconnect.api.didactic.repositories.StudentRepository;
-import com.fiiconnect.api.management_resurse.CerereBursaSociala;
-import com.fiiconnect.api.management_resurse.CerereBursaSocialaDTO;
-import com.fiiconnect.api.management_resurse.CerereBursaSocialaRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,6 +37,12 @@ public class CerereBursaSocialaController {
 
         return ResponseEntity.ok(repository.save(cerere));
     }
+
+    @GetMapping
+    public List<CerereBursaSociala> toateCererileBursaSociala() {
+        return repository.findAll(); 
+    }
+
 
     // GET: cerere după ID
     @GetMapping("/{id}")

@@ -37,6 +37,11 @@ public class CerereCazSocialController {
         return ResponseEntity.ok(repository.save(cerere));
     }
 
+    @GetMapping
+    public List<CerereCazSocial> toateCererileCazSocial() {
+        return repository.findAll(); 
+    }
+
     // GET: cerere după ID
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Integer id) {

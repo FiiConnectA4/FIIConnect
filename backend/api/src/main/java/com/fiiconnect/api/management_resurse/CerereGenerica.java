@@ -1,7 +1,6 @@
 package com.fiiconnect.api.management_resurse;
 
 import com.fiiconnect.api.didactic.models.Student;
-import com.fiiconnect.api.management_resurse.Cerere;
 import jakarta.persistence.*;
 
 import java.util.Objects;

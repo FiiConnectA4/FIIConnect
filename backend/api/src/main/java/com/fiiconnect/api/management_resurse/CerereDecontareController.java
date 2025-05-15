@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/secretariat/cerere-decontare")
+@RequestMapping("/cereri/cerere-decontare")
 public class CerereDecontareController {
 
     private final CerereDecontareRepository repository;
@@ -25,15 +25,6 @@ public class CerereDecontareController {
         if (dto.getStudentId() == null)
             return ResponseEntity.badRequest().body("studentId lipsă");
 
-        System.out.println("📩 ID student primit: " + dto.getStudentId());
-
-        if (studentRepository.findAll().isEmpty()) {
-            System.out.println("❌ Repository gol");
-        } else {
-            System.out.println("✅ Repository conține studenți");
-        }
-
-
         Optional<Student> studentOpt = studentRepository.findById(dto.getStudentId());
         if (studentOpt.isEmpty())
             return ResponseEntity.badRequest().body("Student inexistent");
@@ -41,7 +32,7 @@ public class CerereDecontareController {
         Student student = studentOpt.get();
 
         CerereDecontare cerere = new CerereDecontare();
-        cerere.setStudent(student); // Aici e cheia!
+        cerere.setStudent(student);
         cerere.setStatus(dto.getStatus());
         cerere.setComentariu(dto.getComentariu());
         cerere.setDataTrimitere(dto.getDataTrimitere());
@@ -65,6 +56,11 @@ public class CerereDecontareController {
         return repository.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping
+    public List<CerereDecontare> toateCererileDecontare() {
+        return repository.findAll(); 
     }
 
     @GetMapping("/student/{studentId}")

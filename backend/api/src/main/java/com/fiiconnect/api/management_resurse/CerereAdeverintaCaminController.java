@@ -2,9 +2,6 @@ package com.fiiconnect.api.management_resurse;
 
 import com.fiiconnect.api.didactic.models.Student;
 import com.fiiconnect.api.didactic.repositories.StudentRepository;
-import com.fiiconnect.api.management_resurse.CerereAdeverintaCamin;
-import com.fiiconnect.api.management_resurse.CerereAdeverintaCaminDTO;
-import com.fiiconnect.api.management_resurse.CerereAdeverintaCaminRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,6 +36,11 @@ public class CerereAdeverintaCaminController {
         return ResponseEntity.ok(repository.save(cerere));
     }
 
+    @GetMapping
+    public List<CerereAdeverintaCamin> toateCererileAdeverintaCamin() {
+        return repository.findAll(); 
+    }
+     
     // GET: cerere după ID
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Integer id) {

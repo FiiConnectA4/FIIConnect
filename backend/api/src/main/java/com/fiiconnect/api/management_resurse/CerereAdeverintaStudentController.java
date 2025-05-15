@@ -30,6 +30,11 @@ public class CerereAdeverintaStudentController {
         return ResponseEntity.ok(repository.save(cerere));
     }
 
+    @GetMapping
+    public List<CerereAdeverintaStudent> toateCererileAdeverintaStudent() {
+        return repository.findAll(); 
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Integer id) {
         return repository.findById(id).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());

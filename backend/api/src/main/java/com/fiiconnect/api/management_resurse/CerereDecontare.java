@@ -1,6 +1,5 @@
 package com.fiiconnect.api.management_resurse;
 
-import com.fiiconnect.api.management_resurse.CerereGenerica;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 
