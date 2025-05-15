@@ -350,11 +350,14 @@ public class AnnouncementController {
 
     // updateaza un anunt dupa id
 
+
     /*@PutMapping("/prof-secretar/{id}")
+
 
     public Announcement updateAnnouncement(@PathVariable Long id, @RequestBody AnnouncementDTO announcementRequest){
 
         return announcementService.updateAnnouncement(id,announcementRequest);
+
 
     }*/
 
@@ -416,6 +419,39 @@ public class AnnouncementController {
 
         return announcementService.updateAnnouncement(id, announcementRequest);
 
+
+    }*/
+/*
+    @PutMapping("/prof-secretar/{id}")
+    public Announcement updateAnnouncement(@PathVariable Long id, @RequestBody AnnouncementDTO announcementRequest) {
+        Announcement existingAnnouncement = announcementService.getAnnouncementById(id);
+
+        if (existingAnnouncement == null) {
+            System.out.println("Anunțul nu există.");
+            return null;
+        }
+
+        if (userLogatService.getUserLogat().getId() == null) {
+            System.out.println("Niciun user nu este logat.");
+            return null;
+        }
+
+        User_Anunturi userFromDb = userService2.getUserById(userLogatService.getUserLogat().getId());
+
+        if (userFromDb == null) {
+            System.out.println("Userul logat nu există în baza de date.");
+            return null;
+        }
+
+        if (!Objects.equals(userFromDb.getId(), existingAnnouncement.getAuthor().getId())) {
+            System.out.println("Nu aveți permisiunea să modificați acest anunț.");
+            return null;
+        }
+
+        // Dacă totul este OK, trecem la update
+        return announcementService.updateAnnouncement(id, announcementRequest);
+        */
+
     }
 
 
@@ -425,6 +461,7 @@ public class AnnouncementController {
     @DeleteMapping("/prof-secretar/{id}")
 
     public void deleteAnnouncement(@PathVariable Long id) {
+
 
         Announcement existingAnnouncement = announcementService.getAnnouncementById(id);
 
@@ -477,6 +514,35 @@ public class AnnouncementController {
         announcementService.deleteAnnouncement(id);
 
         System.out.println("Anunțul a fost șters cu succes.");
+
+
+  /*      Announcement existingAnnouncement = announcementService.getAnnouncementById(id);
+
+        if (existingAnnouncement == null) {
+            System.out.println("Anunțul nu există.");
+            return;
+        }
+
+        if (userLogatService.getUserLogat().getId() == null) {
+            System.out.println("Niciun user nu este logat.");
+            return;
+        }
+
+        User_Anunturi userFromDb = userService2.getUserById(userLogatService.getUserLogat().getId());
+
+        if (userFromDb == null) {
+            System.out.println("Userul logat nu există în baza de date.");
+            return;
+        }
+
+        if (!Objects.equals(userFromDb.getId(), existingAnnouncement.getAuthor().getId())) {
+            System.out.println("Nu aveți permisiunea să ștergeți acest anunț.");
+            return;
+        }
+
+        announcementService.deleteAnnouncement(id);
+        System.out.println("Anunțul a fost șters cu succes.");
+        */
 
     }
 

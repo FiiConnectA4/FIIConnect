@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
-import "../Style/Chat.css"
+import "../Style/Chat.css";
 
 function Chat() {
   const [messages, setMessages] = useState([]);
@@ -10,31 +10,54 @@ function Chat() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [stompClient, setStompClient] = useState(null);
-  
+  const [channels, setChannels] = useState([]);
+  const [activeChannel, setActiveChannel] = useState(null);
+  const [userTags, setUserTags] = useState([]);
+  const [pendingMessages, setPendingMessages] = useState([]);
+
   const messagesEndRef = useRef(null);
 
-  // Fetch current user and messages
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
-        
-        // Fetch current user
+
+        // 1. Fetch current user
         const userResponse = await fetch("http://localhost:34101/auth/current-user");
         if (!userResponse.ok) throw new Error("Failed to fetch current user");
         const userData = await userResponse.json();
-        setCurrentUser({
+        const currentUserObj = {
           id: userData.id,
           name: userData.username,
-          type: userData.type
-        });
+          type: userData.type,
+        };
+        setCurrentUser(currentUserObj);
 
-        // Load all messages (single channel)
-        const messagesResponse = await fetch("http://localhost:34101/chat");
-        if (!messagesResponse.ok) throw new Error("Failed to fetch messages");
-        const messagesData = await messagesResponse.json();
-        setMessages(messagesData);
+        // 2. Fetch user's tags
+        const tagsResponse = await fetch(`http://localhost:34101/users/${userData.id}/tags`);
+        if (!tagsResponse.ok) throw new Error("Failed to fetch user tags");
+        const tagsData = await tagsResponse.json();
+        setUserTags(tagsData);
+
+        // 3. Prepare tag IDs
+        const tagIds = tagsData.map(tag => tag.id);
+
+        // 4. Fetch channels
+        const channelsResponse = await fetch(
+          `http://localhost:34101/channel/with-tags?tagIds=${tagIds.join(',')}`
+        );
+        if (!channelsResponse.ok) throw new Error("Failed to fetch channels");
+        const channelsData = await channelsResponse.json();
+        console.log("Channels data:", channelsData);
+        setChannels(channelsData);
+
+        // 5. Set first channel as active if available
+        if (channelsData.length > 0) {
+          setActiveChannel(channelsData[0]);
+          loadChannelMessages(channelsData[0].id);
+        }
       } catch (err) {
+        console.error("Fetch error:", err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -44,34 +67,39 @@ function Chat() {
     fetchData();
   }, []);
 
-  // Initialize WebSocket connection
+  const loadChannelMessages = async (channelId) => {
+    try {
+      const response = await fetch(`http://localhost:34101/chat/get-chats/${channelId}`);
+      if (!response.ok) throw new Error("Failed to fetch channel messages");
+      const data = await response.json();
+      setMessages(data);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   useEffect(() => {
-    if (!currentUser || stompClient) return;
+    if (!currentUser || !activeChannel) return;
 
     const socket = new SockJS('http://localhost:34101/ws');
     const client = Stomp.over(socket);
-    
+
     client.connect({}, () => {
       setStompClient(client);
-      
-      // Subscribe to public topic with duplicate prevention
-      client.subscribe('/topic/public', (message) => {
+
+      client.subscribe(`/topic/channel/${activeChannel.id}`, (message) => {
         const newMessage = JSON.parse(message.body);
-        if (newMessage.type === 'CHAT') {
-          setMessages(prev => {
-            // Using message ID if available, otherwise use timestamp+sender+content as fallback
-            if (newMessage.id && prev.some(msg => msg.id === newMessage.id)) {
-              return prev;
-            }
-            // Fallback duplicate check
-            const isDuplicate = prev.some(msg => 
-              msg.timestamp === newMessage.timestamp && 
-              msg.sender?.id === newMessage.sender?.id &&
-              msg.message === newMessage.message
-            );
-            return isDuplicate ? prev : [...prev, newMessage];
-          });
-        }
+
+        setPendingMessages(prev =>
+          prev.filter(msg => msg.tempId !== newMessage.tempId)
+        );
+
+        setMessages(prev => {
+          const exists = prev.some(msg =>
+            msg.id === newMessage.id || msg.tempId === newMessage.tempId
+          );
+          return exists ? prev : [...prev, newMessage];
+        });
       });
     });
 
@@ -80,30 +108,72 @@ function Chat() {
         client.disconnect();
       }
     };
-  }, [currentUser]);
+  }, [currentUser, activeChannel]);
 
-  // Auto-scroll to bottom when messages change
+  const displayMessages = [
+    ...messages,
+    ...pendingMessages.filter(msg => msg.channelId === activeChannel?.id),
+  ].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [messages, pendingMessages]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+    });
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      scrollToBottom();
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [activeChannel]);
 
   const handleSendMessage = (e) => {
     e.preventDefault();
-    if (!newMessage.trim() || !currentUser || !stompClient) return;
+    if (!newMessage.trim() || !currentUser || !stompClient || !activeChannel) return;
 
+    const tempId = Date.now();
     const chatMessage = {
       sender: currentUser,
       message: newMessage.trim(),
       timestamp: new Date().toISOString(),
-      type: 'CHAT'
+      type: 'CHAT',
+      channelId: activeChannel.id,
+      tempId,
     };
 
-    stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+    setPendingMessages(prev => [...prev, chatMessage]);
     setNewMessage("");
+    stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+  };
+
+  const handleChannelChange = (channel) => {
+    setActiveChannel(channel);
+    loadChannelMessages(channel.id);
+
+    if (stompClient && stompClient.connected) {
+      stompClient.disconnect();
+      setStompClient(null);
+    }
+  };
+
+  const getChannelTypeClass = (channel) => {
+    if (!channel || !channel.tags || !Array.isArray(channel.tags)) return 'general';
+
+    const tagTypes = channel.tags.map(tag => tag.type);
+
+    if (tagTypes.includes('GENERAL')) return 'general';
+    if (tagTypes.includes('AN')) return 'an';
+    if (tagTypes.includes('MATERIE')) return 'materie';
+    if (tagTypes.includes('GRUPA')) return 'grupa';
+    if (tagTypes.includes('SEMINAR')) return 'seminar';
+
+    return 'general';
   };
 
   if (loading) return <div className="loading">Se încarcă...</div>;
@@ -116,47 +186,78 @@ function Chat() {
         <h1>Chat</h1>
       </div>
 
-      <div className="chat-main">
-        <div className="chat-messages">
-          {messages.length === 0 ? (
-            <div className="no-messages">Nu există mesaje în chat.</div>
-          ) : (
-            messages.map((message, index) => (
-              <div 
-                key={index} 
-                className={`message ${
-                  message.sender?.id === currentUser.id ? 'sent' : 'received'
-                }`}
-              >
-                <div className="message-sender">
-                  {message.sender?.id === currentUser.id ? 'Tu' : message.sender?.name}
-                </div>
-                <div className="message-text">{message.message}</div>
-                <div className="message-time">
-                  {new Date(message.timestamp).toLocaleTimeString('ro-RO', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    day: '2-digit',
-                    month: '2-digit',
-                    year: 'numeric'
-                  })}
-                </div>
+      <div className="chat-layout">
+        <div className="chat-main">
+          {activeChannel && (
+            <>
+              <div className="chat-channel-header">
+                <h2>{activeChannel.name}</h2>
+                <span className={`channel-type-badge ${getChannelTypeClass(activeChannel)}`}>
+                  {getChannelTypeClass(activeChannel).toUpperCase()}
+                </span>
               </div>
-            ))
+
+              <div className="chat-messages" style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 200px)' }}>
+                {displayMessages.length === 0 ? (
+                  <div className="no-messages">Nu există mesaje în acest canal.</div>
+                ) : (
+                  displayMessages.map((message) => (
+                    <div
+                      key={message.id || message.tempId}
+                      className={`message ${message.sender?.id === currentUser.id ? 'sent' : 'received'}`}
+                    >
+                      <div className="message-sender">
+                        {message.sender?.id === currentUser.id ? 'Tu' : message.sender?.name}
+                      </div>
+                      <div className="message-text">{message.message}</div>
+                      <div className="message-time">
+                        {new Date(message.timestamp).toLocaleTimeString('ro-RO', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                        })}
+                      </div>
+                    </div>
+                  ))
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              <form className="chat-input-form" onSubmit={handleSendMessage}>
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Scrie un mesaj..."
+                  required
+                />
+                <button type="submit">Trimite</button>
+              </form>
+            </>
           )}
-          <div ref={messagesEndRef} />
         </div>
 
-        <form className="chat-input-form" onSubmit={handleSendMessage}>
-          <input
-            type="text"
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Scrie un mesaj..."
-            required
-          />
-          <button type="submit">Trimite</button>
-        </form>
+        <div className="chat-sidebar">
+          <h2>Canale disponibile</h2>
+          <ul className="channel-list">
+            {channels.map((channel) => (
+              <li
+                key={channel.id}
+                className={`channel-item ${activeChannel?.id === channel.id ? 'active' : ''}`}
+                onClick={() => handleChannelChange(channel)}
+              >
+                <span className={`channel-name ${getChannelTypeClass(channel)}`}>
+                  {channel.name}
+                </span>
+                <span className="channel-type">
+                  {getChannelTypeClass(channel)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );
