@@ -1,16 +1,16 @@
 set sqlblanklines on;
 
 
-drop table USER_TAGS;
-drop table CHANNEL_TAGS;
-drop table ANNOUNCEMENT_TAGS;
-drop table TAG;
+drop table USER_TAGS cascade constraints;
+drop table CHANNEL_TAGS cascade constraints;
+drop table ANNOUNCEMENT_TAGS cascade constraints;
+drop table TAG cascade constraints;
 
-drop table CHANNEL;
+drop table CHANNEL cascade constraints;
 
-drop table ANNOUNCEMENT;
-drop table ACHIEVEMENT;
-drop table CHAT;
+drop table ANNOUNCEMENT cascade constraints;
+drop table ACHIEVEMENT cascade constraints;
+drop table CHAT cascade constraints;
 
 commit;
 
