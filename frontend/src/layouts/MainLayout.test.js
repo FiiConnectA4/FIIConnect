@@ -1,16 +1,16 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import MainLayout from './MainLayout';
-import Sidebar from '../components/Sidebar/Sidebar';
+import StudentLayout from './StudentLayout';
+import StudentSidebar from '../components/Sidebar-Student/StudentSidebar';
 
-jest.mock('../components/Sidebar/Sidebar', () => () => <div>Sidebar</div>);
+jest.mock('../components/Sidebar-Student/StudentSidebar', () => () => <div>Sidebar</div>);
 
-describe('MainLayout Component', () => {
-    test('renders Sidebar and Outlet content', () => {
+describe('StudentLayout Component', () => {
+    test('renders AdminSidebar and Outlet content', () => {
         const OutletMock = () => <div>Outlet Content</div>;
         render(
             <MemoryRouter>
-                <MainLayout />
+                <StudentLayout />
                 <OutletMock />
             </MemoryRouter>
         );
@@ -21,7 +21,7 @@ describe('MainLayout Component', () => {
     test('applies flex layout styles', () => {
         const { container } = render(
             <MemoryRouter>
-                <MainLayout />
+                <StudentLayout />
             </MemoryRouter>
         );
         const wrapper = container.firstChild;
