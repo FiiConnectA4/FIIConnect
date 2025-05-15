@@ -72,6 +72,7 @@ public class FormulaController {
         return newGrade;
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @GetMapping("/formula/{id}/evaluate/all")
     public List<Grade> evaluateFormulaForAllStudents(@PathVariable("id") Long id)
     {
@@ -222,27 +223,6 @@ public class FormulaController {
         message = exceptionHelper.getConstraintName(message);
         LOGGER.warning("Constraint violation: " + message);
         return "Constraint violated: " + message;
-    }
-
-    public static class FormulaRequest {
-        private Long idCourse;
-        private String text;
-
-        public Long getIdCourse() {
-            return idCourse;
-        }
-
-        public void setIdCourse(Long idCourse) {
-            this.idCourse = idCourse;
-        }
-
-        public String getText() {
-            return text;
-        }
-
-        public void setText(String text) {
-            this.text = text;
-        }
     }
 
     private List<FormulaComponent> parseFormulaComponents(String formulaText, Formula formula) {
