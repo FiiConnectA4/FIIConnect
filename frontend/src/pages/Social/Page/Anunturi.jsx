@@ -7,11 +7,9 @@ function Anunturi() {
   const [userLoading, setUserLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
-
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingAnnouncement, setEditingAnnouncement] = useState(null);
   const [availableTagTypes, setAvailableTagTypes] = useState([]);
-
   const [newAnnouncement, setNewAnnouncement] = useState({
     title: "",
     message: "",
@@ -26,8 +24,13 @@ function Anunturi() {
   const [fullUser, setFullUser] = useState(null);
   const [userTags, setUserTags] = useState([]);
 
-  const fetchUserData = async () => {
+  // Helper function to normalize user type
+  const normalizeUserType = (type) => {
+    if (!type) return null;
+    return type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
+  };
 
+  const fetchUserData = async () => {
   try {
     setUserLoading(true);
     const token = localStorage.getItem('token');
@@ -39,7 +42,6 @@ function Anunturi() {
     if (!authResponse.ok) throw new Error("Failed to fetch current user");
     const authUser = await authResponse.json();
     setCurrentUser(authUser);
-
 
     const userResponse = await fetch(`http://localhost:34101/users/${authUser.id}`);
     if (!userResponse.ok) throw new Error("Failed to fetch user details");
@@ -100,7 +102,6 @@ function Anunturi() {
       } : null
     }));
 
-
     // Sortează după dată
     announcementsData.sort((a, b) => new Date(b.publishedDate) - new Date(a.publishedDate));
     setAnnouncements(announcementsData);
@@ -127,6 +128,11 @@ function Anunturi() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setNewAnnouncement(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditingAnnouncement(prev => ({ ...prev, [name]: value }));
   };
 
   const handleTagInputChange = (e) => {
@@ -187,6 +193,8 @@ function Anunturi() {
     setCurrentTag({ name: "", type: "GENERAL" });
   };
 
+  
+
   const addEditTag = () => {
     setError(null);
 
@@ -240,6 +248,13 @@ function Anunturi() {
     }));
   };
 
+  const removeEditTag = (index) => {
+    setEditingAnnouncement(prev => ({
+      ...prev,
+      tags: prev.tags.filter((_, i) => i !== index)
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -273,6 +288,7 @@ function Anunturi() {
         publishedDate: new Date().toISOString()
       };
 
+      
       const response = await fetch("http://localhost:34101/announcement/prof-secretar", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -290,6 +306,89 @@ function Anunturi() {
     } catch (err) {
       setError(err.message);
     }
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
+    
+    try {
+      if (userLoading) {
+        throw new Error("Datele utilizatorului se încarcă. Te rugăm să aștepți...");
+      }
+
+      if (!fullUser) {
+        throw new Error("Informațiile utilizatorului nu sunt disponibile.");
+      }
+
+      if (!editingAnnouncement.title.trim()) {
+        throw new Error("Te rugăm să introduci un titlu");
+      }
+
+      if (!editingAnnouncement.message.trim()) {
+        throw new Error("Te rugăm să introduci un mesaj");
+      }
+
+      const payload = {
+        title: editingAnnouncement.title.trim(),
+        message: editingAnnouncement.message.trim(),
+        professor: {
+          id: fullUser.id,
+          name: fullUser.name,
+          type: fullUser.type
+        },
+        tags: editingAnnouncement.tags,
+        publishedDate: editingAnnouncement.publishedDate
+      };
+
+      const response = await fetch(`http://localhost:34101/announcement/prof-secretar/${editingAnnouncement.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Eroare la actualizarea anunțului");
+      }
+      
+      setShowEditModal(false);
+      setEditingAnnouncement(null);
+      await fetchAnnouncements(fullUser);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleDelete = async (announcementId) => {
+    try {
+      if (!window.confirm("Sigur dorești să ștergi acest anunț?")) {
+        return;
+      }
+
+      const response = await fetch(`http://localhost:34101/announcement/prof-secretar/${announcementId}`, {
+        method: "DELETE"
+      });
+
+      if (!response.ok) {
+        throw new Error("Eroare la ștergerea anunțului");
+      }
+
+      await fetchAnnouncements(fullUser);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const handleEdit = (announcement) => {
+    setEditingAnnouncement({
+      id: announcement.id,
+      title: announcement.title,
+      message: announcement.message,
+      tags: announcement.tags || [],
+      publishedDate: announcement.publishedDate
+    });
+    setShowEditModal(true);
   };
 
   const filterAnnouncements = (allAnnouncements, tags) => {
@@ -316,20 +415,21 @@ function Anunturi() {
   const announcementsToDisplay = fullUser.type === "Student"
     ? filterAnnouncements(announcements, userTags)
     : announcements;
+    
 
   return (
     <div className="announcements-container">
       <div className="announcements-header">
         <h1>Anunțuri</h1>
-        {(fullUser.type === "Profesor" || fullUser.type === "Secretar") && (
-          <button 
-            className="add-button"
-            onClick={() => setShowModal(true)}
-            disabled={userLoading}
-          >
-            +
-          </button>
-        )}
+       {(normalizeUserType(fullUser.type) === "Profesor" || normalizeUserType(fullUser.type) === "Secretar") && (
+        <button 
+          className="add-button"
+          onClick={() => setShowModal(true)}
+          disabled={userLoading}
+        >
+          +
+        </button>
+      )}
       </div>
 
       {showModal && (
@@ -531,13 +631,13 @@ function Anunturi() {
           </div>
         </div>
       )}
+
       <div className="announcements-list">
         {announcementsToDisplay.length === 0 ? (
           <p>Nu există anunțuri disponibile.</p>
         ) : (
           announcementsToDisplay.map((announcement) => (
             <div key={announcement.id} className="announcement-card">
-
   <div className="announcement-header">
     <div className="announcement-title-container">
       <h2>{announcement.title}</h2>
@@ -582,7 +682,6 @@ function Anunturi() {
     </div>
   </div>
   <p className="announcement-message">{announcement.message}</p>
-
               {announcement.tags && announcement.tags.length > 0 && (
                 <div className="announcement-tags-container">
                   <div className="announcement-tags-header">Destinatar:</div>

@@ -22,7 +22,7 @@ public class Channel {
             joinColumns = @JoinColumn(name = "channel_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
-    @JsonIgnore
+    //@JsonIgnore
     private Set<Tag> tags = new HashSet<>();
 
     public Channel() {
