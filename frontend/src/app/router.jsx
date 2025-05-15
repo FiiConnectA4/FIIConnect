@@ -18,7 +18,10 @@ import DotariSala from "../pages/Orar/DotariSala";
 import OrarSecretariat from "../pages/Orar/OrarSecretariat";
 import TwoFAVerify from "../pages/Auth/TwoFAVerify";
 import PrivateRoute from "../components/PrivateRoute";
-import Student from "../pages/Cursuri/Student/Student"; // ✅ importăm PrivateRoute
+import ChangePassword from "../pages/Auth/ChangePassword";
+import CreateAccount from "../pages/Auth/CreateAccount";
+import ForgotPassword from "../pages/Auth/ForgotPassword";
+import ResetPassword from "../pages/Auth/ResetPassword";
 
 const AppRoutes = () => {
     return (
@@ -26,6 +29,8 @@ const AppRoutes = () => {
             {/* Public route (login page) */}
             <Route path="/" element={<Login />} />
             <Route path="/app/2fa"     element={<TwoFAVerify />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
 
             {/* Protected routes inside layout */}
 
@@ -37,6 +42,15 @@ const AppRoutes = () => {
                     </PrivateRoute>
                 }
             >
+
+                <Route
+                    path="create-account"
+                    element={
+                        <PrivateRoute allowedRoles={["ROLE_ADMIN"]}>
+                            <CreateAccount />
+                        </PrivateRoute>
+                    }
+                />
 
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="anunturi" element={<Anunturi />} />
@@ -69,6 +83,7 @@ const AppRoutes = () => {
                 <Route path="secretariat" element={<Secretariat />} />
                 <Route path="chat" element={<Chat />} />
                 <Route path="profile" element={<Profil />} />
+                <Route path="/app/reset-password" element={<ChangePassword />} />
                 <Route path="setup-2fa" element={<Setup2FA />} />
                 <Route path="setup-profile" element={<SetupProfile />} />
                 <Route path="contact" element={<Contact />} />

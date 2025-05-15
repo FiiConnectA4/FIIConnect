@@ -68,15 +68,25 @@ export default function Setup2FA() {
     };
 
     /* -------------------- UI -------------------- */
-    if (loading) return <div className="text-center py-10">Se încarcă…</div>;
-    if (error)   return (
-        <div className="max-w-lg mx-auto p-6 text-center text-red-600">
-            {error}<br />
-            <button onClick={() => navigate("/app/profile")} className="underline mt-4">
-                Înapoi la profil
-            </button>
-        </div>
-    );
+    if (loading) {
+        return (
+            <div className="status-message loading">
+                <p>Se încarcă…</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className={`status-message ${error.toLowerCase().includes("activat") ? "success" : "error"}`}>
+                <p>{error}</p>
+                <button className="back-btn" onClick={() => navigate("/app/profile")}>
+                    Înapoi la profil
+                </button>
+            </div>
+        );
+    }
+
 
     return (
         <div className="setup2fa-wrapper">

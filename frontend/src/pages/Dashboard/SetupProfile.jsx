@@ -9,12 +9,43 @@ const SetupProfile = () => {
         phone: '',
         about: ''
     });
+    const [errors, setErrors] = useState({});
+
 
     const handleChange = (e) => {
-        setForm({ ...form, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+
+        if (name === "phone") {
+            const onlyDigits = value.replace(/\D/g, "");
+            if (onlyDigits.length > 10) return;
+
+            setForm({ ...form, [name]: onlyDigits });
+        } else {
+            setForm({ ...form, [name]: value });
+        }
     };
 
+
     const handleSubmit = () => {
+        const { firstName, lastName, phone } = form;
+        const newErrors = {};
+
+        if (!firstName.trim()) newErrors.firstName = "Prenumele este obligatoriu.";
+        if (!lastName.trim()) newErrors.lastName = "Numele este obligatoriu.";
+        if (!phone.trim()) {
+            newErrors.phone = "Numărul de telefon este obligatoriu.";
+        } else if (!/^\d{10}$/.test(phone)) {
+            newErrors.phone = "Numărul trebuie să aibă exact 10 cifre.";
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
+        // curățăm erorile dacă totul e valid
+        setErrors({});
+
         const token = localStorage.getItem("token");
         fetch("/profile/setup", {
             method: "POST",
@@ -31,6 +62,9 @@ const SetupProfile = () => {
             .then(() => navigate("/app/profile"))
             .catch((err) => alert("Eroare: " + err.message));
     };
+
+
+
 
     return (
         <>
@@ -110,13 +144,60 @@ const SetupProfile = () => {
                         font-size: 1.4rem;
                     }
                 }
+                
+                .error-msg {
+    color: #e53e3e;
+    font-size: 0.875rem;
+    margin: -0.5rem 0 0.75rem 0;
+    text-align: left;
+}
+
+.input-error {
+    border-color: #e53e3e !important;
+    background-color: #fff5f5;
+}
+
             `}</style>
             <div className="setup-profile-wrapper">
                 <h2>Configurează-ți profilul</h2>
-                <input name="firstName" placeholder="First Name" onChange={handleChange} />
-                <input name="lastName" placeholder="Last Name" onChange={handleChange} />
-                <input name="phone" placeholder="Phone" onChange={handleChange} />
-                <textarea name="about" placeholder="Despre tine" onChange={handleChange} />
+                <input
+                    name="firstName"
+                    placeholder="First Name"
+                    value={form.firstName}
+                    onChange={handleChange}
+                    className={errors.firstName ? "input-error" : ""}
+                />
+                {errors.firstName && <p className="error-msg">{errors.firstName}</p>}
+
+                <input
+                    name="lastName"
+                    placeholder="Last Name"
+                    value={form.lastName}
+                    onChange={handleChange}
+                    className={errors.lastName ? "input-error" : ""}
+                />
+                {errors.lastName && <p className="error-msg">{errors.lastName}</p>}
+
+                <input
+                    name="phone"
+                    placeholder="Phone"
+                    value={form.phone}
+                    onChange={handleChange}
+                    inputMode="numeric"
+                    maxLength={11}
+                    autoComplete="tel"
+                    className={errors.phone ? "input-error" : ""}
+                />
+                {errors.phone && <p className="error-msg">{errors.phone}</p>}
+
+                <textarea
+                    name="about"
+                    placeholder="Despre tine (opțional)"
+                    value={form.about}
+                    onChange={handleChange}
+                />
+
+
                 <button onClick={handleSubmit}>Salvează profil</button>
             </div>
         </>

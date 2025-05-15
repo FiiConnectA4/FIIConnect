@@ -71,3 +71,15 @@
         font-size: 1.4rem;
     }
 }
+
+.error-msg {
+    color: #e53e3e;
+    font-size: 0.875rem;
+    margin: -0.5rem 0 0.75rem 0;
+    text-align: left;
+}
+
+.input-error {
+    border-color: #e53e3e !important;
+    background-color: #fff5f5;
+}

@@ -128,6 +128,8 @@ public class AuthController {
         }
 
         User user = userOptional.get();
+        tokenRepository.deleteByUser(user);
+
         String token = UUID.randomUUID().toString();
         PasswordResetToken resetToken = new PasswordResetToken();
         resetToken.setToken(token);
@@ -170,6 +172,39 @@ public class AuthController {
 
         return ResponseEntity.ok("Password reset successfully");
     }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestHeader("Authorization") String authHeader,
+                                            @RequestBody Map<String, String> body) {
+        User user = validateAndGetUser(authHeader);
+
+        String oldPassword = body.get("oldPassword");
+        String newPassword = body.get("newPassword");
+
+        if (oldPassword == null || newPassword == null) {
+            return ResponseEntity.badRequest().body(new ApiResponse("Ambele parole sunt necesare.", false));
+        }
+
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            return ResponseEntity.status(401).body(new ApiResponse("Parola veche este incorectă.", false));
+        }
+
+        if (passwordEncoder.matches(newPassword, user.getPassword())) {
+            return ResponseEntity.badRequest().body(new ApiResponse("Noua parolă nu poate fi aceeași cu cea veche.", false));
+        }
+
+        if (!PasswordValidator.isValid(newPassword)) {
+            return ResponseEntity.badRequest().body(
+                    new ApiResponse("Parola trebuie să conțină minim 8 caractere, o literă mare, una mică, o cifră și un simbol.", false)
+            );
+        }
+
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        return ResponseEntity.ok(new ApiResponse("Parola a fost schimbată cu succes.", true));
+    }
+
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse> registerUser(@RequestBody RegisterDTO registerRequest) {

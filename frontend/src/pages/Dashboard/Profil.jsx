@@ -54,16 +54,21 @@ const Profile = () => {
                     "Content-Type": "application/json",
                     Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify({ ...profile, ...changes }),
+                body: JSON.stringify(changes),
             });
             if (!res.ok) throw new Error("Update failed");
             const updated = await res.json();
             setProfile(updated);
-            setDraft({ phone: updated.phone || "", about: updated.about || "" });
+            setDraft({
+                phone: updated.phone || "",
+                about: updated.about || "",
+            });
+
         } catch (err) {
             console.error("Eroare la actualizare:", err);
         }
     };
+
 
     /* --------------------------- render --------------------------- */
     if (loading) return <div>Loading…</div>;
@@ -106,12 +111,11 @@ const Profile = () => {
                                         </button>
                                     </div>
                                 ) : (
-                                    <EditField
-                                        type="text"
+                                    <EditPhoneField
                                         value={draft.phone}
                                         onChange={(v) => setDraft({ ...draft, phone: v })}
-                                        onSave={() => {
-                                            updateProfile({ phone: draft.phone });
+                                        onSave={async () => {
+                                            await updateProfile({ phone: draft.phone });
                                             setEditing((e) => ({ ...e, phone: false }));
                                         }}
                                         onCancel={() => {
@@ -119,6 +123,7 @@ const Profile = () => {
                                             setEditing((e) => ({ ...e, phone: false }));
                                         }}
                                     />
+
                                 )}
                             </div>
 
@@ -247,22 +252,43 @@ const InfoRow = ({ label, value }) => (
     </div>
 );
 
-const EditField = ({ type, value, onChange, onSave, onCancel }) => (
-    <div className="value-edit">
-        <input
-            type={type}
-            className="editable-input"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-        />
-        <button className="save-btn" onClick={onSave}>
-            Save
-        </button>
-        <button className="cancel-btn" onClick={onCancel}>
-            Cancel
-        </button>
-    </div>
-);
+const EditPhoneField = ({ value, onChange, onSave, onCancel }) => {
+    const handleInputChange = (e) => {
+        const digitsOnly = e.target.value.replace(/\D/g, "");
+        if (digitsOnly.length <= 10) {
+            onChange(digitsOnly);
+        }
+    };
+
+    return (
+        <div className="value-edit">
+            <input
+                type="text"
+                className="editable-input"
+                value={value}
+                onChange={handleInputChange}
+                inputMode="numeric"
+                maxLength={10}
+            />
+            <button
+                className="save-btn"
+                onClick={() => {
+                    if (!/^\d{10}$/.test(value)) {
+                        alert("Numărul trebuie să aibă exact 10 cifre.");
+                        return;
+                    }
+                    onSave();
+                }}
+            >
+                Save
+            </button>
+            <button className="cancel-btn" onClick={onCancel}>
+                Cancel
+            </button>
+        </div>
+    );
+};
+
 
 const EditTextarea = ({ value, onChange, onSave, onCancel }) => (
     <div className="edit-textarea-wrapper">

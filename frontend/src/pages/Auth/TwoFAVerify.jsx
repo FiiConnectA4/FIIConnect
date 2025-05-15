@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "../../styles/Login.css";
+import logo from "../../styles/FiiConnect-removebg-preview.png"
 
 const TwoFAVerify = () => {
     const { state } = useLocation();
-    const navigate  = useNavigate();
-    const username  = state?.username || "";
+    const navigate = useNavigate();
+    const username = state?.username || "";
     const [code, setCode] = useState("");
 
     useEffect(() => {
@@ -41,24 +42,34 @@ const TwoFAVerify = () => {
         }
     };
 
-    /* ---------------- UI ---------------- */
     return (
-        <div className="login-wrapper">
-            <form className="login-card" onSubmit={handleVerify}>
-                <h1>Verificare 2FA</h1>
-
-                <input
-                    type="text"
-                    placeholder="Cod 6 cifre"
-                    value={code}
-                    onChange={(e) => setCode(e.target.value)}
-                    maxLength={6}
-                    className="code-input"
-                    required
+        <div className="login-container">
+            <div className="login-box">
+                <img
+                    src={logo}
+                    alt="FIIConnect"
+                    className="logo"
                 />
+                <h2 className="subtitle">INTRODU CODUL 2FA</h2>
 
-                <button type="submit">Verifică</button>
-            </form>
+                <form className="login-form" onSubmit={handleVerify}>
+                    <input
+                        className="input"
+                        type="text"
+                        placeholder="Cod 6 cifre"
+                        value={code}
+                        onChange={(e) => setCode(e.target.value)}
+                        maxLength={6}
+                        required
+                    />
+
+                    <button className="login-button" type="submit">
+                        Verifică
+                    </button>
+                </form>
+
+                <p className="copyright">© FIIConnect</p>
+            </div>
         </div>
     );
 };

@@ -17,6 +17,7 @@ const StudentSidebar = () => {
     { name: "Profile", icon: "👤", to: "profile" },
     { name: "Contact", icon: "📧" },
     { name: "Secretariat", icon: "🏛️" },
+    { name: "Create Account", icon: "👤", to: "create-account"}
   ];
 
   return (

@@ -44,14 +44,22 @@ public class UserProfileController {
         User user = userRepository.findByUsername(userDetails.getUsername());
         UserProfile profile = profileService.getByUser(user);
 
-        profile.setPhone(dto.getPhone());
-        profile.setAbout(dto.getAbout());
-        profile.setFirstName(dto.getFirstName());
-        profile.setLastName(dto.getLastName());
+        if (dto.getPhone() != null)
+            profile.setPhone(dto.getPhone());
+
+        if (dto.getAbout() != null)
+            profile.setAbout(dto.getAbout());
+
+        if (dto.getFirstName() != null)
+            profile.setFirstName(dto.getFirstName());
+
+        if (dto.getLastName() != null)
+            profile.setLastName(dto.getLastName());
 
         profileService.updateProfile(profile);
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(profile);
     }
+
 
     @PostMapping("/setup")
     public ResponseEntity<?> createProfile(@AuthenticationPrincipal UserDetails userDetails,
