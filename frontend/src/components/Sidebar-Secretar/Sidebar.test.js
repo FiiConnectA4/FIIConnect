@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import Sidebar from './Sidebar';
+import SecretarySidebar from './SecretarySidebar';
 
 jest.mock('../SidebarButton/SidebarButton', () => ({ icon, label, to }) => (
     <div data-testid={`button-${label}`} data-to={to}>
@@ -9,11 +9,11 @@ jest.mock('../SidebarButton/SidebarButton', () => ({ icon, label, to }) => (
 ));
 jest.mock('../ThemeToggle/ThemeToggle', () => () => <div>Theme Toggle</div>);
 
-describe('Sidebar Component', () => {
+describe('AdminSidebar Component', () => {
     test('renders logo and footer', () => {
         render(
             <MemoryRouter>
-                <Sidebar />
+                <SecretarySidebar />
             </MemoryRouter>
         );
         expect(screen.getByText(/FIIConnect/i)).toBeInTheDocument();
@@ -23,7 +23,7 @@ describe('Sidebar Component', () => {
     test('renders general section links', () => {
         render(
             <MemoryRouter>
-                <Sidebar />
+                <SecretarySidebar />
             </MemoryRouter>
         );
         expect(screen.getByText('GENERAL')).toBeInTheDocument();
@@ -34,7 +34,7 @@ describe('Sidebar Component', () => {
     test('renders management section links', () => {
         render(
             <MemoryRouter>
-                <Sidebar />
+                <SecretarySidebar />
             </MemoryRouter>
         );
         expect(screen.getByText('MANAGEMENT')).toBeInTheDocument();
@@ -45,7 +45,7 @@ describe('Sidebar Component', () => {
     test('renders ThemeToggle', () => {
         render(
             <MemoryRouter>
-                <Sidebar />
+                <SecretarySidebar />
             </MemoryRouter>
         );
         expect(screen.getByText('Theme Toggle')).toBeInTheDocument();

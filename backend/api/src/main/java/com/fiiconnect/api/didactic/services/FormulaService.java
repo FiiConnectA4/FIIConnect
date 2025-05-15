@@ -35,7 +35,9 @@ public class FormulaService {
     }
 
     public void addFormula(Formula formula) {
+
         formulaRepository.save(formula);
+        formulaRepository.flush();
     }
 
     public void deleteFormula(Long formulaId) {
