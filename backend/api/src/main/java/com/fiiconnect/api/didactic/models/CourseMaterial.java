@@ -14,7 +14,7 @@ import java.util.Objects;
 public class CourseMaterial {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "material_id_gen")
-    @SequenceGenerator(name="material_id_gen", sequenceName = "seq_material_id", allocationSize = 1, initialValue = 1)
+    @SequenceGenerator(name="material_id_gen", sequenceName = "seq_material_id", allocationSize = 1)
     private Long id;
     private Long idCourse;
     @Column(name = "idProf")

@@ -15,16 +15,18 @@ public class Orar {
 private Integer id;
 
     private String zi;
+    @Column(name = "ora_start")
     private String oraStart;
+    @Column(name = "ora_end")
     private String oraEnd;
     private String saptamana;
 
     @ManyToOne
-    @JoinColumn(name = "disciplina_id", referencedColumnName = "id")
+    @JoinColumn(name = "id_disciplina", referencedColumnName = "id")
     private Course disciplina;
 
     @ManyToOne
-    @JoinColumn(name = "profesor_id", referencedColumnName = "id") // FK către Professor
+    @JoinColumn(name = "id_profesor", referencedColumnName = "id") // FK către Professor
     private Professor profesor;
 
     private String grupa;

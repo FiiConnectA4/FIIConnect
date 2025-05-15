@@ -1,9 +1,17 @@
 package com.fiiconnect.api.auth_userMgmt.models;
 
+import com.fiiconnect.api.didactic.models.Professor;
+import com.fiiconnect.api.didactic.models.Student;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.HashSet;
 import java.util.Set;
 
+
+@Getter
+@Setter
 @Entity
 @Table(name = "users")
 public class User {
@@ -24,56 +32,30 @@ public class User {
     @Column(name = "two_factor_secret")
     private String twoFactorSecret;
 
-    @Column(name = "iban")
-    private String iban;
-
-    private boolean isActive = true;
+    private boolean isActive = false;
+    private String pendingTwoFactorSecret;
+    private boolean twoFactorEnabled = false;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "user_roles",
+            name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-
     private Set<Role> roles = new HashSet<>();
 
-    public String getPassword() {
-        return password;
-    }
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private UserProfile profile;
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    @OneToOne
+    @JoinTable(name = "users_students",
+            joinColumns        = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "student_id"))
+    private Student student;
 
-    public String getUsername() {
-        return username;
-    }
-
-    public String getEmail() { return email; }
-    public Set<Role> getRoles() {
-        return roles;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void setActive(boolean active) {
-        isActive = active;
-    }
-
-    public String getIban() { return iban; }
-    public void setIban(String iban) { this.iban = iban; }
-
-    public String getTwoFactorSecret() {
-        return twoFactorSecret;
-    }
-    public void setTwoFactorSecret(String twoFactorSecret) {
-        this.twoFactorSecret = twoFactorSecret;
-    }
+    @OneToOne
+    @JoinTable(name = "users_professors",
+            joinColumns        = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "professor_id"))
+    private Professor professor;
 }

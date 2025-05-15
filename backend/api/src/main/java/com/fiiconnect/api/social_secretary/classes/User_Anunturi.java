@@ -17,11 +17,11 @@ public class User_Anunturi {
 
     @ManyToMany(cascade = CascadeType.PERSIST)
     @JoinTable(
-            name = "user_tags",
+            name = "users_tags",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
-    @JsonIgnore
+    //@JsonIgnore
     private Set<Tag> tags;
 
     public User_Anunturi() {}

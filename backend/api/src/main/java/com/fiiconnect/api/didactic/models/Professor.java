@@ -13,7 +13,7 @@ import java.util.Objects;
 public class Professor {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "professor_id_gen")
-    @SequenceGenerator(name="professor_id_gen", sequenceName = "seq_professor_id", allocationSize = 1, initialValue = 1)
+    @SequenceGenerator(name="professor_id_gen", sequenceName = "seq_professor_id", allocationSize = 1)
     private Long id;
     private String cnp;
     private String firstName;

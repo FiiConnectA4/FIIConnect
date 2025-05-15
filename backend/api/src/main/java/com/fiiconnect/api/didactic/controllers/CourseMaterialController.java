@@ -11,12 +11,12 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.sql.SQLException;
@@ -50,18 +50,7 @@ public class CourseMaterialController {
         return repository.findById(id).orElseThrow(() -> new CourseMaterialNotFoundException(id));
     }
 
-//    @PostMapping("/didactic/course/material")
-//    public ResponseEntity<?> addMaterial(@RequestBody CourseMaterial material)
-//    {
-//        //should get idProf from currently logged-in user, and check for permission
-//        material.setId(null);
-//        material.setUploadDate(Date.from(Instant.now()));
-//        material.setUpdateDate(Date.from(Instant.now()));
-//
-//        material = repository.save(material);
-//        return ResponseEntity.created(URI.create("/didactic/course/material/" + material.getId())).build();
-//    }
-
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PostMapping("/didactic/course/material")
     public ResponseEntity<?> uploadFile(@RequestParam Long idProf, @RequestParam Long idCourse, @RequestBody MultipartFile file) throws IOException
     {
@@ -103,12 +92,14 @@ public class CourseMaterialController {
         return ResponseEntity.ok().contentType(MediaType.APPLICATION_OCTET_STREAM).header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.getName() +"\"").body(data);
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @DeleteMapping("/didactic/course/material/{id}")
     public void deleteMaterial(@PathVariable Long id) throws IOException {
         CourseMaterial material = repository.findById(id).orElseThrow(() -> new CourseMaterialNotFoundException(id));
         service.deleteMaterial(material);
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PutMapping("/didactic/course/material/{id}")
     public void changeFilename(@PathVariable Long id, @RequestBody String newFilename) throws IOException {
         CourseMaterial material = repository.findById(id).orElseThrow(() -> new CourseMaterialNotFoundException(id));
