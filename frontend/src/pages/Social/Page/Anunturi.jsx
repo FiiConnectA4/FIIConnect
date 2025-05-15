@@ -9,11 +9,13 @@ function Anunturi() {
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingAnnouncement, setEditingAnnouncement] = useState(null);
+  const [availableTagTypes, setAvailableTagTypes] = useState([]);
   const [newAnnouncement, setNewAnnouncement] = useState({
     title: "",
     message: "",
     tags: []
   });
+  
   const [currentTag, setCurrentTag] = useState({
     name: "",
     type: "GENERAL"
@@ -29,93 +31,86 @@ function Anunturi() {
   };
 
   const fetchUserData = async () => {
-    try {
-      setUserLoading(true);
-      const token = localStorage.getItem('token');
-      
-      // Fetch current user
-      const authResponse = await fetch("http://localhost:34101/auth/current-user", {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-      if (!authResponse.ok) throw new Error("Failed to fetch current user");
-      const authUser = await authResponse.json();
-      setCurrentUser(authUser);
+  try {
+    setUserLoading(true);
+    const token = localStorage.getItem('token');
+    
+    const authResponse = await fetch("http://localhost:34101/auth/current-user", {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    
+    if (!authResponse.ok) throw new Error("Failed to fetch current user");
+    const authUser = await authResponse.json();
+    setCurrentUser(authUser);
 
-      // Fetch user details 
-      const userResponse = await fetch(`http://localhost:34101/users/${authUser.id}`);
-      if (!userResponse.ok) throw new Error("Failed to fetch user details");
-      let userDetails = await userResponse.json();
-      
-      // Normalize user type
-      userDetails.type = normalizeUserType(userDetails.type);
-      setFullUser(userDetails);
+    const userResponse = await fetch(`http://localhost:34101/users/${authUser.id}`);
+    if (!userResponse.ok) throw new Error("Failed to fetch user details");
+    let userDetails = await userResponse.json();
+    
+    userDetails.type = normalizeUserType(userDetails.type);
+    setFullUser(userDetails);
 
-      // Fetch user tags from join table
-      const tagsResponse = await fetch(`http://localhost:34101/users/${authUser.id}/tags`);
-      if (!tagsResponse.ok) throw new Error("Failed to fetch user tags");
-      const tagsData = await tagsResponse.json();
-      
-      console.log("User tags from API:", tagsData);
-      setUserTags(tagsData);
+    const tagsResponse = await fetch(`http://localhost:34101/users/${authUser.id}/tags`);
+    if (!tagsResponse.ok) throw new Error("Failed to fetch user tags");
+    const tagsData = await tagsResponse.json();
+    
+    console.log("User tags from API:", tagsData);
+    setUserTags(tagsData);
 
-      return { ...userDetails, tags: tagsData };
-    } catch (err) {
-      console.error("Error fetching user data:", err);
-      setError(err.message);
-      throw err;
-    } finally {
-      setUserLoading(false);
-    }
-  };
+    // Extragem tipurile unice de tag-uri
+    const uniqueTypes = [...new Set(tagsData.map(tag => tag.type))];
+    setAvailableTagTypes(uniqueTypes);
+    setCurrentTag(prev => ({ ...prev, type: uniqueTypes[0] || "GENERAL" }));
 
-  const fetchAnnouncements = async (user) => {
-    try {
-      setLoading(true);
-      let url = "http://localhost:34101/announcement/prof-secretar";
-      
-      if (user.type === "Student") {
-        const tagIds = user.tags?.map(tag => tag.id) || [];
-        if (tagIds.length > 0) {
-          url = `http://localhost:34101/announcement/with-tag?${tagIds.map(id => `tagIds=${id}`).join('&')}`;
-        } else {
-          setAnnouncements([]);
-          return;
-        }
+    return { ...userDetails, tags: tagsData };
+  } catch (err) {
+    console.error("Error fetching user data:", err);
+    setError(err.message);
+    throw err;
+  } finally {
+    setUserLoading(false);
+  }
+};
+
+ const fetchAnnouncements = async (user) => {
+  try {
+    setLoading(true);
+    let url = "http://localhost:34101/announcement/prof-secretar";
+    
+    if (user.type === "Student") {
+      const tagIds = user.tags?.map(tag => tag.id) || [];
+      if (tagIds.length > 0) {
+        url = `http://localhost:34101/announcement/with-tag?${tagIds.map(id => `tagIds=${id}`).join('&')}`;
+      } else {
+        setAnnouncements([]);
+        return;
       }
-
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Failed to fetch announcements");
-      let announcementsData = await response.json();
-
-      announcementsData = announcementsData.map(announcement => ({
-  ...announcement,
-  // Păstrează atât autorul original cât și profesorul
-  author: { 
-    id: announcement.author_id || announcement.author?.id,
-    name: announcement.author?.name,
-    type: announcement.author?.type 
-  },
-  professor: announcement.author ? {
-    ...announcement.author,
-    type: normalizeUserType(announcement.author.type)
-  } : null
-}));
-
-      // Sort by date (newest first)
-      announcementsData = announcementsData.sort((a, b) => {
-        return new Date(b.publishedDate) - new Date(a.publishedDate);
-      });
-
-      setAnnouncements(announcementsData);
-    } catch (err) {
-      setError("Failed to load announcements: " + err.message);
-    } finally {
-      setLoading(false);
     }
-  };
+
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Failed to fetch announcements");
+    let announcementsData = await response.json();
+
+    // Normalizează structura anunțurilor
+    announcementsData = announcementsData.map(announcement => ({
+      ...announcement,
+      author: announcement.author || null, // Păstrează autorul original
+      professor: announcement.author ? { // Creează obiectul professor
+        id: announcement.author.id,
+        name: announcement.author.name,
+        type: normalizeUserType(announcement.author.type)
+      } : null
+    }));
+
+    // Sortează după dată
+    announcementsData.sort((a, b) => new Date(b.publishedDate) - new Date(a.publishedDate));
+    setAnnouncements(announcementsData);
+  } catch (err) {
+    setError("Failed to load announcements: " + err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     const loadData = async () => {
@@ -156,10 +151,15 @@ function Anunturi() {
       return;
     }
 
-    if (userTags.length === 0) {
-      setError("Nu ai nicio etichetă atribuită. Contactează administratorul.");
-      return;
-    }
+    if (availableTagTypes.length === 0) {
+    setError("Nu ai nicio etichetă atribuită. Contactează administratorul.");
+    return;
+  }
+
+  if (!availableTagTypes.includes(tagType)) {
+    setError(`Tipul de etichetă ${tagType} nu este disponibil pentru tine`);
+    return;
+  }
 
     // Check for duplicates (case insensitive)
     const isDuplicate = newAnnouncement.tags.some(
@@ -187,9 +187,13 @@ function Anunturi() {
       tags: [...prev.tags, { name: tagName, type: tagType }]
     }));
 
+    
+
     // Reset input
     setCurrentTag({ name: "", type: "GENERAL" });
   };
+
+  
 
   const addEditTag = () => {
     setError(null);
@@ -406,6 +410,8 @@ function Anunturi() {
   if (error) return <div className="error">{error}</div>;
   if (!fullUser) return <div className="error">Datele utilizatorului nu sunt disponibile</div>;
 
+  console.log("Current user:", fullUser);
+
   const announcementsToDisplay = fullUser.type === "Student"
     ? filterAnnouncements(announcements, userTags)
     : announcements;
@@ -464,17 +470,17 @@ function Anunturi() {
                     disabled={userLoading || userTags.length === 0}
                   />
                   <select
-                    name="type"
-                    value={currentTag.type}
-                    onChange={handleTagInputChange}
-                    disabled={userLoading || userTags.length === 0}
-                  >
-                    <option value="GENERAL">GENERAL</option>
-                    <option value="MATERIE">MATERIE</option>
-                    <option value="AN">AN</option>
-                    <option value="SEMINAR">SEMINAR</option>
-                    <option value="GRUPA">GRUPA</option>
-                  </select>
+                  name="type"
+                  value={currentTag.type}
+                  onChange={handleTagInputChange}
+                  disabled={userLoading || userTags.length === 0}
+                >
+                  {availableTagTypes.map(type => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
                   <button 
                     type="button" 
                     onClick={addTag}
@@ -564,17 +570,17 @@ function Anunturi() {
                     disabled={userLoading || userTags.length === 0}
                   />
                   <select
-                    name="type"
-                    value={currentTag.type}
-                    onChange={handleTagInputChange}
-                    disabled={userLoading || userTags.length === 0}
-                  >
-                    <option value="GENERAL">GENERAL</option>
-                    <option value="MATERIE">MATERIE</option>
-                    <option value="AN">AN</option>
-                    <option value="SEMINAR">SEMINAR</option>
-                    <option value="GRUPA">GRUPA</option>
-                  </select>
+                  name="type"
+                  value={currentTag.type}
+                  onChange={handleTagInputChange}
+                  disabled={userLoading || userTags.length === 0}
+                >
+                  {availableTagTypes.map(type => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
                   <button 
                     type="button" 
                     onClick={addEditTag}
@@ -654,7 +660,7 @@ function Anunturi() {
           )}
         </span>
         {(normalizeUserType(fullUser.type) === "Profesor" || normalizeUserType(fullUser.type) === "Secretar") && 
-       fullUser.id === announcement.author_id && (
+       fullUser.id === announcement.author?.id && (
         <div className="announcement-actions">
           <button 
             className="edit-button"
