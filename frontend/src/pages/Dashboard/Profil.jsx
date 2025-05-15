@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import "./../styles/Profil.css";
+import "../../styles/Profil.css";
 
 /**
  * Profile.jsx – componentă completă

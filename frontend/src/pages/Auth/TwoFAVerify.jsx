@@ -1,20 +1,18 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-import "../styles/Login.css";
+import "../../styles/Login.css";
 
 const TwoFAVerify = () => {
     const { state } = useLocation();
     const navigate  = useNavigate();
-    const username  = state?.username || "";      // poate veni undefined pe refresh
+    const username  = state?.username || "";
     const [code, setCode] = useState("");
 
-    /* dacă nu avem username (ex: pagină reload) => back to login */
     useEffect(() => {
         if (!username) navigate("/app/login", { replace: true });
     }, [username, navigate]);
 
-    /* ---------------- handle verify ---------------- */
     const handleVerify = async (e) => {
         e.preventDefault();
 

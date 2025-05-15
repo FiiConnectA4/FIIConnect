@@ -86,7 +86,7 @@ public class AuthController {
         if (!twoFactorAuthenticationService.verifyCode(pending, code))
             return ResponseEntity.status(401).body(new ApiResponse("Cod 2FA invalid.", false));
 
-        user.setTwoFactorSecret(pending);          // devine secret “oficial”
+        user.setTwoFactorSecret(pending);
         user.setPendingTwoFactorSecret(null);
         user.setTwoFactorEnabled(true);
         userRepository.save(user);
@@ -207,7 +207,6 @@ public class AuthController {
             user.setEmail(registerRequest.getEmail());
             user.setPassword(passwordEncoder.encode(registerRequest.getPassword()));
             user.getRoles().add(role);
-            user.setIban(registerRequest.getIban());
             user.setActive(true);
 
             user.setTwoFactorSecret(null);

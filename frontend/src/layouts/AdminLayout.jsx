@@ -1,12 +1,12 @@
-import Sidebar from "../components/Sidebar/Sidebar";
+import AdminSidebar from "../components/Sidebar-Admin/AdminSidebar";
 import NotificationBell from "../components/notifications/NotificationBell";
 import LogoutButton from "../components/logout-button/LogoutButton";
 import { Outlet } from "react-router-dom";
 
-const MainLayout = () => {
+const AdminLayout = () => {
     return (
         <div style={{ display: "flex", height: "100vh" }}>
-            <Sidebar />
+            <AdminSidebar />
             <div style={{ flex: 1, padding: "2rem" }}>
                 <div
                     style={{
@@ -17,7 +17,6 @@ const MainLayout = () => {
                         marginBottom: "1rem",
                     }}
                 >
-                    <NotificationBell />
                     <LogoutButton />
                 </div>
 
@@ -27,4 +26,4 @@ const MainLayout = () => {
     );
 };
 
-export default MainLayout;
+export default AdminLayout;

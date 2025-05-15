@@ -1,8 +1,8 @@
 import ThemeToggle from "../ThemeToggle/ThemeToggle";
-import "./Sidebar.css";
+import "../../styles/Sidebar.css";
 import SidebarButton from "../SidebarButton/SidebarButton";
 
-const Sidebar = () => {
+const AdminSidebar = () => {
   const generalLinks = [
     { name: "Dashboard", icon: "🏠" },
     { name: "Anunturi", icon: "📢" },
@@ -17,6 +17,12 @@ const Sidebar = () => {
     { name: "Profile", icon: "👤", to: "profile" },
     { name: "Contact", icon: "📧" },
     { name: "Secretariat", icon: "🏛️" },
+  ];
+
+  const adminLinks = [
+    { name: "Admin Dashboard", icon: "🔧" },
+    { name: "Management Utilizatori", icon: "🔧" },
+    { name: "Service", icon: "🔧️" },
   ];
 
   return (
@@ -50,6 +56,19 @@ const Sidebar = () => {
 
           ))}
         </ul>
+
+      <div className="section">ADMIN</div>
+      <ul className="nav-list">
+        {adminLinks.map((link, index) => (
+            <SidebarButton
+                key={index}
+                icon={link.icon}
+                label={link.name}
+                to={`/app/${link.to || link.name.toLowerCase()}`}
+            />
+
+        ))}
+      </ul>
       </div>
 
       <div className="sidebar-bottom">
@@ -60,4 +79,4 @@ const Sidebar = () => {
   );
 };
 
-export default Sidebar;
+export default AdminSidebar;

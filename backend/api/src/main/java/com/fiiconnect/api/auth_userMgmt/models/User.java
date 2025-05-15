@@ -30,9 +30,6 @@ public class User {
     @Column(name = "two_factor_secret")
     private String twoFactorSecret;
 
-    @Column(name = "iban")
-    private String iban;
-
     private boolean isActive = false;
     private String pendingTwoFactorSecret;
     private boolean twoFactorEnabled = false;

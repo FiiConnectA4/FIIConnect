@@ -1,12 +1,15 @@
 package com.fiiconnect.api.auth_userMgmt.controllers;
 
+import com.fiiconnect.api.auth_userMgmt.dtos.BulkNotificationRequest;
 import com.fiiconnect.api.auth_userMgmt.dtos.NotificationRequest;
 import com.fiiconnect.api.auth_userMgmt.dtos.NotificationResponse;
 import com.fiiconnect.api.auth_userMgmt.models.User;
 import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository;
 import com.fiiconnect.api.auth_userMgmt.models.Notification;
 import com.fiiconnect.api.auth_userMgmt.repositories.NotificationRepository;
+import com.fiiconnect.api.auth_userMgmt.services.NotificationService;
 import jakarta.annotation.security.RolesAllowed;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -20,6 +23,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/notifications")
+@RequiredArgsConstructor
 public class NotificationController {
 
     @Autowired
@@ -31,34 +35,15 @@ public class NotificationController {
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
 
-    @PostMapping("/send/{userId}")
-    @RolesAllowed("ROLE_ADMIN")
-    public ResponseEntity<?> sendNotification(
-            @PathVariable Long userId,
-            @RequestBody NotificationRequest req
-    ) {
-        User user = userRepo.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+    private final NotificationService notificationService;
 
-        Notification notif = new Notification();
-        notif.setRecipient(user);
-        notif.setTitle(req.getTitle());
-        notif.setContent(req.getContent());
-        notif.setType(req.getType());
-        notif.setTimestamp(LocalDateTime.now());
+    @PostMapping("/send")
+    @RolesAllowed({"ADMIN", "PROFESSOR"})
+    public ResponseEntity<List<NotificationResponse>> sendBulk(
+            @RequestBody BulkNotificationRequest req) {
 
-        notificationRepo.save(notif);
-
-        NotificationResponse dto = mapToDto(notif);
-
-        // WebSocket push to specific user
-        messagingTemplate.convertAndSendToUser(
-                user.getUsername(),
-                "/queue/notifications",
-                dto
-        );
-
-        return ResponseEntity.ok(dto);
+        List<NotificationResponse> dtos = notificationService.sendBulk(req);
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/unread")

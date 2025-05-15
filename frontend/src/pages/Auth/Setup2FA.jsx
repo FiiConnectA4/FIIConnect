@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { QRCodeSVG } from "qrcode.react";
-import "./../styles/Setup2FA.css";
+import "../../styles/Setup2FA.css";
 
 export default function Setup2FA() {
     /* -------------------- state -------------------- */
