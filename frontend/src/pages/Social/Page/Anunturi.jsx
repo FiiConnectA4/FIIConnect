@@ -7,11 +7,17 @@ function Anunturi() {
   const [userLoading, setUserLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showModal, setShowModal] = useState(false);
+
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingAnnouncement, setEditingAnnouncement] = useState(null);
+  const [availableTagTypes, setAvailableTagTypes] = useState([]);
+
   const [newAnnouncement, setNewAnnouncement] = useState({
     title: "",
     message: "",
     tags: []
   });
+  
   const [currentTag, setCurrentTag] = useState({
     name: "",
     type: "GENERAL"
@@ -21,74 +27,89 @@ function Anunturi() {
   const [userTags, setUserTags] = useState([]);
 
   const fetchUserData = async () => {
-    try {
-      setUserLoading(true);
-      const token = localStorage.getItem('token');
-      // Fetch current user
-      const authResponse = await fetch("http://localhost:34101/auth/current-user", {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
+
+  try {
+    setUserLoading(true);
+    const token = localStorage.getItem('token');
+    
+    const authResponse = await fetch("http://localhost:34101/auth/current-user", {
+      headers: { 'Authorization': `Bearer ${token}` }
     });
-      if (!authResponse.ok) throw new Error("Failed to fetch current user");
-      const authUser = await authResponse.json();
-      setCurrentUser(authUser);
+    
+    if (!authResponse.ok) throw new Error("Failed to fetch current user");
+    const authUser = await authResponse.json();
+    setCurrentUser(authUser);
 
-      // Fetch user details 
-      const userResponse = await fetch(`http://localhost:34101/users/${authUser.id}`);
-      if (!userResponse.ok) throw new Error("Failed to fetch user details");
-      const userDetails = await userResponse.json();
-      setFullUser(userDetails);
 
-      // Fetch user tags from join table
-      const tagsResponse = await fetch(`http://localhost:34101/users/${authUser.id}/tags`);
-      if (!tagsResponse.ok) throw new Error("Failed to fetch user tags");
-      const tagsData = await tagsResponse.json();
-      
-      console.log("User tags from API:", tagsData);
-      setUserTags(tagsData);
+    const userResponse = await fetch(`http://localhost:34101/users/${authUser.id}`);
+    if (!userResponse.ok) throw new Error("Failed to fetch user details");
+    let userDetails = await userResponse.json();
+    
+    userDetails.type = normalizeUserType(userDetails.type);
+    setFullUser(userDetails);
 
-      return { ...userDetails, tags: tagsData };
-    } catch (err) {
-      console.error("Error fetching user data:", err);
-      setError(err.message);
-      throw err;
-    } finally {
-      setUserLoading(false);
-    }
-  };
+    const tagsResponse = await fetch(`http://localhost:34101/users/${authUser.id}/tags`);
+    if (!tagsResponse.ok) throw new Error("Failed to fetch user tags");
+    const tagsData = await tagsResponse.json();
+    
+    console.log("User tags from API:", tagsData);
+    setUserTags(tagsData);
 
-  const fetchAnnouncements = async (user) => {
-    try {
-      setLoading(true);
-      let url = "http://localhost:34101/announcement/prof-secretar";
-      
-      if (user.type === "Student") {
-        const tagIds = user.tags?.map(tag => tag.id) || [];
-        if (tagIds.length > 0) {
-          url = `http://localhost:34101/announcement/with-tag?${tagIds.map(id => `tagIds=${id}`).join('&')}`;
-        } else {
-          setAnnouncements([]);
-          return;
-        }
+    // Extragem tipurile unice de tag-uri
+    const uniqueTypes = [...new Set(tagsData.map(tag => tag.type))];
+    setAvailableTagTypes(uniqueTypes);
+    setCurrentTag(prev => ({ ...prev, type: uniqueTypes[0] || "GENERAL" }));
+
+    return { ...userDetails, tags: tagsData };
+  } catch (err) {
+    console.error("Error fetching user data:", err);
+    setError(err.message);
+    throw err;
+  } finally {
+    setUserLoading(false);
+  }
+};
+
+ const fetchAnnouncements = async (user) => {
+  try {
+    setLoading(true);
+    let url = "http://localhost:34101/announcement/prof-secretar";
+    
+    if (user.type === "Student") {
+      const tagIds = user.tags?.map(tag => tag.id) || [];
+      if (tagIds.length > 0) {
+        url = `http://localhost:34101/announcement/with-tag?${tagIds.map(id => `tagIds=${id}`).join('&')}`;
+      } else {
+        setAnnouncements([]);
+        return;
       }
-
-      const response = await fetch(url);
-      if (!response.ok) throw new Error("Failed to fetch announcements");
-      let announcementsData = await response.json();
-
-      // Sort by date (newest first)
-      announcementsData = announcementsData.sort((a, b) => {
-        return new Date(b.publishedDate) - new Date(a.publishedDate);
-      });
-
-      setAnnouncements(announcementsData);
-    } catch (err) {
-      setError("Failed to load announcements: " + err.message);
-    } finally {
-      setLoading(false);
     }
-  };
+
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Failed to fetch announcements");
+    let announcementsData = await response.json();
+
+    // Normalizează structura anunțurilor
+    announcementsData = announcementsData.map(announcement => ({
+      ...announcement,
+      author: announcement.author || null, // Păstrează autorul original
+      professor: announcement.author ? { // Creează obiectul professor
+        id: announcement.author.id,
+        name: announcement.author.name,
+        type: normalizeUserType(announcement.author.type)
+      } : null
+    }));
+
+
+    // Sortează după dată
+    announcementsData.sort((a, b) => new Date(b.publishedDate) - new Date(a.publishedDate));
+    setAnnouncements(announcementsData);
+  } catch (err) {
+    setError("Failed to load announcements: " + err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     const loadData = async () => {
@@ -124,10 +145,15 @@ function Anunturi() {
       return;
     }
 
-    if (userTags.length === 0) {
-      setError("Nu ai nicio etichetă atribuită. Contactează administratorul.");
-      return;
-    }
+    if (availableTagTypes.length === 0) {
+    setError("Nu ai nicio etichetă atribuită. Contactează administratorul.");
+    return;
+  }
+
+  if (!availableTagTypes.includes(tagType)) {
+    setError(`Tipul de etichetă ${tagType} nu este disponibil pentru tine`);
+    return;
+  }
 
     // Check for duplicates (case insensitive)
     const isDuplicate = newAnnouncement.tags.some(
@@ -151,6 +177,54 @@ function Anunturi() {
 
     // Add the tag
     setNewAnnouncement(prev => ({
+      ...prev,
+      tags: [...prev.tags, { name: tagName, type: tagType }]
+    }));
+
+    
+
+    // Reset input
+    setCurrentTag({ name: "", type: "GENERAL" });
+  };
+
+  const addEditTag = () => {
+    setError(null);
+
+    const tagName = currentTag.name.trim();
+    const tagType = currentTag.type;
+
+    if (!tagName) {
+      setError("Te rugăm să introduci un nume pentru etichetă");
+      return;
+    }
+
+    if (userTags.length === 0) {
+      setError("Nu ai nicio etichetă atribuită. Contactează administratorul.");
+      return;
+    }
+
+    // Check for duplicates (case insensitive)
+    const isDuplicate = editingAnnouncement.tags.some(
+      tag => tag.name.toLowerCase() === tagName.toLowerCase() && tag.type === tagType
+    );
+
+    if (isDuplicate) {
+      setError(`Eticheta "${tagName}" (${tagType}) a fost deja adăugată`);
+      return;
+    }
+
+    // Verify user has this tag
+    const userHasTag = userTags.some(
+      tag => tag.name.toLowerCase() === tagName.toLowerCase() && tag.type === tagType
+    );
+
+    if (!userHasTag) {
+      setError(`Nu ai permisiunea să folosești eticheta "${tagName}" (${tagType})`);
+      return;
+    }
+
+    // Add the tag
+    setEditingAnnouncement(prev => ({
       ...prev,
       tags: [...prev.tags, { name: tagName, type: tagType }]
     }));
@@ -237,6 +311,8 @@ function Anunturi() {
   if (error) return <div className="error">{error}</div>;
   if (!fullUser) return <div className="error">Datele utilizatorului nu sunt disponibile</div>;
 
+  console.log("Current user:", fullUser);
+
   const announcementsToDisplay = fullUser.type === "Student"
     ? filterAnnouncements(announcements, userTags)
     : announcements;
@@ -294,17 +370,17 @@ function Anunturi() {
                     disabled={userLoading || userTags.length === 0}
                   />
                   <select
-                    name="type"
-                    value={currentTag.type}
-                    onChange={handleTagInputChange}
-                    disabled={userLoading || userTags.length === 0}
-                  >
-                    <option value="GENERAL">GENERAL</option>
-                    <option value="MATERIE">MATERIE</option>
-                    <option value="AN">AN</option>
-                    <option value="SEMINAR">SEMINAR</option>
-                    <option value="GRUPA">GRUPA</option>
-                  </select>
+                  name="type"
+                  value={currentTag.type}
+                  onChange={handleTagInputChange}
+                  disabled={userLoading || userTags.length === 0}
+                >
+                  {availableTagTypes.map(type => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
                   <button 
                     type="button" 
                     onClick={addTag}
@@ -356,35 +432,157 @@ function Anunturi() {
         </div>
       )}
 
+      {showEditModal && editingAnnouncement && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Editează Anunț</h2>
+            {error && <div className="error-message">{error}</div>}
+            <form onSubmit={handleEditSubmit}>
+              <div className="form-group">
+                <label>Titlu:</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={editingAnnouncement.title}
+                  onChange={handleEditInputChange}
+                  required  
+                />
+              </div>
+              <div className="form-group">
+                <label>Mesaj:</label>
+                <textarea
+                  name="message"
+                  value={editingAnnouncement.message}
+                  onChange={handleEditInputChange}
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Etichete:</label>
+                <div className="tag-input-container">
+                  <input
+                    type="text"
+                    name="name"
+                    placeholder="Nume etichetă"
+                    value={currentTag.name}
+                    onChange={handleTagInputChange}
+                    disabled={userLoading || userTags.length === 0}
+                  />
+                  <select
+                  name="type"
+                  value={currentTag.type}
+                  onChange={handleTagInputChange}
+                  disabled={userLoading || userTags.length === 0}
+                >
+                  {availableTagTypes.map(type => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+                  <button 
+                    type="button" 
+                    onClick={addEditTag}
+                    className="add-tag-button"
+                    disabled={userLoading || userTags.length === 0}
+                  >
+                    Adaugă
+                  </button>
+                </div>
+                
+                {userTags.length === 0 && (
+                  <div className="no-tags-warning">
+                    Nu ai nicio etichetă atribuită. Contactează administratorul.
+                  </div>
+                )}
+                
+                <div className="tags-list">
+                  {editingAnnouncement.tags.map((tag, index) => (
+                    <div key={index} className="tag-item">
+                      <span>{tag.name} ({tag.type})</span>
+                      <button 
+                        type="button" 
+                        onClick={() => removeEditTag(index)}
+                        className="remove-tag-button"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="modal-actions">
+                <button type="submit" disabled={userLoading}>
+                  Salvează
+                </button>
+                <button 
+                  type="button" 
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setError(null);
+                  }}
+                >
+                  Anulează
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       <div className="announcements-list">
         {announcementsToDisplay.length === 0 ? (
           <p>Nu există anunțuri disponibile.</p>
         ) : (
           announcementsToDisplay.map((announcement) => (
             <div key={announcement.id} className="announcement-card">
-              <div className="announcement-header">
-                <h2>{announcement.title}</h2>
-                <div className="announcement-meta">
-                  <span className="announcement-author-date">
-                    {announcement.professor && (
-                      <span className="announcement-author">
-                        Postat de: {announcement.professor.name}
-                        <span className="separator"> • </span>
-                      </span>
-                    )}
-                    {announcement.publishedDate && (
-                      <span className="announcement-date">
-                        {new Date(announcement.publishedDate).toLocaleDateString('ro-RO', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}
-                      </span>
-                    )}
-                  </span>
-                </div>
-              </div>
-              <p className="announcement-message">{announcement.message}</p>
+
+  <div className="announcement-header">
+    <div className="announcement-title-container">
+      <h2>{announcement.title}</h2>
+      <div className="announcement-meta">
+        <span className="announcement-author-date">
+          {announcement.professor && (
+            <span className="announcement-author">
+              Postat de: {announcement.professor.name}
+              <span className="separator"> • </span>
+            </span>
+          )}
+          {announcement.publishedDate && (
+            <span className="announcement-date">
+              {new Date(announcement.publishedDate).toLocaleDateString('ro-RO', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}
+            </span>
+          )}
+        </span>
+        {(normalizeUserType(fullUser.type) === "Profesor" || normalizeUserType(fullUser.type) === "Secretar") && 
+       fullUser.id === announcement.author?.id && (
+        <div className="announcement-actions">
+          <button 
+            className="edit-button"
+            onClick={() => handleEdit(announcement)}
+            title="Editează"
+          >
+            ✏️
+          </button>
+          <button 
+            className="delete-button"
+            onClick={() => handleDelete(announcement.id)}
+            title="Șterge"
+          >
+            🗑️
+          </button>
+        </div>
+      )}
+      </div>
+    </div>
+  </div>
+  <p className="announcement-message">{announcement.message}</p>
+
               {announcement.tags && announcement.tags.length > 0 && (
                 <div className="announcement-tags-container">
                   <div className="announcement-tags-header">Destinatar:</div>
