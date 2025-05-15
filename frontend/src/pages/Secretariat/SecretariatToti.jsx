@@ -7,7 +7,7 @@ const SecretariatToti = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Ești în modul student dacă URL-ul începe cu /app/student
+  
   const isStudentView = location.pathname.startsWith("/app/student");
 
   const handleSwitch = () => {
@@ -54,13 +54,16 @@ const SecretariatToti = () => {
           className="secretariat-button"
         >
           📂 Cerere Caz Social
-        </Link>
-        <Link
-          to={`${isStudentView ? "/app/student" : "/app/secretariat"}/istoric-cereri`}
-          className="secretariat-button"
-        >
-          📄 Istoric Cereri
-        </Link>
+         </Link>
+
+  {isStudentView && (
+    <Link
+      to={`/app/student/istoric-cereri`}
+      className="secretariat-button"
+    >
+      📄 Istoric Cereri
+    </Link>
+  )}
       </div>
     </div>
   );
