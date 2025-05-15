@@ -17,9 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -259,13 +257,15 @@ public class FormulaController {
         Pattern pattern = Pattern.compile("\\b[a-zA-Z][a-zA-Z0-9_ ]*\\b");
         Matcher matcher = pattern.matcher(expression);
 
+        Set<String> foundComponents = new HashSet<>();
         while (matcher.find()) {
             String componentName = matcher.group().replace(" ", "_");
-            if (!componentName.equals("Final_grade") && !FormulaParser.functions.contains(componentName)) {
+            if (!foundComponents.contains(componentName) && !componentName.equals("Final_grade") && !FormulaParser.functions.contains(componentName)) {
                 FormulaComponent component = new FormulaComponent();
                 component.setIdFormula(formula.getId());
                 component.setName(componentName);
                 components.add(component);
+                foundComponents.add(componentName);
                 LOGGER.info("Parsed component: " + componentName);
             }
         }
