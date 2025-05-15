@@ -558,6 +558,7 @@ const showNotification = (message, type) => {
                   onClick={() => {
                     setShowModal(false);
                     setError(null);
+                    setNotification(null);
                   }}
                 >
                   Anulează
@@ -672,6 +673,7 @@ const showNotification = (message, type) => {
                   onClick={() => {
                     setShowEditModal(false);
                     setError(null);
+                    setNotification(null);
                   }}
                 >
                   Anulează
