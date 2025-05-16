@@ -12,6 +12,6 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
     @Query("SELECT c FROM Chat c WHERE c.message is not null order by timestamp ")
     List<Chat> findAllChats();
 
-    @Query(value = "SELECT * FROM CHAT WHERE  CHANNELID = :channelId ORDER BY timestamp ", nativeQuery = true)
-    List<Chat> findByChannelIdOrderByTimestampAsc(@Param("channelId")Long channelId);
+    @Query("SELECT c FROM Chat c WHERE c.channelId = :channelId ORDER BY c.timestamp ASC")
+    List<Chat> findByChannelIdOrderByTimestampAsc(@Param("channelId") Long channelId);
 }

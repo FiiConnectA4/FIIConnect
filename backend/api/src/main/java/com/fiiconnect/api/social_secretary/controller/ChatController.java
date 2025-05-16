@@ -5,6 +5,7 @@ import com.fiiconnect.api.social_secretary.service.UserService2;
 import com.fiiconnect.api.social_secretary.classes.Chat;
 import com.fiiconnect.api.social_secretary.classes.Emoji;
 import com.fiiconnect.api.social_secretary.classes.User_Anunturi;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -57,26 +58,30 @@ public class ChatController {
     }
 
 
-    @MessageMapping("/chat.sendMessage")//de aici invocam aceasta metoda
+    @MessageMapping("/chat.sendMessage")
+    @Transactional  // Adaugă această annotare
     public Chat createChatMessage(@Payload Chat chatMessage) {
         System.out.println("am ajuns la chat.sendMessage");
-        //niste procesare pe viitor pt emoji uri si chestii
-        String message = chatMessage.getMessage();
-        message=processEmojis(message);
 
+        // Procesare mesaj
+        String message = processEmojis(chatMessage.getMessage());
+        chatMessage.setMessage(message);
+
+        // Verifică sender
         long senderId = chatMessage.getSender().getId();
-        User_Anunturi sender= userService2.getUserById(senderId);
+        User_Anunturi sender = userService2.getUserById(senderId);
+        if (sender == null) {
+            throw new IllegalArgumentException("User-ul nu există");
+        }
         chatMessage.setSender(sender);
         chatMessage.setTimestamp(LocalDateTime.now().toString());
-        chatMessage.setMessage(message);
-        if(userService2.getUserById(senderId)==null){
-            System.out.println("user ul nu exista");
-            return new Chat("user-ul nu exista",null,null, null,null);
-        }
 
-        Long channelId = chatMessage.getChannelId();
-        messagingTemplate.convertAndSend("/topic/channel/" + channelId, chatMessage);
-        return chatService.saveChatMessages(chatMessage);
+        // Salvează în baza de date ÎNAINTE de WebSocket
+        Chat savedMessage = chatService.saveChatMessages(chatMessage);
+
+        // Trimite prin WebSocket
+        messagingTemplate.convertAndSend("/topic/channel/" + savedMessage.getChannelId(), savedMessage);
+        return savedMessage;
     }
 
     /*@MessageMapping("/chat.addUser")
