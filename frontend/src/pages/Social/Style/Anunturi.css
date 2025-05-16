@@ -375,3 +375,13 @@
   from { transform: translateX(100%); opacity: 0; }
   to { transform: translateX(0); opacity: 1; }
 }
+
+.no-tags-message {
+  padding: 8px;
+  color: #666;
+  font-style: italic;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+  text-align: center;
+  margin: 0 5px;
+}
