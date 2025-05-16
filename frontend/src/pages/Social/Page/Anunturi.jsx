@@ -1,6 +1,23 @@
 import React, { useState, useEffect } from "react";
 import "../Style/Anunturi.css";
 
+function Notification({ message, type, onClose }) {
+  return (
+    <div className={`notification ${type}`}>
+      <span className="notification-message" title={message}>
+        {message}
+      </span>
+      <button 
+        className="notification-close" 
+        onClick={onClose}
+        aria-label="Închide notificarea"
+      >
+        ×
+      </button>
+    </div>
+  );
+}
+
 function Anunturi() {
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,6 +37,13 @@ function Anunturi() {
     name: "",
     type: "GENERAL"
   });
+
+const [notification, setNotification] = useState(null);
+
+const showNotification = (message, type) => {
+  setNotification({ message, type });
+};
+
   const [currentUser, setCurrentUser] = useState(null);
   const [fullUser, setFullUser] = useState(null);
   const [userTags, setUserTags] = useState([]);
@@ -164,7 +188,7 @@ function Anunturi() {
   );
 
   if (isDuplicate) {
-    setError(`Eticheta "${tagName}" (${tagType}) există deja în acest anunț`);
+    showNotification(`Eticheta "${tagName}" (${tagType}) există deja`, 'error');
     return;
   }
 
@@ -207,7 +231,7 @@ function Anunturi() {
   );
 
   if (isDuplicate) {
-    setError(`Eticheta "${tagName}" (${tagType}) există deja în acest anunț`);
+    showNotification(`Eticheta "${tagName}" (${tagType}) există deja`, 'error');
     return;
   }
 
@@ -434,7 +458,13 @@ function Anunturi() {
     <div className="modal-overlay">
       <div className="modal-content">
         <h2>Adaugă Anunț Nou</h2>
-        {error && <div className="error-message">{error}</div>}
+        {notification && (
+      <Notification 
+        message={notification.message} 
+        type={notification.type} 
+        onClose={() => setNotification(null)}
+      />
+    )}
         <form onSubmit={handleSubmit}>
   <div className="form-group">
     <label>Titlu:</label>
@@ -528,6 +558,7 @@ function Anunturi() {
                   onClick={() => {
                     setShowModal(false);
                     setError(null);
+                    setNotification(null);
                   }}
                 >
                   Anulează
@@ -542,7 +573,13 @@ function Anunturi() {
     <div className="modal-overlay">
       <div className="modal-content">
         <h2>Editează Anunț</h2>
-        {error && <div className="error-message">{error}</div>}
+        {notification && (
+      <Notification 
+        message={notification.message} 
+        type={notification.type} 
+        onClose={() => setNotification(null)}
+      />
+    )}
         <form onSubmit={handleEditSubmit}>
   <div className="form-group">
     <label>Titlu:</label>
@@ -636,6 +673,7 @@ function Anunturi() {
                   onClick={() => {
                     setShowEditModal(false);
                     setError(null);
+                    setNotification(null);
                   }}
                 >
                   Anulează
