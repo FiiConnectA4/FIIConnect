@@ -584,6 +584,8 @@ const showNotification = (message, type) => {
                     setShowModal(false);
                     setError(null);
                     setNotification(null);
+                    setNewAnnouncement({ title: "", message: "", tags: [] });
+                    setCurrentTag({ name: "", type: availableTagTypes[0] || "GENERAL" });
                   }}
                 >
                   Anulează
@@ -713,6 +715,8 @@ const showNotification = (message, type) => {
                     setShowEditModal(false);
                     setError(null);
                     setNotification(null);
+                    setNewAnnouncement({ title: "", message: "", tags: [] });
+                    setCurrentTag({ name: "", type: availableTagTypes[0] || "GENERAL" });
                   }}
                 >
                   Anulează
