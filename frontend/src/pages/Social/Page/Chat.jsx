@@ -68,52 +68,68 @@ function Chat() {
   }, []);
 
   const loadChannelMessages = async (channelId) => {
-    try {
-      const response = await fetch(`http://localhost:34101/chat/get-chats/${channelId}`);
-      if (!response.ok) throw new Error("Failed to fetch channel messages");
-      const data = await response.json();
-      setMessages(data);
-    } catch (err) {
-      setError(err.message);
-    }
-  };
+  try {
+    // Clear existing messages first
+    setMessages([]);
+    
+    const response = await fetch(`http://localhost:34101/chat/get-chats/${channelId}`);
+    if (!response.ok) throw new Error("Failed to fetch channel messages");
+    const data = await response.json();
+    setMessages(data);
+  } catch (err) {
+    setError(err.message);
+  }
+};
 
   useEffect(() => {
-    if (!currentUser || !activeChannel) return;
+  if (!currentUser || !activeChannel) return;
 
-    const socket = new SockJS('http://localhost:34101/ws');
-    const client = Stomp.over(socket);
+  const socket = new SockJS('http://localhost:34101/ws');
+  const client = Stomp.over(socket);
 
-    client.connect({}, () => {
-      setStompClient(client);
+  client.connect({}, () => {
+    setStompClient(client);
 
-      client.subscribe(`/topic/channel/${activeChannel.id}`, (message) => {
+    const subscription = client.subscribe(
+      `/topic/channel/${activeChannel.id}`,
+      (message) => {
         const newMessage = JSON.parse(message.body);
-
-        setPendingMessages(prev =>
+        
+        // Remove from pending if it was our temp message
+        setPendingMessages(prev => 
           prev.filter(msg => msg.tempId !== newMessage.tempId)
         );
 
+        // Only add if not already present
         setMessages(prev => {
-          const exists = prev.some(msg =>
-            msg.id === newMessage.id || msg.tempId === newMessage.tempId
+          const exists = prev.some(msg => 
+            msg.id === newMessage.id || 
+            msg.tempId === newMessage.tempId
           );
           return exists ? prev : [...prev, newMessage];
         });
-      });
-    });
+      }
+    );
 
     return () => {
-      if (client && client.connected) {
-        client.disconnect();
-      }
+      subscription.unsubscribe();
     };
-  }, [currentUser, activeChannel]);
+  });
+
+  return () => {
+    if (client && client.connected) {
+      client.disconnect();
+    }
+  };
+}, [currentUser, activeChannel]);
 
   const displayMessages = [
-    ...messages,
-    ...pendingMessages.filter(msg => msg.channelId === activeChannel?.id),
-  ].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+  ...messages,
+  ...pendingMessages.filter(msg => 
+    msg.channelId === activeChannel?.id && 
+    !messages.some(m => m.tempId === msg.tempId)
+  )
+].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
   useEffect(() => {
     scrollToBottom();
@@ -134,34 +150,42 @@ function Chat() {
   }, [activeChannel]);
 
   const handleSendMessage = (e) => {
-    e.preventDefault();
-    if (!newMessage.trim() || !currentUser || !stompClient || !activeChannel) return;
+  e.preventDefault();
+  if (!newMessage.trim() || !currentUser || !stompClient || !activeChannel) return;
 
-    const tempId = Date.now();
-    const chatMessage = {
-      sender: currentUser,
-      message: newMessage.trim(),
-      timestamp: new Date().toISOString(),
-      type: 'CHAT',
-      channelId: activeChannel.id,
-      tempId,
-    };
-
-    setPendingMessages(prev => [...prev, chatMessage]);
-    setNewMessage("");
-    stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+  const tempId = Date.now();
+  const chatMessage = {
+    sender: { id: currentUser.id }, // Only send ID to backend
+    message: newMessage.trim(),
+    timestamp: new Date().toISOString(),
+    type: 'CHAT',
+    channelId: activeChannel.id,
+    tempId,
   };
+
+  // Optimistic update with temporary message
+  setPendingMessages(prev => [...prev, {
+    ...chatMessage,
+    sender: { id: currentUser.id, name: "You" } // Add temporary sender info
+  }]);
+  
+  setNewMessage("");
+  stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
+};
 
   const handleChannelChange = (channel) => {
-    setActiveChannel(channel);
-    loadChannelMessages(channel.id);
+  // Clear messages before switching
+  setMessages([]);
+  setPendingMessages([]);
+  
+  setActiveChannel(channel);
+  loadChannelMessages(channel.id);
 
-    if (stompClient && stompClient.connected) {
-      stompClient.disconnect();
-      setStompClient(null);
-    }
-  };
-
+  if (stompClient && stompClient.connected) {
+    stompClient.disconnect();
+    setStompClient(null);
+  }
+};
   const getChannelTypeClass = (channel) => {
     if (!channel || !channel.tags || !Array.isArray(channel.tags)) return 'general';
 
