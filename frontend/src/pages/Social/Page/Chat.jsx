@@ -115,23 +115,14 @@ function Chat() {
     ...pendingMessages.filter(msg => msg.channelId === activeChannel?.id),
   ].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, pendingMessages]);
+ useEffect(() => {
+  scrollToBottom();
+}, [messages, pendingMessages, activeChannel]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-    });
-  };
+  messagesEndRef.current?.scrollIntoView();
+};
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      scrollToBottom();
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [activeChannel]);
 
   const handleSendMessage = (e) => {
     e.preventDefault();
