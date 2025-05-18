@@ -32,6 +32,8 @@ function Anunturi() {
     message: "",
     tags: []
   });
+
+  
   
   const [currentTag, setCurrentTag] = useState({
     name: "",
@@ -54,12 +56,18 @@ const showNotification = (message, type) => {
     return type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
   };
 
-  const getAvailableTagNames = (selectedType) => {
-    if (!userTags || userTags.length === 0) return [];
-    return userTags
-      .filter(tag => tag.type === selectedType)
-      .map(tag => tag.name);
+  const getAvailableTagNames = (selectedType, currentTags = []) => {
+  if (!userTags || userTags.length === 0) return { names: [], hasAvailableTags: false };
+  
+  const filteredTags = userTags
+    .filter(tag => tag.type === selectedType)
+    .filter(tag => !currentTags.some(t => t.name === tag.name && t.type === tag.type));
+    
+  return {
+    names: filteredTags.map(tag => tag.name),
+    hasAvailableTags: filteredTags.length > 0
   };
+};
 
   const fetchUserData = async () => {
   try {
@@ -316,6 +324,7 @@ const showNotification = (message, type) => {
       
       setShowModal(false);
       setNewAnnouncement({ title: "", message: "", tags: [] });
+      setCurrentTag({ name: "", type: availableTagTypes[0] || "GENERAL" });
       await fetchAnnouncements(fullUser);
     } catch (err) {
       setError(err.message);
@@ -368,6 +377,7 @@ const showNotification = (message, type) => {
       
       setShowEditModal(false);
       setEditingAnnouncement(null);
+      setCurrentTag({ name: "", type: availableTagTypes[0] || "GENERAL" });
       await fetchAnnouncements(fullUser);
     } catch (err) {
       setError(err.message);
@@ -503,19 +513,34 @@ const showNotification = (message, type) => {
                 ))}
               </select>
               
-              <select
-                name="name"
-                value={currentTag.name}
-                onChange={handleTagInputChange}
-                disabled={userLoading || userTags.length === 0 || !currentTag.type}
-              >
-                <option value="">Selectează etichetă</option>
-                {getAvailableTagNames(currentTag.type).map(name => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </select>
+  
+  {(() => {
+    const { names, hasAvailableTags } = getAvailableTagNames(currentTag.type, newAnnouncement.tags);
+    
+    if (!hasAvailableTags) {
+      return (
+        <div className="no-tags-message">
+          Nu mai ai etichete disponibile pentru acest tip
+        </div>
+      );
+    }
+    
+    return (
+      <select
+        name="name"
+        value={currentTag.name}
+        onChange={handleTagInputChange}
+        disabled={userLoading || userTags.length === 0 || !currentTag.type}
+      >
+        <option value="">Selectează etichetă</option>
+        {names.map(name => (
+          <option key={name} value={name}>
+            {name}
+          </option>
+        ))}
+      </select>
+    );
+  })()}
               
               <button 
                 type="button" 
@@ -559,6 +584,8 @@ const showNotification = (message, type) => {
                     setShowModal(false);
                     setError(null);
                     setNotification(null);
+                    setNewAnnouncement({ title: "", message: "", tags: [] });
+                    setCurrentTag({ name: "", type: availableTagTypes[0] || "GENERAL" });
                   }}
                 >
                   Anulează
@@ -618,19 +645,33 @@ const showNotification = (message, type) => {
                 ))}
               </select>
               
-              <select
-                name="name"
-                value={currentTag.name}
-                onChange={handleTagInputChange}
-                disabled={userLoading || userTags.length === 0 || !currentTag.type}
-              >
-                <option value="">Selectează etichetă</option>
-                {getAvailableTagNames(currentTag.type).map(name => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </select>
+             {(() => {
+    const { names, hasAvailableTags } = getAvailableTagNames(currentTag.type, editingAnnouncement.tags);
+    
+    if (!hasAvailableTags) {
+      return (
+        <div className="no-tags-message">
+          Nu mai ai etichete disponibile pentru acest tip
+        </div>
+      );
+    }
+    
+    return (
+      <select
+        name="name"
+        value={currentTag.name}
+        onChange={handleTagInputChange}
+        disabled={userLoading || userTags.length === 0 || !currentTag.type}
+      >
+        <option value="">Selectează etichetă</option>
+        {names.map(name => (
+          <option key={name} value={name}>
+            {name}
+          </option>
+        ))}
+      </select>
+    );
+  })()}
               
               <button 
                 type="button" 
@@ -674,6 +715,8 @@ const showNotification = (message, type) => {
                     setShowEditModal(false);
                     setError(null);
                     setNotification(null);
+                    setNewAnnouncement({ title: "", message: "", tags: [] });
+                    setCurrentTag({ name: "", type: availableTagTypes[0] || "GENERAL" });
                   }}
                 >
                   Anulează
