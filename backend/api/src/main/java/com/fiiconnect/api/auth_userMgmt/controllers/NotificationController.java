@@ -8,6 +8,7 @@ import com.fiiconnect.api.auth_userMgmt.repositories.NotificationRepository;
 import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository;
 import com.fiiconnect.api.auth_userMgmt.services.NotificationService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -33,6 +34,29 @@ public class NotificationController {
         List<NotificationResponse> dtos = notificationService.sendBulk(req);
         return ResponseEntity.ok(dtos);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteNotification(@PathVariable Long id) {
+        if (!notificationRepo.existsById(id)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Notificarea nu a fost găsită.");
+        }
+
+        notificationRepo.deleteById(id);
+        return ResponseEntity.ok("Notificarea a fost ștearsă.");
+    }
+
+    @DeleteMapping("/user/{userId}")
+    public ResponseEntity<String> deleteAllNotificationsByUser(@PathVariable Long userId) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("Utilizatorul nu a fost găsit"));
+
+        List<Notification> notifications = notificationRepo.findByRecipient(user);
+        notificationRepo.deleteAll(notifications);
+
+        return ResponseEntity.ok("Toate notificările au fost șterse pentru utilizator.");
+    }
+
+
 
     // ✅ [GET] Toate notificările necitite ale utilizatorului autentificat
     @GetMapping("/unread")
