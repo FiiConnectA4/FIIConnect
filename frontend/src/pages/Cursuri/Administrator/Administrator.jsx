@@ -14,38 +14,42 @@ const Administrator = () => {
     const [adaugaCurs, setAdaugaCurs] = useState(false);
 
     const fetchCourses = () => {
-    const token = localStorage.getItem('token'); 
+        const token = localStorage.getItem('token');
 
-    setLoading(true);
-    fetch('/didactic/course', {
-        headers: {
-            'Authorization': `Bearer ${token}`
-        }
-    })
-    .then((response) => {
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-        return response.json();
-    })
-    .then((data) => {
-        const courses = data._embedded?.courses || [];
-        setCursuri(courses);
-        setLoading(false);
-    })
-    .catch((error) => {
-        console.error('Eroare la încărcarea cursurilor:', error);
-        setCursuri([]);
-        setLoading(false);
-    });
-};
+        setLoading(true);
+        fetch('/didactic/course', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then((response) => {
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                return response.json();
+            })
+            .then((data) => {
+                const courses = data._embedded?.courseList || [];
+                setCursuri(courses);
+                setLoading(false);
+            })
+            .catch((error) => {
+                console.error('Eroare la încărcarea cursurilor:', error);
+                setCursuri([]);
+                setLoading(false);
+            });
+    };
 
     useEffect(() => {
         fetchCourses();
     }, []);
-
+    const token = localStorage.getItem('token');
     const handleDeleteCourse = (id) => {
         if (!window.confirm("Ești sigur că vrei să ștergi acest curs?")) return;
         fetch(`/didactic/course/${id}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+
         })
             .then((res) => {
                 if (!res.ok) throw new Error("Eroare la ștergere");
@@ -68,7 +72,10 @@ const Administrator = () => {
         if (isArchiving) {
             // apelăm direct endpointul de arhivare simplă
             fetch(`/didactic/course/${id}/archive`, {
-                method: 'PUT'
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
             })
                 .then((res) => {
                     if (!res.ok) throw new Error("Eroare la arhivare");
@@ -96,7 +103,8 @@ const Administrator = () => {
             fetch(`/didactic/course/${id}`, {
                 method: 'PUT',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
                 },
                 body: JSON.stringify(updatedCurs)
             })
@@ -116,7 +124,7 @@ const Administrator = () => {
     if (loading) return <div>Loading...</div>;
 
     if (selectedCursId) {
-        const cursSelectat = cursuri.find((c) => c.id === selectedCursId);
+        const cursSelectat = cursuri.find(c => c.id === selectedCursId);
         if (!cursSelectat) {
             console.error(`Cursul cu ID ${selectedCursId} nu a fost găsit`);
             setSelectedCursId(null);
@@ -141,7 +149,7 @@ const Administrator = () => {
             />
         );
     }
-
+    console.log("Lista de cursuri:", cursuri); // <-- aici vezi array-ul complet
     return (
         <div className="container-cursuri">
             <div className="cursuri-titlu">
@@ -153,7 +161,6 @@ const Administrator = () => {
                     cursuri.map((curs) => (
                         <div key={curs.id} className={`rand-curs ${curs.archived === 1 ? 'archived-course' : ''}`}>
                             <Carte
-                                key={curs.id}
                                 id={curs.id}
                                 userType='professor'
                             />
