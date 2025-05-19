@@ -96,6 +96,8 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, "/users/register", "/users/role")
                         .hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/notifications/**")
+                        .hasAnyAuthority("ROLE_ADMIN", "ROLE_PROFESSOR", "ROLE_STUDENT")
 
                         .anyRequest().authenticated()
                 )
