@@ -23,4 +23,8 @@ public class Schedule {
     private String activity;
 
     private boolean updated = false;
+
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 }

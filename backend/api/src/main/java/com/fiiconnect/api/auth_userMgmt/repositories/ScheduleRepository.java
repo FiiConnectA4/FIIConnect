@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
 
@@ -14,4 +15,5 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Long> {
     @Modifying
     @Query("UPDATE Schedule s SET s.updated = true WHERE s.date = :date")
     void updateScheduleForDate(LocalDate date);
+    List<Schedule> findAllByDate(LocalDate date);
 }
