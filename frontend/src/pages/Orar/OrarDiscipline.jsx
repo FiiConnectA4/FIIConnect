@@ -9,7 +9,12 @@ const OrarDiscipline = ({ isSecretariat = false }) => {
   // Funcție pentru a prelua disciplinele din backend
   const fetchDiscipline = async () => {
     try {
-      const response = await fetch("http://localhost:34101/orar/discipline"); 
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:34101/orar/discipline", {
+        headers: {
+          Authorization: `Bearer ${token}` 
+        }
+      }); 
       if (!response.ok) {
         throw new Error("Eroare la preluarea disciplinelor");
       }

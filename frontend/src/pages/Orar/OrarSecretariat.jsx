@@ -22,7 +22,12 @@ const OrarSecretariat = () => {
 
   const fetchSchedule = async (url) => {
     try {
-      const response = await fetch(url);
+      const token = localStorage.getItem("token");
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       const data = await response.json();
 
       console.log("Server data:", data);
@@ -40,9 +45,9 @@ const OrarSecretariat = () => {
     }
   };
 
-  const handleSwitchToOrar = () => {
+  /*const handleSwitchToOrar = () => {
     navigate("/app/orar");
-  };
+  };*/
 
   useEffect(() => {
     const path = location.pathname;
@@ -175,9 +180,9 @@ const OrarSecretariat = () => {
 
   return (
     <div className="orar-container">
-      <button className="toggle-button" onClick={handleSwitchToOrar}>
+      {/* <button className="toggle-button" onClick={handleSwitchToOrar}>
         Switch la Orar
-      </button>
+      </button> */}
 
       {["/app/orar-secretariat/studenti", "/app/orar-secretariat/profesori", "/app/orar-secretariat/sali", "/app/orar-secretariat/discipline"].includes(location.pathname) && (
         <button className="orar-button inapoi" onClick={handleBackToMain}>

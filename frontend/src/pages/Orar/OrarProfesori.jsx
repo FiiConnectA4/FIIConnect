@@ -7,7 +7,12 @@ const OrarProfesori = ({ onProfessorClick }) => {
   
   const fetchProfesori = async () => {
     try {
-      const response = await fetch("http://localhost:34101/orar/profesori");
+      const token = localStorage.getItem("token");
+      const response = await fetch("http://localhost:34101/orar/profesori", {
+        headers: {
+          Authorization: `Bearer ${token}` 
+        }
+      });
       if (!response.ok) {
         throw new Error("Eroare la preluarea profesorilor");
       }

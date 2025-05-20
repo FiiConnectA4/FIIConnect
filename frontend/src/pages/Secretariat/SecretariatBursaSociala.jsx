@@ -9,7 +9,12 @@ const SecretariatBursaSociala = () => {
 
 
   useEffect(() => {
-    fetch("/cereri/bursa-sociala/toate") 
+    const token = localStorage.getItem("token");
+    fetch("/cereri/bursa-sociala/toate", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }) 
       .then((res) => {
         if (!res.ok) throw new Error("Eroare la încărcarea cererilor");
         return res.json();
@@ -49,8 +54,12 @@ Multumesc anticipat pentru analiza cererii!
   };
 
   const valideazaCerere = (id) => {
+    const token = localStorage.getItem("token");
     fetch(`/cereri/bursa-sociala/${id}?status=aprobat`, {
       method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     })
       .then((res) => {
         if (!res.ok) throw new Error("Eroare validare cerere");
@@ -65,8 +74,12 @@ Multumesc anticipat pentru analiza cererii!
   };
 
   const respingeCerere = (id) => {
+    const token = localStorage.getItem("token");
     fetch(`/cereri/bursa-sociala/${id}`, {
       method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     })
       .then((res) => {
         if (!res.ok) throw new Error("Eroare ștergere cerere");

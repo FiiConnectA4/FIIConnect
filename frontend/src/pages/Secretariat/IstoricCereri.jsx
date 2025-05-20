@@ -14,10 +14,31 @@ const IstoricCereri = () => {
 useEffect(() => {
   if (!studentId) return;
 
-  const fetchAdeverinte = fetch(`/cereri/adeverinta-student/student/${studentId}`).then(res => res.json());
-  const fetchCamin = fetch(`/cereri/adeverinta-camin/student/${studentId}`).then(res => res.json());
-  const fetchCazSocial = fetch(`/cereri/caz-social/student/${studentId}`).then(res => res.json());
-  const fetchBursaSociala = fetch(`/cereri/bursa-sociala/student/${studentId}`).then(res => res.json());
+  const token = localStorage.getItem("token");
+
+  const fetchAdeverinte = fetch(`/cereri/adeverinta-student/student/${studentId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }).then(res => res.json());
+
+  const fetchCamin = fetch(`/cereri/adeverinta-camin/student/${studentId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }).then(res => res.json());
+
+  const fetchCazSocial = fetch(`/cereri/caz-social/student/${studentId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }).then(res => res.json());
+
+  const fetchBursaSociala = fetch(`/cereri/bursa-sociala/student/${studentId}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  }).then(res => res.json());
 
   Promise.all([fetchAdeverinte, fetchCamin, fetchCazSocial, fetchBursaSociala])
     .then(([adeverinteData, caminData, cazSocialData, bursaSocialaData]) => {

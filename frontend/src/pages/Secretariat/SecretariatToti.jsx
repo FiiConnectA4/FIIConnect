@@ -10,13 +10,13 @@ const SecretariatToti = () => {
   
   const isStudentView = location.pathname.startsWith("/app/student");
 
-  const handleSwitch = () => {
+  /*const handleSwitch = () => {
     if (isStudentView) {
       navigate("/app/secretariat");
     } else {
       navigate("/app/student");
     }
-  };
+  };*/
 
   return (
     <div className="secretariat-container">
@@ -25,9 +25,9 @@ const SecretariatToti = () => {
           <h1>{isStudentView ? "Cereri Student" : "Secretariat"}</h1>
           <h2>Alege o opțiune</h2>
         </div>
-        <button className="switch-button" onClick={handleSwitch}>
+        {/* <button className="switch-button" onClick={handleSwitch}>
           {isStudentView ? "Comută la Secretariat" : "Comută la Student"}
-        </button>
+        </button> */}
       </div>
 
       <div className="secretariat-buttons">

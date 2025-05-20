@@ -7,7 +7,12 @@ const SecretariatCazSocial = () => {
    const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("/cereri/caz-social/toate")
+    const token = localStorage.getItem("token");
+    fetch("/cereri/caz-social/toate", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then((res) => res.json())
       .then(setCereri)
       .catch(console.error);
@@ -52,8 +57,12 @@ const SecretariatCazSocial = () => {
   };
 
   const valideazaCerere = (id) => {
+    const token = localStorage.getItem("token");
     fetch(`/cereri/caz-social/${id}?status=aprobat`, {
       method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     })
       .then((res) => {
         if (!res.ok) throw new Error("Eroare validare");
@@ -65,8 +74,12 @@ const SecretariatCazSocial = () => {
   };
 
   const respingeCerere = (id) => {
+    const token = localStorage.getItem("token");
     fetch(`/cereri/caz-social/${id}`, {
       method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     })
       .then((res) => {
         if (!res.ok) throw new Error("Eroare ștergere");

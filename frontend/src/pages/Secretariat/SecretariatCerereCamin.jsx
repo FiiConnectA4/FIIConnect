@@ -7,7 +7,12 @@ const SecretariatCerereCamin = () => {
    const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("/cereri/adeverinta-camin/toate")
+    const token = localStorage.getItem("token");
+    fetch("/cereri/adeverinta-camin/toate", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      }
+    })
       .then((res) => res.json())
       .then(setCereri)
       .catch(console.error);
@@ -39,8 +44,12 @@ const SecretariatCerereCamin = () => {
   };
 
   const valideazaCerere = (id) => {
+    const token = localStorage.getItem("token");
     fetch(`/cereri/adeverinta-camin/${id}?status=aprobat`, {
       method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
     })
       .then(res => {
         if (!res.ok) throw new Error("Eroare validare");
@@ -50,8 +59,12 @@ const SecretariatCerereCamin = () => {
   };
 
   const respingeCerere = (id) => {
+    const token = localStorage.getItem("token");
     fetch(`/cereri/adeverinta-camin/${id}`, {
       method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
     })
       .then((res) => {
         if (!res.ok) throw new Error("Eroare ștergere");

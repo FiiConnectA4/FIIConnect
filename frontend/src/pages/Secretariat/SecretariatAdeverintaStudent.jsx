@@ -7,7 +7,12 @@ const SecretariatAdeverinteStudent = () => {
    const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("/cereri/adeverinta-student/toate")
+    const token = localStorage.getItem("token");
+    fetch("/cereri/adeverinta-student/toate", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    })
       .then((res) => res.json())
       .then(setCereri)
       .catch(console.error);
@@ -38,8 +43,12 @@ const veziPdf = (cerere) => {
 
 
   const valideazaCerere = (id) => {
-  fetch(`/cereri/adeverinta-student/${id}?status=aprobat`, {
+    const token = localStorage.getItem("token");
+    fetch(`/cereri/adeverinta-student/${id}?status=aprobat`, {
     method: "PUT",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    }
   })
     .then(res => {
       if (!res.ok) throw new Error("Eroare validare");
@@ -49,8 +58,12 @@ const veziPdf = (cerere) => {
 };
 
   const respingeCerere = (id) => {
+    const token = localStorage.getItem("token");
     fetch(`/cereri/adeverinta-student/${id}`, {
       method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
     })
       .then((res) => {
         if (!res.ok) throw new Error("Eroare ștergere");

@@ -44,10 +44,12 @@ const studentId = 7;
     dataTrimitere: new Date().toISOString(),
   };
 
+  
   fetch("/cereri/caz-social", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`, // Adaugă token-ul aici
     },
     body: JSON.stringify(payload),
   })
