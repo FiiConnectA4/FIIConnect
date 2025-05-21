@@ -368,13 +368,13 @@ const PDetaliiCurs = ({ curs, onBack }) => {
                             value={description}
                             onChange={(newDescription) => setDescription(newDescription)}
                         />
-                        <button onClick={saveCourseChanges}>Salvează</button>
-                        <button onClick={() => setIsEditingDescription(false)}>Anulează</button>
+                        <button className='buton-sectiune' onClick={saveCourseChanges}>Salvează</button>
+                        <button className='buton-sectiune' onClick={() => setIsEditingDescription(false)}>Anulează</button>
                     </div>
                 ) : (
                     <div>
                         <p>{description || 'Fără descriere'}</p>
-                        <button onClick={() => setIsEditingDescription(true)}>Editează</button>
+                        <button className='buton-sectiune' onClick={() => setIsEditingDescription(true)}>Editează</button>
                     </div>
                 )}
             </div>
@@ -389,8 +389,8 @@ const PDetaliiCurs = ({ curs, onBack }) => {
                             onChange={(e) => setFormulaText(e.target.value)}
                             placeholder="ex. Notă finală = laborator + examen"
                         />
-                        <button onClick={saveFormula}>Salvează</button>
-                        <button onClick={() => setIsEditingFormula(false)}>Anulează</button>
+                        <button className='buton-sectiune' onClick={saveFormula}>Salvează</button>
+                        <button className='buton-sectiune' onClick={() => setIsEditingFormula(false)}>Anulează</button>
                     </div>
                 ) : (
                     <div>
@@ -402,7 +402,7 @@ const PDetaliiCurs = ({ curs, onBack }) => {
                                 ))}
                             </ul>
                         )}
-                        <button onClick={() => setIsEditingFormula(true)}>Editează</button>
+                        <button className='buton-sectiune' onClick={() => setIsEditingFormula(true)}>Editează</button>
                     </div>
                 )}
             </div>
@@ -425,9 +425,9 @@ const PDetaliiCurs = ({ curs, onBack }) => {
                                             placeholder="Nume nou fișier"
                                             style={{ marginRight: '10px' }}
                                         />
-                                        <button onClick={saveNewFilename}>Salvează</button>
+                                        <button className='buton-sectiune' onClick={saveNewFilename}>Salvează</button>
                                         <button
-                                            style={{ marginLeft: '10px' }}
+                                            className='buton-sectiune'
                                             onClick={cancelRename}
                                         >
                                             Anulează

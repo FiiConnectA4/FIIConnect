@@ -354,3 +354,7 @@
     cursor: pointer;
     font-size: 13px;
 }
+
+[data-theme="dark"] .icon-buttons-container {
+    background-color: #4e6374;
+}
