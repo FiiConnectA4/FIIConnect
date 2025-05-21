@@ -1,25 +1,53 @@
+import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
+import axios from "axios";
 
 function PrivateRoute({ children, allowedRoles }) {
-  const token = localStorage.getItem("token");
+  const [authorized, setAuthorized] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  if (!token) {
-    return <Navigate to="/login" replace />;
-  }
+  useEffect(() => {
+    const checkToken = async () => {
+      const token = localStorage.getItem("token");
 
-  try {
-    const decoded = jwtDecode(token);
-    const userRoles = decoded.roles || [];
+      console.log("[PrivateRoute] Token folosit:", token);
 
-    const hasAccess = allowedRoles
-        ? userRoles.some(role => allowedRoles.includes(role))
-        : true;
+      if (!token) {
+        console.warn("[PrivateRoute] Token lipsă → redirect la login");
+        setAuthorized(false);
+        setLoading(false);
+        return;
+      }
 
-    return hasAccess ? children : <Navigate to="/unauthorized" replace />;
-  } catch (error) {
-    return <Navigate to="/login" replace />;
-  }
+      try {
+        const response = await axios.get("http://localhost:34101/person/me", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const userRole = response.data.role || "";
+        const hasAccess = allowedRoles
+          ? allowedRoles.includes(userRole)
+          : true;
+
+        console.log("[PrivateRoute] Rol utilizator:", userRole);
+        console.log("[PrivateRoute] Access permis:", hasAccess);
+
+        setAuthorized(hasAccess);
+      } catch (error) {
+        console.error("[PrivateRoute] Eroare token:", error?.response?.status);
+        localStorage.removeItem("token");
+        setAuthorized(false);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkToken();
+  }, [allowedRoles]);
+
+  if (loading) return <div>Se verifică autentificarea...</div>;
+
+  return authorized ? children : <Navigate to="/login" replace />;
 }
 
 export default PrivateRoute;
