@@ -29,18 +29,12 @@ import java.util.List;
 public class SecurityConfig {
 
     private final CustomUserDetailsService userDetailsService;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(CustomUserDetailsService userDetailsService) {
+    public SecurityConfig(CustomUserDetailsService userDetailsService,
+                          JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.userDetailsService = userDetailsService;
-    }
-
-    /* ────────────────────────────────────────────────────────────────────────
-       1.  BEANS
-       ──────────────────────────────────────────────────────────────────────── */
-
-    @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter() {
-        return new JwtAuthenticationFilter();
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
     @Bean
@@ -61,13 +55,10 @@ public class SecurityConfig {
         return cfg.getAuthenticationManager();
     }
 
-    /* ────────────────────────────────────────────────────────────────────────
-       2.  CORS
-       ──────────────────────────────────────────────────────────────────────── */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cors = new CorsConfiguration();
-        cors.setAllowedOriginPatterns(List.of("http://localhost:3000")); // wildcard-ready
+        cors.setAllowedOriginPatterns(List.of("http://localhost:3000"));
         cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         cors.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         cors.setAllowCredentials(true);
@@ -78,9 +69,6 @@ public class SecurityConfig {
         return source;
     }
 
-    /* ────────────────────────────────────────────────────────────────────────
-       3.  SECURITY FILTER CHAIN
-       ──────────────────────────────────────────────────────────────────────── */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -90,7 +78,6 @@ public class SecurityConfig {
                 .formLogin(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        // public WebSocket handshake (token e în query param)
                         .requestMatchers("/ws/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/users/login", "/users/login/verify", "/users/forgot-password", "/users/reset-password")
                         .permitAll()
@@ -98,10 +85,9 @@ public class SecurityConfig {
                         .hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/notifications/**")
                         .hasAnyAuthority("ROLE_ADMIN", "ROLE_PROFESSOR", "ROLE_STUDENT")
-
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .logout(logout -> logout.logoutUrl("/users/logout").permitAll());
 
         http.authenticationProvider(authenticationProvider());

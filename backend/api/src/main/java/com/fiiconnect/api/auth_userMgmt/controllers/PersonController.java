@@ -75,7 +75,15 @@ public class PersonController {
         }
 
         User user = userOpt.get();
-        String role = user.getRoles().stream().findFirst().map(Role::getRoleName).orElse("UNKNOWN");
+
+        if (!user.isActive()) {
+            return ResponseEntity.status(403).body("Contul este inactiv.");
+        }
+
+        String role = user.getRoles().stream()
+                .findFirst()
+                .map(Role::getRoleName)
+                .orElse("UNKNOWN");
 
         StudentDTO studentDTO = null;
         if (user.getStudent() != null) {

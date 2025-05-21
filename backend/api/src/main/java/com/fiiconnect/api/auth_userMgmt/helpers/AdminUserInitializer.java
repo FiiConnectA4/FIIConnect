@@ -40,7 +40,7 @@ public class AdminUserInitializer implements CommandLineRunner {
             admin.setEmail(adminEmail);
             admin.setPassword(passwordEncoder.encode("Admin123!"));
             admin.getRoles().add(adminRole);
-            admin.setActive(true);
+            admin.setActive(false);
             admin.setTwoFactorSecret(null);
 
             userRepository.save(admin);
