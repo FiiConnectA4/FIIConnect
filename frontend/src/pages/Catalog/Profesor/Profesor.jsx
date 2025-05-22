@@ -72,39 +72,39 @@ const Profesor = () => {
             <div className="catalog-table">
                 <table>
                     <thead>
-                    <tr>
-                        <th>Nume student</th>
-                        <th>Titlu curs</th>
-                        <th>Nota finală</th>
-                        <th>Administrative Note</th>
-                    </tr>
+                        <tr className='titlu'>
+                            <th>Nume student</th>
+                            <th>Titlu curs</th>
+                            <th>Nota finală</th>
+                            <th>Administrative Note</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    {loading ? (
-                        <tr><td colSpan="4">Se încarcă...</td></tr>
-                    ) : catalog.length === 0 ? (
-                        <tr><td colSpan="4">Nicio înregistrare.</td></tr>
-                    ) : (
-                        catalog.map((item, index) => (
-                            <tr key={index}>
-                                <td>{item.name}</td>
-                                <td>{selectedCurs}</td>
-                                <td>{item.grade}</td>
-                                <td>
-                                    <button
-                                        className="admin-button"
-                                        onClick={() => alert(`Deschide fișa pentru ${item.name}`)}
-                                    >
-                                        <img
-                                            src="/icons/edit-icon.png"
-                                            alt="Admin Note"
-                                            className="icon-img"
-                                        />
-                                    </button>
-                                </td>
-                            </tr>
-                        ))
-                    )}
+                        {loading ? (
+                            <tr><td colSpan="4">Se încarcă...</td></tr>
+                        ) : catalog.length === 0 ? (
+                            <tr><td colSpan="4">Nicio înregistrare.</td></tr>
+                        ) : (
+                            catalog.map((item, index) => (
+                                <tr key={index}>
+                                    <td>{item.name}</td>
+                                    <td>{selectedCurs}</td>
+                                    <td>{item.grade}</td>
+                                    <td>
+                                        <button
+                                            className="admin-button"
+                                            onClick={() => alert(`Deschide fișa pentru ${item.name}`)}
+                                        >
+                                            <img
+                                                src="/icons/edit-icon.png"
+                                                alt="Admin Note"
+                                                className="icon-img"
+                                            />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>
