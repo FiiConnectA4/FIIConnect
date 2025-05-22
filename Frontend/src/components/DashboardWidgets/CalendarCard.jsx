@@ -2,9 +2,40 @@
 import './CalendarCard.css';
 
 function CalendarCard() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth(); // 0-indexed, aprilie=3
+    const day = today.getDate();
+
+    // Numele lunilor (poți traduce)
+    const luni = [
+        "Ianuarie", "Februarie", "Martie", "Aprilie", "Mai", "Iunie",
+        "Iulie", "August", "Septembrie", "Octombrie", "Noiembrie", "Decembrie"
+    ];
+
+    // Câte zile are luna
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    // În ce zi a săptămânii începe luna (luni=1, duminica=0)
+    let firstDay = new Date(year, month, 1).getDay();
+    if (firstDay === 0) firstDay = 7; // Duminica devine 7 (la final)
+
+    // Generează un array pentru tabel
+    let calendar = [];
+    let week = new Array(firstDay - 1).fill(""); // umple începutul cu gol
+    for (let d = 1; d <= daysInMonth; d++) {
+        week.push(d);
+        if (week.length === 7) {
+            calendar.push(week);
+            week = [];
+        }
+    }
+    while (week.length < 7) week.push(""); // completează ultima săptămână
+    if (week.some(x => x !== "")) calendar.push(week);
+
     return (
         <div className="calendar-card">
-            <h3>Aprilie 2024</h3>
+            <h3>{luni[month]} {year}</h3>
             <table>
                 <thead>
                 <tr>
@@ -12,11 +43,18 @@ function CalendarCard() {
                 </tr>
                 </thead>
                 <tbody>
-                <tr><td></td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td></tr>
-                <tr><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td></tr>
-                <tr><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td></tr>
-                <tr><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td><td>27</td></tr>
-                <tr><td>28</td><td>29</td><td>30</td><td></td><td></td><td></td><td></td></tr>
+                {calendar.map((week, wi) => (
+                    <tr key={wi}>
+                        {week.map((d, di) => (
+                            <td
+                                key={di}
+                                className={d === day ? "calendar-today" : ""}
+                            >
+                                {d}
+                            </td>
+                        ))}
+                    </tr>
+                ))}
                 </tbody>
             </table>
         </div>
