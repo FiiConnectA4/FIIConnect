@@ -1,7 +1,7 @@
 body {
     margin: 0;
     padding: 0;
-    background-color: #f3f7fc;
+    background-color: var(--bg-color);;
     font-family: sans-serif;
 }
 
