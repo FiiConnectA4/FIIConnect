@@ -511,5 +511,3 @@ commit;
 end;
 
 /
-
-exit;
