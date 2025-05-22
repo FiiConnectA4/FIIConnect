@@ -1,10 +1,13 @@
 // src/pages/Dashboard/Dashboard.jsx
+import { useNavigate } from "react-router-dom";
 import InfoCard from '../../components/DashboardWidgets/InfoCard';
 import ActivitiesList from '../../components/DashboardWidgets/ActivitiesList';
 import CalendarCard from '../../components/DashboardWidgets/CalendarCard';
-import './Dashboard.css'; // Importă stilurile noi
+import './Dashboard.css';
 
 function Dashboard() {
+    const navigate = useNavigate();
+
     const stats = {
         announcements: 3,
         courses: 5,
@@ -23,10 +26,18 @@ function Dashboard() {
         <div className="dashboard-container">
             <h1 className="dashboard-title">Salut, Andrei!</h1>
             <div className="dashboard-row">
-                <InfoCard icon="💬" title="Anunțuri noi" value={stats.announcements} />
-                <InfoCard icon="📚" title="Cursuri active" value={stats.courses} />
-                <InfoCard icon="⭐" title="Ultima notă" value={stats.lastGrade} />
-                <InfoCard icon="📅" title="Orar azi" value={stats.todaySchedule} />
+                <div style={{ cursor: "pointer" }} onClick={() => navigate("/app/anunturi")}>
+                    <InfoCard icon="💬" title="Anunțuri noi" value={stats.announcements} />
+                </div>
+                <div style={{ cursor: "pointer" }} onClick={() => navigate("/app/cursuri")}>
+                    <InfoCard icon="📚" title="Cursuri active" value={stats.courses} />
+                </div>
+                <div style={{ cursor: "pointer" }} onClick={() => navigate("/app/catalog")}>
+                    <InfoCard icon="⭐" title="Ultima notă" value={stats.lastGrade} />
+                </div>
+                <div style={{ cursor: "pointer" }} onClick={() => navigate("/app/orar")}>
+                    <InfoCard icon="📅" title="Orar azi" value={stats.todaySchedule} />
+                </div>
             </div>
             <div className="dashboard-row">
                 <CalendarCard />
