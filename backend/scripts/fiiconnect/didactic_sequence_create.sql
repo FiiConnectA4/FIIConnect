@@ -15,4 +15,3 @@ create sequence seq_formula_component_id start with 1 increment by 1 minvalue 1 
 create sequence seq_material_id start with 1 increment by 1 minvalue 1 nomaxvalue;
 
 commit;
-exit;

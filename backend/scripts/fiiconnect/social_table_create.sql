@@ -107,4 +107,3 @@ CREATE TABLE CHAT (
 );
 
 commit;
-exit;

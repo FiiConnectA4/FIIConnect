@@ -9,9 +9,9 @@ drop table transfer_request;
 drop table component_score;
 drop table formula_component;
 drop table formula;
-drop table student;
-drop table course;
-drop table professor;
+drop table student cascade constraints;
+drop table course cascade constraints;
+drop table professor cascade constraints;
 
 commit;
 
@@ -159,4 +159,3 @@ create table material(
 );
 
 commit;
-exit;
