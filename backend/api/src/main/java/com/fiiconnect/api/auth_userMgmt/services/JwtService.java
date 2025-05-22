@@ -16,7 +16,7 @@ import java.util.*;
 @Service
 public class JwtService {
 
-    private static final String SECRET_KEY = "supersecreta123456supersecreta123456"; // trebuie să aibă minim 32 caractere
+    private static final String SECRET_KEY = "x9JzR8^P#kL03qN6fY@u4Wz*LmC1aVt7"; // trebuie să aibă minim 32 caractere
 
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(SECRET_KEY.getBytes());
@@ -31,7 +31,7 @@ public class JwtService {
                 .setSubject(username)
                 .claim("roles", roles)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60)) // 1 oră
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 6)) // 6 ore
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }

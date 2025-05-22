@@ -277,6 +277,22 @@
   .chat-input-form button:hover {
     background-color: #3a5a8f;
   }
+
+  .chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Ensure messages container has a defined height */
+.chat-main {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
   
   /* Tag type colors (similar to Anunturi page) */
   .general { color: #4a6fa5; }

@@ -1,8 +1,11 @@
 package com.fiiconnect.api.didactic.models;
 
+import com.fiiconnect.api.auth_userMgmt.models.User;
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.util.List;
 import java.util.Objects;
@@ -10,10 +13,12 @@ import java.util.Objects;
 @Entity
 @Getter
 @Setter
+@EqualsAndHashCode
+@ToString
 public class Student {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "student_id_gen")
-    @SequenceGenerator(name = "student_id_gen", sequenceName = "seq_student_id", allocationSize = 1, initialValue = 1)
+    @SequenceGenerator(name = "student_id_gen", sequenceName = "seq_student_id", allocationSize = 1)
     private Long id;
     private String cnp;
     private String regNumber;
@@ -24,28 +29,6 @@ public class Student {
     @Transient
     private List<Enrollment> enrollments;
 
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof Student student)) return false;
-        return Objects.equals(getId(), student.getId()) && Objects.equals(getCnp(), student.getCnp()) && Objects.equals(getRegNumber(), student.getRegNumber()) && Objects.equals(getFirstName(), student.getFirstName()) && Objects.equals(getLastName(), student.getLastName()) && Objects.equals(getYear(), student.getYear()) && Objects.equals(getFacultyGroup(), student.getFacultyGroup()) && Objects.equals(getEnrollments(), student.getEnrollments());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId(), getCnp(), getRegNumber(), getFirstName(), getLastName(), getYear(), getFacultyGroup(), getEnrollments());
-    }
-
-    @Override
-    public String toString() {
-        return "Student{" +
-                "id=" + id +
-                ", cnp='" + cnp + '\'' +
-                ", regNumber='" + regNumber + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", year=" + year +
-                ", facultyGroup='" + facultyGroup + '\'' +
-                ", enrollments=" + enrollments +
-                '}';
-    }
+    @Transient
+    private List<Grade> grades;
 }
