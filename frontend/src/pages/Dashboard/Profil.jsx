@@ -11,11 +11,33 @@ import "../../styles/Profil.css";
  */
 const Profile = () => {
     /* --------------------------- state --------------------------- */
+    const API = "http://localhost:34101";
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [editing, setEditing] = useState({ phone: false, about: false });
     const [draft, setDraft] = useState({ phone: "", about: "" });
     const navigate = useNavigate();
+
+    const handleDisable2FA = async () => {
+        const confirm = window.confirm("Sigur vrei să dezactivezi 2FA?");
+        if (!confirm) return;
+
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API}/users/disable-2fa`, {
+                method: "POST",
+                headers: { Authorization: `Bearer ${token}` },
+            });
+
+            if (!res.ok) throw new Error("Failed to disable 2FA");
+
+            // refacem profilul după dezactivare
+            await loadProfile();
+        } catch (err) {
+            console.error("Eroare la dezactivare 2FA:", err);
+            alert("A apărut o problemă la dezactivare.");
+        }
+    };
 
     /* -------------------- fetch profil din backend -------------------- */
     const loadProfile = useCallback(async () => {
@@ -32,6 +54,7 @@ const Profile = () => {
 
             const data = await res.json();
             setProfile(data);
+            console.log("Profil primit:", profile);
             setDraft({ phone: data.phone || "", about: data.about || "" });
         } catch (err) {
             console.error(err);
@@ -177,13 +200,25 @@ const Profile = () => {
                     <div className="card">
                         <div className="info-item">
                             <span className="label">Two-Factor Authentication</span>
-                            <button
-                                className="edit-btn"
-                                onClick={() => navigate("/app/setup-2fa")}
-                            >
-                                {profile.twoFactorEnabled ? "Manage 2FA" : "Enable 2FA"}
-                            </button>
+
+                            {profile.twoFactorEnabled ? (
+                                <>
+                                    <span className="enabled-badge">2FA is enabled</span>
+                                    <button className="danger-btn" onClick={handleDisable2FA}>
+                                        Dezactivează 2FA
+                                    </button>
+                                </>
+                            ) : (
+                                <button
+                                    className="edit-btn"
+                                    onClick={() => navigate("/app/setup-2fa")}
+                                >
+                                    Activează 2FA
+                                </button>
+                            )}
                         </div>
+
+
                     </div>
 
 
