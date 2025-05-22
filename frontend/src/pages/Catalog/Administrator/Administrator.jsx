@@ -72,34 +72,34 @@ const Administrator = () => {
             <div className="catalog-table">
                 <table>
                     <thead>
-                    <tr>
-                        <th><input type="checkbox" /></th>
-                        <th>Student Name</th>
-                        <th>Titlu Curs</th>
-                        <th>Nota finală</th>
-                        <th>Administrative Note</th>
-                    </tr>
+                        <tr className='titlu'>
+                            <th><input type="checkbox" /></th>
+                            <th>Student Name</th>
+                            <th>Titlu Curs</th>
+                            <th>Nota finală</th>
+                            <th>Administrative Note</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    {loading ? (
-                        <tr><td colSpan="5">Se încarcă...</td></tr>
-                    ) : catalog.length === 0 ? (
-                        <tr><td colSpan="5">Nicio înregistrare pentru grupa selectată.</td></tr>
-                    ) : (
-                        catalog.map((item, index) => (
-                            <tr key={index}>
-                                <td><input type="checkbox" /></td>
-                                <td>{item.name}</td>
-                                <td>{selectedCurs}</td>
-                                <td>{item.grade}</td>
-                                <td>
-                                    <button className="admin-button" onClick={() => alert(`Deschide fișa pentru ${item.name}`)}>
-                                        <img src="/icons/edit-icon.png" alt="Admin Note" className="icon-img" />
-                                    </button>
-                                </td>
-                            </tr>
-                        ))
-                    )}
+                        {loading ? (
+                            <tr><td colSpan="5">Se încarcă...</td></tr>
+                        ) : catalog.length === 0 ? (
+                            <tr><td colSpan="5">Nicio înregistrare pentru grupa selectată.</td></tr>
+                        ) : (
+                            catalog.map((item, index) => (
+                                <tr key={index}>
+                                    <td><input type="checkbox" /></td>
+                                    <td>{item.name}</td>
+                                    <td>{selectedCurs}</td>
+                                    <td>{item.grade}</td>
+                                    <td>
+                                        <button className="admin-button" onClick={() => alert(`Deschide fișa pentru ${item.name}`)}>
+                                            <img src="/icons/edit-icon.png" alt="Admin Note" className="icon-img" />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>

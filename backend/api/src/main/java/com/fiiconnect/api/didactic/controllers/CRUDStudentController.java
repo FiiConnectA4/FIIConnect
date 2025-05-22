@@ -7,10 +7,10 @@ import com.fiiconnect.api.didactic.models.Student;
 import com.fiiconnect.api.didactic.repositories.CourseRepository;
 import com.fiiconnect.api.didactic.repositories.EnrollmentRepository;
 import com.fiiconnect.api.didactic.repositories.StudentRepository;
-import com.fiiconnect.api.didactic.services.StudentService;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -25,17 +25,17 @@ public class CRUDStudentController {
     private final StudentRepository repository;
     private final EnrollmentRepository enrollmentRepository;
     private final CourseRepository courseRepository;
-    private final StudentService service;
 
-    public CRUDStudentController(StudentRepository repository, StudentService service, EnrollmentRepository enrollmentRepository, CourseRepository courseRepository)
+
+    public CRUDStudentController(StudentRepository repository, EnrollmentRepository enrollmentRepository, CourseRepository courseRepository)
     {
         this.courseRepository = courseRepository;
         this.enrollmentRepository = enrollmentRepository;
         this.repository = repository;
-        this.service = service;
     }
 
-    @PostMapping("/enroll/student")
+    //@PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("didactic/enroll/student")
     public ResponseEntity<EntityModel<Student>> create(@RequestBody Student student) throws URISyntaxException {
         if (repository.existsByCnp(student.getCnp())) {
             throw new StudentAlreadyEnrolled(student.getCnp());
@@ -55,8 +55,9 @@ public class CRUDStudentController {
         return ResponseEntity.created(location).body(studentResource);
     }
 
-    // Example: /enroll?studentId=x&courseId=y$faculty_group=z
-    @PatchMapping("/enroll")
+    // Example: didactic/enroll?studentId=x&courseId=y$faculty_group=z
+   // @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("didactic/enroll")
     public ResponseEntity<Object> updateEnroll(@RequestParam Long studentId, @RequestParam Long courseId, @RequestParam String facultyGroup) {
         if(repository.findById(studentId).isEmpty())
             throw new StudentNotFoundException(studentId);
@@ -71,8 +72,9 @@ public class CRUDStudentController {
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    // Example: /unenroll?studentId=x&courseId=y$faculty_group=z
-    @PatchMapping("/unenroll")
+    // Example: didactic/unenroll?studentId=x&courseId=y$faculty_group=z
+    //@PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("didactic/unenroll")
     public ResponseEntity<Object> updateUnenroll(@RequestParam Long studentId, @RequestParam Long courseId, @RequestParam String facultyGroup) {
         if(repository.findById(studentId).isEmpty())
             throw new StudentNotFoundException(studentId);
@@ -89,7 +91,8 @@ public class CRUDStudentController {
     }
 
     // Will also unenroll student from all of his courses (cascade)
-    @DeleteMapping("/unenroll/student/{id}")
+    //@PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("didactic/unenroll/student/{id}")
     public ResponseEntity<EntityModel<Student>> delete(@PathVariable Long id){
         if (!repository.existsById(id)) {
             throw new StudentNotFoundException(id);
@@ -97,4 +100,24 @@ public class CRUDStudentController {
         repository.deleteById(id);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
+
+    @ExceptionHandler(StudentAlreadyEnrolled.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String studentAlreadyEnrolled(StudentAlreadyEnrolled e) {
+        return e.getMessage();
+    }
+
+    @ExceptionHandler(StudentAlreadyEnrolledInCourse.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String studentAlreadyEnrolled(StudentAlreadyEnrolledInCourse e) {
+        return e.getMessage();
+    }
+
+    @ExceptionHandler(StudentNotEnrolledInCourse.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String studentAlreadyEnrolled(StudentNotEnrolledInCourse e) {
+        return e.getMessage();
+    }
+
+
 }
