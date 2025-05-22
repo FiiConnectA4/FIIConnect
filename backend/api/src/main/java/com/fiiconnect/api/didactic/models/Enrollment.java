@@ -4,6 +4,7 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Transient;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Objects;
@@ -11,6 +12,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @Entity
+@NoArgsConstructor
 public class Enrollment {
     @EmbeddedId
     private EnrollmentCompositeKey id;
@@ -21,6 +23,11 @@ public class Enrollment {
 
     @Transient
     private Course course;
+
+    public Enrollment(EnrollmentCompositeKey enrollmentKey, String facultyGroup) {
+        this.id = enrollmentKey;
+        this.facultyGroup = facultyGroup;
+    }
 
     @Override
     public boolean equals(Object o) {
