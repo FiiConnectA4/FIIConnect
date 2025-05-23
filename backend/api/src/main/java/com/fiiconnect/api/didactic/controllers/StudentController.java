@@ -28,7 +28,7 @@ public class StudentController {
 
     @GetMapping("/didactic/student/{id}")
     public Student one(@PathVariable Long id)
-    {
+    {  
         Student student = repository.findById(id).orElseThrow(() -> new StudentNotFoundException(id));
         service.attachEnrollments(student);
         service.attachGrades(student);

@@ -37,8 +37,10 @@ public class SftpService {
         try {
             // Convert MultipartFile to File
             assert desiredFileName.length <= 1;
-            String desiredName = desiredFileName.length > 0 ? desiredFileName[0] : null;
-            file = convertToFile(multipartFile, desiredName);
+            if(desiredFileName.length > 0)
+                file = convertToFile(multipartFile, desiredFileName);
+            else
+                file = convertToFile(multipartFile);
             // Send to SFTP via outboundChannel
             outboundChannel.send(MessageBuilder.withPayload(file)
                     .setHeader("remote-target-dir", remoteTargetDir)
@@ -63,7 +65,7 @@ public class SftpService {
         File localFile = new File(localDir, localPath);
 
         try {
-            if (!localFile.getParentFile().mkdirs()) //create all directories leading to file if necessary
+            if (!localFile.getParentFile().mkdirs() && !Files.exists(Path.of(localFile.getParentFile().getAbsolutePath()))) //create all directories leading to file if necessary
                 throw new IOException("Failed to create directory: " + localFile.getParentFile().getAbsolutePath());
             sftpRemoteFileTemplate.execute(session -> {
                 try {

@@ -1,3 +1,33 @@
+:root[data-theme="light"] {
+    --button-bg: #537A9C;
+    --button-hover: #567998;
+    --button-text: #FFFFFF;
+    --btn-archived-bg: #6c757d;
+    --btn-archived-hover: #5a6268;
+    --card-bg: #f0f0f0;
+    --main-blue: #537a9c;
+    --main-blue-hover: #567998;
+    --gray-light: #cccccc;
+    --dot-btn-bg: #668298;
+    --dot-color: #000000;
+    --text-white: #ffffff;
+}
+
+:root[data-theme="dark"] {
+    --button-bg: #335a77;
+    --button-hover: #3a607c;
+    --button-text: #f0f0f0;
+    --btn-archived-bg: #4e5b66;
+    --btn-archived-hover: #3c454d;
+    --card-bg: #2a2f35;
+    --main-blue: #335a77;
+    --main-blue-hover: #3a607c;
+    --gray-light: #999999;
+    --dot-btn-bg: #4e6374;
+    --dot-color: #e0e0e0;
+    --text-white: #f5f5f5;
+}
+
 .buton-icon,
 .buton-edit {
     background: none;
@@ -27,12 +57,12 @@
 }
 
 .buton-arhivat {
-    background-color: #6c757d !important; /* gri Bootstrap */
-    color: white;
+    background-color: var(--btn-archived-bg) !important;
+    color: var(--text-white);
 }
 
 .buton-arhivat:hover {
-    background-color: #5a6268 !important;
+    background-color: var(--btn-archived-hover) !important;
 }
 
 .icon-curs {
@@ -43,7 +73,7 @@
 
 .carte-container {
     position: relative;
-    background-color: #f0f0f0;
+    background-color: var(--card-bg);
     border-radius: 50%;
     padding: 12px;
     display: flex;
@@ -76,8 +106,10 @@
 .image-upload {
     position: absolute;
     top: -15%;
-    right: -15%;
+    width: 130%;
     z-index: 10;
+    display: flex;
+    justify-content: space-between;
 }
 
 .plus-button {
@@ -86,7 +118,8 @@
     align-items: center;
     width: 25px;
     height: 25px;
-    background-color: #537A9C;
+    background-color: var(--button-bg);
+    color: var(--button-text);
     color: white;
     font-size: 16px;
     font-weight: bold;
@@ -99,12 +132,29 @@
 
 .plus-button:hover {
     transform: scale(1.1);
-    background-color: #567998;
+    background-color: var(--button-hover);
 }
 
-.plus-button:hover {
+.sterge-upload {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 25px;
+    height: 25px;
+    background-color: var(--main-blue);
+    color: white;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease;
+}
+
+.sterge-upload:hover {
     transform: scale(1.1);
-    background-color: #567998;
+    background-color: var(--main-blue-hover);
 }
 
 .upload-input {
@@ -116,8 +166,8 @@
     padding: 18px 25px;
     border: none;
     border-radius: 30px;
-    background: #537A9C;
-    color: #FFFFFF;
+    background: var(--main-blue);
+    color: var(--text-white);
     font-size: 16px;
     font-family: 'Segoe UI', sans-serif;
     cursor: pointer;
@@ -132,12 +182,12 @@
 .buton-curs:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    background: #567998;
+    background: var(--main-blue-hover);
 }
 
 .buton-curs.activ {
-    background: #CCCCCC;
-    color: #537A9C;
+    background: var(--gray-light);
+    color: var(--main-blue);
     padding-right: 45px;
 }
 
@@ -153,7 +203,7 @@
     width: 80px;
     height: 40px;
     border-radius: 30px;
-    background-color: #668298;
+    background-color: var(--dot-btn-bg);
     border: none;
     cursor: pointer;
     display: flex;
@@ -180,6 +230,10 @@
     height: 12px;
     background-color: #555;
     border-radius: 50%;
+}
+
+.dots::before {
+    background-color: var(--dot-color);
 }
 
 .dots::before {
@@ -239,7 +293,8 @@
     top: calc(100% + 5px);
     /* Să fie puțin mai jos de butonul principal */
     left: 0;
-    background: #537A9C;
+    background: var(--main-blue);
+    color: var(--text-white);
     border-radius: 30px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     padding: 10px 20px;
@@ -253,8 +308,8 @@
 .buton-submenu-item {
     display: block;
     width: 100%;
-    background: #537A9C;
-    color: #FFFFFF;
+    background: var(--main-blue);
+    color: var(--text-white);
     border: none;
     border-radius: 25px;
     padding: 10px;
@@ -266,13 +321,13 @@
 }
 
 .buton-submenu-item:hover {
-    background: #567998;
+    background: var(--main-blue-hover);
 }
 
 /* Footer suplimentar din sub-meniu */
 .buton-submenu-footer {
     margin-top: 10px;
-    color: #FFFFFF;
+    color: var(--text-white);
     font-size: 14px;
 }
 
@@ -291,11 +346,15 @@
 }
 
 .add-material button {
-    background-color: #537A9C;
-    color: white;
+    background-color: var(--main-blue);
+    color: var(--text-white);
     border: none;
     padding: 8px 12px;
     border-radius: 5px;
     cursor: pointer;
     font-size: 13px;
+}
+
+[data-theme="dark"] .icon-buttons-container {
+    background-color: #4e6374;
 }

@@ -10,4 +10,5 @@ public class UpdateUserProfileRequest {
     private String lastName;
     private String phone;
     private String about;
+    private boolean twoFactorEnabled;
 }

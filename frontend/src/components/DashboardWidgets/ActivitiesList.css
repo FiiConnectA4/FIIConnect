@@ -1,0 +1,64 @@
+.activities-list {
+    background: #fff;
+    border-radius: 1.3rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    padding: 1.2rem 1.4rem;
+    width: 210px;
+    min-width: 180px;
+    max-width: 100%;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    margin: 0.5rem 0;
+    transition: box-shadow 0.2s;
+}
+
+.activities-list:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+}
+
+.activities-list h3 {
+    margin-bottom: 0.7rem;
+    font-size: 1.1rem;
+    color: #002868;
+    font-weight: 700;
+}
+
+.activities-list ul {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+}
+
+.activities-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.45rem;
+    border-bottom: 1px solid #f2f4f7;
+    padding-bottom: 0.3rem;
+    font-size: 0.96rem;
+}
+
+.activity-title {
+    font-weight: 500;
+    color: #343a40;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
+}
+
+.activity-time {
+    color: #868e96;
+    font-size: 0.92rem;
+    flex-shrink: 0;
+}
+
+@media (max-width: 1000px) {
+    .activities-list {
+        width: 48vw;
+        min-width: 140px;
+        padding: 1rem 0.7rem;
+    }
+}
