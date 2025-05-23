@@ -1,6 +1,5 @@
 package com.fiiconnect.api.auth_userMgmt.services;
 
-
 import com.fiiconnect.api.auth_userMgmt.dtos.BulkNotificationRequest;
 import com.fiiconnect.api.auth_userMgmt.dtos.NotificationResponse;
 import com.fiiconnect.api.auth_userMgmt.models.Notification;
@@ -8,7 +7,8 @@ import com.fiiconnect.api.auth_userMgmt.models.User;
 import com.fiiconnect.api.auth_userMgmt.repositories.NotificationRepository;
 import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -53,9 +53,8 @@ public class NotificationService {
                 })
                 .toList();
 
-        notificationRepo.saveAll(entities);          // single round-trip la DB
+        notificationRepo.saveAll(entities); // single round-trip la DB
 
-        // push prin WebSocket + map la DTO
         return entities.stream()
                 .map(n -> {
                     NotificationResponse dto = map(n);
@@ -69,10 +68,23 @@ public class NotificationService {
                 .toList();
     }
 
+    public List<NotificationResponse> getLimitedNotifications(User user, int limit, Boolean readStatus) {
+        Pageable pageable = PageRequest.of(0, limit);
+        List<Notification> notifications = notificationRepo.findLimitedByUserAndReadStatus(user, readStatus, pageable);
+
+        return notifications.stream()
+                .map(this::map)
+                .toList();
+    }
+
     private NotificationResponse map(Notification n) {
         return new NotificationResponse(
-                n.getId(), n.getTitle(), n.getContent(),
-                n.getType(), n.isRead(), n.getTimestamp()
+                n.getId(),
+                n.getTitle(),
+                n.getContent(),
+                n.getType(),
+                n.isRead(),
+                n.getTimestamp()
         );
     }
 }
