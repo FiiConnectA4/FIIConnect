@@ -2,7 +2,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import StudentLayout from "../layouts/StudentLayout";
 import ServiceAdminPage from "../pages/UserManagement/ServiceAdminPage";
 
-import Dashboard from "../pages/Dashboard";
+import Dashboard from "../pages/Dashboard/Dashboard";
 import Anunturi from "../pages/Social/Page/Anunturi";
 import Harta from "../pages/Harta";
 import Cursuri from "../pages/Cursuri/Cursuri";

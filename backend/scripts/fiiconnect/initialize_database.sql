@@ -1,0 +1,9 @@
+@@ didactic_table_create.sql
+@@ didactic_sequence_create.sql
+@@ auth_sequence_create.sql
+@@ auth_table_create.sql
+@@ secretariat_sequence_create.sql
+@@ secretariat_table_create.sql
+@@ social_sequence_create.sql
+@@ social_table_create.sql
+@@ fiiconnect_populate.sql
