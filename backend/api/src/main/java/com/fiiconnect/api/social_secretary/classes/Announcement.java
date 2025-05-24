@@ -58,4 +58,5 @@ public class Announcement {
     public void setTags(Set<Tag> tags) { this.tags = tags; }
     public LocalDate getPublishedDate() { return publishedDate; }
     public void setPublishedDate(LocalDate publishedDate) { this.publishedDate = publishedDate; }
+    public void setId(Long id) { this.id = id; }
 }

@@ -26,7 +26,6 @@ public class ChannelController {
         return channelService.getAllChannelsWithTag(id);
     }
 
-
     //returneaza toate channel-urile care au macar unul din tag-urile din lista de tag-ids
    /* @GetMapping("/with-tag")
     public List<Channel> getAllChannelsWithTags(@RequestParam List<Long> tagIds){

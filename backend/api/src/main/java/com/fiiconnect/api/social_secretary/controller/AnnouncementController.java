@@ -20,16 +20,16 @@ import java.util.*;
 @CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*")
 public class AnnouncementController {
     @Autowired
-    private AnnouncementService announcementService;
+    public AnnouncementService announcementService;
 
     @Autowired
-    private TagService tagService;
+    public TagService tagService;
 
     @Autowired
-    private UserService2 userService2;
+    public UserService2 userService2;
 
     @Autowired
-    private UserLogatService userLogatService;
+    public UserLogatService userLogatService;
 
     // Obține toate anunțurile
     @GetMapping
