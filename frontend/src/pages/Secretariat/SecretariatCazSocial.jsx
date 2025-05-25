@@ -7,7 +7,12 @@ const SecretariatCazSocial = () => {
    const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("/cereri/caz-social/toate")
+    const token = localStorage.getItem("token");
+    fetch("/cereri/caz-social/toate", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then((res) => res.json())
       .then(setCereri)
       .catch(console.error);

@@ -105,39 +105,33 @@ public class OrarController {
 
     
 
-    @GetMapping("/profesor/{nume}/{prenume}")
-    public List<OrarDTO> getOrarByProfesor(@PathVariable String nume, @PathVariable String prenume) {
-        Professor profesor = professorRepository.findAll().stream()
-            .filter(p -> p.getFirstName().equalsIgnoreCase(prenume) && p.getLastName().equalsIgnoreCase(nume))
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("Profesorul nu a fost găsit: " + prenume + " " + nume));
-    
-        System.out.println("Căutăm orar pentru profesorul: " + nume + prenume);  // Log pentru depanare
-    
-        List<Orar> orarList = repository.findByProfesor(profesor);
-        
-        System.out.println("Număr de orare găsite: " + orarList.size()); 
-        
-        return orarList.stream().map(orar -> {
-            LocalTime oraStartTime = LocalTime.parse(orar.getOraStart(), DateTimeFormatter.ofPattern("HH:mm"));
-            LocalTime oraEndTime = LocalTime.parse(orar.getOraEnd(), DateTimeFormatter.ofPattern("HH:mm"));
-            String oraStart = oraStartTime.format(DateTimeFormatter.ofPattern("HH:mm"));
-            String oraEnd = oraEndTime.format(DateTimeFormatter.ofPattern("HH:mm"));
-    
-            return new OrarDTO(
-                orar.getZi(),
-                oraStart + " - " + oraEnd, 
-                orar.getDisciplina().getTitle(),
-                orar.getTip(),
-                orar.getGrupa(),
-                orar.getSala(),
-                orar.getProfesor().getFirstName() + " " + orar.getProfesor().getLastName(),
-                orar.getAn(),
-                orar.getId()
-            );
-        }).collect(Collectors.toList());
-    }
-    
+   @GetMapping("/profesor/{id}")
+public List<OrarDTO> getOrarByProfesorId(@PathVariable Long id) {
+    Professor profesor = professorRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Profesorul nu a fost găsit cu ID: " + id));
+
+    List<Orar> orarList = repository.findByProfesor(profesor);
+
+    return orarList.stream().map(orar -> {
+        LocalTime oraStartTime = LocalTime.parse(orar.getOraStart(), DateTimeFormatter.ofPattern("HH:mm"));
+        LocalTime oraEndTime = LocalTime.parse(orar.getOraEnd(), DateTimeFormatter.ofPattern("HH:mm"));
+        String oraStart = oraStartTime.format(DateTimeFormatter.ofPattern("HH:mm"));
+        String oraEnd = oraEndTime.format(DateTimeFormatter.ofPattern("HH:mm"));
+
+        return new OrarDTO(
+            orar.getZi(),
+            oraStart + " - " + oraEnd,
+            orar.getDisciplina().getTitle(),
+            orar.getTip(),
+            orar.getGrupa(),
+            orar.getSala(),
+            profesor.getFirstName() + " " + profesor.getLastName(),
+            orar.getAn(),
+            orar.getId()
+        );
+    }).collect(Collectors.toList());
+}
+
 
     @GetMapping("/sala/{sala}")
     public List<OrarDTO> getOrarBySala(@PathVariable String sala) {

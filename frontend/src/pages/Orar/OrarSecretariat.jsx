@@ -20,9 +20,14 @@ const OrarSecretariat = () => {
   const [selectedRoom, setSelectedRoom] = useState(sala || null);
   const [selectedDiscipline, setSelectedDiscipline] = useState(disciplina || null);
 
-  const fetchSchedule = async (url) => {
+    const fetchSchedule = async (url) => {
     try {
-      const response = await fetch(url);
+      const token = localStorage.getItem("token");
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       const data = await response.json();
 
       console.log("Server data:", data);

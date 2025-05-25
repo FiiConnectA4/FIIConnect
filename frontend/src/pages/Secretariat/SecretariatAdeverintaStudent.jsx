@@ -6,8 +6,13 @@ const SecretariatAdeverinteStudent = () => {
   const [cereri, setCereri] = useState([]);
    const navigate = useNavigate();
 
-  useEffect(() => {
-    fetch("/cereri/adeverinta-student/toate")
+   useEffect(() => {
+    const token = localStorage.getItem("token");
+    fetch("/cereri/adeverinta-student/toate", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      }
+    })
       .then((res) => res.json())
       .then(setCereri)
       .catch(console.error);
