@@ -1,19 +1,21 @@
 package com.fiiconnect.api.social_secretary.DTO;
 
+import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
+
 import java.time.LocalDate;
 import java.util.Set;
 
 public class AnnouncementDTO {
     private String title;
     private String message;
-    private UserDTO professor;
+    private PersonInfoDTO author;
     private Set<TagDTO> tags;
     private LocalDate publishedDate;
 
-    public AnnouncementDTO(String title, String message, UserDTO professor, Set<TagDTO> tags, LocalDate publishedDate) {
+    public AnnouncementDTO(String title, String message, PersonInfoDTO author, Set<TagDTO> tags, LocalDate publishedDate) {
         this.title = title;
         this.message =   message;
-        this.professor = professor;
+        this.author = author;
         this.tags = tags;
         this.publishedDate=publishedDate;
     }
@@ -34,12 +36,8 @@ public class AnnouncementDTO {
         this.message = message;
     }
 
-    public UserDTO getProfessor() {
-        return professor;
-    }
-
-    public void setUser(UserDTO professor) {
-        this.professor = professor;
+    public PersonInfoDTO getAuthor() {
+        return author;
     }
 
     public Set<TagDTO> getTags() {
@@ -50,8 +48,8 @@ public class AnnouncementDTO {
         this.tags = tags;
     }
 
-    public void setProfessor(UserDTO professor) {
-        this.professor = professor;
+    public void setAuthor(PersonInfoDTO author) {
+        this.author = author;
     }
 
     public LocalDate getPublishedDate() {
@@ -67,7 +65,7 @@ public class AnnouncementDTO {
         return "AnnouncementDTO{" +
                 "title='" + title + '\'' +
                 ", message='" + message + '\'' +
-                ", professor=" + professor +
+                ", author=" + author +
                 ", tags=" + tags +
                 '}';
     }

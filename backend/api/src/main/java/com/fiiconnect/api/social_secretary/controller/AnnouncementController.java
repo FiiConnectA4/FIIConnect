@@ -1,14 +1,14 @@
 package com.fiiconnect.api.social_secretary.controller;
+import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
+import com.fiiconnect.api.auth_userMgmt.dtos.ProfessorDTO;
+import com.fiiconnect.api.auth_userMgmt.models.User;
+import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository;
 import com.fiiconnect.api.social_secretary.DTO.AnnouncementDTO;
-import com.fiiconnect.api.social_secretary.DTO.UserDTO;
 import com.fiiconnect.api.social_secretary.DTO.TagDTO;
 import com.fiiconnect.api.social_secretary.classes.Announcement;
 import com.fiiconnect.api.social_secretary.classes.Tag;
-import com.fiiconnect.api.social_secretary.classes.User_Anunturi;
 import com.fiiconnect.api.social_secretary.service.AnnouncementService;
 import com.fiiconnect.api.social_secretary.service.TagService;
-import com.fiiconnect.api.social_secretary.service.UserLogatService;
-import com.fiiconnect.api.social_secretary.service.UserService2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,11 +25,14 @@ public class AnnouncementController {
     @Autowired
     private TagService tagService;
 
-    @Autowired
-    private UserService2 userService2;
+    //@Autowired
+    //private UserService2 userService2;
+
+   // @Autowired
+   // private UserLogatService userLogatService;
 
     @Autowired
-    private UserLogatService userLogatService;
+    private UserRepository userRepository;
 
     // Obține toate anunțurile
     @GetMapping
@@ -50,54 +53,9 @@ public class AnnouncementController {
     // Creează un nou anunț (doar pt profi si secretari)
     @PostMapping("/prof-secretar")
     public Announcement createAnnouncement(@RequestBody AnnouncementDTO announcementRequest) {
-        Set<TagDTO> tagsRequest = announcementRequest.getTags();
-        Set<Tag> tags = new HashSet<>();
-
-        // Validarea și procesarea tag-urilor
-        for (TagDTO t : tagsRequest) {
-            Tag existingTag = tagService.findByNameAndType(t.getName(), t.getType());
-            if (existingTag == null) {
-                System.out.println("Tag invalid: " + t.getName());
-                return null;
-            }
-
-            tags.add(existingTag);
-        }
-        UserDTO user_request = announcementRequest.getProfessor();
-
-        // Validarea utilizatorului care creează anunțul
-        UserDTO userRequest = announcementRequest.getProfessor();
-        User_Anunturi user = userService2.getUserById(userRequest.getId());
-
-        try{
-            if(!Objects.equals(userLogatService.getUserLogat().getId(), user.getId())){
-                System.out.println("User-ul nu este logat");
-                return null;
-            }
-        }catch(NullPointerException ex){
-            System.out.println("Niciun user nu este logat");
-            return null;
+            return announcementService.saveAnnouncement(announcementRequest);
         }
 
-
-        if (user == null || (!user.getType().equals("Profesor") && !user.getType().equals("Secretar"))) {
-            System.out.println("Autor invalid: utilizatorul nu are permisiunea de a posta anunțuri.");
-            return null;
-        }
-
-        // Setarea datei publicării
-        LocalDate today = LocalDate.now();
-
-        // Crearea și salvarea anunțului
-        Announcement announcement = new Announcement(
-                announcementRequest.getTitle(),
-                announcementRequest.getMessage(),
-                user,
-                tags,
-                today
-        );
-        return announcementService.saveAnnouncement(announcement);
-    }
 
     // Obține un anunț specific după ID
     @GetMapping("/{id}")
@@ -173,62 +131,13 @@ public class AnnouncementController {
 
     @PutMapping("/prof-secretar/{id}")
     public Announcement updateAnnouncement(@PathVariable Long id, @RequestBody AnnouncementDTO announcementRequest) {
-        Announcement existingAnnouncement = announcementService.getAnnouncementById(id);
-
-        if (existingAnnouncement == null) {
-            System.out.println("Anunțul nu există.");
-            return null;
-        }
-
-        if (userLogatService.getUserLogat().getId() == null) {
-            System.out.println("Niciun user nu este logat.");
-            return null;
-        }
-
-        User_Anunturi userFromDb = userService2.getUserById(userLogatService.getUserLogat().getId());
-
-        if (userFromDb == null) {
-            System.out.println("Userul logat nu există în baza de date.");
-            return null;
-        }
-
-        if (!Objects.equals(userFromDb.getId(), existingAnnouncement.getAuthor().getId())) {
-            System.out.println("Nu aveți permisiunea să modificați acest anunț.");
-            return null;
-        }
-
-        // Dacă totul este OK, trecem la update
         return announcementService.updateAnnouncement(id, announcementRequest);
     }
 
     // Șterge un anunț după ID
     @DeleteMapping("/prof-secretar/{id}")
-    public void deleteAnnouncement(@PathVariable Long id) {
-        Announcement existingAnnouncement = announcementService.getAnnouncementById(id);
-
-        if (existingAnnouncement == null) {
-            System.out.println("Anunțul nu există.");
-            return;
-        }
-
-        if (userLogatService.getUserLogat().getId() == null) {
-            System.out.println("Niciun user nu este logat.");
-            return;
-        }
-
-        User_Anunturi userFromDb = userService2.getUserById(userLogatService.getUserLogat().getId());
-
-        if (userFromDb == null) {
-            System.out.println("Userul logat nu există în baza de date.");
-            return;
-        }
-
-        if (!Objects.equals(userFromDb.getId(), existingAnnouncement.getAuthor().getId())) {
-            System.out.println("Nu aveți permisiunea să ștergeți acest anunț.");
-            return;
-        }
-
-        announcementService.deleteAnnouncement(id);
+    public void deleteAnnouncement(@PathVariable Long id, @RequestBody PersonInfoDTO personInfoDTO) {
+        announcementService.deleteAnnouncement(id, personInfoDTO);
         System.out.println("Anunțul a fost șters cu succes.");
     }
 

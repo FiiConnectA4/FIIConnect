@@ -1,15 +1,16 @@
 package com.fiiconnect.api.social_secretary.service;
 
+import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
 import com.fiiconnect.api.social_secretary.DTO.AnnouncementDTO;
 import com.fiiconnect.api.social_secretary.DTO.TagDTO;
 import com.fiiconnect.api.social_secretary.classes.Announcement;
 import com.fiiconnect.api.social_secretary.classes.Tag;
-import com.fiiconnect.api.social_secretary.classes.User_Anunturi;
 import com.fiiconnect.api.social_secretary.repository.AnnouncementRepository;
 import com.fiiconnect.api.social_secretary.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,10 +25,13 @@ public class AnnouncementService {
     private TagRepository tagRepository;
 
     @Autowired
-    private UserLogatService userLogatService;
+    private TagService tagService;
 
-    @Autowired
-    private UserService2 userService;
+   // @Autowired
+   // private UserLogatService userLogatService;
+
+   // @Autowired
+   // private UserService2 userService;
 
     // Obține toate anunțurile din baza de date
     public List<Announcement> getAllAnnouncements() {
@@ -35,9 +39,43 @@ public class AnnouncementService {
     }
 
     // Salvează un nou anunț în baza de date
-    public Announcement saveAnnouncement(Announcement announcement) {
+    public Announcement saveAnnouncement(AnnouncementDTO announcementDTO) {
+        Set<TagDTO> tagsRequest = announcementDTO.getTags();
+        Set<Tag> tags = new HashSet<>();
+
+        // Validarea și procesarea tag-urilor
+        for (TagDTO t : tagsRequest) {
+            Tag existingTag = tagService.findByNameAndType(t.getName(), t.getType());
+            if (existingTag == null) {
+                System.out.println("Tag invalid: " + t.getName());
+                return null;
+            }
+
+            tags.add(existingTag);
+        }
+
+        PersonInfoDTO user_request = announcementDTO.getAuthor();
+
+        if(!user_request.role().equals("role_student")) {
+
+
+            // Setarea datei publicării
+            LocalDate today = LocalDate.now();
+
+            // Crearea și salvarea anunțului
+            Announcement announcement = new Announcement(
+                    announcementDTO.getTitle(),
+                    announcementDTO.getMessage(),
+                    user_request.userId(),
+                    tags,
+                    today
+            );
         return announcementRepository.save(announcement);
     }
+        System.out.println("Nu s-a putut salva anunutul");
+        return null;
+
+        }
 
     // Obține un anunț specific după ID
     public Announcement getAnnouncementById(Long id) {
@@ -45,34 +83,38 @@ public class AnnouncementService {
     }
 
     // Șterge un anunț după ID
-    public void deleteAnnouncement(Long id) {
+    public void deleteAnnouncement(Long id, PersonInfoDTO personInfoDTO) {
+
+        Announcement existingAnnouncement = announcementRepository.findById(id).orElse(null);
+
+        if (existingAnnouncement == null) {
+            System.out.println("Anunțul nu există.");
+        }
+        else if (!personInfoDTO.userId().equals(existingAnnouncement.getAuthor())){
+            System.out.println("User-ul nu are dreptul de a modifica anuntul.");
+        }
+        else
         announcementRepository.deleteById(id);
     }
 
     public Announcement updateAnnouncement(Long id, AnnouncementDTO updatedAnnouncement) {
+
         Announcement currentAnnouncement = announcementRepository.findById(id).orElse(null);
-        if(currentAnnouncement == null){
-            System.out.println("id-ul nu exista");
-            return null;
-        }
-        User_Anunturi user;
-        try {
-            user = userService.getUserById(userLogatService.getUserLogat().getId());
-            if (user == null) {
-                System.out.println("User-ul nu este logat");
-                return null;
-            }
 
-            if(!user.getType().equals("Profesor") && !user.getType().equals("Secretar")){
-                System.out.println("User-ul nu are privilegii");
-                return null;
-            }
-        }catch(NullPointerException ex){
-            System.out.println("User-ul nu este logat");
+        PersonInfoDTO user_request = updatedAnnouncement.getAuthor();
+
+        if (currentAnnouncement == null) {
+            System.out.println("Anunțul nu există.");
             return null;
         }
 
-        currentAnnouncement.setAuthor(user);
+        if (!user_request.userId().equals(currentAnnouncement.getAuthor())){
+            System.out.println("User-ul nu are dreptul de a modifica anuntul.");
+            return null;
+        }
+
+
+        currentAnnouncement.setAuthor(user_request.userId());
         currentAnnouncement.setMessage(updatedAnnouncement.getMessage());
         currentAnnouncement.setTitle(updatedAnnouncement.getTitle());
         currentAnnouncement.setPublishedDate(updatedAnnouncement.getPublishedDate());
