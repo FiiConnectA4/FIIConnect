@@ -90,6 +90,7 @@ const AppRoutes = () => {
                 <Route path="/app/orar-secretariat/sali/:sala" element={<OrarSecretariat />} />
                 <Route path="/app/orar-secretariat/discipline" element={<OrarSecretariat />} />
                 <Route path="/app/orar-secretariat/discipline/:disciplina" element={<OrarSecretariat />} />
+
                 <Route path="secretariat" element={<Secretariat />}>
                           <Route index element={<SecretariatToti />} />
                           <Route path="cerere-decontare" element={<CerereDecontari />} />
@@ -106,6 +107,8 @@ const AppRoutes = () => {
                           <Route path="cerere-caz-social" element={<CerereCazSocial />} />
                           <Route path="istoric-cereri" element={<IstoricCereri />} />
                         </Route>
+
+                        
                 <Route path="chat" element={<Chat />} />
                 <Route path="profile" element={<Profil />} />
                 <Route path="/app/reset-password" element={<ChangePassword />} />
