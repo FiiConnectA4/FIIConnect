@@ -27,8 +27,8 @@ const Administrator = () => {
                 return response.json();
             })
             .then((data) => {
-                const courses = data._embedded?.courseList || [];
-                setCursuri(courses);
+                const courseList = (data._embedded?.courseList || []).filter(c => c.archived !== 1);
+                setCursuri(courseList);
                 setLoading(false);
             })
             .catch((error) => {

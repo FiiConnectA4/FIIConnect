@@ -11,7 +11,6 @@ const Administrator = () => {
     const [catalog, setCatalog] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    // Încarcă cursurile la început
     useEffect(() => {
         const token = localStorage.getItem("token");
 
@@ -22,7 +21,7 @@ const Administrator = () => {
         })
             .then(res => res.json())
             .then(data => {
-                const courseList = data._embedded?.courseList || [];
+                const courseList = (data._embedded?.courseList || []).filter(c => c.archived !== 1); // ✅ filtrare
                 setCursuri(courseList);
 
                 if (courseList.length > 0) {
@@ -32,7 +31,6 @@ const Administrator = () => {
             .catch(err => console.error("Eroare la încărcarea cursurilor:", err));
     }, []);
 
-    // Încarcă notele când se selectează un curs sau o grupă
     useEffect(() => {
         if (!selectedCursId) return;
 
@@ -44,20 +42,14 @@ const Administrator = () => {
                 'Authorization': `Bearer ${token}`
             }
         })
-            .then(res => {
-                if (!res.ok) throw new Error(`Eroare ${res.status}`);
-                return res.json();
-            })
+            .then(res => res.json())
             .then(data => {
                 const allGroups = [...new Set(data.map(entry => entry.student.facultyGroup))];
                 setGrupe(allGroups);
-
-                // Dacă nu e selectată o grupă, o selectăm implicit
                 if (!selectedGrupa && allGroups.length > 0) {
                     setSelectedGrupa(allGroups[0]);
                 }
 
-                // Filtrare după grupă
                 const filtered = data
                     .filter(entry => entry.student.facultyGroup === selectedGrupa)
                     .map(entry => ({
@@ -73,14 +65,6 @@ const Administrator = () => {
                 setLoading(false);
             });
     }, [selectedCursId, selectedGrupa]);
-
-    const handleUploadExcel = () => {
-        alert("Upload Excel (mock)");
-    };
-
-    const handleDownloadExcel = () => {
-        alert("Download Excel (mock)");
-    };
 
     return (
         <div className="container-catalog">
@@ -134,11 +118,6 @@ const Administrator = () => {
                     )}
                     </tbody>
                 </table>
-            </div>
-
-            <div className="catalog-buttons">
-                <button onClick={handleUploadExcel}>Upload Excel</button>
-                <button onClick={handleDownloadExcel}>Download Excel</button>
             </div>
         </div>
     );
