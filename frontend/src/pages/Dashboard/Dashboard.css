@@ -1,7 +1,10 @@
 .dashboard-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 1rem;
+    /* dacă vrei edge-to-edge șterge următoarea linie */
+     max-width: 1200px; margin: 0 auto;
 }
 
 .dashboard-title {
@@ -11,12 +14,11 @@
     text-align: left;
 }
 
+
 .dashboard-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
-    margin-bottom: 2rem;
-    justify-content: flex-start;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
 }
 
 @media (max-width: 1200px) {
