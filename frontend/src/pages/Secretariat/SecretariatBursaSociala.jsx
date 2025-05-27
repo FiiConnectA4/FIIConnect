@@ -9,7 +9,12 @@ const SecretariatBursaSociala = () => {
 
 
   useEffect(() => {
-    fetch("/cereri/bursa-sociala/toate") // ajustează endpoint-ul dacă e altul
+    const token = localStorage.getItem("token");
+    fetch("/cereri/bursa-sociala/toate", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }) 
       .then((res) => {
         if (!res.ok) throw new Error("Eroare la încărcarea cererilor");
         return res.json();
@@ -20,15 +25,14 @@ const SecretariatBursaSociala = () => {
         alert("Nu s-au putut încărca cererile.");
       });
   }, []);
-
   const veziPdf = (cerere) => {
     const doc = new jsPDF();
 
     const text = `
-Către: Secretariatul Facultății
+Catre: Secretariatul Facultatii
 
-Subsemnatul(a), ${cerere.nume} ${cerere.prenume}, student(ă) anul ${cerere.anStudent || cerere.an},
-grupa ${cerere.grupa || "-"}, cu numărul matricol ${cerere.numarMatricol || cerere.regNumber || "-"},
+Subsemnatul(a), ${cerere.nume} ${cerere.prenume}, student(a) anul ${cerere.anStudent || cerere.an},
+grupa ${cerere.grupa || "-"}, cu numarul matricol ${cerere.numarMatricol || cerere.regNumber || "-"},
 solicit acordarea bursei sociale pentru anul universitar curent.
 
 Facultate: ${cerere.facultate || "-"}
@@ -37,7 +41,7 @@ Comentarii: ${cerere.comentariu || "Niciun comentariu"}
 
 Data trimiterii cererii: ${cerere.dataTrimitere || "-"}
 
-Mulțumesc anticipat pentru analiza cererii!
+Multumesc anticipat pentru analiza cererii!
     `;
 
     const lines = doc.splitTextToSize(text.trim(), 180);
@@ -93,15 +97,13 @@ Mulțumesc anticipat pentru analiza cererii!
             <th>Nume Student</th>
             <th>Status</th>
             <th>Data Trimitere</th>
-            <th>An</th>
-            <th>Facultate</th>
             <th>Acțiuni</th>
           </tr>
         </thead>
         <tbody>
           {cereri.length === 0 ? (
             <tr>
-              <td colSpan={7}>Nu există cereri înregistrate.</td>
+              <td colSpan={5}>Nu există cereri înregistrate.</td>
             </tr>
           ) : (
             cereri.map((cerere) => (
@@ -112,8 +114,7 @@ Mulțumesc anticipat pentru analiza cererii!
                 </td>
                 <td>{cerere.status}</td>
                 <td>{cerere.dataTrimitere}</td>
-                <td>{cerere.an}</td>
-                <td>{cerere.facultate}</td>
+              
                 <td>
                   <button onClick={() => veziPdf(cerere)}>Vezi PDF</button>
                   {cerere.status !== "aprobat" && (

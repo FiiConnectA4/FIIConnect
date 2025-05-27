@@ -32,4 +32,3 @@ CREATE TABLE SALI (
 );
 
 commit;
-exit;

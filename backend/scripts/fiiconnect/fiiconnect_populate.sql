@@ -512,5 +512,3 @@ commit;
 end;
 
 /
-
-exit;

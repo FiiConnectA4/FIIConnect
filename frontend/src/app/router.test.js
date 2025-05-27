@@ -13,7 +13,7 @@ jest.mock('../layouts/StudentLayout', () => {
         </div>
     );
 });
-jest.mock('../pages/Dashboard', () => () => <div>Dashboard Page</div>);
+jest.mock('../pages/Dashboard/Dashboard', () => () => <div>Dashboard Page</div>);
 jest.mock('../pages/Anunturi', () => () => <div>Anunturi Page</div>);
 jest.mock('../pages/Harta', () => () => <div>Harta Page</div>);
 jest.mock('../pages/Cursuri/Cursuri', () => () => <div>Cursuri Page</div>);

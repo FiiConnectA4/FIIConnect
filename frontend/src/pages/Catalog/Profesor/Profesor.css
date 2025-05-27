@@ -42,3 +42,22 @@
     display: flex;
     gap: 1rem;
 }
+
+.titlu {
+    background-color: #6195C9;
+}
+
+.catalog-buttons button {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    border: none;
+    background-color: #6195C9;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+[data-theme="dark"] .catalog-buttons button {
+    background-color: #4a6d9d;
+    color: #fff;
+    ;
+}
