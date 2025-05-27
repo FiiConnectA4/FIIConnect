@@ -13,5 +13,4 @@ public record PersonInfoDTO(
         StudentDTO student,
         ProfessorDTO professor,
         Set<TagDTO> tags
-        /// am adaugat asta
 ) {}

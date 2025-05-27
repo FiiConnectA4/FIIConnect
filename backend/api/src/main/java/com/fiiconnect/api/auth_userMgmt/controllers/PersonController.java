@@ -93,14 +93,10 @@ public class PersonController {
             Professor p = user.getProfessor();
             profDTO = new ProfessorDTO(p.getId(), p.getCnp(), p.getFirstName(), p.getLastName(), p.getRank());
         }
-/// am adaugat si asta
+
         Set<TagDTO> tagDTOs = user.getTags().stream()
                 .map(tag -> new TagDTO(tag.getName(), tag.getType()))
                 .collect(Collectors.toSet());
-       //
-        System.out.println("tagDTOs: " + tagDTOs);
-        System.out.println("user.getTags(): " + user.getTags());
-        user.getTags().forEach(tag -> System.out.println(tag.getId() + " " + tag.getName() + " " + tag.getType()));
 
         return ResponseEntity.ok(new PersonInfoDTO(
                 user.getId(),
@@ -110,7 +106,6 @@ public class PersonController {
                 studentDTO,
                 profDTO,
                 tagDTOs
-                /// si asta
         ));
     }
 }
