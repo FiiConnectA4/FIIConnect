@@ -95,7 +95,7 @@ public class PersonController {
         }
 
         Set<TagDTO> tagDTOs = user.getTags().stream()
-                .map(tag -> new TagDTO(tag.getName(), tag.getType()))
+                .map(tag -> new TagDTO(tag.getId(), tag.getName(), tag.getType()))
                 .collect(Collectors.toSet());
 
         return ResponseEntity.ok(new PersonInfoDTO(
