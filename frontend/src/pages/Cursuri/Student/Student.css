@@ -1,3 +1,31 @@
+:root[data-theme="light"] {
+    --btn-archived-bg: #6c757d;
+    --btn-archived-hover: #5a6268;
+    --card-bg: #f0f0f0;
+    --main-blue: #537a9c;
+    --main-blue-hover: #567998;
+    --gray-light: #cccccc;
+    --dot-btn-bg: #668298;
+    --dot-color: #000000;
+    --title-color: #1a3c5a;
+    --btn-delete: #dc3545;
+    --text-white: #ffffff;
+}
+
+:root[data-theme="dark"] {
+    --btn-archived-bg: #4e5b66;
+    --btn-archived-hover: #3c454d;
+    --card-bg: #2a2f35;
+    --main-blue: #335a77;
+    --main-blue-hover: #3a607c;
+    --gray-light: #999999;
+    --dot-btn-bg: #4e6374;
+    --dot-color: #e0e0e0;
+    --title-color: #a9c5e6;
+    --btn-delete: #b33a40;
+    --text-white: #f5f5f5;
+}
+
 /* ----------------- CONTAINER PRINCIPAL ----------------- */
 .container-cursuri {
     display: flex;
@@ -15,7 +43,7 @@
     display: flex;
     align-items: center;
     gap: 15px;
-    color: #1A3C5A;
+    color: var(--title-color);
     text-align: left;
     width: 100%;
 }
@@ -27,7 +55,7 @@
 
 h2 {
     font-size: 1.4em;
-    color: #537A9C;
+    color: var(--main-blue);
     padding-left: 10px;
 }
 
@@ -88,8 +116,8 @@ h2 {
 }
 
 .buton-arhivat {
-    background-color: #dc3545; /* roșu Bootstrap */
-    color: white;
+    background-color: var(--btn-delete);
+    color: var(--text-white);
     border: none;
     font-weight: bold;
 }
