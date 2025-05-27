@@ -1,23 +1,23 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import StudentLayout from "../layouts/StudentLayout";
+import ServiceAdminPage from "../pages/UserManagement/ServiceAdminPage";
 
 import Dashboard from "../pages/Dashboard/Dashboard";
 import Anunturi from "../pages/Social/Page/Anunturi";
 import Harta from "../pages/Harta";
 import Cursuri from "../pages/Cursuri/Cursuri";
 import Catalog from "../pages/Catalog/Catalog";
-import OrarToti from "../pages/Orar/OrarToti"; 
+import OrarToti from "../pages/Orar/OrarToti";
 import Secretariat from "../pages/Secretariat/Secretariat";
 import SecretariatToti from "../pages/Secretariat/SecretariatToti";
-import CerereDecontari from "../pages/Secretariat/CerereDecontari"; // ✅ Import corect
-import CerereAdeverinte from "../pages/Secretariat/CerereAdeverinte"; // ✅ Import corect
-import CerereBursaSociala from "../pages/Secretariat/CerereBursaSociala"; // ✅ Import corect
-import CerereCazSocial from "../pages/Secretariat/CerereCazSocial"; // ✅ Import corect
-import IstoricCereri from "../pages/Secretariat/IstoricCereri"; // ✅ Import corect
-
-import SecretariatCerereAdeverinte from "../pages/Secretariat/SecretariatCerereAdeverinte"; // ✅ Import corect
-import SecretariatBursaSociala from "../pages/Secretariat/SecretariatBursaSociala"; // ✅ Import corect
-import SecretariatCazSocial from "../pages/Secretariat/SecretariatCazSocial"; // ✅ Import corect
+import CerereDecontari from "../pages/Secretariat/CerereDecontari";
+import CerereAdeverinte from "../pages/Secretariat/CerereAdeverinte";
+import CerereBursaSociala from "../pages/Secretariat/CerereBursaSociala";
+import CerereCazSocial from "../pages/Secretariat/CerereCazSocial";
+import IstoricCereri from "../pages/Secretariat/IstoricCereri";
+import SecretariatCerereAdeverinte from "../pages/Secretariat/SecretariatCerereAdeverinte";
+import SecretariatBursaSociala from "../pages/Secretariat/SecretariatBursaSociala";
+import SecretariatCazSocial from "../pages/Secretariat/SecretariatCazSocial";
 import Chat from "../pages/Social/Page/Chat";
 import SetupProfile from "../pages/Dashboard/SetupProfile";
 import Profil from "../pages/Dashboard/Profil";
@@ -34,52 +34,77 @@ import ForgotPassword from "../pages/Auth/ForgotPassword";
 import ResetPassword from "../pages/Auth/ResetPassword";
 
 const AppRoutes = () => {
-    return (
-        <Routes>
-            {/* Public route (login page) */}
-            <Route path="/" element={<Login />} />
-            <Route path="/app/2fa"     element={<TwoFAVerify />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
+  return (
+    <Routes>
+      {/* Public routes */}
+      <Route path="/" element={<Login />} />
+      <Route path="/app/2fa" element={<TwoFAVerify />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
 
-            {/* Protected routes inside layout */}
+      {/* 🛠 Admin Service Page — outside /app */}
+      <Route
+        path="/admin/service"
+        element={
+          <PrivateRoute allowedRoles={["ROLE_ADMIN"]}>
+            <ServiceAdminPage />
+          </PrivateRoute>
+        }
+      />
 
-            <Route
-                path="/app"
-                element={
-                    <PrivateRoute>
-                        <StudentLayout />
-                    </PrivateRoute>
-                }
-            >
+      {/* Protected layout routes */}
+      <Route
+        path="/app"
+        element={
+          <PrivateRoute>
+            <StudentLayout />
+          </PrivateRoute>
+        }
+      >
+        <Route
+          path="create-account"
+          element={
+            <PrivateRoute allowedRoles={["ROLE_ADMIN"]}>
+              <CreateAccount />
+            </PrivateRoute>
+          }
+        />
 
-                <Route
-                    path="create-account"
-                    element={
-                        <PrivateRoute allowedRoles={["ROLE_ADMIN"]}>
-                            <CreateAccount />
-                        </PrivateRoute>
-                    }
-                />
+        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="anunturi" element={<Anunturi />} />
+        <Route path="harta" element={<Harta />} />
+        <Route path="cursuri" element={<Cursuri />} />
+        <Route path="catalog" element={<Catalog />} />
 
-                <Route path="dashboard" element={<Dashboard />} />
-                <Route path="anunturi" element={<Anunturi />} />
-                <Route path="harta" element={<Harta />} />
-                <Route path="cursuri" element={<Cursuri />} />
-                <Route path="catalog" element={<Catalog />} />
+        {/* Rutele pentru orar */}
+        <Route path="orar" element={<OrarToti />} />
+        <Route path="orar/studenti" element={<OrarToti />} />
+        <Route path="orar/studenti/:an/:grupa" element={<OrarToti />} />
+        <Route path="orar/profesori" element={<OrarToti />} />
+        <Route path="orar/profesori/:profesor" element={<OrarToti />} />
+        <Route path="orar/sali" element={<OrarToti />} />
+        <Route path="orar/sali/:sala" element={<OrarToti />} />
+        <Route path="orar/sali/:sala/dotari" element={<DotariSala />} />
+        <Route path="orar/discipline" element={<OrarToti />} />
+        <Route path="orar/discipline/:disciplina" element={<OrarToti />} />
 
-                {/* Rutele pentru orar */}
-                <Route path="/app/orar" element={<OrarToti />} />
-                <Route path="/app/orar/studenti" element={<OrarToti />} />
-                <Route path="/app/orar/studenti/:an/:grupa" element={<OrarToti />} />
-                <Route path="/app/orar/profesori" element={<OrarToti />} />
-                <Route path="/app/orar/profesori/:profesor" element={<OrarToti />} />
-                <Route path="/app/orar/sali" element={<OrarToti />} />
-                <Route path="/app/orar/sali/:sala" element={<OrarToti />} />
-                <Route path="/app/orar/sali/:sala/dotari" element={<DotariSala />} />
-                <Route path="/app/orar/discipline" element={<OrarToti />} />
-                <Route path="/app/orar/discipline/:disciplina" element={<OrarToti />} />
+        <Route path="orar-secretariat" element={<OrarSecretariat />} />
+        <Route path="orar-secretariat/studenti" element={<OrarSecretariat />} />
+        <Route path="orar-secretariat/studenti/:an/:grupa" element={<OrarSecretariat />} />
+        <Route path="orar-secretariat/profesori" element={<OrarSecretariat />} />
+        <Route path="orar-secretariat/profesori/:profesor" element={<OrarSecretariat />} />
+        <Route path="orar-secretariat/sali" element={<OrarSecretariat />} />
+        <Route path="orar-secretariat/sali/:sala" element={<OrarSecretariat />} />
+        <Route path="orar-secretariat/discipline" element={<OrarSecretariat />} />
+        <Route path="orar-secretariat/discipline/:disciplina" element={<OrarSecretariat />} />
 
+        <Route path="secretariat" element={<Secretariat />}>
+          <Route index element={<SecretariatToti />} />
+          <Route path="cerere-decontare" element={<CerereDecontari />} />
+          <Route path="cerere-adeverinte" element={<SecretariatCerereAdeverinte />} />
+          <Route path="cerere-bursa-sociala" element={<SecretariatBursaSociala />} />
+          <Route path="cerere-caz-social" element={<SecretariatCazSocial />} />
+        </Route>
 
                 <Route path="/app/orar-secretariat" element={<OrarSecretariat />} />
                 <Route path="/app/orar-secretariat/studenti" element={<OrarSecretariat />} />
@@ -118,10 +143,10 @@ const AppRoutes = () => {
                 <Route index element={<Navigate to="/app/dashboard" replace />} />
             </Route>
 
-            {/* Catch unknown paths */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-    );
+      {/* Catch unknown paths */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
 };
 
 export default AppRoutes;
