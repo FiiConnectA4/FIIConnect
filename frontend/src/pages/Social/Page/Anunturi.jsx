@@ -260,7 +260,7 @@ function Anunturi() {
       const payload = {
         title: newAnnouncement.title.trim(),
         message: newAnnouncement.message.trim(),
-        author: fullUser, // send the full user object as received from /person/me
+        authorId: fullUser.userId, // send only the userId
         tags: newAnnouncement.tags.map(tag => ({ name: tag.name, type: tag.type })),
         publishedDate: new Date().toISOString().split('T')[0] // LocalDate format (yyyy-MM-dd)
       };
@@ -306,7 +306,7 @@ function Anunturi() {
       const payload = {
         title: editingAnnouncement.title.trim(),
         message: editingAnnouncement.message.trim(),
-        author: fullUser, // send the full user object as received from /person/me
+        authorId: fullUser.userId, // send only the userId
         tags: editingAnnouncement.tags.map(tag => ({ name: tag.name, type: tag.type })),
         publishedDate: editingAnnouncement.publishedDate
       };
@@ -338,7 +338,7 @@ function Anunturi() {
         return;
       }
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:34101/announcement/prof-secretar/${announcementId}`, {
+      const response = await fetch(`http://localhost:34101/announcement/prof-secretar/${announcementId}?userId=${fullUser.userId}`, {
         method: "DELETE",
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -716,8 +716,7 @@ function Anunturi() {
                         </span>
                       )}
                     </span>
-                    {(normalizeUserType(fullUser.type) === "Profesor" || normalizeUserType(fullUser.type) === "Secretar") && 
-                    fullUser.id === announcement.author?.userId && (
+                    {fullUser && (fullUser.userId === announcement.authorId || fullUser.userId === announcement.author) && (
                       <div className="announcement-actions">
                         <button 
                           className="edit-button"

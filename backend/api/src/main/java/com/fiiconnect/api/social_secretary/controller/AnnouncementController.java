@@ -136,9 +136,11 @@ public class AnnouncementController {
 
     // Șterge un anunț după ID
     @DeleteMapping("/prof-secretar/{id}")
-    public void deleteAnnouncement(@PathVariable Long id, @RequestBody PersonInfoDTO personInfoDTO) {
-        announcementService.deleteAnnouncement(id, personInfoDTO);
+    public void deleteAnnouncement(@PathVariable Long id, @RequestParam Long userId) {
+        announcementService.deleteAnnouncement(id, userId);
+        System.out.println("Delete called with id=" + id + " userId=" + userId);
         System.out.println("Anunțul a fost șters cu succes.");
     }
+
 
 }

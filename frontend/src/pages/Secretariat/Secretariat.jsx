@@ -9,4 +9,4 @@ const Secretariat = () => {
   );
 };
 
-export default Secretariat;
+export default Secretariat; 
