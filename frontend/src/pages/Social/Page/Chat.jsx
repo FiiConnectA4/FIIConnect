@@ -21,55 +21,59 @@ function Chat() {
     const fetchData = async () => {
       try {
         setLoading(true);
-
-        // 1. Fetch current user
-        const userResponse = await fetch("http://localhost:34101/auth/current-user");
-        if (!userResponse.ok) throw new Error("Failed to fetch current user");
-        const userData = await userResponse.json();
-        const currentUserObj = {
-          id: userData.id,
-          name: userData.username,
-          type: userData.type,
-        };
-        setCurrentUser(currentUserObj);
-
-        // 2. Fetch user's tags
-        const tagsResponse = await fetch(`http://localhost:34101/users/${userData.id}/tags`);
-        if (!tagsResponse.ok) throw new Error("Failed to fetch user tags");
-        const tagsData = await tagsResponse.json();
-        setUserTags(tagsData);
-
-        // 3. Prepare tag IDs
-        const tagIds = tagsData.map(tag => tag.id);
-
-        // 4. Fetch channels
-        const channelsResponse = await fetch(
-          `http://localhost:34101/channel/with-tags?tagIds=${tagIds.join(',')}`
-        );
-        if (!channelsResponse.ok) throw new Error("Failed to fetch channels");
-        const channelsData = await channelsResponse.json();
-        console.log("Channels data:", channelsData);
-        setChannels(channelsData);
-
-        // 5. Set first channel as active if available
-        if (channelsData.length > 0) {
-          setActiveChannel(channelsData[0]);
-          loadChannelMessages(channelsData[0].id);
+        const token = localStorage.getItem('token');
+        // Fetch user info, tags, and role from unified endpoint
+        const response = await fetch("http://localhost:34101/person/me", {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!response.ok) throw new Error("Failed to fetch user info");
+        const user = await response.json();
+        setCurrentUser({
+          id: user.id,
+          name: user.name,
+          role: user.role,
+        });
+        setUserTags(user.tags || []);
+        // Prepare tag IDs for channel fetch
+        const tagIds = (user.tags || []).map(tag => tag.id);
+        // Only fetch channels if user has tags
+        if (tagIds.length === 0) {
+          setChannels([]);
+          setActiveChannel(null);
+        } else {
+          // Always send Authorization header for channel fetch
+          const channelsResponse = await fetch(
+            `http://localhost:34101/channel/with-tags?tagIds=${tagIds.join(',')}`,
+            { headers: { 'Authorization': `Bearer ${token}` } }
+          );
+          if (!channelsResponse.ok) {
+            const errorText = await channelsResponse.text();
+            throw new Error(errorText || "Failed to fetch channels");
+          }
+          const channelsData = await channelsResponse.json();
+          setChannels(channelsData);
+          if (channelsData.length > 0) {
+            setActiveChannel(channelsData[0]);
+            loadChannelMessages(channelsData[0].id, token);
+          } else {
+            setActiveChannel(null);
+          }
         }
       } catch (err) {
-        console.error("Fetch error:", err);
         setError(err.message);
       } finally {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
-  const loadChannelMessages = async (channelId) => {
+  const loadChannelMessages = async (channelId, tokenOverride) => {
     try {
-      const response = await fetch(`http://localhost:34101/chat/get-chats/${channelId}`);
+      setMessages([]);
+      const token = tokenOverride || localStorage.getItem('token');
+      const response = await fetch(`http://localhost:34101/chat/get-chats/${channelId}`,
+        { headers: { 'Authorization': `Bearer ${token}` } });
       if (!response.ok) throw new Error("Failed to fetch channel messages");
       const data = await response.json();
       setMessages(data);
@@ -87,20 +91,30 @@ function Chat() {
     client.connect({}, () => {
       setStompClient(client);
 
-      client.subscribe(`/topic/channel/${activeChannel.id}`, (message) => {
-        const newMessage = JSON.parse(message.body);
-
-        setPendingMessages(prev =>
-          prev.filter(msg => msg.tempId !== newMessage.tempId)
-        );
-
-        setMessages(prev => {
-          const exists = prev.some(msg =>
-            msg.id === newMessage.id || msg.tempId === newMessage.tempId
+      const subscription = client.subscribe(
+        `/topic/channel/${activeChannel.id}`,
+        (message) => {
+          const newMessage = JSON.parse(message.body);
+          
+          // Remove from pending if it was our temp message
+          setPendingMessages(prev => 
+            prev.filter(msg => msg.tempId !== newMessage.tempId)
           );
-          return exists ? prev : [...prev, newMessage];
-        });
-      });
+
+          // Only add if not already present
+          setMessages(prev => {
+            const exists = prev.some(msg => 
+              msg.id === newMessage.id || 
+              msg.tempId === newMessage.tempId
+            );
+            return exists ? prev : [...prev, newMessage];
+          });
+        }
+      );
+
+      return () => {
+        subscription.unsubscribe();
+      };
     });
 
     return () => {
@@ -112,26 +126,19 @@ function Chat() {
 
   const displayMessages = [
     ...messages,
-    ...pendingMessages.filter(msg => msg.channelId === activeChannel?.id),
+    ...pendingMessages.filter(msg => 
+      msg.channelId === activeChannel?.id && 
+      !messages.some(m => m.tempId === msg.tempId)
+    )
   ].sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, pendingMessages]);
+  }, [messages, pendingMessages, activeChannel]);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-    });
+    messagesEndRef.current?.scrollIntoView();
   };
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      scrollToBottom();
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [activeChannel]);
 
   const handleSendMessage = (e) => {
     e.preventDefault();
@@ -139,7 +146,7 @@ function Chat() {
 
     const tempId = Date.now();
     const chatMessage = {
-      sender: currentUser,
+      sender: { id: currentUser.id }, // Only send ID to backend
       message: newMessage.trim(),
       timestamp: new Date().toISOString(),
       type: 'CHAT',
@@ -147,12 +154,21 @@ function Chat() {
       tempId,
     };
 
-    setPendingMessages(prev => [...prev, chatMessage]);
+    // Optimistic update with temporary message
+    setPendingMessages(prev => [...prev, {
+      ...chatMessage,
+      sender: { id: currentUser.id, name: "You" } // Add temporary sender info
+    }]);
+    
     setNewMessage("");
     stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
   };
 
   const handleChannelChange = (channel) => {
+    // Clear messages before switching
+    setMessages([]);
+    setPendingMessages([]);
+    
     setActiveChannel(channel);
     loadChannelMessages(channel.id);
 

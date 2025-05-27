@@ -8,7 +8,12 @@ const DotariSala = ({ isSecretariat = false }) => {
 
   useEffect(() => {
     // Preia dotările sălii din API
-    fetch(`http://localhost:34101/sali/nume/${sala}`)
+    const token = localStorage.getItem("token");
+    fetch(`http://localhost:34101/sali/nume/${sala}`, {
+      headers: {
+        Authorization: `Bearer ${token}` 
+      }
+    })
       .then(res => res.json())
       .then(data => setDotari(data[0])) 
       .catch(err => console.error('Eroare la preluarea dotărilor:', err));

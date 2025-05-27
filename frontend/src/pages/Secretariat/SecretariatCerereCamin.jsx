@@ -6,12 +6,18 @@ const SecretariatCerereCamin = () => {
   const [cereri, setCereri] = useState([]);
    const navigate = useNavigate();
 
-  useEffect(() => {
-    fetch("/cereri/adeverinta-camin/toate")
+   useEffect(() => {
+    const token = localStorage.getItem("token");
+    fetch("/cereri/adeverinta-camin/toate", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      }
+    })
       .then((res) => res.json())
       .then(setCereri)
       .catch(console.error);
   }, []);
+
 
   const veziPdf = (cerere) => {
     const doc = new jsPDF();

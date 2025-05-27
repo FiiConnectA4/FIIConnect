@@ -106,23 +106,42 @@ const AppRoutes = () => {
           <Route path="cerere-caz-social" element={<SecretariatCazSocial />} />
         </Route>
 
-        <Route path="student" element={<Secretariat />}>
-          <Route index element={<SecretariatToti />} />
-          <Route path="cerere-decontare" element={<CerereDecontari />} />
-          <Route path="cerere-adeverinte" element={<CerereAdeverinte />} />
-          <Route path="cerere-bursa-sociala" element={<CerereBursaSociala />} />
-          <Route path="cerere-caz-social" element={<CerereCazSocial />} />
-          <Route path="istoric-cereri" element={<IstoricCereri />} />
-        </Route>
+                <Route path="/app/orar-secretariat" element={<OrarSecretariat />} />
+                <Route path="/app/orar-secretariat/studenti" element={<OrarSecretariat />} />
+                <Route path="/app/orar-secretariat/studenti/:an/:grupa" element={<OrarSecretariat />} />
+                <Route path="/app/orar-secretariat/profesori" element={<OrarSecretariat />} />
+                <Route path="/app/orar-secretariat/profesori/:profesor" element={<OrarSecretariat />} />
+                <Route path="/app/orar-secretariat/sali" element={<OrarSecretariat />} />
+                <Route path="/app/orar-secretariat/sali/:sala" element={<OrarSecretariat />} />
+                <Route path="/app/orar-secretariat/discipline" element={<OrarSecretariat />} />
+                <Route path="/app/orar-secretariat/discipline/:disciplina" element={<OrarSecretariat />} />
 
-        <Route path="chat" element={<Chat />} />
-        <Route path="profile" element={<Profil />} />
-        <Route path="reset-password" element={<ChangePassword />} />
-        <Route path="setup-2fa" element={<Setup2FA />} />
-        <Route path="setup-profile" element={<SetupProfile />} />
-        <Route path="contact" element={<Contact />} />
-        <Route index element={<Navigate to="/app/dashboard" replace />} />
-      </Route>
+                <Route path="secretariat" element={<Secretariat />}>
+                          <Route index element={<SecretariatToti />} />
+                          <Route path="cerere-decontare" element={<CerereDecontari />} />
+                          <Route path="cerere-adeverinte" element={<SecretariatCerereAdeverinte />} />
+                          <Route path="cerere-bursa-sociala" element={<SecretariatBursaSociala />} />
+                          <Route path="cerere-caz-social" element={<SecretariatCazSocial />} />
+
+                        </Route>
+                        <Route path="student" element={<Secretariat />}>
+                          <Route index element={<SecretariatToti />} />
+                          <Route path="cerere-decontare" element={<CerereDecontari />} />
+                          <Route path="cerere-adeverinte" element={<CerereAdeverinte />} />
+                          <Route path="cerere-bursa-sociala" element={<CerereBursaSociala />} />
+                          <Route path="cerere-caz-social" element={<CerereCazSocial />} />
+                          <Route path="istoric-cereri" element={<IstoricCereri />} />
+                        </Route>
+
+                        
+                <Route path="chat" element={<Chat />} />
+                <Route path="profile" element={<Profil />} />
+                <Route path="/app/reset-password" element={<ChangePassword />} />
+                <Route path="setup-2fa" element={<Setup2FA />} />
+                <Route path="setup-profile" element={<SetupProfile />} />
+                <Route path="contact" element={<Contact />} />
+                <Route index element={<Navigate to="/app/dashboard" replace />} />
+            </Route>
 
       {/* Catch unknown paths */}
       <Route path="*" element={<Navigate to="/" replace />} />

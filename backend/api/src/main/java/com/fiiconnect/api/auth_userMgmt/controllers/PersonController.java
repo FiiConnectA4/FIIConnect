@@ -10,6 +10,7 @@ import com.fiiconnect.api.didactic.models.Professor;
 import com.fiiconnect.api.didactic.models.Student;
 import com.fiiconnect.api.didactic.repositories.ProfessorRepository;
 import com.fiiconnect.api.didactic.repositories.StudentRepository;
+import com.fiiconnect.api.social_secretary.DTO.TagDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/person")
@@ -61,6 +65,7 @@ public class PersonController {
         ));
     }
 
+
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUserInfo() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -97,13 +102,18 @@ public class PersonController {
             profDTO = new ProfessorDTO(p.getId(), p.getCnp(), p.getFirstName(), p.getLastName(), p.getRank());
         }
 
+        Set<TagDTO> tagDTOs = user.getTags().stream()
+                .map(tag -> new TagDTO(tag.getId(), tag.getName(), tag.getType()))
+                .collect(Collectors.toSet());
+
         return ResponseEntity.ok(new PersonInfoDTO(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
                 role,
                 studentDTO,
-                profDTO
+                profDTO,
+                tagDTOs
         ));
     }
 }
