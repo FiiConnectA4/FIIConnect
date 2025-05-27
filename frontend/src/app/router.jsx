@@ -4,6 +4,7 @@ import StudentLayout from "../layouts/StudentLayout";
 import Dashboard from "../pages/Dashboard";
 import Anunturi from "../pages/Social/Page/Anunturi";
 import Harta from "../pages/Harta";
+import EtajeHarta from "../pages/EtajeHarta";
 import Cursuri from "../pages/Cursuri/Cursuri";
 import Catalog from "../pages/Catalog/Catalog";
 import OrarToti from "../pages/Orar/OrarToti"; 
@@ -65,6 +66,7 @@ const AppRoutes = () => {
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="anunturi" element={<Anunturi />} />
                 <Route path="harta" element={<Harta />} />
+                <Route path="etaje-harta" element={<EtajeHarta />} />
                 <Route path="cursuri" element={<Cursuri />} />
                 <Route path="catalog" element={<Catalog />} />
 
