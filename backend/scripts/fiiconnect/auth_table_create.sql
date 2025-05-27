@@ -203,4 +203,3 @@ ALTER TABLE USERS
             ON DELETE SET NULL;
 
 commit;
-exit;

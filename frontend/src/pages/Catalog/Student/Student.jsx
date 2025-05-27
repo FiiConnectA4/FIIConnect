@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import './Student.css';
-
+import './../../Cursuri/Components/Buton'
 const Student = () => {
     const mockCatalog = {
         'Semestrul 1': [
@@ -58,39 +58,39 @@ const Student = () => {
             <div className="catalog-table">
                 <table>
                     <thead>
-                    <tr>
-                        <th>Curs</th>
-                        <th>Nume profesor</th>
-                        <th>Credite</th>
-                        <th>Nota</th>
-                        <th>Fișa Activitate</th>
-                    </tr>
+                        <tr className='titlu'>
+                            <th>Curs</th>
+                            <th>Nume profesor</th>
+                            <th>Credite</th>
+                            <th>Nota</th>
+                            <th>Fișa Activitate</th>
+                        </tr>
                     </thead>
                     <tbody>
-                    {catalog.map((curs, index) => (
-                        <tr key={index}>
-                            <td>{curs.curs}</td>
-                            <td>{curs.profesor}</td>
-                            <td>{curs.credite}</td>
-                            <td>{curs.nota}</td>
-                            <td>
-                                <button className="admin-button" onClick={() => alert(`Deschide fișa pentru ${curs.curs}`)}>
-                                    <img src="/icons/edit-icon.png" alt="Fisa" className="icon-img" />
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
+                        {catalog.map((curs, index) => (
+                            <tr key={index}>
+                                <td>{curs.curs}</td>
+                                <td>{curs.profesor}</td>
+                                <td>{curs.credite}</td>
+                                <td>{curs.nota}</td>
+                                <td>
+                                    <button className="admin-button" onClick={() => alert(`Deschide fișa pentru ${curs.curs}`)}>
+                                        <img src="/icons/edit-icon.png" alt="Fisa" className="icon-img" />
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
             </div>
 
             <div className="catalog-footer">
-                <button onClick={handleDownload}>Download Excel</button>
+                <button className='buton-catalog' onClick={handleDownload}>Download Excel</button>
                 <div className="stats">
                     <p><strong>Punctaj final:</strong> {punctajFinal}</p>
                     <p><strong>Media finală:</strong> {mediaFinala}</p>
                 </div>
-                <button onClick={handleCerereMutare}>Cerere mutare grupa activitate</button>
+                <button className='buton-catalog' onClick={handleCerereMutare}>Cerere mutare grupa activitate</button>
             </div>
         </div>
     );
