@@ -1,0 +1,48 @@
+.info-card {
+    background: #fff;
+    border-radius: 1.3rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    padding: 1.2rem 1.4rem;
+    width: 210px;
+    min-width: 180px;
+    max-width: 100%;
+    min-height: 95px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    margin: 0.5rem 0;
+    transition: box-shadow 0.2s;
+}
+
+.info-card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.10);
+}
+
+.info-card-icon {
+    font-size: 1.6rem;
+    margin-bottom: 0.1rem;
+    line-height: 1;
+}
+
+.info-card-title {
+    font-weight: 600;
+    font-size: 1rem;
+    margin-bottom: 0.3rem;
+    color: #495057;
+}
+
+.info-card-value {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #002868;
+    line-height: 1.1;
+}
+
+@media (max-width: 1000px) {
+    .info-card {
+        width: 48vw;
+        min-width: 140px;
+        padding: 1rem 0.7rem;
+    }
+}

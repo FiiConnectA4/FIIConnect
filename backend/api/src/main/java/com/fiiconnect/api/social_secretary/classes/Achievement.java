@@ -1,5 +1,6 @@
 package com.fiiconnect.api.social_secretary.classes;
 
+import com.fiiconnect.api.auth_userMgmt.models.User;
 import jakarta.persistence.*;
 
 @Entity
@@ -16,7 +17,7 @@ public class Achievement {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User_Anunturi user;
+    private User user;
 
     private String dateAchieved;
 
@@ -24,7 +25,7 @@ public class Achievement {
 
     public Achievement() {}
 
-    public Achievement(String name, String description, User_Anunturi user, String dateAchieved) {
+    public Achievement(String name, String description, User user, String dateAchieved) {
         this.name = name;
         this.description = description;
         this.user = user;
@@ -51,11 +52,11 @@ public class Achievement {
         this.description = description;
     }
 
-    public User_Anunturi getUser() {
+    public User getUser() {
         return user;
     }
 
-    public void setUser(User_Anunturi user) {
+    public void setUser(User user) {
         this.user = user;
     }
 

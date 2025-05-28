@@ -30,8 +30,10 @@ public class TwoFactorAuthenticationService {
     }
 
 
-    public boolean verifyCode(String secret, int verificationCode) {
-        return gAuth.authorize(secret, verificationCode);
+    public boolean verifyCode(String secret, String codeStr) {
+        if (codeStr == null || !codeStr.matches("\\d{6}")) return false;
+        return gAuth.authorize(secret, Integer.parseInt(codeStr));
     }
+
 }
 

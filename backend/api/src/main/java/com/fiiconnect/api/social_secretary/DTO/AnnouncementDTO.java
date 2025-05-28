@@ -6,14 +6,14 @@ import java.util.Set;
 public class AnnouncementDTO {
     private String title;
     private String message;
-    private UserDTO professor;
+    private Long authorId;
     private Set<TagDTO> tags;
     private LocalDate publishedDate;
 
-    public AnnouncementDTO(String title, String message, UserDTO professor, Set<TagDTO> tags, LocalDate publishedDate) {
+    public AnnouncementDTO(String title, String message, Long authorId, Set<TagDTO> tags, LocalDate publishedDate) {
         this.title = title;
         this.message =   message;
-        this.professor = professor;
+        this.authorId = authorId;
         this.tags = tags;
         this.publishedDate=publishedDate;
     }
@@ -34,12 +34,8 @@ public class AnnouncementDTO {
         this.message = message;
     }
 
-    public UserDTO getProfessor() {
-        return professor;
-    }
-
-    public void setUser(UserDTO professor) {
-        this.professor = professor;
+    public Long getAuthorId() {
+        return authorId;
     }
 
     public Set<TagDTO> getTags() {
@@ -50,8 +46,8 @@ public class AnnouncementDTO {
         this.tags = tags;
     }
 
-    public void setProfessor(UserDTO professor) {
-        this.professor = professor;
+    public void setAuthorId(Long author) {
+        this.authorId = author;
     }
 
     public LocalDate getPublishedDate() {
@@ -67,7 +63,7 @@ public class AnnouncementDTO {
         return "AnnouncementDTO{" +
                 "title='" + title + '\'' +
                 ", message='" + message + '\'' +
-                ", professor=" + professor +
+                ", author=" + authorId +
                 ", tags=" + tags +
                 '}';
     }

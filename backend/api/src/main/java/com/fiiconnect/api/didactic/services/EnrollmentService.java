@@ -40,8 +40,6 @@ public class EnrollmentService {
 
     public List<Enrollment> getCourseEnrollments(Long idCourse)
     {
-        List<Enrollment> enrollments = repository.findByIdIdCourse(idCourse);
-        enrollments.forEach(this::attachStudent);
-        return enrollments;
+        return repository.findByIdIdCourse(idCourse);
     }
 }

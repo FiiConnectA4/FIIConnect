@@ -1,8 +1,10 @@
 package com.fiiconnect.api.didactic.controllers;
 
+import com.fiiconnect.api.didactic.exceptions.*;
 import com.fiiconnect.api.didactic.helpers.SQLExceptionMessageParser;
-import com.fiiconnect.api.didactic.models.Formula;
-import com.fiiconnect.api.didactic.models.FormulaComponent;
+import com.fiiconnect.api.didactic.helpers.formula.FormulaParser;
+import com.fiiconnect.api.didactic.models.*;
+import com.fiiconnect.api.didactic.services.EnrollmentService;
 import com.fiiconnect.api.didactic.services.FormulaService;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.hateoas.CollectionModel;
@@ -10,11 +12,12 @@ import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.Instant;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,10 +31,12 @@ public class FormulaController {
     private static final Logger LOGGER = Logger.getLogger(FormulaController.class.getName());
 
     private final FormulaService service;
+    private final EnrollmentService enrollmentService;
     private final SQLExceptionMessageParser exceptionHelper;
 
-    public FormulaController(FormulaService service, SQLExceptionMessageParser exceptionHelper) {
+    public FormulaController(FormulaService service, EnrollmentService enrollmentService, SQLExceptionMessageParser exceptionHelper) {
         this.service = service;
+        this.enrollmentService = enrollmentService;
         this.exceptionHelper = exceptionHelper;
     }
 
@@ -57,6 +62,35 @@ public class FormulaController {
                 linkTo(methodOn(FormulaController.class).allFormulas()).withRel("formulas"));
     }
 
+    @GetMapping("/formula/{id}/evaluate")
+    public Grade evaluateFormulaForStudent(@PathVariable("id") Long id, @RequestParam Long idStud) {
+        LOGGER.info("Fetching formula with ID: " + id);
+        Formula formula = service.getFormula(id);
+        FormulaParser.createSyntaxTree(formula);
+        Double result = service.evaluateFormula(formula, idStud);
+        Grade newGrade = new Grade(new GradeCompositeKey(idStud, formula.getIdCourse()), result, Date.from(Instant.now()));
+        return newGrade;
+    }
+
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
+    @GetMapping("/formula/{id}/evaluate/all")
+    public List<Grade> evaluateFormulaForAllStudents(@PathVariable("id") Long id)
+    {
+        Formula formula = service.getFormula(id);
+        FormulaParser.createSyntaxTree(formula);
+        Long idCourse = formula.getIdCourse();
+        List<Enrollment> enrolled = enrollmentService.getCourseEnrollments(idCourse);
+        List<Grade> out = new ArrayList<>();
+        for(Enrollment enrollment : enrolled)
+        {
+            Long idStud = enrollment.getId().getIdStud();
+            Double result = service.evaluateFormula(formula, idStud);
+            Grade newGrade = new Grade(new GradeCompositeKey(idStud, idCourse), result, Date.from(Instant.now()));
+            out.add(newGrade);
+        }
+        return out;
+    }
+
     @GetMapping("/course/{idCourse}/formula")
     public EntityModel<Formula> getFormulaByCourse(@PathVariable("idCourse") Long idCourse) {
         LOGGER.info("Fetching formula for course ID: " + idCourse);
@@ -66,6 +100,7 @@ public class FormulaController {
                 linkTo(methodOn(FormulaController.class).allFormulas()).withRel("formulas"));
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PostMapping("/formula")
     public ResponseEntity<?> newFormula(@RequestBody Formula request) {
         LOGGER.info("Creating new formula for course ID: " + request.getIdCourse());
@@ -89,12 +124,15 @@ public class FormulaController {
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PutMapping("/formula/{id}")
     public ResponseEntity<?> replaceFormula(@PathVariable("id") Long id, @RequestBody Formula request) {
         LOGGER.info("Updating formula with ID: " + id);
         Formula updatedFormula = service.getFormula(id);
         updatedFormula.setIdCourse(request.getIdCourse());
         updatedFormula.setText(request.getText());
+
+        FormulaParser.createSyntaxTree(updatedFormula);
 
         // Update components in place to preserve Hibernate's collection reference
         List<FormulaComponent> currentComponents = updatedFormula.getComponents();
@@ -116,6 +154,7 @@ public class FormulaController {
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @DeleteMapping("/formula/{id}")
     public ResponseEntity<?> deleteFormula(@PathVariable("id") Long id) {
         LOGGER.info("Deleting formula with ID: " + id);
@@ -144,6 +183,7 @@ public class FormulaController {
                 linkTo(methodOn(FormulaController.class).allFormulaComponents()).withRel("formulas-components"));
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PostMapping("/formula-component")
     public ResponseEntity<?> newFormulaComponent(@RequestBody FormulaComponent newComponent) {
         LOGGER.info("Creating new formula component");
@@ -154,6 +194,7 @@ public class FormulaController {
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).build();
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PutMapping("/formula-component/{id}")
     public ResponseEntity<?> replaceFormulaComponent(@PathVariable("id") Long id, @RequestBody FormulaComponent newComponent) {
         LOGGER.info("Updating formula component with ID: " + id);
@@ -166,6 +207,7 @@ public class FormulaController {
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
 
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @DeleteMapping("/formula-component/{id}")
     public ResponseEntity<?> deleteFormulaComponent(@PathVariable("id") Long id) {
         LOGGER.info("Deleting formula component with ID: " + id);
@@ -183,27 +225,6 @@ public class FormulaController {
         return "Constraint violated: " + message;
     }
 
-    public static class FormulaRequest {
-        private Long idCourse;
-        private String text;
-
-        public Long getIdCourse() {
-            return idCourse;
-        }
-
-        public void setIdCourse(Long idCourse) {
-            this.idCourse = idCourse;
-        }
-
-        public String getText() {
-            return text;
-        }
-
-        public void setText(String text) {
-            this.text = text;
-        }
-    }
-
     private List<FormulaComponent> parseFormulaComponents(String formulaText, Formula formula) {
         LOGGER.info("Parsing components for formula text: " + formulaText);
         List<FormulaComponent> components = new ArrayList<>();
@@ -216,16 +237,103 @@ public class FormulaController {
         Pattern pattern = Pattern.compile("\\b[a-zA-Z][a-zA-Z0-9_ ]*\\b");
         Matcher matcher = pattern.matcher(expression);
 
+        Set<String> foundComponents = new HashSet<>();
         while (matcher.find()) {
             String componentName = matcher.group().replace(" ", "_");
-            if (!componentName.equals("Final_grade")) {
+            if (!foundComponents.contains(componentName) && !componentName.equals("Final_grade") && !FormulaParser.functions.contains(componentName)) {
                 FormulaComponent component = new FormulaComponent();
                 component.setIdFormula(formula.getId());
                 component.setName(componentName);
                 components.add(component);
+                foundComponents.add(componentName);
                 LOGGER.info("Parsed component: " + componentName);
             }
         }
         return components;
+    }
+
+    @GetMapping("/component-score")
+    public ComponentScore getScore(@RequestParam Long idStud, @RequestParam Long idComponent)
+    {
+        return service.getComponentScore(new ComponentScoreCompositeKey(idStud, idComponent));
+    }
+
+    @GetMapping("/component-score/all/by-component")
+    public List<ComponentScore> getScoresByComponent(@RequestParam Long idComponent)
+    {
+        return service.getComponentScoresByIdComponent(idComponent);
+    }
+
+    @GetMapping("/component-score/all/by-student")
+    public List<ComponentScore> getScoresByStudent(@RequestParam Long idStud)
+    {
+        return service.getComponentScoresByIdStud(idStud);
+    }
+
+    @PostMapping("/component-score")
+    public void addScore(@RequestBody ComponentScore score)
+    {
+        service.addComponentScore(score);
+    }
+
+    @PutMapping("/component-score")
+    public void modifyScore(@RequestBody ComponentScore score)
+    {
+        ComponentScore existingScore = service.getComponentScore(score.getId());
+        existingScore.setValue(score.getValue());
+        service.addComponentScore(existingScore);
+    }
+
+    @DeleteMapping("/component-score")
+    public void deleteScore(@RequestParam Long idStud, @RequestParam Long idComponent)
+    {
+        ComponentScore score = service.getComponentScore(new ComponentScoreCompositeKey(idStud, idComponent));
+        service.deleteComponentScore(score);
+    }
+
+    @DeleteMapping("/component-score/all/by-component")
+    public void deleteAllScoresByComponent(@RequestParam Long idComponent)
+    {
+        List<ComponentScore> scores = service.getComponentScoresByIdComponent(idComponent);
+
+        scores.forEach(service::deleteComponentScore);
+    }
+
+    @DeleteMapping("/component-score/all/by-student")
+    public void deleteAllScoresByStudent(@RequestParam Long idStud)
+    {
+        List<ComponentScore> scores = service.getComponentScoresByIdStud(idStud);
+
+        scores.forEach(service::deleteComponentScore);
+    }
+
+    @ExceptionHandler(FormulaNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String formulaNotFound(FormulaNotFoundException e) {
+        return e.getMessage();
+    }
+
+    @ExceptionHandler(FormulaEvaluateException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String formulaEvaluateError(FormulaEvaluateException e) {
+        return e.getMessage();
+    }
+
+    @ExceptionHandler(FormulaParseException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String formulaParseError(FormulaParseException e) {
+        return e.getMessage();
+    }
+
+    @ExceptionHandler(ComponentNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String componentNotFound(ComponentNotFoundException e) {
+        return e.getMessage();
+    }
+
+    @ExceptionHandler(ComponentScoreNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public String scoreNotFound(ComponentScoreNotFoundException e) {
+        return e.getMessage();
     }
 }

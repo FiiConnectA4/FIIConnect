@@ -4,6 +4,6 @@ public enum TagType {
     GENERAL,
     MATERIE,
     AN,
-    SEMINAR,
+    SEMIAN,
     GRUPA
 }

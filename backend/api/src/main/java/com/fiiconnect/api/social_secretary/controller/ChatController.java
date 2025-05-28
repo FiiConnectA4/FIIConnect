@@ -1,10 +1,9 @@
 package com.fiiconnect.api.social_secretary.controller;
 
+import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
 import com.fiiconnect.api.social_secretary.service.ChatService;
-import com.fiiconnect.api.social_secretary.service.UserService2;
 import com.fiiconnect.api.social_secretary.classes.Chat;
 import com.fiiconnect.api.social_secretary.classes.Emoji;
-import com.fiiconnect.api.social_secretary.classes.User_Anunturi;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -30,8 +29,8 @@ public class ChatController {
     @Autowired
     private ChatService chatService;
 
-    @Autowired
-    private UserService2 userService2;
+   // @Autowired
+   // private UserService2 userService2;
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
@@ -68,12 +67,8 @@ public class ChatController {
         chatMessage.setMessage(message);
 
         // Verifică sender
-        long senderId = chatMessage.getSender().getId();
-        User_Anunturi sender = userService2.getUserById(senderId);
-        if (sender == null) {
-            throw new IllegalArgumentException("User-ul nu există");
-        }
-        chatMessage.setSender(sender);
+        Long senderId = chatMessage.getSender();
+
         chatMessage.setTimestamp(LocalDateTime.now().toString());
 
         // Salvează în baza de date ÎNAINTE de WebSocket

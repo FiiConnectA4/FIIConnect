@@ -1,0 +1,13 @@
+.layout {
+    display: flex;
+    height: 100vh;
+}
+
+/* .sidebar e fixed, rămâne la 240px,
+   .content începe TOC după 240px */
+.content {
+    flex: 1;
+    margin-left: 240px;
+    padding: 2rem;
+    overflow-y: auto;      /* scroll doar aici */
+}

@@ -1,0 +1,48 @@
+.container-catalog {
+    padding: 2rem;
+    font-family: sans-serif;
+}
+
+.catalog-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.8rem;
+}
+
+.select-controls {
+    display: flex;
+    gap: 1rem;
+}
+
+.select-controls select {
+    padding: 0.4rem;
+    font-size: 1rem;
+    border-radius: 6px;
+}
+
+.catalog-table {
+    margin-top: 2rem;
+}
+
+.catalog-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.catalog-table th,
+.catalog-table td {
+    padding: 0.5rem 1rem;
+    border: 1px solid #ccc;
+    text-align: center;
+}
+
+.catalog-buttons {
+    margin-top: 1.5rem;
+    display: flex;
+    gap: 1rem;
+}
+
+.titlu {
+    background-color: #6195C9;
+}
