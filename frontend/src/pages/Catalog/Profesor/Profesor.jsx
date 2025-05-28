@@ -1,58 +1,73 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import './Profesor.css';
 
 const Profesor = () => {
-    const mockCatalog = {
-        '2A4': {
-            'Introducere Programare': [
-                { name: 'Lindsey Stroud', grade: 9 },
-                { name: 'Sarah Brown', grade: 7 },
-                { name: 'Michael Owen', grade: 9 },
-                { name: 'Ivory Jane', grade: 9 },
-                { name: 'Peter Odell', grade: 10 }
-            ]
-        },
-        '2A5': {
-            'Programare Avansata': [
-                { name: 'Ion Popescu', grade: 8 },
-                { name: 'Maria Ionescu', grade: 9 }
-            ]
-        }
-    };
+    const [searchParams] = useSearchParams();
+    const profesorId = searchParams.get('profesorId') || 2;
+
+    const [cursuri, setCursuri] = useState([]);
+    const [selectedCursId, setSelectedCursId] = useState(null);
 
     const [grupe, setGrupe] = useState([]);
     const [selectedGrupa, setSelectedGrupa] = useState('');
-    const [cursuri, setCursuri] = useState([]);
-    const [selectedCurs, setSelectedCurs] = useState('');
+
     const [catalog, setCatalog] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        const availableGrupe = Object.keys(mockCatalog);
-        setGrupe(availableGrupe);
-        setSelectedGrupa(availableGrupe[0]);
-    }, []);
+    const token = localStorage.getItem("token");
 
     useEffect(() => {
-        if (!selectedGrupa) return;
-        const availableCursuri = Object.keys(mockCatalog[selectedGrupa]);
-        setCursuri(availableCursuri);
-        setSelectedCurs(availableCursuri[0]);
-    }, [selectedGrupa]);
+        if (!profesorId) return;
+
+        fetch(`/didactic/professor/${profesorId}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                const courses = (data.courses || [])
+                    .map(c => c.course)
+                    .filter(c => c.archived !== 1); // ✅ filtrare
+                setCursuri(courses);
+                if (courses.length > 0) setSelectedCursId(courses[0].id);
+            })
+            .catch(err => console.error("Eroare la încărcarea cursurilor:", err));
+    }, [profesorId]);
 
     useEffect(() => {
-        if (!selectedGrupa || !selectedCurs) return;
+        if (!selectedCursId) return;
+
         setLoading(true);
-        setTimeout(() => {
-            const data = mockCatalog[selectedGrupa]?.[selectedCurs] || [];
-            setCatalog(data);
-            setLoading(false);
-        }, 300);
-    }, [selectedGrupa, selectedCurs]);
+        fetch(`/didactic/course/${selectedCursId}/grades`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                const allGroups = [...new Set(data.map(entry => entry.student.facultyGroup))];
+                setGrupe(allGroups);
+                if (!selectedGrupa && allGroups.length > 0) {
+                    setSelectedGrupa(allGroups[0]);
+                }
 
-    const handleUploadExcel = () => alert("Upload Excel (mock)");
-    const handleDownloadExcel = () => alert("Download Excel (mock)");
-    const handleCerereMutare = () => alert("Cerere mutare grupă activitate trimisă (mock)");
+                const filtered = data
+                    .filter(entry => entry.student.facultyGroup === selectedGrupa)
+                    .map(entry => ({
+                        name: `${entry.student.firstName} ${entry.student.lastName}`,
+                        grade: entry.value
+                    }));
+
+                setCatalog(filtered);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error("Eroare la încărcarea catalogului:", err);
+                setLoading(false);
+            });
+    }, [selectedCursId, selectedGrupa]);
 
     return (
         <div className="container-catalog">
@@ -60,11 +75,15 @@ const Profesor = () => {
                 <h1>CATALOG</h1>
                 <div className="select-controls">
                     <select value={selectedGrupa} onChange={e => setSelectedGrupa(e.target.value)}>
-                        {grupe.map((g, i) => <option key={i} value={g}>{g}</option>)}
+                        {grupe.map((g, i) => (
+                            <option key={i} value={g}>{g}</option>
+                        ))}
                     </select>
 
-                    <select value={selectedCurs} onChange={e => setSelectedCurs(e.target.value)}>
-                        {cursuri.map((c, i) => <option key={i} value={c}>{c}</option>)}
+                    <select value={selectedCursId ?? ''} onChange={e => setSelectedCursId(parseInt(e.target.value))}>
+                        {cursuri.map((c) => (
+                            <option key={c.id} value={c.id}>{c.title}</option>
+                        ))}
                     </select>
                 </div>
             </div>
@@ -72,47 +91,41 @@ const Profesor = () => {
             <div className="catalog-table">
                 <table>
                     <thead>
-                        <tr className='titlu'>
-                            <th>Nume student</th>
-                            <th>Titlu curs</th>
-                            <th>Nota finală</th>
-                            <th>Administrative Note</th>
-                        </tr>
+                    <tr className='titlu'>
+                        <th>Nume student</th>
+                        <th>Titlu curs</th>
+                        <th>Nota finală</th>
+                        <th>Administrative Note</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        {loading ? (
-                            <tr><td colSpan="4">Se încarcă...</td></tr>
-                        ) : catalog.length === 0 ? (
-                            <tr><td colSpan="4">Nicio înregistrare.</td></tr>
-                        ) : (
-                            catalog.map((item, index) => (
-                                <tr key={index}>
-                                    <td>{item.name}</td>
-                                    <td>{selectedCurs}</td>
-                                    <td>{item.grade}</td>
-                                    <td>
-                                        <button
-                                            className="admin-button"
-                                            onClick={() => alert(`Deschide fișa pentru ${item.name}`)}
-                                        >
-                                            <img
-                                                src="/icons/edit-icon.png"
-                                                alt="Admin Note"
-                                                className="icon-img"
-                                            />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
+                    {loading ? (
+                        <tr><td colSpan="4">Se încarcă...</td></tr>
+                    ) : catalog.length === 0 ? (
+                        <tr><td colSpan="4">Nicio înregistrare.</td></tr>
+                    ) : (
+                        catalog.map((item, index) => (
+                            <tr key={index}>
+                                <td>{item.name}</td>
+                                <td>{cursuri.find(c => c.id === selectedCursId)?.title || ''}</td>
+                                <td>{item.grade}</td>
+                                <td>
+                                    <button
+                                        className="admin-button"
+                                        onClick={() => alert(`Deschide fișa pentru ${item.name}`)}
+                                    >
+                                        <img
+                                            src="/icons/edit-icon.png"
+                                            alt="Admin Note"
+                                            className="icon-img"
+                                        />
+                                    </button>
+                                </td>
+                            </tr>
+                        ))
+                    )}
                     </tbody>
                 </table>
-            </div>
-
-            <div className="catalog-buttons">
-                <button onClick={handleUploadExcel}>Upload Excel</button>
-                <button onClick={handleDownloadExcel}>Download Excel</button>
-                <button onClick={handleCerereMutare}>Cerere mutare grupa activitate</button>
             </div>
         </div>
     );
