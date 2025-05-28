@@ -36,6 +36,11 @@ public class User {
     private String twoFactorSecret;
 
     private boolean isActive = false;
+
+    public boolean isActive() {
+        return isActive;
+    }
+
     private String pendingTwoFactorSecret;
     private boolean twoFactorEnabled = false;
 
@@ -62,7 +67,6 @@ public class User {
             inverseJoinColumns = @JoinColumn(name = "professor_id"))
     private Professor professor;
 
-/// am adaugat un user de tags
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "user_tags",

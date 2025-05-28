@@ -7,7 +7,12 @@ const SecretariatCazSocial = () => {
    const navigate = useNavigate();
 
   useEffect(() => {
-    fetch("/cereri/caz-social/toate")
+    const token = localStorage.getItem("token");
+    fetch("/cereri/caz-social/toate", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
       .then((res) => res.json())
       .then(setCereri)
       .catch(console.error);
@@ -17,10 +22,10 @@ const SecretariatCazSocial = () => {
     const doc = new jsPDF();
 
     const text = `
-      Către: Secretariatul Facultății
+      Catre: Secretariatul Facultatii
 
-      Subsemnatul(a), ${cerere.nume} ${cerere.prenume}, student(ă) anul ${cerere.an},
-      grupa ${cerere.grupa}, cu numărul matricol ${cerere.regNumber},
+      Subsemnatul(a), ${cerere.nume} ${cerere.prenume}, student(a) anul ${cerere.an},
+      grupa ${cerere.grupa}, cu numarul matricol ${cerere.regNumber},
       solicit ajutor pentru caz social.
 
       Justificare:
@@ -30,7 +35,7 @@ const SecretariatCazSocial = () => {
 
       Data trimiterii cererii: ${cerere.dataTrimitere}
 
-      Mulțumesc anticipat pentru analiza cererii!
+      Multumesc anticipat pentru analiza cererii!
     `;
 
     const lines = doc.splitTextToSize(text, 180);

@@ -89,3 +89,23 @@ a {
 .link {
     margin-top: 10px;
 }
+
+[data-theme="dark"] .titlu-curs h1 {
+    color: #a9c5e6
+}
+
+[data-theme="dark"] .buton-inapoi {
+    background-color: #335a77
+}
+
+.buton-sectiune {
+    margin-right: 10px;
+    margin-left: 2px;
+    background-color: #537A9C;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 13px;
+}
