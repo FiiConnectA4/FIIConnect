@@ -15,7 +15,7 @@ jest.mock('../layouts/StudentLayout', () => {
 });
 jest.mock('../pages/Dashboard', () => () => <div>Dashboard Page</div>);
 jest.mock('../pages/Anunturi', () => () => <div>Anunturi Page</div>);
-jest.mock('../pages/Harta', () => () => <div>Harta Page</div>);
+jest.mock('../pages/Harta/Harta', () => () => <div>Harta Page</div>);
 jest.mock('../pages/Cursuri/Cursuri', () => () => <div>Cursuri Page</div>);
 jest.mock('../pages/Catalog/Catalog', () => () => <div>Catalog Page</div>);
 jest.mock('../pages/Orar', () => () => <div>Orar Page</div>);

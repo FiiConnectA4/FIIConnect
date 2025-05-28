@@ -3,8 +3,7 @@ import StudentLayout from "../layouts/StudentLayout";
 
 import Dashboard from "../pages/Dashboard";
 import Anunturi from "../pages/Social/Page/Anunturi";
-import Harta from "../pages/Harta";
-import EtajeHarta from "../pages/EtajeHarta";
+import EtajeHarta from "../pages/Harta/EtajeHarta";
 import Cursuri from "../pages/Cursuri/Cursuri";
 import Catalog from "../pages/Catalog/Catalog";
 import OrarToti from "../pages/Orar/OrarToti"; 
@@ -15,6 +14,9 @@ import CerereAdeverinte from "../pages/Secretariat/CerereAdeverinte"; // ✅ Imp
 import CerereBursaSociala from "../pages/Secretariat/CerereBursaSociala"; // ✅ Import corect
 import CerereCazSocial from "../pages/Secretariat/CerereCazSocial"; // ✅ Import corect
 import IstoricCereri from "../pages/Secretariat/IstoricCereri"; // ✅ Import corect
+import Harta from "../pages/Harta/Harta";
+import HartaFullScreen from "../pages/Harta/HartaFullScreen";
+
 
 import SecretariatCerereAdeverinte from "../pages/Secretariat/SecretariatCerereAdeverinte"; // ✅ Import corect
 import SecretariatBursaSociala from "../pages/Secretariat/SecretariatBursaSociala"; // ✅ Import corect
@@ -92,6 +94,11 @@ const AppRoutes = () => {
                 <Route path="/app/orar-secretariat/sali/:sala" element={<OrarSecretariat />} />
                 <Route path="/app/orar-secretariat/discipline" element={<OrarSecretariat />} />
                 <Route path="/app/orar-secretariat/discipline/:disciplina" element={<OrarSecretariat />} />
+
+                <Route path="/app/harta" element={<Harta />} />
+                <Route path="/app/harta/fullscreen" element={<HartaFullScreen />} />
+
+
 
                 <Route path="secretariat" element={<Secretariat />}>
                           <Route index element={<SecretariatToti />} />
