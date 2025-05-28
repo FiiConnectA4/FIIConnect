@@ -22,11 +22,6 @@ public class TagDTO {
         this.type = type;
     }
 
-    public TagDTO(Long id, String name, TagType type) {
-        this.id = id;
-        this.name = name;
-        this.type = type;
-    }
 
     public String getName() {
         return name;
