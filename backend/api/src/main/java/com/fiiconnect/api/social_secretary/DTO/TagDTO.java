@@ -9,6 +9,19 @@ public class TagDTO {
     private String name;
     private TagType type;
 
+    public TagDTO() {}
+
+    public TagDTO(String name, TagType type) {
+       this.name = name;
+        this.type = type;
+    }
+
+    public TagDTO(Long id, String name, TagType type) {
+        this.id = id;
+        this.name = name;
+        this.type = type;
+    }
+
     public TagDTO(Long id, String name, TagType type) {
         this.id = id;
         this.name = name;
