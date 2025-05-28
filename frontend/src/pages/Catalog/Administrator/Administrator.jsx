@@ -11,74 +11,98 @@ const Administrator = () => {
     const [catalog, setCatalog] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        const token = localStorage.getItem("token");
+    const token = localStorage.getItem('token');
 
+    // Load courses
+    useEffect(() => {
         fetch('/didactic/course', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => res.json())
             .then(data => {
-                const courseList = (data._embedded?.courseList || []).filter(c => c.archived !== 1); // ✅ filtrare
+                const courseList = (data._embedded?.courseList || []).filter(c => c.archived !== 1);
+                console.log('Cursuri disponibile:', courseList);
                 setCursuri(courseList);
-
-                if (courseList.length > 0) {
-                    setSelectedCursId(courseList[0].id);
-                }
+                if (courseList.length) setSelectedCursId(courseList[0].id);
             })
-            .catch(err => console.error("Eroare la încărcarea cursurilor:", err));
-    }, []);
+            .catch(err => console.error('Eroare la încărcarea cursurilor:', err));
+    }, [token]);
 
+    // Load groups when course changes
     useEffect(() => {
         if (!selectedCursId) return;
-
-        const token = localStorage.getItem("token");
         setLoading(true);
+        fetch(`/didactic/course/${selectedCursId}/enrolled`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+            .then(res => res.json())
+            .then(enrollments => {
+                console.log('Enrollments:', enrollments);
+                const allGroups = [...new Set(enrollments.map(e => e.student.facultyGroup))];
+                console.log('Grupe extrase:', allGroups);
+                setGrupe(allGroups);
+                setSelectedGrupa(allGroups[0] || '');
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error('Eroare la încărcarea grupelor:', err);
+                setLoading(false);
+            });
+    }, [selectedCursId, token]);
 
+    // Load grades when group or course changes
+    useEffect(() => {
+        if (!selectedCursId || !selectedGrupa) return;
+        setLoading(true);
         fetch(`/didactic/course/${selectedCursId}/grades`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => res.json())
             .then(data => {
-                const allGroups = [...new Set(data.map(entry => entry.student.facultyGroup))];
-                setGrupe(allGroups);
-                if (!selectedGrupa && allGroups.length > 0) {
-                    setSelectedGrupa(allGroups[0]);
-                }
-
+                console.log('Toate notele:', data);
                 const filtered = data
-                    .filter(entry => entry.student.facultyGroup === selectedGrupa)
+                    .filter(entry => {
+                        console.log(`Grupa student: ${entry.student.facultyGroup}, Grupa selectată: ${selectedGrupa}`);
+                        return entry.student.facultyGroup === selectedGrupa;
+                    })
                     .map(entry => ({
                         name: `${entry.student.firstName} ${entry.student.lastName}`,
                         grade: entry.value
                     }));
-
+                console.log('Note filtrate pentru grupa selectată:', filtered);
                 setCatalog(filtered);
                 setLoading(false);
             })
             .catch(err => {
-                console.error("Eroare la fetch:", err);
+                console.error('Eroare la fetch:', err);
                 setLoading(false);
             });
-    }, [selectedCursId, selectedGrupa]);
+    }, [selectedCursId, selectedGrupa, token]);
+
+    const handleUploadExcel = () => alert('Upload Excel (mock)');
+    const handleDownloadExcel = () => alert('Download Excel (mock)');
 
     return (
         <div className="container-catalog">
             <div className="catalog-header">
                 <h1>CATALOG</h1>
                 <div className="select-controls">
-                    <select value={selectedGrupa} onChange={e => setSelectedGrupa(e.target.value)}>
+                    {/* Prima select: grupe */}
+                    <select
+                        value={selectedGrupa}
+                        onChange={e => setSelectedGrupa(e.target.value)}
+                    >
                         {grupe.map((g, i) => (
                             <option key={i} value={g}>{g}</option>
                         ))}
                     </select>
 
-                    <select value={selectedCursId ?? ''} onChange={e => setSelectedCursId(parseInt(e.target.value))}>
-                        {cursuri.map((c) => (
+                    {/* A doua select: cursuri */}
+                    <select
+                        value={selectedCursId || ''}
+                        onChange={e => setSelectedCursId(parseInt(e.target.value, 10))}
+                    >
+                        {cursuri.map(c => (
                             <option key={c.id} value={c.id}>{c.title}</option>
                         ))}
                     </select>
@@ -102,8 +126,8 @@ const Administrator = () => {
                         ) : catalog.length === 0 ? (
                             <tr><td colSpan="5">Nicio înregistrare pentru grupa selectată.</td></tr>
                         ) : (
-                            catalog.map((item, index) => (
-                                <tr key={index}>
+                            catalog.map((item, idx) => (
+                                <tr key={idx}>
                                     <td><input type="checkbox" /></td>
                                     <td>{item.name}</td>
                                     <td>{cursuri.find(c => c.id === selectedCursId)?.title || ''}</td>
