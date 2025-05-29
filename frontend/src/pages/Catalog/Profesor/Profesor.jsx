@@ -10,9 +10,12 @@ const Profesor = () => {
     const [grupe, setGrupe] = useState([]);
     const [selectedGrupa, setSelectedGrupa] = useState('');
 
-    const [gradesData, setGradesData] = useState([]);
     const [catalog, setCatalog] = useState([]);
     const [loading, setLoading] = useState(false);
+
+    const [editingIndex, setEditingIndex] = useState(null);
+    const [editedGrade, setEditedGrade] = useState('');
+    const [prevGrade, setPrevGrade] = useState('');
 
     const token = localStorage.getItem('token');
     useEffect(() => {
@@ -46,36 +49,102 @@ const Profesor = () => {
     useEffect(() => {
         if (!selectedCursId) return;
         setLoading(true);
-        fetch(`/didactic/course/${selectedCursId}/enrolled`, { headers: { 'Authorization': `Bearer ${token}` } })
-            .then(res => res.json())
-            .then(enrollments => {
+        Promise.all([
+            fetch(`/didactic/course/${selectedCursId}/enrolled`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
+            fetch(`/didactic/course/${selectedCursId}/grades`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json())
+        ])
+            .then(([enrollments, grades]) => {
                 const uniqueGroups = [...new Set(enrollments.map(e => e.student.facultyGroup))];
                 setGrupe(uniqueGroups);
-                // pick first by default
-                if (uniqueGroups.length) setSelectedGrupa(uniqueGroups[0]);
+                const defaultGroup = uniqueGroups[0] || '';
+                setSelectedGrupa(defaultGroup);
+
+                // build initial catalog for default group
+                const students = enrollments
+                    .filter(e => e.student.facultyGroup === defaultGroup)
+                    .map(e => e.student);
+                const initCatalog = students.map(student => {
+                    const g = grades.find(x => x.student.id === student.id);
+                    return { name: `${student.firstName} ${student.lastName}`, grade: g ? g.value : '', studentId: student.id };
+                });
+                setCatalog(initCatalog);
                 setLoading(false);
             })
             .catch(err => { console.error(err); setLoading(false); });
     }, [selectedCursId, token]);
 
-    // Load grades when selectedGrupa or selectedCursId changes
+    // Refresh catalog when group changes
     useEffect(() => {
         if (!selectedCursId || !selectedGrupa) return;
         setLoading(true);
-        fetch(`/didactic/course/${selectedCursId}/grades`, { headers: { 'Authorization': `Bearer ${token}` } })
-            .then(res => res.json())
-            .then(grades => {
-                const filtered = grades
-                    .filter(g => g.student.facultyGroup === selectedGrupa)
-                    .map(g => ({ name: `${g.student.firstName} ${g.student.lastName}`, grade: g.value }));
-                setCatalog(filtered);
+        Promise.all([
+            fetch(`/didactic/course/${selectedCursId}/enrolled`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
+            fetch(`/didactic/course/${selectedCursId}/grades`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json())
+        ])
+            .then(([enrollments, grades]) => {
+                const students = enrollments
+                    .filter(e => e.student.facultyGroup === selectedGrupa)
+                    .map(e => e.student);
+                const newCatalog = students.map(student => {
+                    const g = grades.find(x => x.student.id === student.id);
+                    return { name: `${student.firstName} ${student.lastName}`, grade: g ? g.value : '', studentId: student.id };
+                });
+                setCatalog(newCatalog);
                 setLoading(false);
             })
             .catch(err => { console.error(err); setLoading(false); });
     }, [selectedCursId, selectedGrupa, token]);
 
-    const handleUploadExcel = () => alert('Upload Excel (mock)');
-    const handleDownloadExcel = () => alert('Download Excel (mock)');
+    const handleSaveGrade = (index) => {
+        const entry = catalog[index];
+        if (!entry) return;
+        const parsed = parseFloat(editedGrade);
+        if (isNaN(parsed) || parsed < 1 || parsed > 10) {
+            alert('Nota trebuie să fie între 1 și 10.');
+            return;
+        }
+        const dateNow = new Date().toISOString();
+        const hasExisting = entry.grade !== '';
+        const method = hasExisting ? 'PUT' : 'POST';
+        const payload = hasExisting
+            ? {
+                id: { idStud: entry.studentId, idCourse: selectedCursId },
+                value: parsed
+            }
+            : {
+                id: { idStud: entry.studentId, idCourse: selectedCursId },
+                value: parsed,
+                gradingDate: dateNow
+            };
+
+        fetch('/didactic/grade', {
+            method,
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify(payload)
+        })
+            .then(res => {
+                if (!res.ok) throw new Error(`Eroare ${method}`);
+                const updated = [...catalog]; updated[index].grade = parsed;
+                setCatalog(updated);
+                setEditingIndex(null);
+            })
+            .catch(err => { console.error(err); alert('Eroare salvare nota: ' + err.message); });
+    };
+
+    const handleUndo = () => {
+        setEditedGrade(prevGrade);
+        setEditingIndex(null);
+    };
+
+    const handleUploadExcel = () => {
+        // TODO: implementare încărcare fișier Excel
+        console.log('Triggered upload');
+    };
+
+    const handleDownloadExcel = () => {
+        // TODO: implementare descărcare fișier Excel
+        console.log('Triggered download');
+    };
 
     const currentCourseTitle = cursuri.find(c => c.id === selectedCursId)?.title || '';
 
@@ -85,22 +154,21 @@ const Profesor = () => {
                 <h1>CATALOG</h1>
                 <div className="select-controls">
                     <select value={selectedGrupa} onChange={e => setSelectedGrupa(e.target.value)}>
-                        {grupe.map((g, i) => (<option key={i} value={g}>{g}</option>))}
+                        {grupe.map((g, i) => <option key={i} value={g}>{g}</option>)}
                     </select>
                     <select value={selectedCursId || ''} onChange={e => setSelectedCursId(parseInt(e.target.value, 10))}>
-                        {cursuri.map(c => (<option key={c.id} value={c.id}>{c.title}</option>))}
+                        {cursuri.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
                     </select>
                 </div>
             </div>
-
             <div className="catalog-table">
                 <table>
                     <thead>
                         <tr className="titlu">
                             <th>Nume student</th>
-                            <th>Titlu curs</th>
+                            <th>{`Titlu curs`}</th>
                             <th>Nota finală</th>
-                            <th>Administrative Note</th>
+                            <th>Administrare</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -110,23 +178,27 @@ const Profesor = () => {
                             <tr key={idx}>
                                 <td>{item.name}</td>
                                 <td>{currentCourseTitle}</td>
-                                <td>{item.grade}</td>
+                                <td>{editingIndex === idx ? (
+                                    <input type="number" value={editedGrade} onChange={e => setEditedGrade(e.target.value)} />
+                                ) : item.grade}</td>
                                 <td>
-                                    <button className="admin-button" onClick={() => alert(`Deschide fișa pentru ${item.name}`)}>
-                                        <img src="/icons/edit-icon.png" alt="Admin Note" className="icon-img" />
-                                    </button>
+                                    {editingIndex === idx ? (
+                                        <>
+                                            <button onClick={() => handleSaveGrade(idx)}>💾</button>
+                                            <button onClick={handleUndo}>↩️</button>
+                                        </>
+                                    ) : (
+                                        <button onClick={() => { setPrevGrade(item.grade); setEditingIndex(idx); setEditedGrade(item.grade); }}>✏️</button>
+                                    )}
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
-
             <div className="catalog-buttons">
-                <div className="catalog-buttons">
-                    <button onClick={handleUploadExcel}>Încarcă Excel</button>
-                    <button onClick={handleDownloadExcel}>Descarcă Excel</button>
-                </div>
+                <button onClick={handleUploadExcel}>Încarcă Excel</button>
+                <button onClick={handleDownloadExcel}>Descarcă Excel</button>
             </div>
         </div>
     );
