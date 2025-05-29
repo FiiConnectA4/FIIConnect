@@ -93,36 +93,47 @@ const Administrator = () => {
 
         const studentId = gradeEntry.studentId;
         const courseId = selectedCursId;
+        const parsed = parseFloat(editedGrade);
 
-        const parsedGrade = parseFloat(editedGrade);
-        if (isNaN(parsedGrade) || parsedGrade < 1 || parsedGrade > 10) {
+        if (isNaN(parsed) || parsed < 1 || parsed > 10) {
             alert("Introduceți o notă validă între 1 și 10.");
             return;
         }
 
-        fetch(`/didactic/grade?idStud=${studentId}&idCourse=${courseId}`, {
-            method: 'DELETE',
-            headers: { 'Authorization': `Bearer ${token}` }
+        const hasExisting = gradeEntry.grade !== ""; // dacă e gol, e POST, altfel PUT
+        const url = '/didactic/grade';
+        const method = hasExisting ? 'PUT' : 'POST';
+        const payload = hasExisting
+            ? {
+                id: { idStud: studentId, idCourse: courseId },
+                value: parsed
+            }
+            : {
+                id: { idStud: studentId, idCourse: courseId },
+                value: parsed,
+                gradingDate: new Date().toISOString()
+            };
+
+        fetch(url, {
+            method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
         })
             .then(res => {
-                if (!res.ok) return res.text().then(text => { throw new Error(text); });
-                return fetch('/didactic/grade', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ value: parsedGrade, id: { idStud: studentId, idCourse: courseId } })
-                });
-            })
-            .then(res => {
-                if (!res.ok) return res.text().then(text => { throw new Error(text); });
+                if (!res.ok) return res.text().then(text => { throw new Error(text) });
+                // actualizează local
                 const updated = [...catalog];
-                updated[index].grade = parsedGrade;
+                updated[index].grade = parsed;
                 setCatalog(updated);
                 setEditingIndex(null);
             })
-            .catch(err => { console.error(err); alert("Eroare la actualizarea notei."); });
+            .catch(err => {
+                console.error(err);
+                alert("Eroare la salvarea notei: " + err.message);
+            });
     };
 
     const handleUndo = () => {
