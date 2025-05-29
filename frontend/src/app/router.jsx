@@ -44,7 +44,7 @@ const AppRoutes = () => {
 
       {/* 🛠 Admin Service Page — outside /app */}
       <Route
-        path="/admin/service"
+        path="/app/service"
         element={
           <PrivateRoute allowedRoles={["ROLE_ADMIN"]}>
             <ServiceAdminPage />
