@@ -14,7 +14,7 @@ public class TwoFactorAuthenticationService {
     public TwoFactorAuthenticationService() {
         GoogleAuthenticatorConfig config = new GoogleAuthenticatorConfig.GoogleAuthenticatorConfigBuilder()
                 .setTimeStepSizeInMillis(30_000)
-                .setWindowSize(5)
+                .setWindowSize(2)
                 .build();
         this.gAuth = new GoogleAuthenticator(config);
     }
