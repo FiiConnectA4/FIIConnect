@@ -46,3 +46,10 @@
 .titlu {
     background-color: #6195C9;
 }
+
+.admin-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+}

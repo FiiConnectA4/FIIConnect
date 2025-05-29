@@ -1,5 +1,6 @@
 package com.fiiconnect.api.didactic.services;
 
+import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
 import com.fiiconnect.api.didactic.models.*;
 import com.fiiconnect.api.didactic.repositories.*;
 import com.fiiconnect.api.didactic.exceptions.CourseNotFoundException;
@@ -163,5 +164,39 @@ public class CourseService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public boolean allowCourseViewing(PersonInfoDTO person, Long idCourse)
+    {
+        if(person.role().equals("ROLE_ADMIN"))
+            return true;
+
+        if(person.role().equals("ROLE_PROFESOR"))
+            return authorizeCourseOperation(person, idCourse, false);
+
+        //ROLE_STUDENT
+        List<Enrollment> courseEnrollments = enrollmentService.getCourseEnrollments(idCourse);
+        for(Enrollment enrollment : courseEnrollments)
+            if(enrollment.getId().getIdStud().equals(person.student().id()))
+                return true;
+
+        return false;
+    }
+
+    public boolean authorizeCourseOperation(PersonInfoDTO person, Long idCourse, boolean onlyTitular)
+    {
+        if(person.role().equals("ROLE_ADMIN"))
+            return true;
+        if(person.role().equals("ROLE_STUDENT"))
+            return false;
+
+        //ROLE_PROFESOR
+        Long idProf = person.professor().id();
+        List<Teaching> eligibleProfs = teachingRepo.findByIdIdCourse(idCourse);
+
+        for(Teaching t : eligibleProfs)
+            if(t.getId().getIdProf().equals(idProf) && (!onlyTitular || t.getRole().equals("titular")))
+                return true;
+        return false;
     }
 }
