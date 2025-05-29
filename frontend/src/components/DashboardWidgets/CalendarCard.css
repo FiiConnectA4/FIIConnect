@@ -26,6 +26,15 @@
     font-weight: 700;
 }
 
+.calendar-today {
+    background: #009dff !important;
+    color: #fff !important;
+    font-weight: bold;
+    border-radius: 0.7rem;
+    box-shadow: 0 0 8px #009dff33;
+    transition: background 0.2s;
+}
+
 .calendar-card table {
     width: 100%;
     border-collapse: collapse;

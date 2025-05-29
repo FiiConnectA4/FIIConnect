@@ -1,33 +1,71 @@
 .dashboard-container {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 1rem;
+    /* dacă vrei edge-to-edge, șterge următoarea linie */
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2rem 1.5rem;
 }
 
 .dashboard-title {
-    font-size: 3rem;
+    font-size: 2.5rem;
     font-weight: 700;
-    margin-bottom: 2rem;
-    text-align: left;
+    margin: 0;
 }
 
-.dashboard-row {
+/* ==== stats cards (neschimbat) ==== */
+.dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+.stat-card {
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* ==== NOUA secțiune widgets ==== */
+.dashboard-widgets {
     display: flex;
-    flex-wrap: wrap;
-    gap: 2rem;
-    margin-bottom: 2rem;
-    justify-content: flex-start;
+    gap: 1.5rem;
+    flex-wrap: wrap;         /* wrap pe mobil */
+    align-items: flex-start; /* stretch vertical când e 2 coloane */
 }
 
-@media (max-width: 1200px) {
-    .dashboard-container {
-        max-width: 98vw;
+/* coloana stângă: calendar + activități */
+.dashboard-widgets-left {
+    flex: 2 1 300px;         /* crește de 2 ori mai mult decât news, minim 300px */
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* coloana dreaptă: newsfeed */
+.news-feed {
+    flex: 1 1 300px;         /* minim 300px, crește normal */
+    display: flex;
+    flex-direction: column;
+    /* dacă ai mult conținut, scroll doar în newsfeed */
+    max-height: calc(100vh - 300px);
+    overflow-y: auto;
+}
+
+/* ==== breakpoints ==== */
+/* pe ecrane mai înguste, wrap în 1 coloană */
+@media (max-width: 768px) {
+    .dashboard-widgets {
+        flex-direction: column;
     }
 }
 
-@media (max-width: 900px) {
-    .dashboard-row {
-        flex-direction: column;
-        gap: 1rem;
+/* dacă vrei sub 480px să ai și stats pe o coloană */
+@media (max-width: 480px) {
+    .dashboard-stats {
+        grid-template-columns: 1fr;
     }
 }

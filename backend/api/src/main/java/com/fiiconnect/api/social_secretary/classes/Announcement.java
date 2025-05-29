@@ -2,6 +2,8 @@ package com.fiiconnect.api.social_secretary.classes;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
+import com.fiiconnect.api.auth_userMgmt.models.User;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -20,10 +22,10 @@ public class Announcement {
     private String title;
     private String message;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "author_id")
-    //@JsonIgnore
-    private User_Anunturi author;
+   // @ManyToOne(cascade = CascadeType.PERSIST)
+   // @JoinColumn(name = "author_id")
+   //@JsonIgnore
+    private Long author;
 
     @ManyToMany//(cascade = CascadeType.PERSIST)
     @JoinTable(
@@ -31,7 +33,6 @@ public class Announcement {
             joinColumns = @JoinColumn(name = "announcement_id"),
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
-
     //@JsonIgnore
     private Set<Tag> tags = new HashSet<>();
 
@@ -39,7 +40,7 @@ public class Announcement {
 
     public Announcement() {}
 
-    public Announcement(String title, String message, User_Anunturi author, Set<Tag> tags, LocalDate publishedDate) {
+    public Announcement(String title, String message, Long author, Set<Tag> tags, LocalDate publishedDate) {
         this.title = title;
         this.message = message;
         this.author = author;
@@ -52,8 +53,8 @@ public class Announcement {
     public void setTitle(String title) { this.title = title; }
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }
-    public User_Anunturi getAuthor() { return author; }
-    public void setAuthor(User_Anunturi author) { this.author = author; }
+    public Long getAuthor() { return author; }
+    public void setAuthor(Long author) { this.author = author; }
     public Set<Tag> getTags() { return tags; }
     public void setTags(Set<Tag> tags) { this.tags = tags; }
     public LocalDate getPublishedDate() { return publishedDate; }
