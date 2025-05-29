@@ -6,12 +6,7 @@ const AtribuireTaguri = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
-  // Utilizatori hardcodati
-  const [users, setUsers] = useState([
-    { id: 1, name: "Ion Popescu", email: "ion.popescu@example.com", role: "student" },
-    { id: 2, name: "Maria Ionescu", email: "maria.ionescu@example.com", role: "student" },
-    { id: 3, name: "Profesor Georgescu", email: "prof.georgescu@example.com", role: "profesor" },
-  ]);
+  const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const [availableTagTypes, setAvailableTagTypes] = useState([]);
@@ -24,6 +19,58 @@ const AtribuireTaguri = () => {
   const [userTags, setUserTags] = useState([]);
   const [error, setError] = useState(null);
   const [notification, setNotification] = useState(null);
+  const [currentUser, setCurrentUser] = useState(null);
+
+  // Fetch current user info
+  const fetchCurrentUser = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch("http://localhost:34101/person/me", {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!response.ok) throw new Error("Failed to fetch current user");
+      const data = await response.json();
+      return data;
+    } catch (err) {
+      console.error("Error fetching current user:", err);
+      throw err;
+    }
+  };
+
+
+// Fetch all users from the API
+const fetchAllUsers = async () => {
+  try {
+    const token = localStorage.getItem('token');
+    const response = await fetch("http://localhost:34101/person/get-all", {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    console.log("User JSON:", data); // Debug: verifică structura primită
+
+    return data.map(user => {
+      if (!user) return null;
+
+      // Extragem doar câmpurile necesare din structura ta
+      return {
+        id: user.userId, // Folosim userId din răspuns
+        name: `${user.lastName || ''} ${user.firstName || ''}`.trim() || 'Necunoscut',
+        role: (user.role || 'unknown').toLowerCase(),
+        // Am eliminat email-ul deoarece nu este prezent în structura ta
+        tags: user.tags || [] // Păstrăm tag-urile dacă sunt necesare
+      };
+    }).filter(user => user !== null);
+  } catch (err) {
+    console.error("Error fetching users:", err);
+    throw err;
+  }
+};
+
 
   // Fetch all tags from database
   const fetchAllTags = async () => {
@@ -63,25 +110,24 @@ const AtribuireTaguri = () => {
       try {
         setLoading(true);
         
-        // Fetch all tags from database
+        const currentUserData = await fetchCurrentUser();
+        setCurrentUser(currentUserData);
+
+        const usersData = await fetchAllUsers();
+        setUsers(usersData);
+        setFilteredUsers(usersData);
+
         const tagsData = await fetchAllTags();
         setAllTags(tagsData);
 
-        // Extract unique tag types from enum values
-        const tagTypes = Object.values({
-          GENERAL: "GENERAL",
-          MATERIE: "MATERIE",
-          AN: "AN",
-          SEMIAN: "SEMIAN",
-          GRUPA: "GRUPA"
-        });
+        // Extract unique tag types from tags data
+        const tagTypes = [...new Set(tagsData.map(tag => tag.type))];
         setAvailableTagTypes(tagTypes);
         
         if (tagTypes.length > 0) {
           setCurrentTag(prev => ({ ...prev, type: tagTypes[0] }));
         }
 
-        setFilteredUsers(users);
         setLoading(false);
       } catch (err) {
         console.error("Initialization error:", err);
@@ -117,16 +163,17 @@ const AtribuireTaguri = () => {
 
   // Filter users based on search term
   useEffect(() => {
-    if (searchTerm.trim() === "") {
-      setFilteredUsers(users);
-    } else {
-      const filtered = users.filter(user =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-      setFilteredUsers(filtered);
-    }
-  }, [searchTerm, users]);
+  if (searchTerm.trim() === "") {
+    setFilteredUsers(users);
+  } else {
+    const filtered = users.filter(user =>
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    setFilteredUsers(filtered);
+    console.log("Filtered Users:", filtered); // Adaugă asta pentru debug
+  }
+}, [searchTerm, users]);
 
   const handleSearchChange = (e) => {
     setSearchTerm(e.target.value);
@@ -157,7 +204,6 @@ const AtribuireTaguri = () => {
     });
   };
 
-  // Get available tags for the selected type that the user doesn't already have
   const getAvailableTagsForType = (type) => {
     if (!type) return [];
     return allTags
@@ -166,93 +212,92 @@ const AtribuireTaguri = () => {
   };
 
   const addTag = async () => {
-    if (!selectedUser) {
-      setError("Selectează mai întâi un utilizator");
+    setError(null);
+    setNotification(null);
+    if (!selectedUser || !currentTag.id) {
+      setError("Selectează un utilizator și un tag.");
       return;
     }
-
-    if (!currentTag.id) {
-      setError("Selectează un tag");
-      return;
-    }
-
     try {
       const token = localStorage.getItem('token');
-      const whoIsLoggedId = 1; // ID-ul utilizatorului logat (ar trebui să vină din auth)
-      
-      const response = await fetch(
-        `http://localhost:34101/manage_tags/${whoIsLoggedId}/${selectedUser.id}/${currentTag.id}`,
-        {
-          method: "POST",
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-
+      // whoIsLoggedId = utilizatorul curent (secretar/admin)
+      // Asigură-te că iei id-ul corect din structura de la /person/me
+      const whoIsLoggedId = currentUser?.id || currentUser?.userId;
+      const userId = selectedUser.id;
+      const tagId = currentTag.id;
+      // DEBUG: log parametri request și currentUser
+      console.log('AddTag params:', { whoIsLoggedId, userId, tagId, currentUser });
+      const response = await fetch(`http://localhost:34101/manage_tags/${whoIsLoggedId}/${userId}/${tagId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      // DEBUG: log status code
+      console.log('AddTag status:', response.status);
       if (!response.ok) {
-        throw new Error(await response.text());
+        const msg = await response.text();
+        setError(msg || 'Eroare la adăugarea tag-ului.');
+        // DEBUG: log response body
+        console.log('AddTag ERROR:', msg);
+        return;
       }
-
-      // Refresh user tags after adding
-      const updatedTags = await fetchUserTags(selectedUser.id);
-      setUserTags(updatedTags);
-      
-      setNotification({
-        message: `Tag-ul "${currentTag.name}" a fost adăugat`,
-        type: "success"
-      });
-      
-      // Reset tag selection
-      setCurrentTag(prev => ({
-        id: null,
-        name: "",
-        type: prev.type
-      }));
+      // DEBUG: log success
+      const successMsg = await response.text();
+      console.log('AddTag SUCCESS:', successMsg);
+      setNotification({ type: 'success', message: 'Tag adăugat cu succes!' });
+      // reîncarcă tag-urile utilizatorului și resetează selecția tagului
+      const tags = await fetchUserTags(userId);
+      setUserTags(tags);
+      setCurrentTag({ id: null, name: '', type: currentTag.type });
     } catch (err) {
-      console.error("Error adding tag:", err);
-      setNotification({
-        message: err.message || "Eroare la adăugarea tag-ului",
-        type: "error"
-      });
+      setError('Eroare la adăugarea tag-ului.');
+      // DEBUG: log error
+      console.log('AddTag error:', err);
     }
   };
 
   const removeTag = async (tagId) => {
-    if (!selectedUser) return;
-
+    setError(null);
+    setNotification(null);
+    if (!selectedUser || !tagId) {
+      setError("Selectează un utilizator și un tag.");
+      return;
+    }
     try {
       const token = localStorage.getItem('token');
-      const whoIsLoggedId = 1; // ID-ul utilizatorului logat (ar trebui să vină din auth)
-      
-      const response = await fetch(
-        `http://localhost:34101/manage_tags/${whoIsLoggedId}/${selectedUser.id}/${tagId}`,
-        {
-          method: "DELETE",
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-
+      // whoIsLoggedId = utilizatorul curent (secretar/admin)
+      const whoIsLoggedId = currentUser?.id || currentUser?.userId;
+      const userId = selectedUser.id;
+      // DEBUG: log parametri request
+      console.log('RemoveTag params:', { whoIsLoggedId, userId, tagId, currentUser });
+      const response = await fetch(`http://localhost:34101/manage_tags/${whoIsLoggedId}/${userId}/${tagId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      // DEBUG: log status code
+      console.log('RemoveTag status:', response.status);
       if (!response.ok) {
-        throw new Error(await response.text());
+        const msg = await response.text();
+        setError(msg || 'Eroare la ștergerea tag-ului.');
+        // DEBUG: log response body
+        console.log('RemoveTag ERROR:', msg);
+        return;
       }
-
-      // Refresh user tags after removal
-      const updatedTags = await fetchUserTags(selectedUser.id);
-      setUserTags(updatedTags);
-      
-      setNotification({
-        message: "Tag-ul a fost eliminat",
-        type: "success"
-      });
+      // DEBUG: log success
+      const successMsg = await response.text();
+      console.log('RemoveTag SUCCESS:', successMsg);
+      setNotification({ type: 'success', message: 'Tag șters cu succes!' });
+      // reîncarcă tag-urile utilizatorului
+      const tags = await fetchUserTags(userId);
+      setUserTags(tags);
     } catch (err) {
-      console.error("Error removing tag:", err);
-      setNotification({
-        message: err.message || "Eroare la eliminarea tag-ului",
-        type: "error"
-      });
+      setError('Eroare la ștergerea tag-ului.');
+      // DEBUG: log error
+      console.log('RemoveTag error:', err);
     }
   };
 
@@ -261,7 +306,6 @@ const AtribuireTaguri = () => {
   }
 
   return (
-
     <div className="secretariat-container">
       <button 
         className="switch-button" 
@@ -288,18 +332,18 @@ const AtribuireTaguri = () => {
           />
           
           <div className="users-list">
-            {filteredUsers.map(user => (
-              <div
-                key={user.id}
-                className={`user-item ${selectedUser?.id === user.id ? 'selected' : ''}`}
-                onClick={() => handleUserSelect(user)}
-              >
-                <div className="user-name">{user.name}</div>
-                <div className="user-email">{user.email}</div>
-                <div className="user-role">{user.role}</div>
-              </div>
-            ))}
-          </div>
+  {filteredUsers.map(user => (
+    <div
+      key={user.id}
+      className={`user-item ${selectedUser?.id === user.id ? 'selected' : ''}`}
+      onClick={() => handleUserSelect(user)}
+    >
+      <div className="user-name">{user.name}</div>
+      <div className="user-role">{user.role}</div>
+      
+    </div>
+  ))}
+</div>
         </div>
 
         {selectedUser && (
