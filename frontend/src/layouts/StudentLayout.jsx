@@ -16,14 +16,15 @@ const StudentLayout = () => (
         {/* 2) Conținutul începe după 240px */}
         <div className="content">
             <header
-                style={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    alignItems: "center",
-                    gap: "1rem",
-                    marginBottom: "1rem",
-                }}
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                alignItems: "center",
+                gap: "0.3rem", // ✅ mai apropiate 🔔 și Logout
+                marginBottom: "1rem",
+              }}
             >
+
                 <NotificationBell />
                 <LogoutButton />
             </header>

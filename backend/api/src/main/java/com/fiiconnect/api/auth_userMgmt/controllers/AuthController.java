@@ -430,8 +430,15 @@ public class AuthController {
 
         String jwtToken = jwtService.generateToken(user.getUsername(), authorities);
 
-        return ResponseEntity.ok(new AuthResponse(jwtToken));
+        Map<String, Object> response = new HashMap<>();
+        response.put("token", jwtToken);
+        response.put("user", Map.of(
+                "username", user.getUsername()
+        ));
+
+        return ResponseEntity.ok(response);
     }
+
 
     @PostMapping("/login/verify")
     public ResponseEntity<?> verifyTwoFactor(@RequestBody LoginDTO loginRequest) {
