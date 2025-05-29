@@ -35,6 +35,7 @@ const Profesor = () => {
         if (!profesorId) return;
         fetch(`/didactic/professor/${profesorId}`, { headers: { 'Authorization': `Bearer ${token}` } })
             .then(res => res.json())
+            .then(data => {
                 const courses = (data.courses || [])
                     .map(c => c.course)
                     .filter(c => c.archived !== 1);
