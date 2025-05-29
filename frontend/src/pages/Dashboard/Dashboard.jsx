@@ -1,54 +1,117 @@
-// src/pages/Dashboard/Dashboard.jsx
-import { useNavigate } from "react-router-dom";
-import InfoCard from '../../components/DashboardWidgets/InfoCard';
-import ActivitiesList from '../../components/DashboardWidgets/ActivitiesList';
-import CalendarCard from '../../components/DashboardWidgets/CalendarCard';
-import NewsFeed from '../../components/DashboardWidgets/NewsFeed';  // <— nou
-import './Dashboard.css';
+import React, { useEffect, useState } from "react";
+import "./Dashboard.css";
 
 function Dashboard() {
-    const navigate = useNavigate();
+    // 1. State pentru numele userului
+    const [username, setUsername] = useState("utilizator");
 
-    const stats = [
-        { icon: '💬', title: 'Anunțuri noi',     value: 3,               to: '/app/anunturi' },
-        { icon: '📚', title: 'Cursuri active',   value: 5,               to: '/app/cursuri'   },
-        { icon: '⭐', title: 'Ultima notă',      value: 8.5,             to: '/app/catalog'   },
-        { icon: '📅', title: 'Orar azi',         value: '9:00 Algoritmi fundamentali', to: '/app/orar' }
-    ];
+    // 2. Preia numele real din backend la mount
+    useEffect(() => {
+        // Ia tokenul JWT din localStorage (adaptează dacă îl salvezi altfel!)
+        const token = localStorage.getItem("token");
+        if (!token) return;
 
-    const activities = [
-        { title: "Andrei, unde se detali...", time: "Acum 2 ore" },
-        { title: "Notă adăugată la Proiect...", time: "Ieri" },
-        { title: "Mesaj nou de la Radu L.",     time: "Ieri" },
-        { title: "Atestat la programare.",      time: "12 Apr." }
-    ];
-
-    // date dummy pentru NewsFeed
-    const newsItems = [
-        { id: 1, text: "👨‍🏫 Profesorii au adăugat teme noi!" },
-        { id: 2, text: "📢 Atenție: Seminarul de baze de date sâmbătă." },
-        { id: 3, text: "🎉 S-a format un nou grup de studiu." }
-    ];
+        fetch("/profile", {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then(res => res.json())
+            .then(data => {
+                // În funcție de structura răspunsului
+                let nume = "";
+                if (data.firstName) nume += data.firstName + " ";
+                if (data.lastName) nume += data.lastName;
+                setUsername(nume.trim() || data.username || "utilizator");
+            })
+            .catch(() => setUsername("utilizator"));
+    }, []);
 
     return (
-        <div className="dashboard-container">
-            <h1 className="dashboard-title">Salut, Andrei!</h1>
-
-            <div className="dashboard-stats">
-                {stats.map((c, i) => (
-                    <div key={i} className="stat-card" onClick={() => navigate(c.to)}>
-                        <InfoCard icon={c.icon} title={c.title} value={c.value} />
-                    </div>
-                ))}
-            </div>
-
-            {/* === aici am modificat === */}
-            <div className="dashboard-widgets">
-                <div className="dashboard-widgets-left">
-                    <CalendarCard />
-                    <ActivitiesList activities={activities} />
+        <div className="dashboard-content">
+            {/* 3. Afișează numele real */}
+            <div className="dashboard-title">Salut, {username}!</div>
+            <div className="dashboard-cards-row">
+                <div className="dashboard-card">
+                    <span className="icon purple">💬</span>
+                    <span className="card-title">Anunțuri noi</span>
+                    <span className="card-value">3</span>
                 </div>
-                <NewsFeed items={newsItems} />
+                <div className="dashboard-card">
+                    <span className="icon blue">📚</span>
+                    <span className="card-title">Cursuri active</span>
+                    <span className="card-value">5</span>
+                </div>
+                <div className="dashboard-card">
+                    <span className="icon yellow">⭐</span>
+                    <span className="card-title">Ultima notă</span>
+                    <span className="card-value">8.5</span>
+                </div>
+                <div className="dashboard-card">
+                    <span className="icon pink">📅</span>
+                    <span className="card-title">Orar azi</span>
+                    <span className="card-value card-orar">
+                        <span className="ora">9:00</span>
+                        <span className="disciplina" style={{ marginLeft: 8 }}>
+                            Algoritmi fundamentali
+                        </span>
+                    </span>
+                </div>
+            </div>
+            <div className="dashboard-bottom-row">
+                {/* Calendar */}
+                <div className="glass-card dashboard-calendar">
+                    <div className="calendar-title">Mai 2025</div>
+                    <div className="calendar-table">
+                        <div className="calendar-days">
+                            <span>Du</span>
+                            <span>Lu</span>
+                            <span>Ma</span>
+                            <span>Mi</span>
+                            <span>Jo</span>
+                            <span>Vi</span>
+                            <span>Sâ</span>
+                        </div>
+                        <div className="calendar-dates">
+                            {[...Array(31)].map((_, i) => (
+                                <span key={i} className={i === 28 ? "calendar-today" : ""}>
+                                    {i + 1}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+                {/* Ultimele activități */}
+                <div className="glass-card dashboard-activities">
+                    <div className="activities-title">Ultimele activități</div>
+                    <ul>
+                        <li>
+                            Andrei, unde s... <span className="time">Acum 2 ore</span>
+                        </li>
+                        <li>
+                            Notă adăugată... <span className="time">Ieri</span>
+                        </li>
+                        <li>
+                            Mesaj nou de l... <span className="time">Ieri</span>
+                        </li>
+                        <li>
+                            Atestat la pro... <span className="time">12 Apr.</span>
+                        </li>
+                    </ul>
+                </div>
+                {/* News Feed */}
+                <div className="glass-card dashboard-news">
+                    <div className="news-title">News Feed</div>
+                    <ul>
+                        <li>
+                            <span className="news-dot green"></span>Profesorii au adăugat teme noi!
+                        </li>
+                        <li>
+                            <span className="news-dot red"></span>Atenție: Seminarul de baze de date sâmbătă.
+                        </li>
+                        <li>
+                            <span className="news-dot purple"></span>S-a format un nou grup de studiu.
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     );

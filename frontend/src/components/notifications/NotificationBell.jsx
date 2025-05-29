@@ -13,40 +13,51 @@ const NotificationBell = () => {
     useEffect(() => {
         const token = localStorage.getItem("token");
 
-        // 1. WebSocket connection
+        const fetchInitial = async () => {
+            try {
+                const res = await fetch("/notifications/unread", {
+                    headers: token ? { Authorization: `Bearer ${token}` } : {}
+                });
+
+                if (!res.ok) {
+                    console.warn("No notifications (status: " + res.status + ")");
+                    setNotifications([]);
+                    setUnreadCount(0);
+                    return;
+                }
+
+                const contentType = res.headers.get("content-type") || "";
+                if (!contentType.includes("application/json")) {
+                    console.warn("No JSON response for unread notifications");
+                    setNotifications([]);
+                    setUnreadCount(0);
+                    return;
+                }
+
+                const data = await res.json();
+                setNotifications(Array.isArray(data) ? data : []);
+                setUnreadCount(Array.isArray(data) ? data.length : 0);
+            } catch (err) {
+                console.warn("Could not load notifications:", err);
+                setNotifications([]);
+                setUnreadCount(0);
+            }
+        };
+
+        fetchInitial();
         const socket = new SockJS(`/ws?token=${token}`);
         const stompClient = new Client({
             webSocketFactory: () => socket,
             reconnectDelay: 5000,
             onConnect: () => {
-                console.log("✅ Connected to WebSocket");
-
                 stompClient.subscribe("/user/queue/notifications", (message) => {
                     const notif = JSON.parse(message.body);
-                    console.log("📩 WebSocket notification:", notif);
                     setNotifications((prev) => [notif, ...prev]);
                     setUnreadCount((prev) => prev + 1);
                 });
             },
         });
         stompClient.activate();
-
-        // 2. Initial fetch of unread notifications
-        fetch("/notifications/unread", {
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
-        })
-            .then(res => {
-                if (!res.ok) throw new Error("Failed to fetch notifications");
-                return res.json();
-            })
-            .then(data => {
-                console.log("📦 Initial unread notifications:", data);
-                setNotifications(data);
-                setUnreadCount(data.length);
-            })
-            .catch(err => console.error("❌ Notification fetch error:", err));
 
         return () => {
             stompClient.deactivate();
