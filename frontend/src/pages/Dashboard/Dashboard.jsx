@@ -8,6 +8,12 @@ import './Dashboard.css';
 
 function Dashboard() {
     const navigate = useNavigate();
+// Adaugă la începutul funcției Dashboard:
+const user = JSON.parse(localStorage.getItem("user"));
+const username = user?.username || "utilizator";
+
+
+
 
     const stats = [
         { icon: '💬', title: 'Anunțuri noi',     value: 3,               to: '/app/anunturi' },
@@ -32,7 +38,9 @@ function Dashboard() {
 
     return (
         <div className="dashboard-container">
-            <h1 className="dashboard-title">Salut, Andrei!</h1>
+             <h1 className="dashboard-title">Salut, {username}!</h1>
+
+
 
             <div className="dashboard-stats">
                 {stats.map((c, i) => (
@@ -48,7 +56,11 @@ function Dashboard() {
                     <CalendarCard />
                     <ActivitiesList activities={activities} />
                 </div>
-                <NewsFeed items={newsItems} />
+               <div style={{ transform: 'translateX(-40px)' }}>
+                 <NewsFeed items={newsItems} />
+               </div>
+
+
             </div>
         </div>
     );

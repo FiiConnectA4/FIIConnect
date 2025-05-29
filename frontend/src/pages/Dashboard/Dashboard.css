@@ -31,29 +31,28 @@
 
 /* ==== NOUA secțiune widgets ==== */
 .dashboard-widgets {
-    display: flex;
-    gap: 1.5rem;
-    flex-wrap: wrap;         /* wrap pe mobil */
-    align-items: flex-start; /* stretch vertical când e 2 coloane */
+  display: flex;
+  gap: 0.8rem;  /* ✅ Mai mic = News Feed mai aproape de calendar */
+  flex-wrap: wrap;
+  align-items: flex-start;
 }
+
 
 /* coloana stângă: calendar + activități */
 .dashboard-widgets-left {
-    flex: 2 1 300px;         /* crește de 2 ori mai mult decât news, minim 300px */
+    flex: 1 1 600px;   /* ⚠️ era 2 1 300px – acum ocupă mai puțin spațiu proporțional */
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
 }
 
-/* coloana dreaptă: newsfeed */
 .news-feed {
-    flex: 1 1 300px;         /* minim 300px, crește normal */
-    display: flex;
-    flex-direction: column;
-    /* dacă ai mult conținut, scroll doar în newsfeed */
-    max-height: calc(100vh - 300px);
-    overflow-y: auto;
+    flex: 0 0 280px;
+    max-width: 280px;
+    margin-left: -20px; /* ✅ aduce News Feed spre stânga */
 }
+
+
 
 /* ==== breakpoints ==== */
 /* pe ecrane mai înguste, wrap în 1 coloană */
@@ -68,4 +67,8 @@
     .dashboard-stats {
         grid-template-columns: 1fr;
     }
+}
+
+.news-feed-wrapper {
+  transform: translateX(-30px); /* Mută spre stânga */
 }
