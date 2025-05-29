@@ -1,43 +1,76 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom"; // 1. Import pentru redirect
 import "./Dashboard.css";
 
 function Dashboard() {
-    // 1. Preia obiectul user din localStorage și extrage proprietatea username
-    const storedUser = localStorage.getItem("user");
-    let username = "utilizator";
-    if (storedUser) {
-        try {
-            const userObj = JSON.parse(storedUser);
-            if (userObj.username) {
-                username = userObj.username;
-            }
-        } catch (err) {
-            console.error("Eroare la parsarea user din localStorage:", err);
-        }
-    }
+    // 1. State pentru numele userului
+    const [username, setUsername] = useState("utilizator");
+
+    // 2. Hook pentru redirect
+    const navigate = useNavigate();
+
+    // 3. Preia numele real din backend la mount
+    useEffect(() => {
+        // Ia tokenul JWT din localStorage (adaptează dacă îl salvezi altfel!)
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        fetch("/profile", {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then(res => res.json())
+            .then(data => {
+                // În funcție de structura răspunsului
+                let nume = "";
+                if (data.firstName) nume += data.firstName + " ";
+                if (data.lastName) nume += data.lastName;
+                setUsername(nume.trim() || data.username || "utilizator");
+            })
+            .catch(() => setUsername("utilizator"));
+    }, []);
 
     return (
         <div className="dashboard-content">
-            {/* 2. Afișează numele real */}
+            {/* Afișează numele real */}
             <div className="dashboard-title">Salut, {username}!</div>
 
             <div className="dashboard-cards-row">
-                <div className="dashboard-card">
+                <div
+                    className="dashboard-card"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => navigate("/app/anunturi")}
+                    title="Vezi anunțurile"
+                >
                     <span className="icon purple">💬</span>
                     <span className="card-title">Anunțuri noi</span>
                     <span className="card-value">3</span>
                 </div>
-                <div className="dashboard-card">
+                <div
+                    className="dashboard-card"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => navigate("/app/cursuri")}
+                    title="Vezi cursurile"
+                >
                     <span className="icon blue">📚</span>
                     <span className="card-title">Cursuri active</span>
                     <span className="card-value">5</span>
                 </div>
-                <div className="dashboard-card">
+                <div
+                    className="dashboard-card"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => navigate("/app/catalog")}
+                    title="Vezi catalogul"
+                >
                     <span className="icon yellow">⭐</span>
                     <span className="card-title">Ultima notă</span>
                     <span className="card-value">8.5</span>
                 </div>
-                <div className="dashboard-card">
+                <div
+                    className="dashboard-card"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => navigate("/app/orar")}
+                    title="Vezi orarul"
+                >
                     <span className="icon pink">📅</span>
                     <span className="card-title">Orar azi</span>
                     <span className="card-value card-orar">

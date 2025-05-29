@@ -23,7 +23,7 @@
 .dashboard-title {
     font-size: 2.5rem;
     font-weight: 800;
-    color: var(--main-text);
+    color: var(--main-text); /* aici rămâne default pentru light */
     margin-left: 0;
     margin-top: 32px;
     margin-bottom: 18px;
@@ -31,6 +31,8 @@
 }
 
 
+/* Pentru dark mode */
+body.dark .dashboard-title { color: #fff !important; }
 
 /* Grid pentru carduri info de sus */
 .dashboard-cards-row {
