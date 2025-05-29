@@ -64,7 +64,14 @@ public class PersonController {
                             .map(tag -> new TagDTO(tag.getId(), tag.getName(), tag.getType()))
                             .collect(Collectors.toSet());
 
-                    return new PersonRoleDTO(lastName, firstName, role, tags);
+                    // <-- pass u.getId() as first arg
+                    return new PersonRoleDTO(
+                            u.getId(),
+                            lastName,
+                            firstName,
+                            role,
+                            tags
+                    );
                 })
                 .collect(Collectors.toList());
 

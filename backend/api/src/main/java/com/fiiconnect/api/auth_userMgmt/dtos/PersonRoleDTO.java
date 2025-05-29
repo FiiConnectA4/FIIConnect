@@ -11,6 +11,7 @@ import java.util.Set;
 @Getter
 @Setter
 public class PersonRoleDTO {
+    private Long userId;
     private String lastName;
     private String firstName;
     private String role;
@@ -18,10 +19,11 @@ public class PersonRoleDTO {
 
     public PersonRoleDTO() {}
 
-    public PersonRoleDTO(String lastName,
+    public PersonRoleDTO(Long id, String lastName,
                          String firstName,
                          String role,
                          Set<TagDTO> tags) {
+        this.userId = id;
         this.lastName = lastName;
         this.firstName = firstName;
         this.role = role;
