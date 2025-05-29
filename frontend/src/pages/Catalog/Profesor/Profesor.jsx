@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import './Profesor.css';
 
 const Profesor = () => {
-    const [searchParams] = useSearchParams();
-    const profesorId = searchParams.get('profesorId') || 2;
+    const [profesorId, setProfesorId] = useState(null);
 
     const [cursuri, setCursuri] = useState([]);
     const [selectedCursId, setSelectedCursId] = useState(null);
@@ -17,21 +15,34 @@ const Profesor = () => {
     const [loading, setLoading] = useState(false);
 
     const token = localStorage.getItem('token');
-
-    // Load courses
+    useEffect(() => {
+        fetch('/person/me', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.role === "ROLE_PROFESOR" && data.professor?.id) {
+                    setProfesorId(data.professor.id);
+                } else {
+                    console.error("Nu s-a putut obține profesorId.");
+                }
+            })
+            .catch(err => console.error("Eroare la fetch /person/me:", err));
+    }, []);
     useEffect(() => {
         if (!profesorId) return;
         fetch(`/didactic/professor/${profesorId}`, { headers: { 'Authorization': `Bearer ${token}` } })
             .then(res => res.json())
-            .then(data => {
-                const courses = (data.courses || []).map(c => c.course).filter(c => c.archived !== 1);
+                const courses = (data.courses || [])
+                    .map(c => c.course)
+                    .filter(c => c.archived !== 1);
                 setCursuri(courses);
                 if (courses.length) setSelectedCursId(courses[0].id);
             })
             .catch(err => console.error(err));
     }, [profesorId, token]);
-
-    // Load groups when course changes
     useEffect(() => {
         if (!selectedCursId) return;
         setLoading(true);
