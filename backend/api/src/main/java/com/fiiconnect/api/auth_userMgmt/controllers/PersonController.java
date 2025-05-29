@@ -1,6 +1,7 @@
 package com.fiiconnect.api.auth_userMgmt.controllers;
 
 import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
+import com.fiiconnect.api.auth_userMgmt.dtos.PersonRoleDTO;
 import com.fiiconnect.api.auth_userMgmt.dtos.ProfessorDTO;
 import com.fiiconnect.api.auth_userMgmt.dtos.StudentDTO;
 import com.fiiconnect.api.auth_userMgmt.models.Role;
@@ -11,6 +12,7 @@ import com.fiiconnect.api.didactic.models.Student;
 import com.fiiconnect.api.didactic.repositories.ProfessorRepository;
 import com.fiiconnect.api.didactic.repositories.StudentRepository;
 import com.fiiconnect.api.social_secretary.DTO.TagDTO;
+import jakarta.annotation.security.RolesAllowed;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +37,39 @@ public class PersonController {
 
     @Autowired
     private ProfessorRepository professorRepository;
+
+    @GetMapping("/get-all")
+    @RolesAllowed("ROLE_ADMIN")
+    public ResponseEntity<List<PersonRoleDTO>> getAllPersons() {
+        List<User> allUsers = userRepository.findAll();
+
+        List<PersonRoleDTO> result = allUsers.stream()
+                .filter(u -> u.getStudent() != null || u.getProfessor() != null)
+                .map(u -> {
+                    String role, firstName, lastName;
+
+                    if (u.getStudent() != null) {
+                        Student s = u.getStudent();
+                        firstName = s.getFirstName();
+                        lastName  = s.getLastName();
+                        role      = "STUDENT";
+                    } else {
+                        Professor p = u.getProfessor();
+                        firstName = p.getFirstName();
+                        lastName  = p.getLastName();
+                        role      = "PROFESSOR";
+                    }
+
+                    Set<TagDTO> tags = u.getTags().stream()
+                            .map(tag -> new TagDTO(tag.getId(), tag.getName(), tag.getType()))
+                            .collect(Collectors.toSet());
+
+                    return new PersonRoleDTO(lastName, firstName, role, tags);
+                })
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(result);
+    }
 
     @GetMapping("/student/{userId}")
     public ResponseEntity<?> getStudentInfo(@PathVariable Long userId) {
