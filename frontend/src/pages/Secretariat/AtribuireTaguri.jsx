@@ -162,16 +162,15 @@ const fetchAllUsers = async () => {
   }, [selectedUser]);
 
   // Filter users based on search term
-  useEffect(() => {
+useEffect(() => {
   if (searchTerm.trim() === "") {
     setFilteredUsers(users);
   } else {
     const filtered = users.filter(user =>
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+      user.id.toString().includes(searchTerm.toLowerCase())
     );
     setFilteredUsers(filtered);
-    console.log("Filtered Users:", filtered); // Adaugă asta pentru debug
   }
 }, [searchTerm, users]);
 
@@ -325,7 +324,7 @@ const fetchAllUsers = async () => {
         <div className="search-section">
           <input
             type="text"
-            placeholder="Caută utilizator după nume sau email"
+            placeholder="Caută utilizator după nume sau id"
             value={searchTerm}
             onChange={handleSearchChange}
             className="search-input"
@@ -339,6 +338,7 @@ const fetchAllUsers = async () => {
       onClick={() => handleUserSelect(user)}
     >
       <div className="user-name">{user.name}</div>
+      <div className="user-email">{user.id}</div>
       <div className="user-role">{user.role}</div>
       
     </div>
