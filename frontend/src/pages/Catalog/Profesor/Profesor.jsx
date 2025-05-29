@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import './Profesor.css';
 
 const Profesor = () => {
-    const [searchParams] = useSearchParams();
-    const profesorId = searchParams.get('profesorId') || 2;
+    const [profesorId, setProfesorId] = useState(null);
 
     const [cursuri, setCursuri] = useState([]);
     const [selectedCursId, setSelectedCursId] = useState(null);
@@ -17,6 +15,25 @@ const Profesor = () => {
 
     const token = localStorage.getItem("token");
 
+    // ✅ Fetch /person/me to get profesorId
+    useEffect(() => {
+        fetch('/person/me', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.role === "ROLE_PROFESOR" && data.professor?.id) {
+                    setProfesorId(data.professor.id);
+                } else {
+                    console.error("Nu s-a putut obține profesorId.");
+                }
+            })
+            .catch(err => console.error("Eroare la fetch /person/me:", err));
+    }, []);
+
+    // ✅ Fetch courses by profesorId
     useEffect(() => {
         if (!profesorId) return;
 
@@ -29,13 +46,14 @@ const Profesor = () => {
             .then(data => {
                 const courses = (data.courses || [])
                     .map(c => c.course)
-                    .filter(c => c.archived !== 1); // ✅ filtrare
+                    .filter(c => c.archived !== 1);
                 setCursuri(courses);
                 if (courses.length > 0) setSelectedCursId(courses[0].id);
             })
             .catch(err => console.error("Eroare la încărcarea cursurilor:", err));
     }, [profesorId]);
 
+    // ✅ Fetch catalog for selected course
     useEffect(() => {
         if (!selectedCursId) return;
 
