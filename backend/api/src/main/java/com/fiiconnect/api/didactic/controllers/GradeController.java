@@ -1,5 +1,6 @@
 package com.fiiconnect.api.didactic.controllers;
 
+import com.fiiconnect.api.didactic.exceptions.GradeNotFoundException;
 import com.fiiconnect.api.didactic.helpers.SQLExceptionMessageParser;
 import com.fiiconnect.api.didactic.models.Grade;
 import com.fiiconnect.api.didactic.models.GradeCompositeKey;
@@ -9,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
+import java.time.Instant;
+import java.util.Date;
 
 @RestController
 public class GradeController {
@@ -31,6 +34,14 @@ public class GradeController {
     {
         GradeCompositeKey compKey = new GradeCompositeKey(idStud, idCourse);
         repository.deleteById(compKey);
+    }
+
+    @PutMapping("/didactic/grade")
+    public void modifyGrade(@RequestBody Grade newGrade)
+    {
+        if(!repository.existsById(newGrade.getId())) throw new GradeNotFoundException(newGrade.getId());
+        newGrade.setGradingDate(Date.from(Instant.now()));
+        repository.save(newGrade);
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)
