@@ -41,7 +41,7 @@ const Cursuri = () => {
         <div>
             {userType === "ROLE_STUDENT" && <Student />}
             {userType === "ROLE_ADMIN" && <Administrator />}
-            {userType === "ROLE_PROFESSOR" && <Profesor />}
+            {userType === "ROLE_PROFESOR" && <Profesor />}
             {!userType && <p>Loading user info...</p>}
         </div>
     );
