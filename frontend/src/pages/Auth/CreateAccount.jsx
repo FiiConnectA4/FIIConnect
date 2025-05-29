@@ -15,7 +15,7 @@ export default function CreateAccount() {
                 { headers: token ? { Authorization: `Bearer ${token}` } : {} }
             );
             setUnassigned(data);
-            setSelected([]); // curăță selecția când reîncarci lista
+            setSelected([]);
         } catch (err) {
             console.error("Error fetching unassigned:", err);
         }
@@ -87,7 +87,7 @@ export default function CreateAccount() {
     return (
         <div className="create-page">
             <div className="create-card">
-                <h1 className="create-title">Create Accounts in Bulk</h1>
+                <h1 className="create-title">Create Accounts</h1>
 
                 {msg && (
                     <div
@@ -104,7 +104,7 @@ export default function CreateAccount() {
                 </button>
 
                 <div className="unassigned-container">
-                    <h2>Conturi disponibile</h2>
+                    <h2>Users without accounts:</h2>
                     <table className="unassigned-table">
                         <thead>
                         <tr>

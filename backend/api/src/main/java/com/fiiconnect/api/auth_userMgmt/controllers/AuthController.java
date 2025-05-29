@@ -219,7 +219,7 @@ public class AuthController {
         userRepository.save(user);
         tokenRepository.delete(resetToken);
 
-        return ResponseEntity.ok("Password reset successfully");
+        return ResponseEntity.ok(   "Password reset successfully");
     }
 
     @PostMapping("/change-password")

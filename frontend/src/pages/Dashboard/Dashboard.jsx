@@ -1,34 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import "./Dashboard.css";
 
 function Dashboard() {
-    // 1. State pentru numele userului
-    const [username, setUsername] = useState("utilizator");
-
-    // 2. Preia numele real din backend la mount
-    useEffect(() => {
-        // Ia tokenul JWT din localStorage (adaptează dacă îl salvezi altfel!)
-        const token = localStorage.getItem("token");
-        if (!token) return;
-
-        fetch("/profile", {
-            headers: { Authorization: `Bearer ${token}` }
-        })
-            .then(res => res.json())
-            .then(data => {
-                // În funcție de structura răspunsului
-                let nume = "";
-                if (data.firstName) nume += data.firstName + " ";
-                if (data.lastName) nume += data.lastName;
-                setUsername(nume.trim() || data.username || "utilizator");
-            })
-            .catch(() => setUsername("utilizator"));
-    }, []);
+    // 1. Preia obiectul user din localStorage și extrage proprietatea username
+    const storedUser = localStorage.getItem("user");
+    let username = "utilizator";
+    if (storedUser) {
+        try {
+            const userObj = JSON.parse(storedUser);
+            if (userObj.username) {
+                username = userObj.username;
+            }
+        } catch (err) {
+            console.error("Eroare la parsarea user din localStorage:", err);
+        }
+    }
 
     return (
         <div className="dashboard-content">
-            {/* 3. Afișează numele real */}
+            {/* 2. Afișează numele real */}
             <div className="dashboard-title">Salut, {username}!</div>
+
             <div className="dashboard-cards-row">
                 <div className="dashboard-card">
                     <span className="icon purple">💬</span>
@@ -56,6 +48,7 @@ function Dashboard() {
                     </span>
                 </div>
             </div>
+
             <div className="dashboard-bottom-row">
                 {/* Calendar */}
                 <div className="glass-card dashboard-calendar">
@@ -72,13 +65,14 @@ function Dashboard() {
                         </div>
                         <div className="calendar-dates">
                             {[...Array(31)].map((_, i) => (
-                                <span key={i} className={i === 28 ? "calendar-today" : ""}>
+                                <span key={i} className={i === new Date().getDate() - 1 ? "calendar-today" : ""}>
                                     {i + 1}
                                 </span>
                             ))}
                         </div>
                     </div>
                 </div>
+
                 {/* Ultimele activități */}
                 <div className="glass-card dashboard-activities">
                     <div className="activities-title">Ultimele activități</div>
@@ -97,6 +91,7 @@ function Dashboard() {
                         </li>
                     </ul>
                 </div>
+
                 {/* News Feed */}
                 <div className="glass-card dashboard-news">
                     <div className="news-title">News Feed</div>
