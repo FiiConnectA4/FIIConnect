@@ -62,15 +62,21 @@
   display: flex;
   gap: 2rem;
   margin-top: 0.1rem;
+  width: 100%;
+  max-width: 1200px;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 /* Sectiunea de căutare */
 .search-section {
-  flex: 1;
+  flex: 0 0 33.3333%;
+  width: 33.3333%;
   background-color: #ffffff;
   padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
 }
 
 .search-input {
@@ -147,11 +153,13 @@
 
 /* Sectiunea de tag-uri */
 .tags-section {
-  flex: 1;
+  flex: 0 0 66.6667%;
+  width: 66.6667%;
   background-color: #ffffff;
   padding: 1.5rem;
   border-radius: 12px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
 }
 
 .tags-section h3 {
