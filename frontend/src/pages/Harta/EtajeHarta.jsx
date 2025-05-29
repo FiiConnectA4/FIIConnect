@@ -26,7 +26,7 @@ const EtajeHarta = () => {
             </select>
             {etaj && (
                 <div className="etaje-selected">
-                    Ai selectat: {etaj}
+                    Ai selectat: {etaj} 
                 </div>
             )}
         </div>

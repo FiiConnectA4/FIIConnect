@@ -148,7 +148,7 @@ public class OrarController {
             return new OrarDTO(
                     orar.getZi(),
                     oraStart + " - " + oraEnd,
-                    (orar.getDisciplina() != null ? orar.getDisciplina().getTitle() : "Disciplina necunoscută"),
+                    (orar.getDisciplina() != null ? orar.getDisciplina().getTitle() : "Rezervat"),
 
                     orar.getTip(),
                     orar.getGrupa(),
@@ -177,7 +177,7 @@ public class OrarController {
             return new OrarDTO(
                     orar.getZi(),
                     oraStart + " - " + oraEnd,
-                    (orar.getDisciplina() != null ? orar.getDisciplina().getTitle() : "Disciplina necunoscută"),
+                    (orar.getDisciplina() != null ? orar.getDisciplina().getTitle() : "Rezervat"),
                     orar.getTip(),
                     orar.getGrupa(),
                     orar.getSala(),

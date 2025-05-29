@@ -28,7 +28,7 @@ public class HartaController {
         this.repository = repository;
     }
 
-    // GET: afișează intervalele libere din sala și ziua date
+    
     @GetMapping("/sala-libera")
     public List<String> getIntervaleLibereSala(
             @RequestParam String sala,
@@ -36,7 +36,7 @@ public class HartaController {
 
         List<Orar> ocupate = repository.findBySalaAndZi(sala, zi);
 
-        // Presupunem programul 08:00-20:00
+        
         List<TimeSlot> toateIntervalele = TimeSlot.generateDefaultSlots();
 
         List<TimeSlot> ocupateSlots = ocupate.stream()
