@@ -1,10 +1,14 @@
 package com.fiiconnect.api.didactic.controllers;
 
+import com.fiiconnect.api.auth_userMgmt.controllers.PersonController;
+import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
+import com.fiiconnect.api.didactic.exceptions.UnauthorizedOperationException;
 import com.fiiconnect.api.didactic.helpers.SQLExceptionMessageParser;
 import com.fiiconnect.api.didactic.models.CourseMaterial;
 import com.fiiconnect.api.didactic.exceptions.CourseMaterialNotFoundException;
 import com.fiiconnect.api.didactic.repositories.CourseMaterialRepository;
 import com.fiiconnect.api.didactic.services.CourseMaterialService;
+import com.fiiconnect.api.didactic.services.CourseService;
 import com.fiiconnect.api.didactic.services.SftpService;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpHeaders;
@@ -29,34 +33,48 @@ public class CourseMaterialController {
     private final SQLExceptionMessageParser exceptionHelper;
     private final CourseMaterialRepository repository;
     private final CourseMaterialService service;
+    private final CourseService courseService;
     private final SftpService sftpService;
+    private final PersonController personController;
 
-    public CourseMaterialController(SQLExceptionMessageParser exceptionHelper, CourseMaterialRepository repository, CourseMaterialService service, SftpService sftpService) {
+    public CourseMaterialController(SQLExceptionMessageParser exceptionHelper, CourseMaterialRepository repository, CourseMaterialService service, CourseService courseService, SftpService sftpService, PersonController personController) {
         this.exceptionHelper = exceptionHelper;
         this.repository = repository;
         this.service = service;
+        this.courseService = courseService;
         this.sftpService = sftpService;
+        this.personController = personController;
     }
 
     @GetMapping("/didactic/course/material")
     public List<CourseMaterial> all()
     {
-        return repository.findAll();
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
+        return repository.findAll().stream().filter(m -> courseService.allowCourseViewing(person, m.getIdCourse())).toList();
     }
 
     @GetMapping("/didactic/course/material/{id}")
     public CourseMaterial one(@PathVariable Long id)
     {
-        return repository.findById(id).orElseThrow(() -> new CourseMaterialNotFoundException(id));
+        CourseMaterial material = repository.findById(id).orElseThrow(() -> new CourseMaterialNotFoundException(id));
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
+        if(!courseService.allowCourseViewing(person, material.getIdCourse()))
+            throw new UnauthorizedOperationException("Only students enrolled in a course or professors who teach the course may see its materials");
+
+        return material;
     }
 
-    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('PROFESOR')")
     @PostMapping("/didactic/course/material")
-    public ResponseEntity<?> uploadFile(@RequestParam Long idProf, @RequestParam Long idCourse, @RequestBody MultipartFile file) throws IOException
+    public ResponseEntity<?> uploadFile(@RequestParam Long idCourse, @RequestBody MultipartFile file) throws IOException
     {
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
+        if(!courseService.authorizeCourseOperation(person, idCourse, true))
+            throw new UnauthorizedOperationException("Only professors who teach the course may add materials");
+
         CourseMaterial material = new CourseMaterial();
         material.setIdCourse(idCourse);
-        material.setIdProfessor(idProf);
+        material.setIdProfessor(person.professor().id()); //professor is not null because of preauthorize
         //should get idProf from currently logged-in user, and check for permission
         material.setId(null);
         material.setUploadDate(Date.from(Instant.now()));
@@ -80,6 +98,10 @@ public class CourseMaterialController {
     @GetMapping("/didactic/course/material/{id}/file")
     public ResponseEntity<?> downloadFile(@PathVariable Long id) throws IOException {
         CourseMaterial material = repository.findById(id).orElseThrow(()->new CourseMaterialNotFoundException(id));
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
+        if(!courseService.allowCourseViewing(person, material.getIdCourse()))
+            throw new UnauthorizedOperationException("Only students enrolled in a course or professors who teach the course may see its materials");
+
         File file;
         file = sftpService.downloadFile("faculty_files/didactic/course-" + material.getIdCourse() + "/materials/" + material.getFilename(), "didactic/course-" + material.getIdCourse() + "/materials/" + material.getFilename());
 
@@ -96,6 +118,10 @@ public class CourseMaterialController {
     @DeleteMapping("/didactic/course/material/{id}")
     public void deleteMaterial(@PathVariable Long id) throws IOException {
         CourseMaterial material = repository.findById(id).orElseThrow(() -> new CourseMaterialNotFoundException(id));
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
+        if(!courseService.authorizeCourseOperation(person, material.getIdCourse(), true))
+            throw new UnauthorizedOperationException("Only professors who teach the course may add materials");
+
         service.deleteMaterial(material);
     }
 
@@ -103,6 +129,9 @@ public class CourseMaterialController {
     @PutMapping("/didactic/course/material/{id}")
     public void changeFilename(@PathVariable Long id, @RequestBody String newFilename) throws IOException {
         CourseMaterial material = repository.findById(id).orElseThrow(() -> new CourseMaterialNotFoundException(id));
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
+        if(!courseService.authorizeCourseOperation(person, material.getIdCourse(), true))
+            throw new UnauthorizedOperationException("Only professors who teach the course may add materials");
 
         String oldFilename = material.getFilename();
         material.setFilename(newFilename);
