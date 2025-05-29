@@ -13,6 +13,8 @@ public interface OrarRepository extends JpaRepository<com.fiiconnect.api.managem
     List<Orar> findByProfesor(Professor profesor); // select * from orar where profesor =
     List<Orar> findBySala(String sala);
     List<Orar> findByDisciplina(Course disciplina);
+    List<Orar> findBySalaAndZi(String sala, String zi);
+
     
 
     

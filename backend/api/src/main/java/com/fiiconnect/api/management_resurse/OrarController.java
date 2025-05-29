@@ -1,5 +1,7 @@
 package com.fiiconnect.api.management_resurse;
 
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -146,7 +148,8 @@ public List<OrarDTO> getOrarByProfesorId(@PathVariable Long id) {
             return new OrarDTO(
                 orar.getZi(),
                 oraStart + " - " + oraEnd,
-                orar.getDisciplina().getTitle(),
+               (orar.getDisciplina() != null ? orar.getDisciplina().getTitle() : "Disciplina necunoscută"),
+
                 orar.getTip(),
                 orar.getGrupa(),
                 orar.getSala(),
@@ -174,7 +177,7 @@ public List<OrarDTO> getOrarByProfesorId(@PathVariable Long id) {
             return new OrarDTO(
                 orar.getZi(),
                 oraStart + " - " + oraEnd,
-                orar.getDisciplina().getTitle(),
+                (orar.getDisciplina() != null ? orar.getDisciplina().getTitle() : "Disciplina necunoscută"),
                 orar.getTip(),
                 orar.getGrupa(),
                 orar.getSala(),
@@ -227,4 +230,5 @@ public List<OrarDTO> getOrarByProfesorId(@PathVariable Long id) {
 
         return ResponseEntity.ok(updatedOrar);
     }
+
 }
