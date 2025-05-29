@@ -14,4 +14,7 @@ public interface ChatRepository extends JpaRepository<Chat, Long> {
 
     @Query("SELECT c FROM Chat c WHERE c.channelId = :channelId ORDER BY c.timestamp ASC")
     List<Chat> findByChannelIdOrderByTimestampAsc(@Param("channelId") Long channelId);
+
+    @Query(value="SELECT count(ID) from CHAT where SENDER= : senderId", nativeQuery = true)
+    Integer getUserMessageCount(@Param("senderId") Long senderId);
 }
