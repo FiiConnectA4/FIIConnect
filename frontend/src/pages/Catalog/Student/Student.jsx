@@ -1,55 +1,111 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import './Student.css';
-import './../../Cursuri/Components/Buton'
-const Student = () => {
-    const mockCatalog = {
-        'Semestrul 1': [
-            { curs: 'Introducere Programare', profesor: 'Cristian Simionescu', credite: 6, nota: 9 },
-            { curs: 'Programare Avansata', profesor: 'Cristian Simionescu', credite: 5, nota: 10 },
-            { curs: 'Ingineria Programarii', profesor: 'Cristian Simionescu', credite: 4, nota: 10 },
-            { curs: 'Introducere Programare', profesor: 'Cristian Simionescu', credite: 6, nota: 7 },
-            { curs: 'Programare Avansata', profesor: 'Cristian Simionescu', credite: 5, nota: 8 }
-        ],
-        'Semestrul 2': [
-            { curs: 'Matematică Avansata', profesor: 'Ion Georgescu', credite: 4, nota: 10 },
-            { curs: 'Structuri de Date', profesor: 'Maria Popa', credite: 6, nota: 9 }
-        ]
-    };
 
-    const [semestre, setSemestre] = useState([]);
-    const [selectedSemestru, setSelectedSemestru] = useState('');
-    const [catalog, setCatalog] = useState([]);
-    const [punctajFinal, setPunctajFinal] = useState(0);
-    const [mediaFinala, setMediaFinala] = useState(0);
+const StudentCatalog = () => {
+    const [searchParams] = useSearchParams();
+    const studentId = Number(searchParams.get('studentId')) || 5;
 
+    /* -------------------------- STATE -------------------------- */
+    const [semestre, setSemestre]           = useState([]);
+    const [selectedSem, setSelectedSem]     = useState('');
+    const [bySem, setBySem]                 = useState({});
+    const [curCatalog, setCurCatalog]       = useState([]);
+    const [points, setPoints]               = useState(0);
+    const [avg, setAvg]                     = useState(0);
+    const [loading, setLoading]             = useState(true);
+
+    /* ------------------------ HELPERS -------------------------- */
+    const token   = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
+
+    /* 1️⃣  — cursurile la care poate accesa studentul ------------ */
     useEffect(() => {
-        const keys = Object.keys(mockCatalog);
-        setSemestre(keys);
-        setSelectedSemestru(keys[0]);
-    }, []);
+        (async () => {
+            try {
+                const res     = await fetch('/didactic/course', { headers });
+                const body    = await res.json();
+                const courses = body._embedded?.courseList ?? [];
 
+                if (!courses.length) { setLoading(false); return; }
+
+                /* 2️⃣  — grades + detalii în paralel pentru fiecare curs */
+                const detailPromises = courses.map(async c => {
+                    const [gradesRes, detailRes] = await Promise.all([
+                        fetch(`/didactic/course/${c.id}/grades`, { headers }),
+                        fetch(`/didactic/course/${c.id}`,        { headers })
+                    ]);
+
+                    const grades = await gradesRes.json();
+                    const det    = await detailRes.json();
+
+                    /* note doar pentru studentul curent */
+                    const myGrade = grades.find(g => Number(g.student?.id) === studentId);
+                    if (!myGrade) return null;
+
+                    /* profesorul este Teaching → professor */
+                    const teaching   = det.professors?.[0];            // primul element din array
+                    const profObj    = teaching?.professor;            // obiect Professor
+                    const profName   = profObj
+                        ? `${profObj.firstName} ${profObj.lastName}`
+                        : '—';
+
+                    return {
+                        semestru : `Semestrul ${det.semester}`,
+                        curs     : det.title,
+                        profesor : profName,
+                        credite  : det.credits,
+                        nota     : myGrade.value
+                    };
+                });
+
+                const raw = (await Promise.all(detailPromises)).filter(Boolean);
+
+                /* 3️⃣  — grupare pe semestre */
+                const grouped = raw.reduce((acc, row) => {
+                    (acc[row.semestru] = acc[row.semestru] || []).push(row);
+                    return acc;
+                }, {});
+                const semKeys = Object.keys(grouped);
+
+                setSemestre(semKeys);
+                setSelectedSem(semKeys[0] || '');
+                setBySem(grouped);
+                setLoading(false);
+            } catch (err) {
+                console.error('⛔  Eroare catalog student:', err);
+                setLoading(false);
+            }
+        })();
+    }, [studentId]);
+
+    /* 4️⃣  — când schimb semestrul recalculez punctaj & medie */
     useEffect(() => {
-        if (!selectedSemestru) return;
-        const cursuri = mockCatalog[selectedSemestru];
-        setCatalog(cursuri);
+        const cursuri = bySem[selectedSem] || [];
+        setCurCatalog(cursuri);
 
-        const totalPunctaj = cursuri.reduce((acc, c) => acc + c.credite * c.nota, 0);
-        const totalCredite = cursuri.reduce((acc, c) => acc + c.credite, 0);
-        setPunctajFinal(totalPunctaj);
-        setMediaFinala(totalCredite ? (totalPunctaj / totalCredite).toFixed(2) : 0);
-    }, [selectedSemestru]);
+        const p  = cursuri.reduce((s, c) => s + c.credite * c.nota, 0);
+        const cr = cursuri.reduce((s, c) => s + c.credite, 0);
+        setPoints(p);
+        setAvg(cr ? (p / cr).toFixed(2) : 0);
+    }, [selectedSem, bySem]);
 
-    const handleDownload = () => alert('Download Excel (mock)');
-    const handleCerereMutare = () => alert('Cerere mutare grupă activitate trimisă (mock)');
+    /* --------------------------- UI --------------------------- */
+    if (loading) return <div className="container-catalog">Se încarcă catalogul…</div>;
 
     return (
         <div className="container-catalog">
             <div className="catalog-header">
                 <h1>CATALOG</h1>
+
+                {/*  păstrăm containerul pentru styling  */}
                 <div className="select-controls">
-                    <select value={selectedSemestru} onChange={e => setSelectedSemestru(e.target.value)}>
-                        {semestre.map((sem, i) => (
-                            <option key={i} value={sem}>{sem}</option>
+                    <select
+                        value={selectedSem}
+                        onChange={e => setSelectedSem(e.target.value)}
+                    >
+                        {semestre.map(s => (
+                            <option key={s} value={s}>{s}</option>
                         ))}
                     </select>
                 </div>
@@ -58,42 +114,42 @@ const Student = () => {
             <div className="catalog-table">
                 <table>
                     <thead>
-                        <tr className='titlu'>
-                            <th>Curs</th>
-                            <th>Nume profesor</th>
-                            <th>Credite</th>
-                            <th>Nota</th>
-                            <th>Fișa Activitate</th>
-                        </tr>
+                    <tr className="titlu">
+                        <th>Curs</th><th>Profesor</th><th>Credite</th><th>Notă</th><th>Fișa</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        {catalog.map((curs, index) => (
-                            <tr key={index}>
-                                <td>{curs.curs}</td>
-                                <td>{curs.profesor}</td>
-                                <td>{curs.credite}</td>
-                                <td>{curs.nota}</td>
-                                <td>
-                                    <button className="admin-button" onClick={() => alert(`Deschide fișa pentru ${curs.curs}`)}>
-                                        <img src="/icons/edit-icon.png" alt="Fisa" className="icon-img" />
-                                    </button>
-                                </td>
-                            </tr>
-                        ))}
+                    {curCatalog.length === 0 && (
+                        <tr><td colSpan="5">Nu există note pentru semestrul selectat.</td></tr>
+                    )}
+                    {curCatalog.map((c, i) => (
+                        <tr key={i}>
+                            <td>{c.curs}</td>
+                            <td>{c.profesor}</td>
+                            <td>{c.credite}</td>
+                            <td>{c.nota}</td>
+                            <td>
+                                <button onClick={() => alert(`Fișa activitate: ${c.curs}`)}>
+                                    <img src="/icons/edit-icon.png" alt="Fișa" className="icon-img" />
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
                     </tbody>
                 </table>
             </div>
 
             <div className="catalog-footer">
-                <button className='buton-catalog' onClick={handleDownload}>Download Excel</button>
+                <button className="buton-catalog" onClick={() => alert('Download Excel (mock)')}>
+                    Descarcă Excel
+                </button>
                 <div className="stats">
-                    <p><strong>Punctaj final:</strong> {punctajFinal}</p>
-                    <p><strong>Media finală:</strong> {mediaFinala}</p>
+                    <p><strong>Punctaj final:</strong> {points}</p>
+                    <p><strong>Media finală:</strong> {avg}</p>
                 </div>
-                <button className='buton-catalog' onClick={handleCerereMutare}>Cerere mutare grupa activitate</button>
             </div>
         </div>
     );
 };
 
-export default Student;
+export default StudentCatalog;
