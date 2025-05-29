@@ -1,5 +1,7 @@
 package com.fiiconnect.api.management_resurse;
 
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,11 +16,11 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@RestController 
-@RequestMapping({"/orar", "/orar-secretariat"}) 
+@RestController
+@RequestMapping({"/orar", "/orar-secretariat"})
 public class OrarController {
 
-    @Autowired 
+    @Autowired
     private OrarRepository repository;
 
     @Autowired
@@ -30,42 +32,42 @@ public class OrarController {
 
     @GetMapping
     public List<com.fiiconnect.api.management_resurse.Orar> toateOrele() {
-        return repository.findAll(); 
+        return repository.findAll();
     }
 
     @GetMapping("/{id}")
     public com.fiiconnect.api.management_resurse.Orar getOrarById(@PathVariable Integer id) {
-        return repository.findById(id).orElseThrow(); 
+        return repository.findById(id).orElseThrow();
     }
 
     @PostMapping
     public com.fiiconnect.api.management_resurse.Orar adaugaOrar(@RequestBody com.fiiconnect.api.management_resurse.Orar orar) {
-        return repository.save(orar); 
+        return repository.save(orar);
     }
 
     @DeleteMapping("/{id}")
     public void stergeOrar(@PathVariable Integer id) {
-        repository.deleteById(id); 
+        repository.deleteById(id);
     }
 
     @GetMapping("/discipline")
     public List<Course> getDiscipline() {
         // Obține lista unică de discipline din baza de date
         return repository.findAll().stream()
-                .map(Orar::getDisciplina) 
-                .filter(disciplina -> disciplina != null) 
-                .distinct() 
-                .collect(Collectors.toList()); 
+                .map(Orar::getDisciplina)
+                .filter(disciplina -> disciplina != null)
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/profesori")
     public List<Professor> getProfesori() {
         // Obține lista unică de profesori din baza de date
         return repository.findAll().stream()
-                .map(Orar::getProfesor) 
-                .filter(profesor -> profesor != null) 
-                .distinct() 
-                .collect(Collectors.toList()); 
+                .map(Orar::getProfesor)
+                .filter(profesor -> profesor != null)
+                .distinct()
+                .collect(Collectors.toList());
     }
 
     @GetMapping({"/studenti/{an}/{grupa}", "/grupa/{an}/{grupa}"})
@@ -80,57 +82,57 @@ public class OrarController {
             }
         }
 
-        
+
         return orarList.stream().map(orar -> {
             LocalTime oraStartTime = LocalTime.parse(orar.getOraStart(), DateTimeFormatter.ofPattern("HH:mm"));
             LocalTime oraEndTime = LocalTime.parse(orar.getOraEnd(), DateTimeFormatter.ofPattern("HH:mm"));
             String oraStart = oraStartTime.format(DateTimeFormatter.ofPattern("HH:mm"));
             String oraEnd = oraEndTime.format(DateTimeFormatter.ofPattern("HH:mm"));
 
-           
+
             return new OrarDTO(
                     orar.getZi(),
-                    oraStart + " - " + oraEnd, 
+                    oraStart + " - " + oraEnd,
                     orar.getDisciplina().getTitle(),
                     orar.getTip(),
                     orar.getGrupa(),
                     orar.getSala(),
-                    orar.getProfesor().getFirstName() + " " + orar.getProfesor().getLastName(),  
-                    orar.getAn(),  
+                    orar.getProfesor().getFirstName() + " " + orar.getProfesor().getLastName(),
+                    orar.getAn(),
                     orar.getId()
             );
         }).collect(Collectors.toList());
     }
 
 
-    
 
-   @GetMapping("/profesor/{id}")
-public List<OrarDTO> getOrarByProfesorId(@PathVariable Long id) {
-    Professor profesor = professorRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Profesorul nu a fost găsit cu ID: " + id));
 
-    List<Orar> orarList = repository.findByProfesor(profesor);
+    @GetMapping("/profesor/{id}")
+    public List<OrarDTO> getOrarByProfesorId(@PathVariable Long id) {
+        Professor profesor = professorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Profesorul nu a fost găsit cu ID: " + id));
 
-    return orarList.stream().map(orar -> {
-        LocalTime oraStartTime = LocalTime.parse(orar.getOraStart(), DateTimeFormatter.ofPattern("HH:mm"));
-        LocalTime oraEndTime = LocalTime.parse(orar.getOraEnd(), DateTimeFormatter.ofPattern("HH:mm"));
-        String oraStart = oraStartTime.format(DateTimeFormatter.ofPattern("HH:mm"));
-        String oraEnd = oraEndTime.format(DateTimeFormatter.ofPattern("HH:mm"));
+        List<Orar> orarList = repository.findByProfesor(profesor);
 
-        return new OrarDTO(
-            orar.getZi(),
-            oraStart + " - " + oraEnd,
-            orar.getDisciplina().getTitle(),
-            orar.getTip(),
-            orar.getGrupa(),
-            orar.getSala(),
-            profesor.getFirstName() + " " + profesor.getLastName(),
-            orar.getAn(),
-            orar.getId()
-        );
-    }).collect(Collectors.toList());
-}
+        return orarList.stream().map(orar -> {
+            LocalTime oraStartTime = LocalTime.parse(orar.getOraStart(), DateTimeFormatter.ofPattern("HH:mm"));
+            LocalTime oraEndTime = LocalTime.parse(orar.getOraEnd(), DateTimeFormatter.ofPattern("HH:mm"));
+            String oraStart = oraStartTime.format(DateTimeFormatter.ofPattern("HH:mm"));
+            String oraEnd = oraEndTime.format(DateTimeFormatter.ofPattern("HH:mm"));
+
+            return new OrarDTO(
+                    orar.getZi(),
+                    oraStart + " - " + oraEnd,
+                    orar.getDisciplina().getTitle(),
+                    orar.getTip(),
+                    orar.getGrupa(),
+                    orar.getSala(),
+                    profesor.getFirstName() + " " + profesor.getLastName(),
+                    orar.getAn(),
+                    orar.getId()
+            );
+        }).collect(Collectors.toList());
+    }
 
 
     @GetMapping("/sala/{sala}")
@@ -144,26 +146,27 @@ public List<OrarDTO> getOrarByProfesorId(@PathVariable Long id) {
             String oraStart = oraStartTime.format(DateTimeFormatter.ofPattern("HH:mm"));
             String oraEnd = oraEndTime.format(DateTimeFormatter.ofPattern("HH:mm"));
             return new OrarDTO(
-                orar.getZi(),
-                oraStart + " - " + oraEnd,
-                orar.getDisciplina().getTitle(),
-                orar.getTip(),
-                orar.getGrupa(),
-                orar.getSala(),
-                orar.getProfesor().getFirstName() + " " + orar.getProfesor().getLastName(),
-                orar.getAn(),
-                orar.getId()
+                    orar.getZi(),
+                    oraStart + " - " + oraEnd,
+                    (orar.getDisciplina() != null ? orar.getDisciplina().getTitle() : "Disciplina necunoscută"),
+
+                    orar.getTip(),
+                    orar.getGrupa(),
+                    orar.getSala(),
+                    orar.getProfesor().getFirstName() + " " + orar.getProfesor().getLastName(),
+                    orar.getAn(),
+                    orar.getId()
             );
         }).collect(Collectors.toList());
     }
-    
+
     @GetMapping("/disciplina/{disciplinaNume}")
     public List<OrarDTO> getOrarByDisciplina(@PathVariable String disciplinaNume) {
         System.out.println("Căutăm orar pentru disciplina: " + disciplinaNume);
         Course disciplina = courseRepository.findAll().stream()
-            .filter(c -> c.getTitle().equalsIgnoreCase(disciplinaNume))
-            .findFirst()
-            .orElseThrow(() -> new RuntimeException("Disciplina nu a fost găsită: " + disciplinaNume));
+                .filter(c -> c.getTitle().equalsIgnoreCase(disciplinaNume))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Disciplina nu a fost găsită: " + disciplinaNume));
         List<Orar> orarList = repository.findByDisciplina(disciplina);
         System.out.println("Număr de orare găsite: " + orarList.size());
         return orarList.stream().map(orar -> {
@@ -172,15 +175,15 @@ public List<OrarDTO> getOrarByProfesorId(@PathVariable Long id) {
             String oraStart = oraStartTime.format(DateTimeFormatter.ofPattern("HH:mm"));
             String oraEnd = oraEndTime.format(DateTimeFormatter.ofPattern("HH:mm"));
             return new OrarDTO(
-                orar.getZi(),
-                oraStart + " - " + oraEnd,
-                orar.getDisciplina().getTitle(),
-                orar.getTip(),
-                orar.getGrupa(),
-                orar.getSala(),
-                orar.getProfesor().getFirstName() + " " + orar.getProfesor().getLastName(),
-                orar.getAn(),
-                orar.getId()
+                    orar.getZi(),
+                    oraStart + " - " + oraEnd,
+                    (orar.getDisciplina() != null ? orar.getDisciplina().getTitle() : "Disciplina necunoscută"),
+                    orar.getTip(),
+                    orar.getGrupa(),
+                    orar.getSala(),
+                    orar.getProfesor().getFirstName() + " " + orar.getProfesor().getLastName(),
+                    orar.getAn(),
+                    orar.getId()
             );
         }).collect(Collectors.toList());
     }
@@ -217,7 +220,7 @@ public List<OrarDTO> getOrarByProfesorId(@PathVariable Long id) {
         if (orar.getProfesor() != null) {
             existingOrar.setProfesor(orar.getProfesor());
         }
-        
+
         if (orar.getAn() != null) {
             existingOrar.setAn(orar.getAn());
         }
@@ -227,4 +230,5 @@ public List<OrarDTO> getOrarByProfesorId(@PathVariable Long id) {
 
         return ResponseEntity.ok(updatedOrar);
     }
+
 }

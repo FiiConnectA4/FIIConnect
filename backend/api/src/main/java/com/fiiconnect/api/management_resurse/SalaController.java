@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/sali")
+@RequestMapping({"/sali","/harta"})
 public class SalaController {
 
     @Autowired
@@ -31,62 +31,72 @@ public class SalaController {
 
     @DeleteMapping("/{id}")
     public void stergeSala(@PathVariable Long id) {
-        salaRepository.deleteById(id); 
+        salaRepository.deleteById(id);
     }
 
     @GetMapping("/nume/{nume}")
-    public List<SalaDTO> getSalabyNume(@PathVariable String nume) { 
-        // Obținem lista de orare din baza de date
-        List<Sala> SalaList = salaRepository.findByNume(nume);
+    public List<SalaDTO> getSalabyNume(@PathVariable String nume) {
+        List<Sala> salaList = salaRepository.findByNume(nume);
 
-        
-        return SalaList.stream().map(sala -> {
-           
-            return new SalaDTO(
+        return salaList.stream().map(sala -> new SalaDTO(
                 sala.getCapacitate(),
                 sala.getDotari(),
                 sala.getObservatii(),
-                sala.getLocatie()
-            );
-        }).collect(Collectors.toList());
+                sala.getLocatie(),
+                sala.getRezervat(),
+                sala.getProfesorRezervare(),
+                sala.getOraStartRezervare(),
+                sala.getOraEndRezervare()
+        )).collect(Collectors.toList());
+
     }
 
-@PutMapping("/{id}")
-public ResponseEntity<com.fiiconnect.api.management_resurse.Sala> updateSala(@PathVariable Long id, @RequestBody com.fiiconnect.api.management_resurse.Sala sala){
-    com.fiiconnect.api.management_resurse.Sala existingSala = salaRepository.findById(id)
+    @PutMapping("/{id}")
+    public ResponseEntity<Sala> updateSala(@PathVariable Long id, @RequestBody Sala sala) {
+        Sala existingSala = salaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Sala not found with id " + id));
-    
-    if (sala.getNume() != null) {
-        existingSala.setNume(sala.getNume());
+
+        // Actualizări standard
+        if (sala.getNume() != null) existingSala.setNume(sala.getNume());
+        if (sala.getCapacitate() != null) existingSala.setCapacitate(sala.getCapacitate());
+        if (sala.getTipSala() != null) existingSala.setTipSala(sala.getTipSala());
+        if (sala.getLocatie() != null) existingSala.setLocatie(sala.getLocatie());
+        if (sala.getImagineUrl() != null) existingSala.setImagineUrl(sala.getImagineUrl());
+        if (sala.getDotari() != null) existingSala.setDotari(sala.getDotari());
+        if (sala.getObservatii() != null) existingSala.setObservatii(sala.getObservatii());
+
+        // Actualizări pentru rezervare
+        if (sala.getRezervat() != null) existingSala.setRezervat(sala.getRezervat());
+        if (sala.getProfesorRezervare() != null) existingSala.setProfesorRezervare(sala.getProfesorRezervare());
+        if (sala.getOraStartRezervare() != null) existingSala.setOraStartRezervare(sala.getOraStartRezervare());
+        if (sala.getOraEndRezervare() != null) existingSala.setOraEndRezervare(sala.getOraEndRezervare());
+
+        Sala updatedSala = salaRepository.save(existingSala);
+        return ResponseEntity.ok(updatedSala);
     }
 
-    if (sala.getCapacitate() != null) {
-        existingSala.setCapacitate(sala.getCapacitate());
-    }
 
-    if (sala.getTipSala() != null) {
-        existingSala.setTipSala(sala.getTipSala());
-    }
+    @PutMapping("/{nume}")
+    public ResponseEntity<Sala> updateSala(@PathVariable String nume, @RequestBody Sala sala) {
+        List<Sala> salaList = salaRepository.findByNume(nume);
+        Sala existingSala = salaList.getFirst();
+        // Actualizări standard
+        if (sala.getNume() != null) existingSala.setNume(sala.getNume());
+        if (sala.getCapacitate() != null) existingSala.setCapacitate(sala.getCapacitate());
+        if (sala.getTipSala() != null) existingSala.setTipSala(sala.getTipSala());
+        if (sala.getLocatie() != null) existingSala.setLocatie(sala.getLocatie());
+        if (sala.getImagineUrl() != null) existingSala.setImagineUrl(sala.getImagineUrl());
+        if (sala.getDotari() != null) existingSala.setDotari(sala.getDotari());
+        if (sala.getObservatii() != null) existingSala.setObservatii(sala.getObservatii());
 
-    if (sala.getLocatie() != null) {
-        existingSala.setLocatie(sala.getLocatie());
-    }
-    
-    if (sala.getImagineUrl() != null) {
-        existingSala.setImagineUrl(sala.getImagineUrl());
-    }
+        // Actualizări pentru rezervare
+        if (sala.getRezervat() != null) existingSala.setRezervat(sala.getRezervat());
+        if (sala.getProfesorRezervare() != null) existingSala.setProfesorRezervare(sala.getProfesorRezervare());
+        if (sala.getOraStartRezervare() != null) existingSala.setOraStartRezervare(sala.getOraStartRezervare());
+        if (sala.getOraEndRezervare() != null) existingSala.setOraEndRezervare(sala.getOraEndRezervare());
 
-    if (sala.getDotari() != null) {
-        existingSala.setDotari(sala.getDotari());
+        Sala updatedSala = salaRepository.save(existingSala);
+        return ResponseEntity.ok(updatedSala);
     }
-
-    if (sala.getObservatii() != null) {
-        existingSala.setObservatii(sala.getObservatii());
-    }
-
-    com.fiiconnect.api.management_resurse.Sala updatedSala = salaRepository.save(existingSala);
-    return ResponseEntity.ok(updatedSala);
-
-}
 
 }

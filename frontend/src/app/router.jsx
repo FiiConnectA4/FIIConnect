@@ -3,10 +3,10 @@ import StudentLayout from "../layouts/StudentLayout";
 
 import Dashboard from "../pages/Dashboard/Dashboard";
 import Anunturi from "../pages/Social/Page/Anunturi";
-import Harta from "../pages/Harta";
+import EtajeHarta from "../pages/Harta/EtajeHarta";
 import Cursuri from "../pages/Cursuri/Cursuri";
 import Catalog from "../pages/Catalog/Catalog";
-import OrarToti from "../pages/Orar/OrarToti"; 
+import OrarToti from "../pages/Orar/OrarToti";
 import Secretariat from "../pages/Secretariat/Secretariat";
 import SecretariatToti from "../pages/Secretariat/SecretariatToti";
 import CerereDecontari from "../pages/Secretariat/CerereDecontari"; // ✅ Import corect
@@ -14,6 +14,9 @@ import CerereAdeverinte from "../pages/Secretariat/CerereAdeverinte"; // ✅ Imp
 import CerereBursaSociala from "../pages/Secretariat/CerereBursaSociala"; // ✅ Import corect
 import CerereCazSocial from "../pages/Secretariat/CerereCazSocial"; // ✅ Import corect
 import IstoricCereri from "../pages/Secretariat/IstoricCereri"; // ✅ Import corect
+import Harta from "../pages/Harta/Harta";
+import HartaFullScreen from "../pages/Harta/HartaFullScreen";
+
 
 import SecretariatCerereAdeverinte from "../pages/Secretariat/SecretariatCerereAdeverinte"; // ✅ Import corect
 import SecretariatBursaSociala from "../pages/Secretariat/SecretariatBursaSociala"; // ✅ Import corect
@@ -65,6 +68,7 @@ const AppRoutes = () => {
                 <Route path="dashboard" element={<Dashboard />} />
                 <Route path="anunturi" element={<Anunturi />} />
                 <Route path="harta" element={<Harta />} />
+                <Route path="etaje-harta" element={<EtajeHarta />} />
                 <Route path="cursuri" element={<Cursuri />} />
                 <Route path="catalog" element={<Catalog />} />
 
@@ -91,24 +95,29 @@ const AppRoutes = () => {
                 <Route path="/app/orar-secretariat/discipline" element={<OrarSecretariat />} />
                 <Route path="/app/orar-secretariat/discipline/:disciplina" element={<OrarSecretariat />} />
 
+                <Route path="/app/harta" element={<Harta />} />
+                <Route path="/app/harta/fullscreen" element={<HartaFullScreen />} />
+
+
+
                 <Route path="secretariat" element={<Secretariat />}>
-                          <Route index element={<SecretariatToti />} />
-                          <Route path="cerere-decontare" element={<CerereDecontari />} />
-                          <Route path="cerere-adeverinte" element={<SecretariatCerereAdeverinte />} />
-                          <Route path="cerere-bursa-sociala" element={<SecretariatBursaSociala />} />
-                          <Route path="cerere-caz-social" element={<SecretariatCazSocial />} />
+                    <Route index element={<SecretariatToti />} />
+                    <Route path="cerere-decontare" element={<CerereDecontari />} />
+                    <Route path="cerere-adeverinte" element={<SecretariatCerereAdeverinte />} />
+                    <Route path="cerere-bursa-sociala" element={<SecretariatBursaSociala />} />
+                    <Route path="cerere-caz-social" element={<SecretariatCazSocial />} />
 
-                        </Route>
-                        <Route path="student" element={<Secretariat />}>
-                          <Route index element={<SecretariatToti />} />
-                          <Route path="cerere-decontare" element={<CerereDecontari />} />
-                          <Route path="cerere-adeverinte" element={<CerereAdeverinte />} />
-                          <Route path="cerere-bursa-sociala" element={<CerereBursaSociala />} />
-                          <Route path="cerere-caz-social" element={<CerereCazSocial />} />
-                          <Route path="istoric-cereri" element={<IstoricCereri />} />
-                        </Route>
+                </Route>
+                <Route path="student" element={<Secretariat />}>
+                    <Route index element={<SecretariatToti />} />
+                    <Route path="cerere-decontare" element={<CerereDecontari />} />
+                    <Route path="cerere-adeverinte" element={<CerereAdeverinte />} />
+                    <Route path="cerere-bursa-sociala" element={<CerereBursaSociala />} />
+                    <Route path="cerere-caz-social" element={<CerereCazSocial />} />
+                    <Route path="istoric-cereri" element={<IstoricCereri />} />
+                </Route>
 
-                        
+
                 <Route path="chat" element={<Chat />} />
                 <Route path="profile" element={<Profil />} />
                 <Route path="/app/reset-password" element={<ChangePassword />} />
