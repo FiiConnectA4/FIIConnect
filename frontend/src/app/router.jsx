@@ -17,6 +17,7 @@ import CerereCazSocial from "../pages/Secretariat/CerereCazSocial";
 import IstoricCereri from "../pages/Secretariat/IstoricCereri";
 import SecretariatCerereAdeverinte from "../pages/Secretariat/SecretariatCerereAdeverinte";
 import SecretariatBursaSociala from "../pages/Secretariat/SecretariatBursaSociala";
+import AtribuireTaguri from "../pages/Secretariat/AtribuireTaguri";
 import SecretariatCazSocial from "../pages/Secretariat/SecretariatCazSocial";
 import Chat from "../pages/Social/Page/Chat";
 import SetupProfile from "../pages/Dashboard/SetupProfile";
@@ -104,6 +105,7 @@ const AppRoutes = () => {
           <Route path="cerere-adeverinte" element={<SecretariatCerereAdeverinte />} />
           <Route path="cerere-bursa-sociala" element={<SecretariatBursaSociala />} />
           <Route path="cerere-caz-social" element={<SecretariatCazSocial />} />
+          <Route path="atribuire-taguri" element={<AtribuireTaguri />} />
         </Route>
 
                 <Route path="/app/orar-secretariat" element={<OrarSecretariat />} />
