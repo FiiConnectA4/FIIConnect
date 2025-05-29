@@ -11,24 +11,24 @@ const Administrator = () => {
     const [catalog, setCatalog] = useState([]);
     const [loading, setLoading] = useState(false);
 
+    const [editingIndex, setEditingIndex] = useState(null);
+    const [editedGrade, setEditedGrade] = useState('');
+
     const token = localStorage.getItem('token');
 
-    // Load courses
     useEffect(() => {
         fetch('/didactic/course', {
             headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => res.json())
             .then(data => {
-                const courseList = (data._embedded?.courseList || []).filter(c => c.archived !== 1);
-                console.log('Cursuri disponibile:', courseList);
+                const courseList = data._embedded?.courseList || [];
                 setCursuri(courseList);
                 if (courseList.length) setSelectedCursId(courseList[0].id);
             })
             .catch(err => console.error('Eroare la încărcarea cursurilor:', err));
     }, [token]);
 
-    // Load groups when course changes
     useEffect(() => {
         if (!selectedCursId) return;
         setLoading(true);
@@ -37,9 +37,7 @@ const Administrator = () => {
         })
             .then(res => res.json())
             .then(enrollments => {
-                console.log('Enrollments:', enrollments);
                 const allGroups = [...new Set(enrollments.map(e => e.student.facultyGroup))];
-                console.log('Grupe extrase:', allGroups);
                 setGrupe(allGroups);
                 setSelectedGrupa(allGroups[0] || '');
                 setLoading(false);
@@ -50,7 +48,6 @@ const Administrator = () => {
             });
     }, [selectedCursId, token]);
 
-    // Load grades when group or course changes
     useEffect(() => {
         if (!selectedCursId || !selectedGrupa) return;
         setLoading(true);
@@ -59,17 +56,13 @@ const Administrator = () => {
         })
             .then(res => res.json())
             .then(data => {
-                console.log('Toate notele:', data);
                 const filtered = data
-                    .filter(entry => {
-                        console.log(`Grupa student: ${entry.student.facultyGroup}, Grupa selectată: ${selectedGrupa}`);
-                        return entry.student.facultyGroup === selectedGrupa;
-                    })
+                    .filter(entry => entry.student.facultyGroup === selectedGrupa)
                     .map(entry => ({
                         name: `${entry.student.firstName} ${entry.student.lastName}`,
-                        grade: entry.value
+                        grade: entry.value,
+                        studentId: entry.student.id
                     }));
-                console.log('Note filtrate pentru grupa selectată:', filtered);
                 setCatalog(filtered);
                 setLoading(false);
             })
@@ -79,15 +72,75 @@ const Administrator = () => {
             });
     }, [selectedCursId, selectedGrupa, token]);
 
-    const handleUploadExcel = () => alert('Upload Excel (mock)');
-    const handleDownloadExcel = () => alert('Download Excel (mock)');
+    const handleSaveGrade = (index) => {
+        const gradeEntry = catalog[index];
+        if (!gradeEntry) return;
+
+        const studentId = gradeEntry.studentId;
+        const courseId = selectedCursId;
+
+        const parsedGrade = parseFloat(editedGrade);
+        if (isNaN(parsedGrade) || parsedGrade < 1 || parsedGrade > 10) {
+            alert("Introduceți o notă validă între 1 și 10.");
+            return;
+        }
+
+        console.log('Șterg nota existentă pentru:', studentId, courseId);
+
+        // Șterge nota existentă
+        fetch(`/didactic/grade?idStud=${studentId}&idCourse=${courseId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(res => {
+                if (!res.ok) {
+                    return res.text().then(text => {
+                        console.error('Eroare DELETE:', text);
+                        throw new Error(`Eroare la ștergere: ${text}`);
+                    });
+                }
+
+                // Adaugă nota nouă
+                return fetch('/didactic/grade', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        value: parsedGrade,
+                        student: { id: studentId },
+                        course: { id: courseId }
+                    })
+                });
+            })
+            .then(res => {
+                if (!res.ok) {
+                    return res.text().then(text => {
+                        console.error('Eroare POST:', text);
+                        throw new Error(`Eroare la adăugare: ${text}`);
+                    });
+                }
+
+                // Update local catalog
+                const updatedCatalog = [...catalog];
+                updatedCatalog[index].grade = parsedGrade;
+                setCatalog(updatedCatalog);
+                setEditingIndex(null);
+            })
+            .catch(err => {
+                console.error("Eroare la actualizarea notei:", err);
+                alert("A apărut o eroare la salvarea noii note. Verificați consola pentru detalii.");
+            });
+    };
 
     return (
         <div className="container-catalog">
             <div className="catalog-header">
                 <h1>CATALOG</h1>
                 <div className="select-controls">
-                    {/* Prima select: grupe */}
                     <select
                         value={selectedGrupa}
                         onChange={e => setSelectedGrupa(e.target.value)}
@@ -97,7 +150,6 @@ const Administrator = () => {
                         ))}
                     </select>
 
-                    {/* A doua select: cursuri */}
                     <select
                         value={selectedCursId || ''}
                         onChange={e => setSelectedCursId(parseInt(e.target.value, 10))}
@@ -131,21 +183,34 @@ const Administrator = () => {
                                     <td><input type="checkbox" /></td>
                                     <td>{item.name}</td>
                                     <td>{cursuri.find(c => c.id === selectedCursId)?.title || ''}</td>
-                                    <td>{item.grade}</td>
                                     <td>
-                                        <button className="admin-button" onClick={() => alert(`Deschide fișa pentru ${item.name}`)}>
-                                            <img src="/icons/edit-icon.png" alt="Admin Note" className="icon-img" />
-                                        </button>
+                                        {editingIndex === idx ? (
+                                            <input
+                                                type="number"
+                                                value={editedGrade}
+                                                onChange={(e) => setEditedGrade(e.target.value)}
+                                            />
+                                        ) : (
+                                            item.grade
+                                        )}
+                                    </td>
+                                    <td>
+                                        {editingIndex === idx ? (
+                                            <button onClick={() => handleSaveGrade(idx)}>💾</button>
+                                        ) : (
+                                            <button onClick={() => {
+                                                setEditingIndex(idx);
+                                                setEditedGrade(item.grade);
+                                            }}>
+                                                ✏️
+                                            </button>
+                                        )}
                                     </td>
                                 </tr>
                             ))
                         )}
                     </tbody>
                 </table>
-            </div>
-            <div className="catalog-buttons">
-                <button onClick={handleUploadExcel}>Upload Excel</button>
-                <button onClick={handleDownloadExcel}>Download Excel</button>
             </div>
         </div>
     );
