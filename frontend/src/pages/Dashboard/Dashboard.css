@@ -34,7 +34,6 @@
 /* Pentru dark mode */
 body.dark .dashboard-title { color: #fff !important; }
 
-
 /* Grid pentru carduri info de sus */
 .dashboard-cards-row {
     display: grid;

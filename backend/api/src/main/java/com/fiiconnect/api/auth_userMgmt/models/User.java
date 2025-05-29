@@ -35,6 +35,7 @@ public class User {
     @Column(name = "two_factor_secret")
     private String twoFactorSecret;
 
+    @Column(name="is_active", columnDefinition = "NUMBER(1)")
     private boolean isActive = false;
 
     public boolean isActive() {
