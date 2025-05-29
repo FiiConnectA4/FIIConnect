@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // 1. Import pentru redirect
+import { useNavigate } from "react-router-dom"; // Import pentru redirect
 import "./Dashboard.css";
 
 function Dashboard() {
@@ -9,8 +9,21 @@ function Dashboard() {
     // 2. Hook pentru redirect
     const navigate = useNavigate();
 
-    // 3. Preia numele real din backend la mount
+    // 3. Preia numele real din localStorage și din backend la mount
     useEffect(() => {
+        // Preia obiectul user din localStorage
+        const storedUser = localStorage.getItem("user");
+        if (storedUser) {
+            try {
+                const userObj = JSON.parse(storedUser);
+                if (userObj.username) {
+                    setUsername(userObj.username);
+                }
+            } catch (err) {
+                console.error("Eroare la parsarea user din localStorage:", err);
+            }
+        }
+
         // Ia tokenul JWT din localStorage (adaptează dacă îl salvezi altfel!)
         const token = localStorage.getItem("token");
         if (!token) return;
@@ -20,13 +33,13 @@ function Dashboard() {
         })
             .then(res => res.json())
             .then(data => {
-                // În funcție de structura răspunsului
                 let nume = "";
                 if (data.firstName) nume += data.firstName + " ";
                 if (data.lastName) nume += data.lastName;
-                setUsername(nume.trim() || data.username || "utilizator");
+                const realName = nume.trim() || data.username;
+                if (realName) setUsername(realName);
             })
-            .catch(() => setUsername("utilizator"));
+            .catch(() => {});
     }, []);
 
     return (
@@ -98,7 +111,10 @@ function Dashboard() {
                         </div>
                         <div className="calendar-dates">
                             {[...Array(31)].map((_, i) => (
-                                <span key={i} className={i === new Date().getDate() - 1 ? "calendar-today" : ""}>
+                                <span
+                                    key={i}
+                                    className={i === new Date().getDate() - 1 ? "calendar-today" : ""}
+                                >
                                     {i + 1}
                                 </span>
                             ))}

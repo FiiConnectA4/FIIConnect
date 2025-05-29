@@ -31,9 +31,10 @@
 }
 
 
-/* Pentru dark mode */
-body.dark .dashboard-title { color: #fff !important; }
-
+[data-theme="dark"] .dashboard-title {
+    color: #fff;
+;
+}
 /* Grid pentru carduri info de sus */
 .dashboard-cards-row {
     display: grid;
