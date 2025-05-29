@@ -2,12 +2,10 @@ import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import "./SecretariatToti.css";
 
-
 const SecretariatToti = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  
   const isStudentView = location.pathname.startsWith("/app/student");
 
   const handleSwitch = () => {
@@ -54,16 +52,26 @@ const SecretariatToti = () => {
           className="secretariat-button"
         >
           📂 Cerere Caz Social
-         </Link>
+        </Link>
 
-  {isStudentView && (
-    <Link
-      to={`/app/student/istoric-cereri`}
-      className="secretariat-button"
-    >
-      📄 Istoric Cereri
-    </Link>
-  )}
+        {/* New button for tag assignment - only visible in secretariat view */}
+        {!isStudentView && (
+          <Link
+            to={`/app/secretariat/atribuire-taguri`}
+            className="secretariat-button"
+          >
+            🏷️ Atribuire Tag-uri
+          </Link>
+        )}
+
+        {isStudentView && (
+          <Link
+            to={`/app/student/istoric-cereri`}
+            className="secretariat-button"
+          >
+            📄 Istoric Cereri
+          </Link>
+        )}
       </div>
     </div>
   );

@@ -1,26 +1,17 @@
-package com.fiiconnect.api.social_secretary.classes;
-
-import com.fiiconnect.api.auth_userMgmt.models.User;
-import jakarta.persistence.*;
+package com.fiiconnect.api.social_secretary.DTO;
 
 import java.util.Objects;
 
-@Entity
-@Table(name = "ACHIEVEMENT")
-public class Achievement {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "achievement_seq")
-    @SequenceGenerator(name = "achievement_seq", sequenceName = "achievement_seq", allocationSize = 1)
+public class AchievementDTO {
     private Long id;
     private String name;
     private String description;
 
-    // Constructors, getters, setters
+    public AchievementDTO() {
+    }
 
-    public Achievement() {}
-
-    public Achievement(String name, String description) {
+    public AchievementDTO(Long id, String name, String description) {
+        this.id = id;
         this.name = name;
         this.description = description;
     }
@@ -51,11 +42,13 @@ public class Achievement {
 
     @Override
     public boolean equals(Object o) {
-        if (!(o instanceof Achievement that)) return false;
-        return Objects.equals(id, that.id)
-                && Objects.equals(name, that.name)
-                && Objects.equals(description, that.description);
+        if (!(o instanceof AchievementDTO that)) return false;
+        return Objects.equals(id, that.id) &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(description, that.description);
     }
+
+
 
     @Override
     public int hashCode() {
@@ -64,7 +57,7 @@ public class Achievement {
 
     @Override
     public String toString() {
-        return "Achievement{" +
+        return "AchievementDTO{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +

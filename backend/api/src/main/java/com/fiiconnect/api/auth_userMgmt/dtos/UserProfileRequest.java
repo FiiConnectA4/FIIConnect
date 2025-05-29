@@ -2,6 +2,7 @@ package com.fiiconnect.api.auth_userMgmt.dtos;
 
 import com.fiiconnect.api.auth_userMgmt.models.User;
 import com.fiiconnect.api.auth_userMgmt.models.UserProfile;
+import com.fiiconnect.api.social_secretary.classes.Achievement;
 import lombok.Getter;
 
 import java.util.List;
@@ -18,6 +19,7 @@ public class UserProfileRequest {
     private final String currentYear;
     private final double rating;
     private final List<String> expertise;
+    //ar trebui sa fie list de achievements
     private final List<String> achievements;
     private final String profilePictureUrl;
 
