@@ -13,13 +13,12 @@ const Administrator = () => {
 
     const [editingIndex, setEditingIndex] = useState(null);
     const [editedGrade, setEditedGrade] = useState('');
+    const [prevGrade, setPrevGrade] = useState('');
 
     const token = localStorage.getItem('token');
 
     useEffect(() => {
-        fetch('/didactic/course', {
-            headers: { 'Authorization': `Bearer ${token}` }
-        })
+        fetch('/didactic/course', { headers: { 'Authorization': `Bearer ${token}` } })
             .then(res => res.json())
             .then(data => {
                 const courseList = data._embedded?.courseList || [];
@@ -32,44 +31,60 @@ const Administrator = () => {
     useEffect(() => {
         if (!selectedCursId) return;
         setLoading(true);
-        fetch(`/didactic/course/${selectedCursId}/enrolled`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        })
-            .then(res => res.json())
-            .then(enrollments => {
+        Promise.all([
+            fetch(`/didactic/course/${selectedCursId}/enrolled`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
+            fetch(`/didactic/course/${selectedCursId}/grades`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json())
+        ])
+            .then(([enrollments, grades]) => {
                 const allGroups = [...new Set(enrollments.map(e => e.student.facultyGroup))];
                 setGrupe(allGroups);
-                setSelectedGrupa(allGroups[0] || '');
+                const defaultGroup = allGroups[0] || '';
+                setSelectedGrupa(defaultGroup);
+
+                const groupStudents = enrollments
+                    .filter(e => e.student.facultyGroup === defaultGroup)
+                    .map(e => e.student);
+
+                const initialCatalog = groupStudents.map(student => {
+                    const gradeEntry = grades.find(g => g.student.id === student.id);
+                    return {
+                        name: `${student.firstName} ${student.lastName}`,
+                        grade: gradeEntry ? gradeEntry.value : '',
+                        studentId: student.id
+                    };
+                });
+
+                setCatalog(initialCatalog);
                 setLoading(false);
             })
-            .catch(err => {
-                console.error('Eroare la încărcarea grupelor:', err);
-                setLoading(false);
-            });
+            .catch(err => { console.error('Eroare la încărcarea datelor:', err); setLoading(false); });
     }, [selectedCursId, token]);
 
     useEffect(() => {
         if (!selectedCursId || !selectedGrupa) return;
         setLoading(true);
-        fetch(`/didactic/course/${selectedCursId}/grades`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        })
-            .then(res => res.json())
-            .then(data => {
-                const filtered = data
-                    .filter(entry => entry.student.facultyGroup === selectedGrupa)
-                    .map(entry => ({
-                        name: `${entry.student.firstName} ${entry.student.lastName}`,
-                        grade: entry.value,
-                        studentId: entry.student.id
-                    }));
-                setCatalog(filtered);
+        Promise.all([
+            fetch(`/didactic/course/${selectedCursId}/enrolled`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
+            fetch(`/didactic/course/${selectedCursId}/grades`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json())
+        ])
+            .then(([enrollments, grades]) => {
+                const groupStudents = enrollments
+                    .filter(e => e.student.facultyGroup === selectedGrupa)
+                    .map(e => e.student);
+
+                const filteredCatalog = groupStudents.map(student => {
+                    const gradeEntry = grades.find(g => g.student.id === student.id);
+                    return {
+                        name: `${student.firstName} ${student.lastName}`,
+                        grade: gradeEntry ? gradeEntry.value : '',
+                        studentId: student.id
+                    };
+                });
+
+                setCatalog(filteredCatalog);
                 setLoading(false);
             })
-            .catch(err => {
-                console.error('Eroare la fetch:', err);
-                setLoading(false);
-            });
+            .catch(err => { console.error('Eroare la fetch:', err); setLoading(false); });
     }, [selectedCursId, selectedGrupa, token]);
 
     const handleSaveGrade = (index) => {
@@ -85,55 +100,34 @@ const Administrator = () => {
             return;
         }
 
-        console.log('Șterg nota existentă pentru:', studentId, courseId);
-
-        // Șterge nota existentă
         fetch(`/didactic/grade?idStud=${studentId}&idCourse=${courseId}`, {
             method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => {
-                if (!res.ok) {
-                    return res.text().then(text => {
-                        console.error('Eroare DELETE:', text);
-                        throw new Error(`Eroare la ștergere: ${text}`);
-                    });
-                }
-
-                // Adaugă nota nouă
+                if (!res.ok) return res.text().then(text => { throw new Error(text); });
                 return fetch('/didactic/grade', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({
-                        value: parsedGrade,
-                        student: { id: studentId },
-                        course: { id: courseId }
-                    })
+                    body: JSON.stringify({ value: parsedGrade, student: { id: studentId }, course: { id: courseId } })
                 });
             })
             .then(res => {
-                if (!res.ok) {
-                    return res.text().then(text => {
-                        console.error('Eroare POST:', text);
-                        throw new Error(`Eroare la adăugare: ${text}`);
-                    });
-                }
-
-                // Update local catalog
-                const updatedCatalog = [...catalog];
-                updatedCatalog[index].grade = parsedGrade;
-                setCatalog(updatedCatalog);
+                if (!res.ok) return res.text().then(text => { throw new Error(text); });
+                const updated = [...catalog];
+                updated[index].grade = parsedGrade;
+                setCatalog(updated);
                 setEditingIndex(null);
             })
-            .catch(err => {
-                console.error("Eroare la actualizarea notei:", err);
-                alert("A apărut o eroare la salvarea noii note. Verificați consola pentru detalii.");
-            });
+            .catch(err => { console.error(err); alert("Eroare la actualizarea notei."); });
+    };
+
+    const handleUndo = () => {
+        setEditedGrade(prevGrade);
+        setEditingIndex(null);
     };
 
     return (
@@ -141,22 +135,11 @@ const Administrator = () => {
             <div className="catalog-header">
                 <h1>CATALOG</h1>
                 <div className="select-controls">
-                    <select
-                        value={selectedGrupa}
-                        onChange={e => setSelectedGrupa(e.target.value)}
-                    >
-                        {grupe.map((g, i) => (
-                            <option key={i} value={g}>{g}</option>
-                        ))}
+                    <select value={selectedGrupa} onChange={e => setSelectedGrupa(e.target.value)}>
+                        {grupe.map((g, i) => (<option key={i} value={g}>{g}</option>))}
                     </select>
-
-                    <select
-                        value={selectedCursId || ''}
-                        onChange={e => setSelectedCursId(parseInt(e.target.value, 10))}
-                    >
-                        {cursuri.map(c => (
-                            <option key={c.id} value={c.id}>{c.title}</option>
-                        ))}
+                    <select value={selectedCursId || ''} onChange={e => setSelectedCursId(parseInt(e.target.value, 10))}>
+                        {cursuri.map(c => (<option key={c.id} value={c.id}>{c.title}</option>))}
                     </select>
                 </div>
             </div>
@@ -185,23 +168,19 @@ const Administrator = () => {
                                     <td>{cursuri.find(c => c.id === selectedCursId)?.title || ''}</td>
                                     <td>
                                         {editingIndex === idx ? (
-                                            <input
-                                                type="number"
-                                                value={editedGrade}
-                                                onChange={(e) => setEditedGrade(e.target.value)}
-                                            />
+                                            <input type="number" value={editedGrade} onChange={e => setEditedGrade(e.target.value)} />
                                         ) : (
                                             item.grade
                                         )}
                                     </td>
                                     <td>
                                         {editingIndex === idx ? (
-                                            <button onClick={() => handleSaveGrade(idx)}>💾</button>
+                                            <>
+                                                <button onClick={() => handleSaveGrade(idx)}>💾</button>
+                                                <button onClick={handleUndo}>↩️</button>
+                                            </>
                                         ) : (
-                                            <button onClick={() => {
-                                                setEditingIndex(idx);
-                                                setEditedGrade(item.grade);
-                                            }}>
+                                            <button onClick={() => { setPrevGrade(item.grade); setEditingIndex(idx); setEditedGrade(item.grade); }}>
                                                 ✏️
                                             </button>
                                         )}

@@ -7,7 +7,7 @@ import Administrator from "./Administrator/Administrator";
 const Catalog = () => {
     const [searchParams] = useSearchParams();
     const paramValue = searchParams.get("userType");
-    const userType = paramValue !== null && !isNaN(parseInt(paramValue)) ? parseInt(paramValue) : 3;
+    const userType = paramValue !== null && !isNaN(parseInt(paramValue)) ? parseInt(paramValue) : 2;
 
     return (
         <>
