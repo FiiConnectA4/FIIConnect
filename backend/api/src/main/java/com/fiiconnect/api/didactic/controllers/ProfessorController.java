@@ -51,7 +51,7 @@ public class ProfessorController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("didactic/enroll/professor")
+    @PostMapping("/didactic/professor")
     public ResponseEntity<EntityModel<Professor>> create(@RequestBody Professor professor) throws URISyntaxException {
         if (repository.existsByCnp(professor.getCnp())) {
             throw new ProfessorAlreadyEnrolled(professor.getCnp());
@@ -72,7 +72,7 @@ public class ProfessorController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("didactic/unenroll/professor/{id}")
+    @DeleteMapping("/didactic/professor/{id}")
     public ResponseEntity<EntityModel<Professor>> delete(@PathVariable Long id) {
         if (!repository.existsById(id)) {
             throw new ProfessorNotFoundException(id);
