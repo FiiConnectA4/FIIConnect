@@ -41,8 +41,9 @@ public class UserProfile {
     @ElementCollection
     private List<String> expertise;
 
+    //ar trebuie sa fie list de achievements
     @ElementCollection
-    private List<Achievement> achievements;
+    private List<String> achievements;
 
     private String profilePictureUrl;
 

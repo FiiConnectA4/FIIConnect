@@ -19,7 +19,8 @@ public class UserProfileRequest {
     private final String currentYear;
     private final double rating;
     private final List<String> expertise;
-    private final List<Achievement> achievements;
+    //ar trebui sa fie list de achievements
+    private final List<String> achievements;
     private final String profilePictureUrl;
 
     public UserProfileRequest(User user, UserProfile profile) {
