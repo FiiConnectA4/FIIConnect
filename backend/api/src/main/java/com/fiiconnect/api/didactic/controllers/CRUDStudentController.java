@@ -34,7 +34,7 @@ public class CRUDStudentController {
         this.repository = repository;
     }
 
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("didactic/enroll/student")
     public ResponseEntity<EntityModel<Student>> create(@RequestBody Student student) throws URISyntaxException {
         if (repository.existsByCnp(student.getCnp())) {
@@ -56,7 +56,7 @@ public class CRUDStudentController {
     }
 
     // Example: didactic/enroll?studentId=x&courseId=y$faculty_group=z
-   // @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("didactic/enroll")
     public ResponseEntity<Object> updateEnroll(@RequestParam Long studentId, @RequestParam Long courseId, @RequestParam String facultyGroup) {
         if(repository.findById(studentId).isEmpty())
@@ -73,7 +73,7 @@ public class CRUDStudentController {
     }
 
     // Example: didactic/unenroll?studentId=x&courseId=y$faculty_group=z
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("didactic/unenroll")
     public ResponseEntity<Object> updateUnenroll(@RequestParam Long studentId, @RequestParam Long courseId, @RequestParam String facultyGroup) {
         if(repository.findById(studentId).isEmpty())
@@ -91,7 +91,7 @@ public class CRUDStudentController {
     }
 
     // Will also unenroll student from all of his courses (cascade)
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("didactic/unenroll/student/{id}")
     public ResponseEntity<EntityModel<Student>> delete(@PathVariable Long id){
         if (!repository.existsById(id)) {

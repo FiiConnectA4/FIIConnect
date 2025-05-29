@@ -25,6 +25,11 @@ public class Teaching {
 
     private String role;
 
+    public Teaching(TeachingCompositeKey id, String role) {
+        this.id = id;
+        this.role = role;
+    }
+
     @Override
     public String toString() {
         return "Teaching{" +

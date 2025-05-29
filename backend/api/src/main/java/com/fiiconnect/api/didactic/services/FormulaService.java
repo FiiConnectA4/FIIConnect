@@ -44,11 +44,16 @@ public class FormulaService {
         formulaRepository.deleteById(formulaId);
     }
 
-    public Formula getFormula(Long formulaId) {
+    public Formula getFormula(Long formulaId, boolean attach) {
         Formula formula = formulaRepository.findById(formulaId)
                 .orElseThrow(() -> new FormulaNotFoundException(formulaId));
-        attachComponents(formula);
+        if(attach)
+            attachComponents(formula);
         return formula;
+    }
+
+    public Formula getFormula(Long formulaId) {
+        return getFormula(formulaId, true);
     }
 
     public Formula getFormulaByCourseId(Long idCourse) {
