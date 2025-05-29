@@ -1,35 +1,76 @@
 import { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
 import './Student.css';
 
+const API_BASE_URL = '';
+
+async function getStudentId(token) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/person/me`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.role !== 'ROLE_STUDENT' || !data.student?.id) {
+            throw new Error('Utilizatorul nu este student sau lipsește ID-ul');
+        }
+
+        return data.student.id;
+    } catch (error) {
+        console.error('Error fetching student ID:', error);
+        return null;
+    }
+}
+
 const StudentCatalog = () => {
-    const [searchParams] = useSearchParams();
-    const studentId = Number(searchParams.get('studentId')) || 5;
+    const [semestre, setSemestre]       = useState([]);
+    const [selectedSem, setSelectedSem] = useState('');
+    const [bySem, setBySem]             = useState({});
+    const [curCatalog, setCurCatalog]   = useState([]);
+    const [points, setPoints]           = useState(0);
+    const [avg, setAvg]                 = useState(0);
+    const [loading, setLoading]         = useState(true);
+    const [studentId, setStudentId]     = useState(null);
 
-    /* -------------------------- STATE -------------------------- */
-    const [semestre, setSemestre]           = useState([]);
-    const [selectedSem, setSelectedSem]     = useState('');
-    const [bySem, setBySem]                 = useState({});
-    const [curCatalog, setCurCatalog]       = useState([]);
-    const [points, setPoints]               = useState(0);
-    const [avg, setAvg]                     = useState(0);
-    const [loading, setLoading]             = useState(true);
-
-    /* ------------------------ HELPERS -------------------------- */
     const token   = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
 
-    /* 1️⃣  — cursurile la care poate accesa studentul ------------ */
+    // 🔹 Obține ID-ul studentului din /person/me
     useEffect(() => {
+        if (!token) return;
+
+        getStudentId(token).then(id => {
+            if (id) {
+                setStudentId(id);
+            } else {
+                setLoading(false);
+            }
+        });
+    }, [token]);
+
+    // 🔹 După ce avem ID-ul, încărcăm cursurile și notele
+    useEffect(() => {
+        if (!studentId) return;
+
         (async () => {
             try {
                 const res     = await fetch('/didactic/course', { headers });
                 const body    = await res.json();
                 const courses = body._embedded?.courseList ?? [];
 
-                if (!courses.length) { setLoading(false); return; }
+                if (!courses.length) {
+                    setLoading(false);
+                    return;
+                }
 
-                /* 2️⃣  — grades + detalii în paralel pentru fiecare curs */
                 const detailPromises = courses.map(async c => {
                     const [gradesRes, detailRes] = await Promise.all([
                         fetch(`/didactic/course/${c.id}/grades`, { headers }),
@@ -39,13 +80,12 @@ const StudentCatalog = () => {
                     const grades = await gradesRes.json();
                     const det    = await detailRes.json();
 
-                    /* note doar pentru studentul curent */
-                    const myGrade = grades.find(g => Number(g.student?.id) === studentId);
-                    if (!myGrade) return null;
+                    var myGrade = grades.find(g => Number(g.student?.id) === studentId);
+                    if (!myGrade)
+                        myGrade = { value: '' };
 
-                    /* profesorul este Teaching → professor */
-                    const teaching   = det.professors?.[0];            // primul element din array
-                    const profObj    = teaching?.professor;            // obiect Professor
+                    const teaching   = det.professors?.[0];
+                    const profObj    = teaching?.professor;
                     const profName   = profObj
                         ? `${profObj.firstName} ${profObj.lastName}`
                         : '—';
@@ -61,7 +101,6 @@ const StudentCatalog = () => {
 
                 const raw = (await Promise.all(detailPromises)).filter(Boolean);
 
-                /* 3️⃣  — grupare pe semestre */
                 const grouped = raw.reduce((acc, row) => {
                     (acc[row.semestru] = acc[row.semestru] || []).push(row);
                     return acc;
@@ -79,7 +118,7 @@ const StudentCatalog = () => {
         })();
     }, [studentId]);
 
-    /* 4️⃣  — când schimb semestrul recalculez punctaj & medie */
+    // 🔹 Recalculare punctaj și medie
     useEffect(() => {
         const cursuri = bySem[selectedSem] || [];
         setCurCatalog(cursuri);
@@ -90,15 +129,12 @@ const StudentCatalog = () => {
         setAvg(cr ? (p / cr).toFixed(2) : 0);
     }, [selectedSem, bySem]);
 
-    /* --------------------------- UI --------------------------- */
     if (loading) return <div className="container-catalog">Se încarcă catalogul…</div>;
 
     return (
         <div className="container-catalog">
             <div className="catalog-header">
                 <h1>CATALOG</h1>
-
-                {/*  păstrăm containerul pentru styling  */}
                 <div className="select-controls">
                     <select
                         value={selectedSem}
