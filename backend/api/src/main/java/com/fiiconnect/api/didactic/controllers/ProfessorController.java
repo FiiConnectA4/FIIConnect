@@ -1,8 +1,9 @@
 package com.fiiconnect.api.didactic.controllers;
 
+import com.fiiconnect.api.auth_userMgmt.controllers.PersonController;
+import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
 import com.fiiconnect.api.didactic.exceptions.ProfessorAlreadyEnrolled;
 import com.fiiconnect.api.didactic.exceptions.ProfessorNotFoundException;
-
 
 import com.fiiconnect.api.didactic.models.Professor;
 
@@ -25,26 +26,31 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class ProfessorController {
     private final ProfessorRepository repository;
     private final ProfessorService service;
+    private final PersonController personController;
 
-    public ProfessorController(ProfessorRepository repository, ProfessorService service) {
+    public ProfessorController(ProfessorRepository repository, ProfessorService service, PersonController personController) {
         this.repository = repository;
         this.service = service;
+        this.personController = personController;
     }
 
     @GetMapping("/didactic/professor")
     public List<Professor> all() {
-        return repository.findAll();
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
+        List<Professor> students = repository.findAll();
+        students.forEach(p -> {service.limitVisibility(p, person, false);});
+        return students;
     }
 
     @GetMapping("/didactic/professor/{id}")
     public Professor one(@PathVariable Long id) {
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
         Professor professor = repository.findById(id).orElseThrow(() -> new ProfessorNotFoundException(id));
-
-        service.attachCourses(professor);
+        service.limitVisibility(professor, person, true);
         return professor;
     }
 
-    //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("didactic/enroll/professor")
     public ResponseEntity<EntityModel<Professor>> create(@RequestBody Professor professor) throws URISyntaxException {
         if (repository.existsByCnp(professor.getCnp())) {
@@ -65,7 +71,7 @@ public class ProfessorController {
         return ResponseEntity.created(location).body(studentResource);
     }
 
-   //@PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("didactic/unenroll/professor/{id}")
     public ResponseEntity<EntityModel<Professor>> delete(@PathVariable Long id) {
         if (!repository.existsById(id)) {
