@@ -4,94 +4,93 @@ import './Student.css';
 
 const StudentCatalog = () => {
     const [searchParams] = useSearchParams();
-    const studentId = Number(searchParams.get('studentId')) || 4;   // fallback pt demo
+    const studentId = Number(searchParams.get('studentId')) || 5;
 
-    /* ─────────────── STATE ─────────────── */
-    const [semestre, setSemestre]               = useState([]);
-    const [selectedSemestru, setSelectedSem]    = useState('');
-    const [catalogBySemestru, setCatalogGroup]  = useState({});
-    const [catalogCurent, setCatalogCurent]     = useState([]);
-    const [punctaj, setPunctaj]                 = useState(0);
-    const [media, setMedia]                     = useState(0);
-    const [loading, setLoading]                 = useState(true);
+    /* -------------------------- STATE -------------------------- */
+    const [semestre, setSemestre]           = useState([]);
+    const [selectedSem, setSelectedSem]     = useState('');
+    const [bySem, setBySem]                 = useState({});
+    const [curCatalog, setCurCatalog]       = useState([]);
+    const [points, setPoints]               = useState(0);
+    const [avg, setAvg]                     = useState(0);
+    const [loading, setLoading]             = useState(true);
 
-    /* ─────────────── HELPERS ─────────────── */
+    /* ------------------------ HELPERS -------------------------- */
     const token   = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
 
-    /* ─────────────── ETAPA 1: cursurile accesibile studentului ─────────────── */
+    /* 1️⃣  — cursurile la care poate accesa studentul ------------ */
     useEffect(() => {
         (async () => {
             try {
-                const res       = await fetch('/didactic/course', { headers });
-                const payload   = await res.json();
-                const courses   = payload._embedded?.courseList ?? [];
+                const res     = await fetch('/didactic/course', { headers });
+                const body    = await res.json();
+                const courses = body._embedded?.courseList ?? [];
 
-                /* Nu continuăm dacă nu există cursuri. */
-                if (!courses.length) {
-                    setLoading(false);
-                    return;
-                }
+                if (!courses.length) { setLoading(false); return; }
 
-                /* ─────────────── ETAPA 2: pornim fetch-urile in paralel ─────────────── */
-                const detailsPromises = courses.map(async (c) => {
-                    /* grades pentru curs */
+                /* 2️⃣  — grades + detalii în paralel pentru fiecare curs */
+                const detailPromises = courses.map(async c => {
                     const [gradesRes, detailRes] = await Promise.all([
                         fetch(`/didactic/course/${c.id}/grades`, { headers }),
                         fetch(`/didactic/course/${c.id}`,        { headers })
                     ]);
 
-                    const grades       = await gradesRes.json();
-                    const courseDetail = await detailRes.json();
+                    const grades = await gradesRes.json();
+                    const det    = await detailRes.json();
 
-                    /* extrage nota studentului curent, dacă există */
-                    const myGradeEntry = grades.find(g => Number(g.student?.id) === studentId);
-                    if (!myGradeEntry) return null;
+                    /* note doar pentru studentul curent */
+                    const myGrade = grades.find(g => Number(g.student?.id) === studentId);
+                    if (!myGrade) return null;
 
-                    const profesor = courseDetail.professors?.[0];
+                    /* profesorul este Teaching → professor */
+                    const teaching   = det.professors?.[0];            // primul element din array
+                    const profObj    = teaching?.professor;            // obiect Professor
+                    const profName   = profObj
+                        ? `${profObj.firstName} ${profObj.lastName}`
+                        : '—';
+
                     return {
-                        semestru : `Semestrul ${courseDetail.semester}`,
-                        curs     : courseDetail.title,
-                        profesor : profesor ? `${profesor.firstName} ${profesor.lastName}` : '-',
-                        credite  : courseDetail.credits,
-                        nota     : myGradeEntry.value
+                        semestru : `Semestrul ${det.semester}`,
+                        curs     : det.title,
+                        profesor : profName,
+                        credite  : det.credits,
+                        nota     : myGrade.value
                     };
                 });
 
-                const raw = (await Promise.all(detailsPromises)).filter(Boolean);
+                const raw = (await Promise.all(detailPromises)).filter(Boolean);
 
-                /* ─────────────── ETAPA 3: grupare pe semestre ─────────────── */
-                const grouped = raw.reduce((acc, entry) => {
-                    acc[entry.semestru] = acc[entry.semestru] ?? [];
-                    acc[entry.semestru].push(entry);
+                /* 3️⃣  — grupare pe semestre */
+                const grouped = raw.reduce((acc, row) => {
+                    (acc[row.semestru] = acc[row.semestru] || []).push(row);
                     return acc;
                 }, {});
-
                 const semKeys = Object.keys(grouped);
+
                 setSemestre(semKeys);
                 setSelectedSem(semKeys[0] || '');
-                setCatalogGroup(grouped);
+                setBySem(grouped);
                 setLoading(false);
             } catch (err) {
-                console.error('⛔ Eroare la fetch-uri catalog student:', err);
+                console.error('⛔  Eroare catalog student:', err);
                 setLoading(false);
             }
         })();
-    }, [studentId]);   // dacă schimbăm id din URL, refacem catalogul
+    }, [studentId]);
 
-    /* ─────────────── ETAPA 4: când se schimbă semestrul ─────────────── */
+    /* 4️⃣  — când schimb semestrul recalculez punctaj & medie */
     useEffect(() => {
-        const cursuri = catalogBySemestru[selectedSemestru] || [];
-        setCatalogCurent(cursuri);
+        const cursuri = bySem[selectedSem] || [];
+        setCurCatalog(cursuri);
 
-        const totalPunctaj = cursuri.reduce((s, c) => s + c.credite * c.nota, 0);
-        const totalCredite = cursuri.reduce((s, c) => s + c.credite, 0);
+        const p  = cursuri.reduce((s, c) => s + c.credite * c.nota, 0);
+        const cr = cursuri.reduce((s, c) => s + c.credite, 0);
+        setPoints(p);
+        setAvg(cr ? (p / cr).toFixed(2) : 0);
+    }, [selectedSem, bySem]);
 
-        setPunctaj(totalPunctaj);
-        setMedia(totalCredite ? (totalPunctaj / totalCredite).toFixed(2) : 0);
-    }, [selectedSemestru, catalogBySemestru]);
-
-    /* ─────────────── UI ─────────────── */
+    /* --------------------------- UI --------------------------- */
     if (loading) return <div className="container-catalog">Se încarcă catalogul…</div>;
 
     return (
@@ -99,9 +98,15 @@ const StudentCatalog = () => {
             <div className="catalog-header">
                 <h1>CATALOG</h1>
 
+                {/*  păstrăm containerul pentru styling  */}
                 <div className="select-controls">
-                    <select value={selectedSemestru} onChange={e => setSelectedSem(e.target.value)}>
-                        {semestre.map((sem) => <option key={sem} value={sem}>{sem}</option>)}
+                    <select
+                        value={selectedSem}
+                        onChange={e => setSelectedSem(e.target.value)}
+                    >
+                        {semestre.map(s => (
+                            <option key={s} value={s}>{s}</option>
+                        ))}
                     </select>
                 </div>
             </div>
@@ -110,28 +115,21 @@ const StudentCatalog = () => {
                 <table>
                     <thead>
                     <tr className="titlu">
-                        <th>Curs</th>
-                        <th>Profesor</th>
-                        <th>Credite</th>
-                        <th>Notă</th>
-                        <th>Fișa&nbsp;Activitate</th>
+                        <th>Curs</th><th>Profesor</th><th>Credite</th><th>Notă</th><th>Fișa</th>
                     </tr>
                     </thead>
                     <tbody>
-                    {catalogCurent.length === 0 && (
+                    {curCatalog.length === 0 && (
                         <tr><td colSpan="5">Nu există note pentru semestrul selectat.</td></tr>
                     )}
-                    {catalogCurent.map((c, idx) => (
-                        <tr key={idx}>
+                    {curCatalog.map((c, i) => (
+                        <tr key={i}>
                             <td>{c.curs}</td>
                             <td>{c.profesor}</td>
                             <td>{c.credite}</td>
                             <td>{c.nota}</td>
                             <td>
-                                <button
-                                    className="admin-button"
-                                    onClick={() => alert(`Deschide fișa pentru ${c.curs}`)}
-                                >
+                                <button onClick={() => alert(`Fișa activitate: ${c.curs}`)}>
                                     <img src="/icons/edit-icon.png" alt="Fișa" className="icon-img" />
                                 </button>
                             </td>
@@ -145,18 +143,10 @@ const StudentCatalog = () => {
                 <button className="buton-catalog" onClick={() => alert('Download Excel (mock)')}>
                     Descarcă Excel
                 </button>
-
                 <div className="stats">
-                    <p><strong>Punctaj final:</strong>&nbsp;{punctaj}</p>
-                    <p><strong>Media finală:</strong>&nbsp;{media}</p>
+                    <p><strong>Punctaj final:</strong> {points}</p>
+                    <p><strong>Media finală:</strong> {avg}</p>
                 </div>
-
-                <button
-                    className="buton-catalog"
-                    onClick={() => alert('Cerere mutare grupă trimisă (mock)')}
-                >
-                    Cerere mutare grupă activitate
-                </button>
             </div>
         </div>
     );
