@@ -1,74 +1,251 @@
-.dashboard-container {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    padding: 1rem;
-    /* dacă vrei edge-to-edge, șterge următoarea linie */
+:root {
+    --glass-bg: rgba(255, 255, 255, 0.78);
+    --glass-blur: 11px;
+    --blue: #3494fa;
+    --purple: #a259ff;
+    --yellow: #f8ce46;
+    --pink: #ff7bce;
+    --main-text: #0a1633;
+    --shadow: 0 4px 32px rgba(60, 70, 130, 0.10);
+    --border: #e9eaf2;
+}
+
+/* Container central pentru dashboard */
+.dashboard-content {
     max-width: 1200px;
     margin: 0 auto;
+    padding: 0 24px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 .dashboard-title {
     font-size: 2.5rem;
-    font-weight: 700;
-    margin: 0;
+    font-weight: 800;
+    color: var(--main-text);
+    margin-left: 0;
+    margin-top: 32px;
+    margin-bottom: 18px;
+    text-align: left;
 }
 
-/* ==== stats cards (neschimbat) ==== */
-.dashboard-stats {
+/* Pentru dark mode */
+.dashboard-title {
+    color: #fff !important;
+}
+
+/* Grid pentru carduri info de sus */
+.dashboard-cards-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1rem;
-}
-.stat-card {
-    cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-.stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    grid-template-columns: repeat(4, 1fr);
+    gap: 32px;           /* spațiu generos și simetric între carduri */
+    margin-bottom: 36px;
+    width: 100%;
+    align-items: stretch; /* toate cardurile vor fi egale pe verticală */
 }
 
-/* ==== NOUA secțiune widgets ==== */
-.dashboard-widgets {
-  display: flex;
-  gap: 0.8rem;  /* ✅ Mai mic = News Feed mai aproape de calendar */
-  flex-wrap: wrap;
-  align-items: flex-start;
-}
-
-
-/* coloana stângă: calendar + activități */
-.dashboard-widgets-left {
-    flex: 1 1 600px;   /* ⚠️ era 2 1 300px – acum ocupă mai puțin spațiu proporțional */
+/* Card info */
+.dashboard-card {
+    width: 100%;
+    min-width: 0;
+    background: var(--glass-bg);
+    box-shadow: var(--shadow);
+    border-radius: 22px;
+    padding: 30px 22px 26px 26px;
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    align-items: flex-start;
+    border: 1.2px solid var(--border);
+    gap: 14px;
+    transition: 0.18s;
+    justify-content: flex-start;
+    min-height: 170px;       /* toate cardurile AU ACEEAȘI ÎNĂLȚIME */
+    box-sizing: border-box;
+}
+/* Înlocuiește movul cu albastru */
+.dashboard-card:hover {
+    box-shadow: 0 7px 32px 0 #b2a7ee26, 0 0 0 2px var(--blue, #3494fa22);
+    border-color: var(--blue, #3494fa);
+    transform: translateY(-2px) scale(1.018);
 }
 
-.news-feed {
-    flex: 0 0 280px;
-    max-width: 280px;
-    margin-left: -20px; /* ✅ aduce News Feed spre stânga */
+
+.icon {
+    font-size: 1.7rem;
+    margin-bottom: 8px;
+    opacity: 0.97;
+}
+.icon.purple { color: var(--purple);}
+.icon.blue { color: var(--blue);}
+.icon.yellow { color: var(--yellow);}
+.icon.pink { color: var(--pink);}
+
+.card-title {
+    font-size: 1.12rem;
+    color: #344052;
+    font-weight: 500;
+    margin-bottom: 1px;
+}
+.card-value {
+    font-size: 1.73rem;
+    font-weight: bold;
+    color: var(--main-text);
+    margin-top: 2px;
+}
+.card-orar .ora {
+    font-size: 1.18rem;
+    font-weight: 700;
+    color: var(--main-text);
+    margin-bottom: 2px;
+}
+.card-orar .disciplina {
+    font-size: 1.05rem;
+    font-weight: 500;
+    color: #28428b;
+    opacity: 0.81;
 }
 
+/* Grid pentru cardurile de jos */
+.dashboard-bottom-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    width: 100%;
+    margin-bottom: 26px;
+    align-items: stretch;
+}
 
+/* Card glass pentru calendar, activități, news */
+.glass-card {
+    width: 100%;
+    min-width: 0;
+    background: var(--glass-bg);
+    border-radius: 22px;
+    box-shadow: var(--shadow);
+    border: 1.2px solid var(--border);
+    padding: 26px 20px 20px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    min-height: 170px;
+    box-sizing: border-box;
+}
 
-/* ==== breakpoints ==== */
-/* pe ecrane mai înguste, wrap în 1 coloană */
-@media (max-width: 768px) {
-    .dashboard-widgets {
-        flex-direction: column;
+/* Calendar, activities, news style */
+.dashboard-calendar .calendar-title {
+    font-size: 1.09rem;
+    font-weight: 700;
+    color: #23429e;
+    margin-bottom: 7px;
+}
+.calendar-table { margin-bottom: 4px; }
+.calendar-days {
+    display: flex;
+    gap: 7px;
+    color: #7a869a;
+    font-size: 0.98rem;
+    margin-bottom: 4px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+.calendar-days span { width: 22px; text-align: center; }
+.calendar-dates {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3.5px;
+    font-size: 0.94rem;
+}
+.calendar-dates span {
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5px;
+    background: #f6f8fd;
+    color: #1c2d4f;
+}
+.calendar-today {
+    background: var(--blue);
+    color: #fff;
+    font-weight: 700;
+}
+.calendar-red {
+    color: #e24e4e;
+}
+.dashboard-activities .activities-title,
+.dashboard-news .news-title {
+    font-weight: 700;
+    font-size: 0.96rem;
+    margin-bottom: 6px;
+    color: #1b2c65;
+}
+.dashboard-activities ul, .dashboard-news ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.dashboard-activities li {
+    font-size: 0.92rem;
+    color: #193367;
+    margin-bottom: 6px;
+    display: flex;
+    justify-content: space-between;
+}
+.time {
+    color: #a8a8a8;
+    font-size: 0.80rem;
+    margin-left: 7px;
+}
+.dashboard-news li {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.93rem;
+    margin-bottom: 6px;
+}
+.news-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 2px;
+}
+.news-dot.green { background: #31df8a; }
+.news-dot.red { background: #ff7082; }
+.news-dot.purple { background: #a259ff; }
+
+/* Responsive */
+@media (max-width: 1100px) {
+    .dashboard-content {
+        max-width: 97vw;
+        padding: 0 10px;
     }
-}
-
-/* dacă vrei sub 480px să ai și stats pe o coloană */
-@media (max-width: 480px) {
-    .dashboard-stats {
+    .dashboard-cards-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 18px;
+    }
+    .dashboard-bottom-row {
         grid-template-columns: 1fr;
+        gap: 18px;
+    }
+    .dashboard-card, .glass-card {
+        min-height: 140px;
+        padding: 18px 10px 14px 14px;
     }
 }
-
-.news-feed-wrapper {
-  transform: translateX(-30px); /* Mută spre stânga */
+@media (max-width: 700px) {
+    .dashboard-content {
+        max-width: 99vw;
+        padding: 0 3vw;
+    }
+    .dashboard-title {
+        font-size: 1.5rem;
+        margin-left: 0;
+    }
+    .dashboard-cards-row {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
 }
