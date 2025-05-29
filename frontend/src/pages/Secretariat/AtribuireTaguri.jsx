@@ -212,104 +212,78 @@ const fetchAllUsers = async () => {
   };
 
   const addTag = async () => {
-    if (!selectedUser) {
-      setError("Selectează mai întâi un utilizator");
+    setError(null);
+    setNotification(null);
+    if (!selectedUser || !currentTag.id) {
+      setError("Selectează un utilizator și un tag.");
       return;
     }
-
-    if (!currentTag.id) {
-      setError("Selectează un tag");
-      return;
-    }
-
-    if (!currentUser) {
-      setError("Nu s-a putut identifica utilizatorul curent");
-      return;
-    }
-
     try {
       const token = localStorage.getItem('token');
-      const whoIsLoggedId = currentUser.id;
-      
-      const response = await fetch(
-        `http://localhost:34101/manage_tags/${whoIsLoggedId}/${selectedUser.id}/${currentTag.id}`,
-        {
-          method: "POST",
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      const responseData = await response.json();
-      
+      // whoIsLoggedId = utilizatorul curent (secretar/admin)
+      // Asigură-te că iei id-ul corect din structura de la /person/me
+      const whoIsLoggedId = currentUser?.id || currentUser?.userId;
+      const userId = selectedUser.id;
+      const tagId = currentTag.id;
+      // DEBUG: log parametri request și currentUser
+      console.log('AddTag params:', { whoIsLoggedId, userId, tagId, currentUser });
+      const response = await fetch(`http://localhost:34101/manage_tags/${whoIsLoggedId}/${userId}/${tagId}`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      // DEBUG: log status code
+      console.log('AddTag status:', response.status);
       if (!response.ok) {
-        throw new Error(responseData.message || responseData);
+        const msg = await response.text();
+        setError(msg || 'Eroare la adăugarea tag-ului.');
+        // DEBUG: log response body
+        console.log('AddTag ERROR:', msg);
+        return;
       }
-
-      // Refresh user tags after adding
-      const updatedTags = await fetchUserTags(selectedUser.id);
-      setUserTags(updatedTags);
-      
-      setNotification({
-        message: `Tag-ul "${currentTag.name}" a fost adăugat`,
-        type: "success"
-      });
-      
-      // Reset tag selection
-      setCurrentTag(prev => ({
-        id: null,
-        name: "",
-        type: prev.type
-      }));
+      // DEBUG: log success
+      const successMsg = await response.text();
+      console.log('AddTag SUCCESS:', successMsg);
+      setNotification({ type: 'success', message: 'Tag adăugat cu succes!' });
+      // reîncarcă tag-urile utilizatorului și resetează selecția tagului
+      const tags = await fetchUserTags(userId);
+      setUserTags(tags);
+      setCurrentTag({ id: null, name: '', type: currentTag.type });
     } catch (err) {
-      console.error("Error adding tag:", err);
-      setNotification({
-        message: err.message || "Eroare la adăugarea tag-ului",
-        type: "error"
-      });
+      setError('Eroare la adăugarea tag-ului.');
+      // DEBUG: log error
+      console.log('AddTag error:', err);
     }
   };
 
   const removeTag = async (tagId) => {
-    if (!selectedUser || !currentUser) return;
-
+    setError(null);
+    setNotification(null);
+    if (!selectedUser || !tagId) {
+      setError("Selectează un utilizator și un tag.");
+      return;
+    }
     try {
       const token = localStorage.getItem('token');
-      const whoIsLoggedId = currentUser.id;
-      
-      const response = await fetch(
-        `http://localhost:34101/manage_tags/${whoIsLoggedId}/${selectedUser.id}/${tagId}`,
-        {
-          method: "DELETE",
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      );
-
-      const responseData = await response.json();
-      
+      const whoIsLoggedId = currentUser?.id;
+      const userId = selectedUser.id;
+      const response = await fetch(`http://localhost:34101/manage_tags/${whoIsLoggedId}/${userId}/${tagId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       if (!response.ok) {
-        throw new Error(responseData.message || responseData);
+        const msg = await response.text();
+        setError(msg || 'Eroare la ștergerea tag-ului.');
+        return;
       }
-
-      // Refresh user tags after removal
-      const updatedTags = await fetchUserTags(selectedUser.id);
-      setUserTags(updatedTags);
-      
-      setNotification({
-        message: "Tag-ul a fost eliminat",
-        type: "success"
-      });
+      setNotification({ type: 'success', message: 'Tag șters cu succes!' });
+      fetchUserTags(userId);
     } catch (err) {
-      console.error("Error removing tag:", err);
-      setNotification({
-        message: err.message || "Eroare la eliminarea tag-ului",
-        type: "error"
-      });
+      setError('Eroare la ștergerea tag-ului.');
     }
   };
 
