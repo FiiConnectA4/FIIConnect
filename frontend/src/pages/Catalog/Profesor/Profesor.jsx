@@ -92,31 +92,47 @@ const Profesor = () => {
             alert('Nota trebuie să fie între 1 și 10.');
             return;
         }
-        // delete old
-        fetch(`/didactic/grade?idStud=${entry.studentId}&idCourse=${selectedCursId}`, {
-            method: 'DELETE', headers: { 'Authorization': `Bearer ${token}` }
+        const dateNow = new Date().toISOString();
+        const hasExisting = entry.grade !== '';
+        const method = hasExisting ? 'PUT' : 'POST';
+        const payload = hasExisting
+            ? {
+                id: { idStud: entry.studentId, idCourse: selectedCursId },
+                value: parsed
+            }
+            : {
+                id: { idStud: entry.studentId, idCourse: selectedCursId },
+                value: parsed,
+                gradingDate: dateNow
+            };
+
+        fetch('/didactic/grade', {
+            method,
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify(payload)
         })
             .then(res => {
-                if (!res.ok) throw new Error('Erroare DELETE');
-                // post new
-                return fetch('/didactic/grade', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                    body: JSON.stringify({ value: parsed, student: { id: entry.studentId }, course: { id: selectedCursId } })
-                });
-            })
-            .then(res => {
-                if (!res.ok) throw new Error('Erroare POST');
+                if (!res.ok) throw new Error(`Eroare ${method}`);
                 const updated = [...catalog]; updated[index].grade = parsed;
                 setCatalog(updated);
                 setEditingIndex(null);
             })
-            .catch(err => { console.error(err); alert('Eroare salvare nota'); });
+            .catch(err => { console.error(err); alert('Eroare salvare nota: ' + err.message); });
     };
 
     const handleUndo = () => {
         setEditedGrade(prevGrade);
         setEditingIndex(null);
+    };
+
+    const handleUploadExcel = () => {
+        // TODO: implementare încărcare fișier Excel
+        console.log('Triggered upload');
+    };
+
+    const handleDownloadExcel = () => {
+        // TODO: implementare descărcare fișier Excel
+        console.log('Triggered download');
     };
 
     const currentCourseTitle = cursuri.find(c => c.id === selectedCursId)?.title || '';
@@ -168,6 +184,10 @@ const Profesor = () => {
                         ))}
                     </tbody>
                 </table>
+            </div>
+            <div className="catalog-buttons">
+                <button onClick={handleUploadExcel}>Încarcă Excel</button>
+                <button onClick={handleDownloadExcel}>Descarcă Excel</button>
             </div>
         </div>
     );

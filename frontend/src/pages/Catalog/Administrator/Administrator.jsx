@@ -112,7 +112,7 @@ const Administrator = () => {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ value: parsedGrade, student: { id: studentId }, course: { id: courseId } })
+                    body: JSON.stringify({ value: parsedGrade, id: { idStud: studentId, idCourse: courseId } })
                 });
             })
             .then(res => {
@@ -136,10 +136,10 @@ const Administrator = () => {
                 <h1>CATALOG</h1>
                 <div className="select-controls">
                     <select value={selectedGrupa} onChange={e => setSelectedGrupa(e.target.value)}>
-                        {grupe.map((g, i) => (<option key={i} value={g}>{g}</option>))}
+                        {grupe.map((g, i) => <option key={i} value={g}>{g}</option>)}
                     </select>
                     <select value={selectedCursId || ''} onChange={e => setSelectedCursId(parseInt(e.target.value, 10))}>
-                        {cursuri.map(c => (<option key={c.id} value={c.id}>{c.title}</option>))}
+                        {cursuri.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
                     </select>
                 </div>
             </div>
@@ -166,25 +166,21 @@ const Administrator = () => {
                                     <td><input type="checkbox" /></td>
                                     <td>{item.name}</td>
                                     <td>{cursuri.find(c => c.id === selectedCursId)?.title || ''}</td>
-                                    <td>
-                                        {editingIndex === idx ? (
-                                            <input type="number" value={editedGrade} onChange={e => setEditedGrade(e.target.value)} />
-                                        ) : (
-                                            item.grade
-                                        )}
-                                    </td>
-                                    <td>
-                                        {editingIndex === idx ? (
-                                            <>
-                                                <button onClick={() => handleSaveGrade(idx)}>💾</button>
-                                                <button onClick={handleUndo}>↩️</button>
-                                            </>
-                                        ) : (
-                                            <button onClick={() => { setPrevGrade(item.grade); setEditingIndex(idx); setEditedGrade(item.grade); }}>
-                                                ✏️
-                                            </button>
-                                        )}
-                                    </td>
+                                    <td>{editingIndex === idx ? (
+                                        <input type="number" value={editedGrade} onChange={e => setEditedGrade(e.target.value)} />
+                                    ) : (
+                                        item.grade
+                                    )}</td>
+                                    <td>{editingIndex === idx ? (
+                                        <>
+                                            <button onClick={() => handleSaveGrade(idx)}>💾</button>
+                                            <button onClick={handleUndo}>↩️</button>
+                                        </>
+                                    ) : (
+                                        <button onClick={() => { setPrevGrade(item.grade); setEditingIndex(idx); setEditedGrade(item.grade); }}>
+                                            ✏️
+                                        </button>
+                                    )}</td>
                                 </tr>
                             ))
                         )}
