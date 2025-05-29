@@ -267,23 +267,37 @@ const fetchAllUsers = async () => {
     }
     try {
       const token = localStorage.getItem('token');
-      const whoIsLoggedId = currentUser?.id;
+      // whoIsLoggedId = utilizatorul curent (secretar/admin)
+      const whoIsLoggedId = currentUser?.id || currentUser?.userId;
       const userId = selectedUser.id;
+      // DEBUG: log parametri request
+      console.log('RemoveTag params:', { whoIsLoggedId, userId, tagId, currentUser });
       const response = await fetch(`http://localhost:34101/manage_tags/${whoIsLoggedId}/${userId}/${tagId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,
         },
       });
+      // DEBUG: log status code
+      console.log('RemoveTag status:', response.status);
       if (!response.ok) {
         const msg = await response.text();
         setError(msg || 'Eroare la ștergerea tag-ului.');
+        // DEBUG: log response body
+        console.log('RemoveTag ERROR:', msg);
         return;
       }
+      // DEBUG: log success
+      const successMsg = await response.text();
+      console.log('RemoveTag SUCCESS:', successMsg);
       setNotification({ type: 'success', message: 'Tag șters cu succes!' });
-      fetchUserTags(userId);
+      // reîncarcă tag-urile utilizatorului
+      const tags = await fetchUserTags(userId);
+      setUserTags(tags);
     } catch (err) {
       setError('Eroare la ștergerea tag-ului.');
+      // DEBUG: log error
+      console.log('RemoveTag error:', err);
     }
   };
 
