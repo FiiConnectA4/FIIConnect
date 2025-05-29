@@ -28,6 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -317,6 +318,88 @@ public class AuthController {
             e.printStackTrace();
             return ResponseEntity.status(500).body(
                     new ApiResponse("Eroare internă: " + e.getMessage(), false));
+        }
+    }
+
+    @PostMapping("/register-multiple")
+    @Transactional
+    public ResponseEntity<ApiResponse> registerMultipleUsers(
+            @RequestBody List<RegisterDTO> registerRequests) {
+        if (registerRequests == null || registerRequests.isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(new ApiResponse("Lista de înregistrări este goală.", false));
+        }
+
+        try {
+            List<String> createdUsers = new ArrayList<>();
+
+            for (RegisterDTO req : registerRequests) {
+                // validări de bază
+                if (req.getUsername() == null || req.getPassword() == null
+                        || req.getEmail() == null || req.getRole() == null) {
+                    throw new IllegalArgumentException(
+                            "Toate câmpurile (username, email, parola, rol) sunt necesare.");
+                }
+                if (userRepository.findByEmail(req.getEmail()) != null) {
+                    throw new IllegalArgumentException(
+                            "Email-ul este deja folosit: " + req.getEmail());
+                }
+                if (userRepository.findByUsername(req.getUsername()) != null) {
+                    throw new IllegalArgumentException(
+                            "Username-ul este deja folosit: " + req.getUsername());
+                }
+                if (!PasswordValidator.isValid(req.getPassword())) {
+                    throw new IllegalArgumentException(
+                            "Parola trebuie să conțină minim 8 caractere, o literă mare, una mică, o cifră și un simbol.");
+                }
+                if (!EmailValidator.isValid(req.getEmail())) {
+                    throw new IllegalArgumentException("Email invalid: " + req.getEmail());
+                }
+
+                // rol
+                String roleName = "ROLE_" + req.getRole().toUpperCase();
+                Role role = roleRepository.findByRoleName(roleName);
+                if (role == null) {
+                    throw new IllegalArgumentException(
+                            "Rol invalid pentru utilizatorul " + req.getUsername()
+                                    + ". Roluri posibile: STUDENT sau PROFESSOR.");
+                }
+
+                // creare user
+                User user = new User();
+                user.setUsername(req.getUsername());
+                user.setEmail(req.getEmail());
+                user.setPassword(passwordEncoder.encode(req.getPassword()));
+                user.getRoles().add(role);
+                user.setActive(true);
+                user.setTwoFactorSecret(null);
+
+                // asociere Student / Professor
+                if ("ROLE_STUDENT".equals(roleName)) {
+                    Student student = studentRepository.findById(req.getStudentId())
+                            .orElseThrow(() -> new IllegalArgumentException(
+                                    "Studentul nu există: " + req.getStudentId()));
+                    user.setStudent(student);
+                } else if ("ROLE_PROFESSOR".equals(roleName)) {
+                    Professor prof = professorRepository.findById(req.getProfessorId())
+                            .orElseThrow(() -> new IllegalArgumentException(
+                                    "Profesorul nu există: " + req.getProfessorId()));
+                    user.setProfessor(prof);
+                }
+
+                userRepository.save(user);
+                createdUsers.add(req.getUsername());
+            }
+
+            return ResponseEntity.ok(new ApiResponse(
+                    "Au fost create conturile: " + String.join(", ", createdUsers), true));
+
+        } catch (IllegalArgumentException ex) {
+            // aruncă RuntimeException pentru a forța rollback
+            throw new RuntimeException(ex.getMessage(), ex);
+        } catch (Exception ex) {
+            // altă eroare neașteptată
+            throw new RuntimeException("Eroare internă la creare: " + ex.getMessage(), ex);
         }
     }
 
