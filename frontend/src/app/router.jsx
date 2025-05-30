@@ -8,7 +8,6 @@ import Cursuri from "../pages/Cursuri/Cursuri";
 import Catalog from "../pages/Catalog/Catalog";
 import OrarToti from "../pages/Orar/OrarToti";
 import Secretariat from "../pages/Secretariat/Secretariat";
-import SecretariatToti from "../pages/Secretariat/SecretariatToti";
 import CerereDecontari from "../pages/Secretariat/CerereDecontari"; // ✅ Import corect
 import CerereAdeverinte from "../pages/Secretariat/CerereAdeverinte"; // ✅ Import corect
 import CerereBursaSociala from "../pages/Secretariat/CerereBursaSociala"; // ✅ Import corect
@@ -16,7 +15,6 @@ import CerereCazSocial from "../pages/Secretariat/CerereCazSocial"; // ✅ Impor
 import IstoricCereri from "../pages/Secretariat/IstoricCereri"; // ✅ Import corect
 import Harta from "../pages/Harta/Harta";
 import HartaFullScreen from "../pages/Harta/HartaFullScreen";
-
 
 import SecretariatCerereAdeverinte from "../pages/Secretariat/SecretariatCerereAdeverinte"; // ✅ Import corect
 import SecretariatBursaSociala from "../pages/Secretariat/SecretariatBursaSociala"; // ✅ Import corect
@@ -35,18 +33,18 @@ import ChangePassword from "../pages/Auth/ChangePassword";
 import CreateAccount from "../pages/Auth/CreateAccount";
 import ForgotPassword from "../pages/Auth/ForgotPassword";
 import ResetPassword from "../pages/Auth/ResetPassword";
+import Orar from "../pages/Orar/Orar"; // Import pentru componenta de routing
 
 const AppRoutes = () => {
     return (
         <Routes>
             {/* Public route (login page) */}
             <Route path="/" element={<Login />} />
-            <Route path="/app/2fa"     element={<TwoFAVerify />} />
+            <Route path="/app/2fa" element={<TwoFAVerify />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
 
             {/* Protected routes inside layout */}
-
             <Route
                 path="/app"
                 element={
@@ -55,7 +53,6 @@ const AppRoutes = () => {
                     </PrivateRoute>
                 }
             >
-
                 <Route
                     path="create-account"
                     element={
@@ -72,55 +69,47 @@ const AppRoutes = () => {
                 <Route path="cursuri" element={<Cursuri />} />
                 <Route path="catalog" element={<Catalog />} />
 
-                {/* Rutele pentru orar */}
-                <Route path="/app/orar" element={<OrarToti />} />
-                <Route path="/app/orar/studenti" element={<OrarToti />} />
-                <Route path="/app/orar/studenti/:an/:grupa" element={<OrarToti />} />
-                <Route path="/app/orar/profesori" element={<OrarToti />} />
-                <Route path="/app/orar/profesori/:profesor" element={<OrarToti />} />
-                <Route path="/app/orar/sali" element={<OrarToti />} />
-                <Route path="/app/orar/sali/:sala" element={<OrarToti />} />
-                <Route path="/app/orar/sali/:sala/dotari" element={<DotariSala />} />
-                <Route path="/app/orar/discipline" element={<OrarToti />} />
-                <Route path="/app/orar/discipline/:disciplina" element={<OrarToti />} />
+                {/* Rutele pentru orar - MUTATE ÎN INTERIOR */}
+                <Route path="orar" element={<Orar />} />
 
+                <Route path="orar/studenti" element={<OrarToti />} />
+                <Route path="orar/studenti/:an/:grupa" element={<OrarToti />} />
+                <Route path="orar/profesori" element={<OrarToti />} />
+                <Route path="orar/profesori/:profesor" element={<OrarToti />} />
+                <Route path="orar/sali" element={<OrarToti />} />
+                <Route path="orar/sali/:sala" element={<OrarToti />} />
+                <Route path="orar/sali/:sala/dotari" element={<DotariSala />} />
+                <Route path="orar/discipline" element={<OrarToti />} />
+                <Route path="orar/discipline/:disciplina" element={<OrarToti />} />
 
-                <Route path="/app/orar-secretariat" element={<OrarSecretariat />} />
-                <Route path="/app/orar-secretariat/studenti" element={<OrarSecretariat />} />
-                <Route path="/app/orar-secretariat/studenti/:an/:grupa" element={<OrarSecretariat />} />
-                <Route path="/app/orar-secretariat/profesori" element={<OrarSecretariat />} />
-                <Route path="/app/orar-secretariat/profesori/:profesor" element={<OrarSecretariat />} />
-                <Route path="/app/orar-secretariat/sali" element={<OrarSecretariat />} />
-                <Route path="/app/orar-secretariat/sali/:sala" element={<OrarSecretariat />} />
-                <Route path="/app/orar-secretariat/discipline" element={<OrarSecretariat />} />
-                <Route path="/app/orar-secretariat/discipline/:disciplina" element={<OrarSecretariat />} />
+                <Route path="orar-secretariat" element={<OrarSecretariat />} />
+                <Route path="orar-secretariat/studenti" element={<OrarSecretariat />} />
+                <Route path="orar-secretariat/studenti/:an/:grupa" element={<OrarSecretariat />} />
+                <Route path="orar-secretariat/profesori" element={<OrarSecretariat />} />
+                <Route path="orar-secretariat/profesori/:profesor" element={<OrarSecretariat />} />
+                <Route path="orar-secretariat/sali" element={<OrarSecretariat />} />
+                <Route path="orar-secretariat/sali/:sala" element={<OrarSecretariat />} />
+                <Route path="orar-secretariat/discipline" element={<OrarSecretariat />} />
+                <Route path="orar-secretariat/discipline/:disciplina" element={<OrarSecretariat />} />
 
-                <Route path="/app/harta" element={<Harta />} />
-                <Route path="/app/harta/fullscreen" element={<HartaFullScreen />} />
+                <Route path="harta" element={<Harta />} />
+                <Route path="harta/fullscreen" element={<HartaFullScreen />} />
 
+                <Route path="secretariat" element={<Secretariat />} />
+                <Route path="secretariat/cerere-decontare" element={<CerereDecontari />} />
+                <Route path="secretariat/cerere-adeverinte" element={<SecretariatCerereAdeverinte />} />
+                <Route path="secretariat/cerere-bursa-sociala" element={<SecretariatBursaSociala />} />
+                <Route path="secretariat/cerere-caz-social" element={<SecretariatCazSocial />} />
 
-
-                <Route path="secretariat" element={<Secretariat />}>
-                    <Route index element={<SecretariatToti />} />
-                    <Route path="cerere-decontare" element={<CerereDecontari />} />
-                    <Route path="cerere-adeverinte" element={<SecretariatCerereAdeverinte />} />
-                    <Route path="cerere-bursa-sociala" element={<SecretariatBursaSociala />} />
-                    <Route path="cerere-caz-social" element={<SecretariatCazSocial />} />
-
-                </Route>
-                <Route path="student" element={<Secretariat />}>
-                    <Route index element={<SecretariatToti />} />
-                    <Route path="cerere-decontare" element={<CerereDecontari />} />
-                    <Route path="cerere-adeverinte" element={<CerereAdeverinte />} />
-                    <Route path="cerere-bursa-sociala" element={<CerereBursaSociala />} />
-                    <Route path="cerere-caz-social" element={<CerereCazSocial />} />
-                    <Route path="istoric-cereri" element={<IstoricCereri />} />
-                </Route>
-
+                <Route path="student/cerere-decontare" element={<CerereDecontari />} />
+                <Route path="student/cerere-adeverinte" element={<CerereAdeverinte />} />
+                <Route path="student/cerere-bursa-sociala" element={<CerereBursaSociala />} />
+                <Route path="student/cerere-caz-social" element={<CerereCazSocial />} />
+                <Route path="student/istoric-cereri" element={<IstoricCereri />} />
 
                 <Route path="chat" element={<Chat />} />
                 <Route path="profile" element={<Profil />} />
-                <Route path="/app/reset-password" element={<ChangePassword />} />
+                <Route path="reset-password" element={<ChangePassword />} />
                 <Route path="setup-2fa" element={<Setup2FA />} />
                 <Route path="setup-profile" element={<SetupProfile />} />
                 <Route path="contact" element={<Contact />} />
