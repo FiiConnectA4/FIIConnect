@@ -33,6 +33,11 @@ public class PersonController {
     private final StudentRepository studentRepository;
     private final ProfessorRepository professorRepository;
 
+    /**
+     * [GET] /person/get-all
+     * Returnează toți utilizatorii care au asociat rol de student sau profesor.
+     * Acces: doar ADMIN.
+     */
     @GetMapping("/get-all")
     @RolesAllowed("ROLE_ADMIN")
     public ResponseEntity<List<PersonRoleDTO>> getAllPersons() {
@@ -55,7 +60,9 @@ public class PersonController {
                         role      = "PROFESSOR";
                     }
 
-                    Set<TagDTO> tags = u.getTags().stream()
+                    Set<TagDTO> tags = Optional.ofNullable(u.getTags())
+                            .orElse(Collections.emptySet())
+                            .stream()
                             .map(tag -> new TagDTO(tag.getId(), tag.getName(), tag.getType()))
                             .collect(Collectors.toSet());
 
@@ -72,9 +79,15 @@ public class PersonController {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * [GET] /person/unassigned
+     * Returnează lista studenților și profesorilor care încă nu au fost alocați unui cont de utilizator.
+     * Acces: doar ADMIN.
+     */
     @GetMapping("/unassigned")
     @RolesAllowed("ROLE_ADMIN")
     public ResponseEntity<List<UnassignedPersonDTO>> getUnassignedPersons() {
+        // Extragem ID-urile tuturor studenților și profesorilor deja asociați unui user
         Set<Long> studentIdsTaken = userRepository.findAll().stream()
                 .map(User::getStudent)
                 .filter(Objects::nonNull)
@@ -87,7 +100,11 @@ public class PersonController {
                 .map(Professor::getId)
                 .collect(Collectors.toSet());
 
-        List<UnassignedPersonDTO> unassignedStudents = studentRepository.findAll().stream()
+        // Obținem toți studenții din repository
+        List<Student> allStudents = Optional.ofNullable(studentRepository.findAll())
+                .orElseThrow(() -> new RuntimeException("Student repository returned null"));
+        // Filtrăm studenții care nu sunt luați deja
+        List<UnassignedPersonDTO> unassignedStudents = allStudents.stream()
                 .filter(s -> !studentIdsTaken.contains(s.getId()))
                 .map(s -> new UnassignedPersonDTO(
                         s.getId(),
@@ -95,9 +112,13 @@ public class PersonController {
                         s.getLastName(),
                         "STUDENT"
                 ))
-                .toList();
+                .collect(Collectors.toList());
 
-        List<UnassignedPersonDTO> unassignedProfessors = professorRepository.findAll().stream()
+        // Obținem toți profesorii din repository
+        List<Professor> allProfessors = Optional.ofNullable(professorRepository.findAll())
+                .orElseThrow(() -> new RuntimeException("Professor repository returned null"));
+        // Filtrăm profesorii care nu sunt luați deja
+        List<UnassignedPersonDTO> unassignedProfessors = allProfessors.stream()
                 .filter(p -> !professorIdsTaken.contains(p.getId()))
                 .map(p -> new UnassignedPersonDTO(
                         p.getId(),
@@ -105,8 +126,9 @@ public class PersonController {
                         p.getLastName(),
                         "PROFESSOR"
                 ))
-                .toList();
+                .collect(Collectors.toList());
 
+        // Concatenăm listele și returnăm
         List<UnassignedPersonDTO> result = new ArrayList<>();
         result.addAll(unassignedStudents);
         result.addAll(unassignedProfessors);
@@ -114,62 +136,89 @@ public class PersonController {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * [GET] /person/student/{userId}
+     * Returnează informațiile despre studentul asociat unui anumit user.
+     * Acces: oricine autentificat.
+     * Dacă user-ul nu există sau nu are student asociat, aruncă UserNotFoundException (→ 404).
+     */
     @GetMapping("/student/{userId}")
-    public ResponseEntity<?> getStudentInfo(@PathVariable Long userId) {
+    public ResponseEntity<StudentDTO> getStudentInfo(@PathVariable Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+                .orElseThrow(() -> new UserNotFoundException("User cu ID-ul " + userId + " nu există"));
 
         if (user.getStudent() == null) {
-            return ResponseEntity.notFound().build();
+            throw new UserNotFoundException("User-ul cu ID-ul " + userId + " nu are rol de student");
         }
-        Student s = studentRepository.findById(user.getStudent().getId())
-                .orElseThrow(() -> new UserNotFoundException("Student for user " + userId));
 
-        return ResponseEntity.ok(new StudentDTO(
-                s.getId(),
-                s.getCnp(),
-                s.getRegNumber(),
-                s.getFirstName(),
-                s.getLastName(),
-                s.getYear(),
-                s.getFacultyGroup()
-        ));
+        Student student = studentRepository.findById(user.getStudent().getId())
+                .orElseThrow(() -> new UserNotFoundException(
+                        "Student asociat pentru user-ul cu ID-ul " + userId + " nu a fost găsit"));
+
+        StudentDTO dto = new StudentDTO(
+                student.getId(),
+                student.getCnp(),
+                student.getRegNumber(),
+                student.getFirstName(),
+                student.getLastName(),
+                student.getYear(),
+                student.getFacultyGroup()
+        );
+        return ResponseEntity.ok(dto);
     }
 
+    /**
+     * [GET] /person/professor/{userId}
+     * Returnează informațiile despre profesorul asociat unui anumit user.
+     * Acces: oricine autentificat.
+     * Dacă user-ul nu există sau nu are profesor asociat, aruncă UserNotFoundException (→ 404).
+     */
     @GetMapping("/professor/{userId}")
-    public ResponseEntity<?> getProfessorInfo(@PathVariable Long userId) {
+    public ResponseEntity<ProfessorDTO> getProfessorInfo(@PathVariable Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(userId));
+                .orElseThrow(() -> new UserNotFoundException("User cu ID-ul " + userId + " nu există"));
 
         if (user.getProfessor() == null) {
-            return ResponseEntity.notFound().build();
+            throw new UserNotFoundException("User-ul cu ID-ul " + userId + " nu are rol de profesor");
         }
-        Professor p = user.getProfessor();
 
-        return ResponseEntity.ok(new ProfessorDTO(
-                p.getId(),
-                p.getCnp(),
-                p.getFirstName(),
-                p.getLastName(),
-                p.getRank()
-        ));
+        Professor professor = Optional.ofNullable(user.getProfessor())
+                .orElseThrow(() -> new UserNotFoundException(
+                        "Profesor asociat pentru user-ul cu ID-ul " + userId + " nu a fost găsit"
+                ));
+
+        ProfessorDTO dto = new ProfessorDTO(
+                professor.getId(),
+                professor.getCnp(),
+                professor.getFirstName(),
+                professor.getLastName(),
+                professor.getRank()
+        );
+        return ResponseEntity.ok(dto);
     }
 
+    /**
+     * [GET] /person/me
+     * Returnează informațiile despre utilizatorul curent autentificat (username + detalii profil).
+     * Acces: oricine autentificat.
+     * Dacă user-ul nu există sau contul e inactiv, aruncă excepție.
+     */
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUserInfo() {
+    public ResponseEntity<PersonInfoDTO> getCurrentUserInfo() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
-            return ResponseEntity.status(401).body("Neautentificat.");
+            throw new UserNotFoundException("Neautentificat.");
         }
 
         String username = auth.getName();
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException(username));
+                .orElseThrow(() -> new UserNotFoundException("User-ul '" + username + "' nu există"));
 
         if (!user.isActive()) {
-            return ResponseEntity.status(403).body("Contul este inactiv.");
+            throw new UserNotFoundException("Contul este inactiv pentru user-ul: " + username);
         }
 
+        // Extragem primul rol
         String role = user.getRoles().stream()
                 .findFirst()
                 .map(Role::getRoleName)
@@ -201,11 +250,13 @@ public class PersonController {
             );
         }
 
-        Set<TagDTO> tagDTOs = user.getTags().stream()
+        Set<TagDTO> tagDTOs = Optional.ofNullable(user.getTags())
+                .orElse(Collections.emptySet())
+                .stream()
                 .map(tag -> new TagDTO(tag.getId(), tag.getName(), tag.getType()))
                 .collect(Collectors.toSet());
 
-        return ResponseEntity.ok(new PersonInfoDTO(
+        PersonInfoDTO dto = new PersonInfoDTO(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
@@ -213,6 +264,7 @@ public class PersonController {
                 studentDTO,
                 profDTO,
                 tagDTOs
-        ));
+        );
+        return ResponseEntity.ok(dto);
     }
 }

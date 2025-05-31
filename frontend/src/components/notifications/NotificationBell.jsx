@@ -6,6 +6,8 @@ import SockJS from "sockjs-client";
 import { FaBell } from "react-icons/fa";
 import "./NotificationBell.css";
 
+const BACKEND_URL = "http://localhost:34101"; // Adresa Spring Boot
+
 const NotificationBell = () => {
     const [notifications, setNotifications] = useState([]);
     const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -14,90 +16,81 @@ const NotificationBell = () => {
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (!token) {
-            console.warn("No token found, skipping WS connection");
+            console.warn("Nu există token, nu se deschide WS");
             return;
         }
 
-        // 1) Extragem username din JWT (presupunem că e un token JWT standard)
+        // Extragem username din JWT (presupunem că îl avem în "sub")
         let username;
         try {
-            const payload = JSON.parse(atob(token.split(".")[1])); // decodăm partea middle a JWT
-            username = payload.sub; // în mod normal „sub” conține username-ul
+            const payload = JSON.parse(atob(token.split(".")[1]));
+            username = payload.sub;
         } catch (err) {
-            console.error("Invalid token format:", err);
+            console.error("Format JWT invalid:", err);
             return;
         }
 
-        // 2) Funcție pentru a încărca notificările inițiale (REST)
+        // 1) Obținem notificările inițiale prin REST
         const fetchInitial = async () => {
             try {
-                const res = await fetch("/notifications/unread", {
+                const res = await fetch(`${BACKEND_URL}/notifications/unread`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
                     },
                 });
 
+                console.log("[NotificationBell] fetch /notifications/unread, status:", res.status);
                 if (!res.ok) {
-                    console.warn("No notifications (status: " + res.status + ")");
                     setNotifications([]);
                     setUnreadCount(0);
                     return;
                 }
-
-                const contentType = res.headers.get("content-type") || "";
-                if (!contentType.includes("application/json")) {
-                    console.warn("No JSON response for unread notifications");
-                    setNotifications([]);
-                    setUnreadCount(0);
-                    return;
-                }
-
                 const data = await res.json();
                 setNotifications(Array.isArray(data) ? data : []);
                 setUnreadCount(Array.isArray(data) ? data.length : 0);
             } catch (err) {
-                console.warn("Could not load notifications:", err);
+                console.warn("Nu s-au putut încărca notificările:", err);
                 setNotifications([]);
                 setUnreadCount(0);
             }
         };
-
         fetchInitial();
 
-        // 3) Creăm conexiunea SockJS + STOMP
-        const socket = new SockJS("/ws"); // `/ws` e endpoint-ul definit în WebSocketConfig
+        // 2) Deschidem conexiunea SockJS + STOMP la BACKEND_URL/ws
+        const sockJsEndpoint = `${BACKEND_URL}/ws`; // atenție: full URL, nu relativ
+        const socket = new SockJS(sockJsEndpoint);
         const stompClient = new Client({
             webSocketFactory: () => socket,
-            reconnectDelay: 5000,      // încercare reconectare la 5s dacă se închide
-            heartbeatIncoming: 10000,  // așteaptă 10s de la server heartbeat
-            heartbeatOutgoing: 10000,  // trimite 10s heartbeat către server
+            reconnectDelay: 5000,      // încearcă reconectare la 5s
+            heartbeatIncoming: 10000,  // așteaptă heartbeat de la server
+            heartbeatOutgoing: 10000,  // trimite heartbeat către server
             connectHeaders: {
-                Authorization: `Bearer ${token}`, // trimitem JWT în header la CONNECT
-            },
-            onConnect: () => {
-                // 4) Ne abonăm pe canalul /user/{username}/queue/notifications
-                stompClient.subscribe(
-                    `/user/${username}/queue/notifications`,
-                    (message) => {
-                        try {
-                            const notif = JSON.parse(message.body);
-                            setNotifications((prev) => [notif, ...prev]);
-                            setUnreadCount((prev) => prev + 1);
-                        } catch (e) {
-                            console.error("Could not parse notification:", e);
-                        }
-                    }
-                );
+                Authorization: `Bearer ${token}`,
             },
             onStompError: (frame) => {
-                console.error("STOMP error:", frame.headers["message"], frame.body);
+                console.error("[STOMP] Broker error:", frame.headers["message"], frame.body);
+            },
+            onConnect: () => {
+                console.log("[STOMP] Conexiune deschisă, subscribe pe /user/" + username + "/queue/notifications");
+                // 3) Mă abonăm pe canalul user‐specific
+                stompClient.subscribe(`/user/${username}/queue/notifications`, (message) => {
+                    console.log("[STOMP] Mesaj recepționat:", message.body);
+                    try {
+                        const notif = JSON.parse(message.body);
+                        setNotifications((prev) => [notif, ...prev]);
+                        setUnreadCount((prev) => prev + 1);
+                    } catch (e) {
+                        console.error("Nu s-a putut parsa notificarea:", e);
+                    }
+                });
             },
         });
 
         stompClient.activate();
 
-        // 5) Curățăm la demontare
+        // 4) Cleanup la demontare
         return () => {
+            console.log("[STOMP] Deactivare STOMP client");
             stompClient.deactivate();
         };
     }, []);
@@ -107,7 +100,7 @@ const NotificationBell = () => {
     };
 
     const handleMarkAsRead = (id) => {
-        fetch(`/notifications/${id}/read`, {
+        fetch(`${BACKEND_URL}/notifications/${id}/read`, {
             method: "PUT",
             headers: {
                 Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -115,7 +108,7 @@ const NotificationBell = () => {
         })
             .then((res) => {
                 if (!res.ok) {
-                    console.error(`Failed to mark notification ${id} as read (status ${res.status})`);
+                    console.error(`Eșec la marcarea notificării ${id} ca citită (status ${res.status})`);
                     return;
                 }
                 setNotifications((prev) =>
@@ -123,9 +116,7 @@ const NotificationBell = () => {
                 );
                 setUnreadCount((prev) => Math.max(prev - 1, 0));
             })
-            .catch((err) =>
-                console.error(`❌ Error marking notification ${id} as read:`, err)
-            );
+            .catch((err) => console.error(`Eroare la PUT /notifications/${id}/read:`, err));
     };
 
     return (
@@ -144,8 +135,8 @@ const NotificationBell = () => {
                     ) : (
                         notifications.slice(0, 10).map((notif) => (
                             <div
-                                className={`notif-item ${notif.read ? "read" : ""}`}
                                 key={notif.id}
+                                className={`notif-item ${notif.read ? "read" : ""}`}
                             >
                                 <div className="notif-header">
                                     <strong>{notif.title}</strong>
