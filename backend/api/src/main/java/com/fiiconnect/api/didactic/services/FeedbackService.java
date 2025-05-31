@@ -1,6 +1,6 @@
 package com.fiiconnect.api.didactic.services;
 
-import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
+import com.fiiconnect.api.auth_userMgmt.dtos.personDTO.PersonInfoDTO;
 import com.fiiconnect.api.didactic.models.FeedbackCompositeKey;
 import org.springframework.stereotype.Service;
 

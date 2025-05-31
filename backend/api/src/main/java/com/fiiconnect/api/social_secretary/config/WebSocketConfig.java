@@ -19,7 +19,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws")
+        registry
+                .addEndpoint("/ws")
                 .addInterceptors(new JwtHandshakeInterceptor(jwtService))
                 .setAllowedOriginPatterns("*")
                 .withSockJS();
@@ -27,7 +28,17 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
+        // 1) Prefix pentru destinațiile “de aplicație” (trimise de client cu /app/…)
         registry.setApplicationDestinationPrefixes("/app");
-        registry.enableSimpleBroker("/topic","/topic/channel");///toate locatiile in care trimitem trb sa inceapa cu asta
+
+        // 2) Prefix pentru mesajele “user‐specific”.
+        //    ConvertAndSendToUser("/queue/notifications") va ajunge la "/user/{username}/queue/notifications"
+        registry.setUserDestinationPrefix("/user");
+
+        // 3) Activăm brokerul simplu pentru /topic și /queue (toate destinațiile unde vrem să primească clientul)
+        registry.enableSimpleBroker("/topic", "/queue", "/topic/channel");
+        //    - "/topic" (dacă ai publish/generic topics)
+        //    - "/queue" (destinații unicast pe fiecare user, ex. "/user/{username}/queue/notifications")
+        //    - "/topic/channel" (orice alt topic specific ție, dacă ai nevoie)
     }
 }

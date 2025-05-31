@@ -1,32 +1,35 @@
 package com.fiiconnect.api.auth_userMgmt.controllers;
 
 import com.fiiconnect.api.auth_userMgmt.core.ApiResponse;
-import com.fiiconnect.api.auth_userMgmt.dtos.LoginDTO;
-import com.fiiconnect.api.auth_userMgmt.dtos.RegisterDTO;
+import com.fiiconnect.api.auth_userMgmt.core.AuthResponse;
+import com.fiiconnect.api.auth_userMgmt.dtos.authDTO.LoginDTO;
+import com.fiiconnect.api.auth_userMgmt.dtos.authDTO.RegisterDTO;
+import com.fiiconnect.api.auth_userMgmt.exceptions.UserNotFoundException;
+import com.fiiconnect.api.auth_userMgmt.models.PasswordResetToken;
+import com.fiiconnect.api.didactic.models.Professor;
 import com.fiiconnect.api.auth_userMgmt.models.Role;
+import com.fiiconnect.api.didactic.models.Student;
 import com.fiiconnect.api.auth_userMgmt.models.User;
 import com.fiiconnect.api.auth_userMgmt.models.UserProfile;
+import com.fiiconnect.api.auth_userMgmt.repositories.PasswordResetTokenRepository;
+import com.fiiconnect.api.didactic.repositories.ProfessorRepository;
 import com.fiiconnect.api.auth_userMgmt.repositories.RoleRepository;
+import com.fiiconnect.api.didactic.repositories.StudentRepository;
 import com.fiiconnect.api.auth_userMgmt.repositories.UserProfileRepository;
 import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository;
 import com.fiiconnect.api.auth_userMgmt.services.EmailService;
-import com.fiiconnect.api.auth_userMgmt.core.AuthResponse;
 import com.fiiconnect.api.auth_userMgmt.services.JwtService;
 import com.fiiconnect.api.auth_userMgmt.services.TwoFactorAuthenticationService;
 import com.fiiconnect.api.auth_userMgmt.validators.EmailValidator;
-import com.fiiconnect.api.auth_userMgmt.validators.IbanValidator;
 import com.fiiconnect.api.auth_userMgmt.validators.PasswordValidator;
-import com.fiiconnect.api.auth_userMgmt.models.PasswordResetToken;
-import com.fiiconnect.api.auth_userMgmt.repositories.PasswordResetTokenRepository;
-import com.fiiconnect.api.didactic.models.Professor;
-import com.fiiconnect.api.didactic.models.Student;
-import com.fiiconnect.api.didactic.repositories.ProfessorRepository;
-import com.fiiconnect.api.didactic.repositories.StudentRepository;
 import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -37,39 +40,21 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class AuthController {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordResetTokenRepository tokenRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final TwoFactorAuthenticationService twoFactorAuthenticationService;
+    private final JwtService jwtService;
+    private final EmailService emailService;
+    private final StudentRepository studentRepository;
+    private final ProfessorRepository professorRepository;
+    private final UserProfileRepository userProfileRepository;
 
-    @Autowired
-    private RoleRepository roleRepository;
-
-    @Autowired
-    private PasswordResetTokenRepository tokenRepository;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private TwoFactorAuthenticationService twoFactorAuthenticationService;
-
-    @Autowired
-    private JwtService jwtService;
-
-    @Autowired
-    private EmailService emailService;
-
-    @Autowired
-    private StudentRepository studentRepository;
-
-    @Autowired
-    private ProfessorRepository professorRepository;
-
-    @Autowired
-    private UserProfileRepository userProfileRepository;
-
-    // Test Token Repository
+    // Verifică că bean-ul de token funcționează
     @PostConstruct
     public void testTokenRepo() {
         tokenRepository.count();
@@ -78,8 +63,9 @@ public class AuthController {
     @PostMapping("/2fa/start")
     public ResponseEntity<?> start2FA(@RequestHeader("Authorization") String authHeader) {
         User user = validateAndGetUser(authHeader);
-        if (user.isTwoFactorEnabled())
+        if (user.isTwoFactorEnabled()) {
             return ResponseEntity.badRequest().body(new ApiResponse("2FA este deja activ.", false));
+        }
 
         String secret = twoFactorAuthenticationService.generateSecretKey();
         user.setPendingTwoFactorSecret(secret);
@@ -90,17 +76,20 @@ public class AuthController {
     }
 
     @PostMapping("/2fa/confirm")
-    public ResponseEntity<?> confirm2FA(@RequestHeader("Authorization") String authHeader,
-                                        @RequestBody Map<String,String> body) {
+    public ResponseEntity<?> confirm2FA(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody Map<String, String> body) {
+
         User user = validateAndGetUser(authHeader);
         String code = body.get("code");
-
         String pending = user.getPendingTwoFactorSecret();
-        if (pending == null)
-            return ResponseEntity.badRequest().body(new ApiResponse("Nu ai început configurarea 2FA.", false));
 
-        if (!twoFactorAuthenticationService.verifyCode(pending, code))
+        if (pending == null) {
+            return ResponseEntity.badRequest().body(new ApiResponse("Nu ai început configurarea 2FA.", false));
+        }
+        if (!twoFactorAuthenticationService.verifyCode(pending, code)) {
             return ResponseEntity.status(401).body(new ApiResponse("Cod 2FA invalid.", false));
+        }
 
         user.setTwoFactorSecret(pending);
         user.setPendingTwoFactorSecret(null);
@@ -125,11 +114,13 @@ public class AuthController {
     }
 
     private User validateAndGetUser(String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer "))
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             throw new RuntimeException("Token lipsă");
-        String username = jwtService.extractUsername(authHeader.substring(7));
-        return Optional.ofNullable(userRepository.findByUsername(username))
-                .orElseThrow(() -> new RuntimeException("User inexistent"));
+        }
+        String token = authHeader.substring(7);
+        String username = jwtService.extractUsername(token);
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
     }
 
     @PostMapping("/disable-2fa")
@@ -146,14 +137,11 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new ApiResponse("Token invalid.", false));
         }
 
-        User user = userRepository.findByUsername(username);
-        if (user == null) {
-            return ResponseEntity.status(404).body(new ApiResponse("Utilizator inexistent.", false));
-        }
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
 
         user.setTwoFactorSecret(null);
         user.setTwoFactorEnabled(false);
-
 
         UserProfile profile = user.getProfile();
         if (profile != null) {
@@ -162,21 +150,16 @@ public class AuthController {
         }
 
         userRepository.save(user);
-
-
         return ResponseEntity.ok(new ApiResponse("2FA a fost dezactivat cu succes.", true));
     }
 
-
-
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestParam String email) {
-        Optional<User> userOptional = Optional.ofNullable(userRepository.findByEmail(email));
-        if (userOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body("User not found");
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new UserNotFoundException(email);
         }
 
-        User user = userOptional.get();
         tokenRepository.deleteByUser(user);
 
         String token = UUID.randomUUID().toString();
@@ -186,31 +169,20 @@ public class AuthController {
         resetToken.setExpirationDate(LocalDateTime.now().plusMinutes(30));
         tokenRepository.save(resetToken);
 
-        // Link pentru email
-        String resetLink = "http://localhost:34101/reset-password?token=" + token;
-
-        // Trimite email
         emailService.sendResetPasswordEmail(email, token);
-
         return ResponseEntity.ok("Link-ul de resetare a fost trimis pe email.");
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestParam String token, @RequestParam String newPassword) {
-        Optional<PasswordResetToken> resetTokenOptional = tokenRepository.findByToken(token);
-
-        if (resetTokenOptional.isEmpty()) {
-            return ResponseEntity.badRequest().body("Invalid token");
-        }
-
-        PasswordResetToken resetToken = resetTokenOptional.get();
+        PasswordResetToken resetToken = tokenRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Invalid token"));
 
         if (resetToken.getExpirationDate().isBefore(LocalDateTime.now())) {
             return ResponseEntity.badRequest().body("Token expired");
         }
 
         User user = resetToken.getUser();
-
         if (passwordEncoder.matches(newPassword, user.getPassword())) {
             return ResponseEntity.badRequest().body("Noua parolă nu poate fi aceeași cu parola curentă.");
         }
@@ -219,29 +191,27 @@ public class AuthController {
         userRepository.save(user);
         tokenRepository.delete(resetToken);
 
-        return ResponseEntity.ok(   "Password reset successfully");
+        return ResponseEntity.ok("Password reset successfully");
     }
 
     @PostMapping("/change-password")
-    public ResponseEntity<?> changePassword(@RequestHeader("Authorization") String authHeader,
-                                            @RequestBody Map<String, String> body) {
-        User user = validateAndGetUser(authHeader);
+    public ResponseEntity<?> changePassword(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody Map<String, String> body) {
 
+        User user = validateAndGetUser(authHeader);
         String oldPassword = body.get("oldPassword");
         String newPassword = body.get("newPassword");
 
         if (oldPassword == null || newPassword == null) {
             return ResponseEntity.badRequest().body(new ApiResponse("Ambele parole sunt necesare.", false));
         }
-
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             return ResponseEntity.status(401).body(new ApiResponse("Parola veche este incorectă.", false));
         }
-
         if (passwordEncoder.matches(newPassword, user.getPassword())) {
             return ResponseEntity.badRequest().body(new ApiResponse("Noua parolă nu poate fi aceeași cu cea veche.", false));
         }
-
         if (!PasswordValidator.isValid(newPassword)) {
             return ResponseEntity.badRequest().body(
                     new ApiResponse("Parola trebuie să conțină minim 8 caractere, o literă mare, una mică, o cifră și un simbol.", false)
@@ -250,46 +220,43 @@ public class AuthController {
 
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
-
         return ResponseEntity.ok(new ApiResponse("Parola a fost schimbată cu succes.", true));
     }
-
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse> registerUser(@RequestBody RegisterDTO registerRequest) {
         try {
-            if (registerRequest.getUsername() == null || registerRequest.getPassword() == null || registerRequest.getEmail() == null || registerRequest.getRole() == null) {
-                return ResponseEntity.badRequest().body(
-                        new ApiResponse("Username, email, parola și rolul sunt necesare.", false));
+            if (registerRequest.getUsername() == null
+                    || registerRequest.getPassword() == null
+                    || registerRequest.getEmail() == null
+                    || registerRequest.getRole() == null) {
+                return ResponseEntity.badRequest()
+                        .body(new ApiResponse("Username, email, parola și rolul sunt necesare.", false));
             }
 
             if (userRepository.findByEmail(registerRequest.getEmail()) != null) {
-                return ResponseEntity.badRequest().body(
-                        new ApiResponse("Emailul este deja folosit.", false));
+                return ResponseEntity.badRequest()
+                        .body(new ApiResponse("Emailul este deja folosit.", false));
             }
-
             if (!PasswordValidator.isValid(registerRequest.getPassword())) {
-                return ResponseEntity.badRequest().body(
-                        new ApiResponse("Parola trebuie să conțină minim 8 caractere, o literă mare, una mică, o cifră și un simbol.", false));
+                return ResponseEntity.badRequest()
+                        .body(new ApiResponse("Parola trebuie să conțină minim 8 caractere, o literă mare, una mică, o cifră și un simbol.", false));
             }
-
             if (!EmailValidator.isValid(registerRequest.getEmail())) {
-                return ResponseEntity.badRequest().body(
-                        new ApiResponse("Email invalid.", false));
+                return ResponseEntity.badRequest()
+                        .body(new ApiResponse("Email invalid.", false));
             }
-
-            if (userRepository.findByUsername(registerRequest.getUsername()) != null) {
-                return ResponseEntity.badRequest().body(
-                        new ApiResponse("Username-ul este deja folosit.", false));
+            if (userRepository.findByUsername(registerRequest.getUsername()).isPresent()) {
+                return ResponseEntity.badRequest()
+                        .body(new ApiResponse("Username-ul este deja folosit.", false));
             }
 
             Role role = roleRepository.findByRoleName("ROLE_" + registerRequest.getRole().toUpperCase());
             if (role == null) {
-                return ResponseEntity.badRequest().body(
-                        new ApiResponse("Rol invalid. Roluri posibile: STUDENT sau PROFESOR.", false));
+                return ResponseEntity.badRequest()
+                        .body(new ApiResponse("Rol invalid. Roluri posibile: STUDENT sau PROFESOR.", false));
             }
 
-            //users
             User user = new User();
             user.setUsername(registerRequest.getUsername());
             user.setEmail(registerRequest.getEmail());
@@ -303,8 +270,6 @@ public class AuthController {
                         .orElseThrow(() -> new IllegalArgumentException("Studentul nu există"));
                 user.setStudent(student);
             }
-
-
             if (role.getRoleName().equals("ROLE_PROFESOR")) {
                 Professor prof = professorRepository.findById(registerRequest.getProfessorId())
                         .orElseThrow(() -> new IllegalArgumentException("Profesorul nu există"));
@@ -312,12 +277,13 @@ public class AuthController {
             }
 
             userRepository.save(user);
-
-            return ResponseEntity.ok(new ApiResponse("Register successful. Username: " + registerRequest.getUsername() + ", Password: " + registerRequest.getPassword(), true));
+            return ResponseEntity.ok(
+                    new ApiResponse("Register successful. Username: " + registerRequest.getUsername() + ", Password: " + registerRequest.getPassword(), true)
+            );
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(500).body(
-                    new ApiResponse("Eroare internă: " + e.getMessage(), false));
+            return ResponseEntity.status(500)
+                    .body(new ApiResponse("Eroare internă: " + e.getMessage(), false));
         }
     }
 
@@ -325,6 +291,7 @@ public class AuthController {
     @Transactional
     public ResponseEntity<ApiResponse> registerMultipleUsers(
             @RequestBody List<RegisterDTO> registerRequests) {
+
         if (registerRequests == null || registerRequests.isEmpty()) {
             return ResponseEntity.badRequest()
                     .body(new ApiResponse("Lista de înregistrări este goală.", false));
@@ -334,38 +301,31 @@ public class AuthController {
             List<String> createdUsers = new ArrayList<>();
 
             for (RegisterDTO req : registerRequests) {
-                // validări de bază
-                if (req.getUsername() == null || req.getPassword() == null
-                        || req.getEmail() == null || req.getRole() == null) {
-                    throw new IllegalArgumentException(
-                            "Toate câmpurile (username, email, parola, rol) sunt necesare.");
+                if (req.getUsername() == null
+                        || req.getPassword() == null
+                        || req.getEmail() == null
+                        || req.getRole() == null) {
+                    throw new IllegalArgumentException("Toate câmpurile (username, email, parola, rol) sunt necesare.");
                 }
                 if (userRepository.findByEmail(req.getEmail()) != null) {
-                    throw new IllegalArgumentException(
-                            "Email-ul este deja folosit: " + req.getEmail());
+                    throw new IllegalArgumentException("Email-ul este deja folosit: " + req.getEmail());
                 }
-                if (userRepository.findByUsername(req.getUsername()) != null) {
-                    throw new IllegalArgumentException(
-                            "Username-ul este deja folosit: " + req.getUsername());
+                if (userRepository.findByUsername(req.getUsername()).isPresent()) {
+                    throw new IllegalArgumentException("Username-ul este deja folosit: " + req.getUsername());
                 }
                 if (!PasswordValidator.isValid(req.getPassword())) {
-                    throw new IllegalArgumentException(
-                            "Parola trebuie să conțină minim 8 caractere, o literă mare, una mică, o cifră și un simbol.");
+                    throw new IllegalArgumentException("Parola trebuie să conțină minim 8 caractere, o literă mare, una mică, o cifră și un simbol.");
                 }
                 if (!EmailValidator.isValid(req.getEmail())) {
                     throw new IllegalArgumentException("Email invalid: " + req.getEmail());
                 }
 
-                // rol
                 String roleName = "ROLE_" + req.getRole().toUpperCase();
                 Role role = roleRepository.findByRoleName(roleName);
                 if (role == null) {
-                    throw new IllegalArgumentException(
-                            "Rol invalid pentru utilizatorul " + req.getUsername()
-                                    + ". Roluri posibile: STUDENT sau PROFESSOR.");
+                    throw new IllegalArgumentException("Rol invalid pentru utilizatorul " + req.getUsername() + ". Roluri posibile: STUDENT sau PROFESSOR.");
                 }
 
-                // creare user
                 User user = new User();
                 user.setUsername(req.getUsername());
                 user.setEmail(req.getEmail());
@@ -374,16 +334,13 @@ public class AuthController {
                 user.setActive(true);
                 user.setTwoFactorSecret(null);
 
-                // asociere Student / Professor
                 if ("ROLE_STUDENT".equals(roleName)) {
                     Student student = studentRepository.findById(req.getStudentId())
-                            .orElseThrow(() -> new IllegalArgumentException(
-                                    "Studentul nu există: " + req.getStudentId()));
+                            .orElseThrow(() -> new IllegalArgumentException("Studentul nu există: " + req.getStudentId()));
                     user.setStudent(student);
                 } else if ("ROLE_PROFESSOR".equals(roleName)) {
                     Professor prof = professorRepository.findById(req.getProfessorId())
-                            .orElseThrow(() -> new IllegalArgumentException(
-                                    "Profesorul nu există: " + req.getProfessorId()));
+                            .orElseThrow(() -> new IllegalArgumentException("Profesorul nu există: " + req.getProfessorId()));
                     user.setProfessor(prof);
                 }
 
@@ -391,30 +348,21 @@ public class AuthController {
                 createdUsers.add(req.getUsername());
             }
 
-            return ResponseEntity.ok(new ApiResponse(
-                    "Au fost create conturile: " + String.join(", ", createdUsers), true));
-
+            return ResponseEntity.ok(new ApiResponse("Au fost create conturile: " + String.join(", ", createdUsers), true));
         } catch (IllegalArgumentException ex) {
-            // aruncă RuntimeException pentru a forța rollback
             throw new RuntimeException(ex.getMessage(), ex);
         } catch (Exception ex) {
-            // altă eroare neașteptată
             throw new RuntimeException("Eroare internă la creare: " + ex.getMessage(), ex);
         }
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDTO loginRequest) {
-        User user = userRepository.findByUsername(loginRequest.getUsername());
-
-        if (user == null) {
-            return ResponseEntity.status(401).body(
-                    new ApiResponse("User inexistent.", false));
-        }
+        User user = userRepository.findByUsername(loginRequest.getUsername())
+                .orElseThrow(() -> new UserNotFoundException(loginRequest.getUsername()));
 
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            return ResponseEntity.status(401).body(
-                    new ApiResponse("Parolă greșită.", false));
+            return ResponseEntity.status(401).body(new ApiResponse("Parolă greșită.", false));
         }
 
         if (user.isTwoFactorEnabled()) {
@@ -432,21 +380,18 @@ public class AuthController {
 
         Map<String, Object> response = new HashMap<>();
         response.put("token", jwtToken);
-        response.put("user", Map.of(
-                "username", user.getUsername()
-        ));
+        response.put("user", Map.of("username", user.getUsername()));
 
         return ResponseEntity.ok(response);
     }
 
-
     @PostMapping("/login/verify")
     public ResponseEntity<?> verifyTwoFactor(@RequestBody LoginDTO loginRequest) {
-        User user = userRepository.findByUsername(loginRequest.getUsername());
+        User user = userRepository.findByUsername(loginRequest.getUsername())
+                .orElseThrow(() -> new UserNotFoundException(loginRequest.getUsername()));
 
-        if (user == null || !user.isTwoFactorEnabled() || user.getTwoFactorSecret() == null) {
-            return ResponseEntity.status(401)
-                    .body(new ApiResponse("2FA nu e activat.", false));
+        if (!user.isTwoFactorEnabled() || user.getTwoFactorSecret() == null) {
+            return ResponseEntity.status(401).body(new ApiResponse("2FA nu e activat.", false));
         }
 
         boolean ok = twoFactorAuthenticationService.verifyCode(
@@ -455,8 +400,7 @@ public class AuthController {
         );
 
         if (!ok) {
-            return ResponseEntity.status(401)
-                    .body(new ApiResponse("Cod 2FA invalid.", false));
+            return ResponseEntity.status(401).body(new ApiResponse("Cod 2FA invalid.", false));
         }
 
         user.setActive(true);
@@ -469,7 +413,6 @@ public class AuthController {
         String jwtToken = jwtService.generateToken(user.getUsername(), authorities);
         return ResponseEntity.ok(new AuthResponse(jwtToken));
     }
-
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader) {
@@ -485,15 +428,12 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new ApiResponse("Token invalid.", false));
         }
 
-        User user = userRepository.findByUsername(username);
-        if (user == null) {
-            return ResponseEntity.status(404).body(new ApiResponse("Utilizator inexistent.", false));
-        }
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
 
         user.setActive(false);
         userRepository.save(user);
 
         return ResponseEntity.ok(new ApiResponse("Utilizator delogat și dezactivat.", true));
     }
-
 }

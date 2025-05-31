@@ -1,7 +1,7 @@
 package com.fiiconnect.api.didactic.controllers;
 
 import com.fiiconnect.api.auth_userMgmt.controllers.PersonController;
-import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
+import com.fiiconnect.api.auth_userMgmt.dtos.personDTO.PersonInfoDTO;
 import com.fiiconnect.api.didactic.exceptions.FeedbackForProfessorNotFound;
 import com.fiiconnect.api.didactic.exceptions.FeedbackFromStudentNotFound;
 import com.fiiconnect.api.didactic.exceptions.FeedbackNotFound;
@@ -10,14 +10,12 @@ import com.fiiconnect.api.didactic.models.Feedback;
 import com.fiiconnect.api.didactic.models.FeedbackCompositeKey;
 import com.fiiconnect.api.didactic.repositories.FeedbackRepository;
 import com.fiiconnect.api.didactic.services.FeedbackService;
-import jakarta.websocket.server.PathParam;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController

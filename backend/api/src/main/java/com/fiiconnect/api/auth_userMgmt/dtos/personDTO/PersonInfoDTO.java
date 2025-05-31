@@ -1,8 +1,7 @@
-package com.fiiconnect.api.auth_userMgmt.dtos;
+package com.fiiconnect.api.auth_userMgmt.dtos.personDTO;
 
 import com.fiiconnect.api.social_secretary.DTO.TagDTO;
 
-import java.util.List;
 import java.util.Set;
 
 public record PersonInfoDTO(

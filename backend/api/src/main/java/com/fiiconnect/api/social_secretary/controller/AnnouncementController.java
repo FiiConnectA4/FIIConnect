@@ -1,18 +1,12 @@
 package com.fiiconnect.api.social_secretary.controller;
-import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
-import com.fiiconnect.api.auth_userMgmt.dtos.ProfessorDTO;
-import com.fiiconnect.api.auth_userMgmt.models.User;
 import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository;
 import com.fiiconnect.api.social_secretary.DTO.AnnouncementDTO;
-import com.fiiconnect.api.social_secretary.DTO.TagDTO;
 import com.fiiconnect.api.social_secretary.classes.Announcement;
-import com.fiiconnect.api.social_secretary.classes.Tag;
 import com.fiiconnect.api.social_secretary.service.AnnouncementService;
 import com.fiiconnect.api.social_secretary.service.TagService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.util.*;
 
 @RestController

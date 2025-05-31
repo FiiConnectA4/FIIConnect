@@ -1,5 +1,6 @@
 package com.fiiconnect.api.auth_userMgmt.controllers;
 
+import com.fiiconnect.api.auth_userMgmt.exceptions.UserNotFoundException;
 import com.fiiconnect.api.auth_userMgmt.models.Role;
 import com.fiiconnect.api.auth_userMgmt.models.User;
 import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository;
@@ -17,7 +18,7 @@ import java.util.*;
 public class AdminController {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserRepository userRepo;
 
     @GetMapping("/status")
     @PreAuthorize("hasRole('ADMIN')")
@@ -33,14 +34,15 @@ public class AdminController {
     @GetMapping("/users-count")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getUsersCount() {
-        long count = userRepository.count();
+        long count = userRepo.count();
         return ResponseEntity.ok(Map.of("count", count));
     }
 
     @GetMapping("/user/{username}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getUserByUsername(@PathVariable String username) {
-        User user = userRepository.findByUsername(username);
+        User user = userRepo.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
         if (user == null) {
             return ResponseEntity.status(404).body(Map.of("error", "Utilizator inexistent"));
         }
@@ -62,7 +64,7 @@ public class AdminController {
     @GetMapping("/recent-users")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getRecentUsers() {
-        List<User> recent = userRepository.findTop5ByOrderByIdDesc();
+        List<User> recent = userRepo.findTop5ByOrderByIdDesc();
 
         List<Map<String, Object>> result = recent.stream().map(user -> {
             String role = user.getRoles().stream()

@@ -1,6 +1,6 @@
 package com.fiiconnect.api.didactic.services;
 
-import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
+import com.fiiconnect.api.auth_userMgmt.dtos.personDTO.PersonInfoDTO;
 import com.fiiconnect.api.didactic.repositories.TeachingRepository;
 import com.fiiconnect.api.didactic.models.Professor;
 import com.fiiconnect.api.didactic.models.Teaching;

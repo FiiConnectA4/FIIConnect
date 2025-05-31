@@ -1,108 +1,123 @@
 package com.fiiconnect.api.auth_userMgmt.controllers;
 
-import com.fiiconnect.api.auth_userMgmt.dtos.BulkNotificationRequest;
-import com.fiiconnect.api.auth_userMgmt.dtos.NotificationResponse;
-import com.fiiconnect.api.auth_userMgmt.models.Notification;
+import com.fiiconnect.api.auth_userMgmt.dtos.notificationDTO.BulkNotificationRequest;
+import com.fiiconnect.api.auth_userMgmt.dtos.notificationDTO.NotificationResponse;
+import com.fiiconnect.api.auth_userMgmt.exceptions.NotificationNotFoundException;
+import com.fiiconnect.api.auth_userMgmt.exceptions.UserNotFoundException;
 import com.fiiconnect.api.auth_userMgmt.models.User;
-import com.fiiconnect.api.auth_userMgmt.repositories.NotificationRepository;
 import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository;
 import com.fiiconnect.api.auth_userMgmt.services.NotificationService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.annotation.security.RolesAllowed;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/notifications")
 @RequiredArgsConstructor
 public class NotificationController {
 
-    private final NotificationRepository notificationRepo;
-    private final UserRepository userRepo;
     private final NotificationService notificationService;
+    private final UserRepository userRepo;
 
-    // ✅ [POST] Trimitere notificări bulk (ADMIN / PROFESSOR)
+    /**
+     * [POST] /notifications/send
+     * Trimite notificări bulk către o listă de useri.
+     * Acces: ADMIN sau PROFESSOR.
+     * Service-ul poate arunca UserNotFoundException sau alte erori pe bază de validări.
+     */
     @PostMapping("/send")
     @RolesAllowed({"ADMIN", "PROFESSOR"})
     public ResponseEntity<List<NotificationResponse>> sendBulk(@RequestBody BulkNotificationRequest req) {
+        // Dacă unul dintre recipientIds nu există, service va arunca UserNotFoundException
         List<NotificationResponse> dtos = notificationService.sendBulk(req);
         return ResponseEntity.ok(dtos);
     }
 
+    /**
+     * [DELETE] /notifications/{id}
+     * Șterge o singură notificare după ID.
+     * Acces: doar utilizatorul care deține notificarea sau un ADMIN/PROFESOR.
+     * Service-ul poate arunca NotificationNotFoundException (→ 404) sau AccessDeniedException (→ 403).
+     */
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteNotification(@PathVariable Long id) {
-        if (!notificationRepo.existsById(id)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Notificarea nu a fost găsită.");
-        }
-
-        notificationRepo.deleteById(id);
-        return ResponseEntity.ok("Notificarea a fost ștearsă.");
+    public ResponseEntity<Void> deleteNotification(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        // Dacă notificarea nu există, service va arunca NotificationNotFoundException
+        // Dacă utilizatorul nu are permisiunea, se aruncă AccessDeniedException
+        notificationService.deleteNotificationById(id, userDetails.getUsername());
+        return ResponseEntity.noContent().build();
     }
 
+    /**
+     * [DELETE] /notifications/user/{userId}
+     * Șterge toate notificările asociate unui utilizator.
+     * Acces: doar ADMIN / PROFESSOR
+     * Service-ul poate arunca UserNotFoundException (→ 404).
+     */
     @DeleteMapping("/user/{userId}")
-    public ResponseEntity<String> deleteAllNotificationsByUser(@PathVariable Long userId) {
-        User user = userRepo.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Utilizatorul nu a fost găsit"));
-
-        List<Notification> notifications = notificationRepo.findByRecipient(user);
-        notificationRepo.deleteAll(notifications);
-
-        return ResponseEntity.ok("Toate notificările au fost șterse pentru utilizator.");
+    @RolesAllowed({"ADMIN", "PROFESSOR"})
+    public ResponseEntity<Void> deleteAllByUser(@PathVariable Long userId) {
+        // Dacă user-ul cu userId nu există, service aruncă UserNotFoundException
+        notificationService.deleteAllNotificationsForUser(userId);
+        return ResponseEntity.noContent().build();
     }
 
-
-
-    // ✅ [GET] Toate notificările necitite ale utilizatorului autentificat
+    /**
+     * [GET] /notifications/unread
+     * Returnează toate notificările necitite ale utilizatorului autentificat.
+     * Acces: orice utilizator autentificat.
+     * Dacă user-ul nu există, aruncă UserNotFoundException (→ 404).
+     */
     @GetMapping("/unread")
-    public ResponseEntity<List<NotificationResponse>> getUnread(@AuthenticationPrincipal UserDetails userDetails) {
-        User user = userRepo.findByUsername(userDetails.getUsername());
-
-        List<NotificationResponse> dtos = notificationRepo
-                .findByRecipientAndReadFalse(user)
-                .stream()
-                .map(this::mapToDto)
-                .collect(Collectors.toList());
-
+    public ResponseEntity<List<NotificationResponse>> getUnread(
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        User user = userRepo.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
+        List<NotificationResponse> dtos = notificationService.getUnreadNotifications(user);
         return ResponseEntity.ok(dtos);
     }
 
-    // ✅ [PUT] Marchează o notificare ca "citită"
+    /**
+     * [PUT] /notifications/{id}/read
+     * Marchează o notificare ca „read” (citită).
+     * Acces: doar utilizatorul care deține notificarea sau ADMIN/PROFESOR.
+     * Service-ul poate arunca NotificationNotFoundException (→ 404) sau AccessDeniedException (→ 403).
+     */
     @PutMapping("/{id}/read")
-    public ResponseEntity<?> markAsRead(@PathVariable Long id) {
-        Notification notif = notificationRepo.findById(id)
-                .orElseThrow(() -> new RuntimeException("Not found"));
-        notif.setRead(true);
-        notificationRepo.save(notif);
+    public ResponseEntity<Void> markAsRead(
+            @PathVariable Long id,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        notificationService.markAsRead(id, userDetails.getUsername());
         return ResponseEntity.ok().build();
     }
 
-    // ✅ [GET] Returnează notificări filtrate după `read` și limitate
+    /**
+     * [GET] /notifications?limit={limit}&read={true|false}
+     * Returnează notificări filtrate după starea „read” (dacă e specificat) și limitate la 'limit' intrări.
+     * Rezultatele sunt ordonate descrescător după timestamp.
+     * Acces: doar utilizatorul care le primește.
+     * Dacă user-ul nu există, aruncă UserNotFoundException (→ 404).
+     */
     @GetMapping
     public ResponseEntity<List<NotificationResponse>> getLimitedNotifications(
             @AuthenticationPrincipal UserDetails userDetails,
             @RequestParam(defaultValue = "10") int limit,
             @RequestParam(required = false) Boolean read
     ) {
-        User user = userRepo.findByUsername(userDetails.getUsername());
-        List<NotificationResponse> dtos = notificationService.getLimitedNotifications(user, limit, read);
+        User user = userRepo.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
+        List<NotificationResponse> dtos =
+                notificationService.getLimitedNotifications(user, limit, read);
         return ResponseEntity.ok(dtos);
-    }
-
-    // 🔄 Conversie Notification → DTO
-    private NotificationResponse mapToDto(Notification notif) {
-        return new NotificationResponse(
-                notif.getId(),
-                notif.getTitle(),
-                notif.getContent(),
-                notif.getType(),
-                notif.isRead(),
-                notif.getTimestamp()
-        );
     }
 }

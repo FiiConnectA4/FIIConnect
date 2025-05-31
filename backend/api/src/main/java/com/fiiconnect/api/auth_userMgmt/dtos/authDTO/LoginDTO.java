@@ -1,4 +1,4 @@
-package com.fiiconnect.api.auth_userMgmt.dtos;
+package com.fiiconnect.api.auth_userMgmt.dtos.authDTO;
 
 import lombok.Getter;
 import lombok.Setter;

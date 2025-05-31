@@ -1,6 +1,11 @@
 package com.fiiconnect.api.auth_userMgmt.controllers;
 
-import com.fiiconnect.api.auth_userMgmt.dtos.*;
+import com.fiiconnect.api.auth_userMgmt.dtos.authDTO.UnassignedPersonDTO;
+import com.fiiconnect.api.auth_userMgmt.dtos.personDTO.PersonInfoDTO;
+import com.fiiconnect.api.auth_userMgmt.dtos.personDTO.PersonRoleDTO;
+import com.fiiconnect.api.auth_userMgmt.dtos.personDTO.ProfessorDTO;
+import com.fiiconnect.api.auth_userMgmt.dtos.personDTO.StudentDTO;
+import com.fiiconnect.api.auth_userMgmt.exceptions.UserNotFoundException;
 import com.fiiconnect.api.auth_userMgmt.models.Role;
 import com.fiiconnect.api.auth_userMgmt.models.User;
 import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository;
@@ -10,28 +15,23 @@ import com.fiiconnect.api.didactic.repositories.ProfessorRepository;
 import com.fiiconnect.api.didactic.repositories.StudentRepository;
 import com.fiiconnect.api.social_secretary.DTO.TagDTO;
 import jakarta.annotation.security.RolesAllowed;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/person")
+@RequiredArgsConstructor
 public class PersonController {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private StudentRepository studentRepository;
-
-    @Autowired
-    private ProfessorRepository professorRepository;
+    private final UserRepository userRepository;
+    private final StudentRepository studentRepository;
+    private final ProfessorRepository professorRepository;
 
     @GetMapping("/get-all")
     @RolesAllowed("ROLE_ADMIN")
@@ -59,7 +59,6 @@ public class PersonController {
                             .map(tag -> new TagDTO(tag.getId(), tag.getName(), tag.getType()))
                             .collect(Collectors.toSet());
 
-                    // <-- pass u.getId() as first arg
                     return new PersonRoleDTO(
                             u.getId(),
                             lastName,
@@ -115,36 +114,46 @@ public class PersonController {
         return ResponseEntity.ok(result);
     }
 
-
     @GetMapping("/student/{userId}")
     public ResponseEntity<?> getStudentInfo(@PathVariable Long userId) {
-        Optional<User> userOpt = userRepository.findById(userId);
-        if (userOpt.isEmpty() || userOpt.get().getStudent() == null) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        if (user.getStudent() == null) {
             return ResponseEntity.notFound().build();
         }
-        Student s = studentRepository.findById(userOpt.get().getStudent().getId()).orElse(null);
+        Student s = studentRepository.findById(user.getStudent().getId())
+                .orElseThrow(() -> new UserNotFoundException("Student for user " + userId));
 
         return ResponseEntity.ok(new StudentDTO(
-                s.getId(), s.getCnp(), s.getRegNumber(),
-                s.getFirstName(), s.getLastName(),
-                s.getYear(), s.getFacultyGroup()
+                s.getId(),
+                s.getCnp(),
+                s.getRegNumber(),
+                s.getFirstName(),
+                s.getLastName(),
+                s.getYear(),
+                s.getFacultyGroup()
         ));
     }
 
     @GetMapping("/professor/{userId}")
     public ResponseEntity<?> getProfessorInfo(@PathVariable Long userId) {
-        Optional<User> userOpt = userRepository.findById(userId);
-        if (userOpt.isEmpty() || userOpt.get().getProfessor() == null) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(userId));
+
+        if (user.getProfessor() == null) {
             return ResponseEntity.notFound().build();
         }
-        Professor p = userOpt.get().getProfessor();
+        Professor p = user.getProfessor();
 
         return ResponseEntity.ok(new ProfessorDTO(
-                p.getId(), p.getCnp(), p.getFirstName(),
-                p.getLastName(), p.getRank()
+                p.getId(),
+                p.getCnp(),
+                p.getFirstName(),
+                p.getLastName(),
+                p.getRank()
         ));
     }
-
 
     @GetMapping("/me")
     public ResponseEntity<?> getCurrentUserInfo() {
@@ -154,12 +163,8 @@ public class PersonController {
         }
 
         String username = auth.getName();
-        Optional<User> userOpt = Optional.ofNullable(userRepository.findByUsername(username));
-        if (userOpt.isEmpty()) {
-            return ResponseEntity.status(404).body("Utilizator inexistent.");
-        }
-
-        User user = userOpt.get();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
 
         if (!user.isActive()) {
             return ResponseEntity.status(403).body("Contul este inactiv.");
@@ -173,13 +178,27 @@ public class PersonController {
         StudentDTO studentDTO = null;
         if (user.getStudent() != null) {
             Student s = user.getStudent();
-            studentDTO = new StudentDTO(s.getId(), s.getCnp(), s.getRegNumber(), s.getFirstName(), s.getLastName(), s.getYear(), s.getFacultyGroup());
+            studentDTO = new StudentDTO(
+                    s.getId(),
+                    s.getCnp(),
+                    s.getRegNumber(),
+                    s.getFirstName(),
+                    s.getLastName(),
+                    s.getYear(),
+                    s.getFacultyGroup()
+            );
         }
 
         ProfessorDTO profDTO = null;
         if (user.getProfessor() != null) {
             Professor p = user.getProfessor();
-            profDTO = new ProfessorDTO(p.getId(), p.getCnp(), p.getFirstName(), p.getLastName(), p.getRank());
+            profDTO = new ProfessorDTO(
+                    p.getId(),
+                    p.getCnp(),
+                    p.getFirstName(),
+                    p.getLastName(),
+                    p.getRank()
+            );
         }
 
         Set<TagDTO> tagDTOs = user.getTags().stream()

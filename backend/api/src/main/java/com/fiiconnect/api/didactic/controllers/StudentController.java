@@ -1,14 +1,12 @@
 package com.fiiconnect.api.didactic.controllers;
 
 import com.fiiconnect.api.auth_userMgmt.controllers.PersonController;
-import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
+import com.fiiconnect.api.auth_userMgmt.dtos.personDTO.PersonInfoDTO;
 import com.fiiconnect.api.didactic.exceptions.StudentNotFoundException;
-import com.fiiconnect.api.didactic.exceptions.UnauthorizedOperationException;
 import com.fiiconnect.api.didactic.models.Student;
 import com.fiiconnect.api.didactic.repositories.StudentRepository;
 import com.fiiconnect.api.didactic.services.StudentService;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

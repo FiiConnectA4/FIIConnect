@@ -1,6 +1,6 @@
 package com.fiiconnect.api.didactic.services;
 
-import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
+import com.fiiconnect.api.auth_userMgmt.dtos.personDTO.PersonInfoDTO;
 import com.fiiconnect.api.didactic.models.*;
 import com.fiiconnect.api.didactic.repositories.*;
 import com.fiiconnect.api.didactic.exceptions.CourseNotFoundException;

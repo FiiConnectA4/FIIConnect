@@ -1,9 +1,7 @@
-package com.fiiconnect.api.auth_userMgmt.dtos;
+package com.fiiconnect.api.auth_userMgmt.dtos.personDTO;
 
 import com.fiiconnect.api.social_secretary.DTO.TagDTO;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.Set;

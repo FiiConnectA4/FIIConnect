@@ -1,7 +1,7 @@
 package com.fiiconnect.api.social_secretary.service;
 
-import com.fiiconnect.api.auth_userMgmt.dtos.ProfessorDTO;
-import com.fiiconnect.api.auth_userMgmt.dtos.StudentDTO;
+import com.fiiconnect.api.auth_userMgmt.dtos.personDTO.ProfessorDTO;
+import com.fiiconnect.api.auth_userMgmt.dtos.personDTO.StudentDTO;
 import com.fiiconnect.api.auth_userMgmt.models.Role;
 import com.fiiconnect.api.didactic.models.Professor;
 import com.fiiconnect.api.didactic.models.Student;
@@ -12,7 +12,7 @@ import com.fiiconnect.api.social_secretary.classes.Tag;
 import com.fiiconnect.api.social_secretary.repository.AnnouncementRepository;
 import com.fiiconnect.api.social_secretary.repository.TagRepository;
 import com.fiiconnect.api.auth_userMgmt.models.User;
-import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
+import com.fiiconnect.api.auth_userMgmt.dtos.personDTO.PersonInfoDTO;
 import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

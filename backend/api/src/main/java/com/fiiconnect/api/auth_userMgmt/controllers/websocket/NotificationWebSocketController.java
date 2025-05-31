@@ -1,5 +1,6 @@
 package com.fiiconnect.api.auth_userMgmt.controllers.websocket;
 
+import com.fiiconnect.api.auth_userMgmt.exceptions.UserNotFoundException;
 import com.fiiconnect.api.auth_userMgmt.models.Notification;
 import com.fiiconnect.api.auth_userMgmt.models.User;
 import com.fiiconnect.api.auth_userMgmt.repositories.NotificationRepository;
@@ -32,7 +33,8 @@ public class NotificationWebSocketController {
     @MessageMapping("/notify-test")
     public void testNotify(Principal principal, String message) {
         String username = principal.getName();
-        User user = userRepository.findByUsername(username);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
 
         if (user == null) {
             return;

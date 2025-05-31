@@ -1,4 +1,4 @@
-package com.fiiconnect.api.auth_userMgmt.dtos;
+package com.fiiconnect.api.auth_userMgmt.dtos.personDTO;
 
 public record StudentDTO(
         Long id,

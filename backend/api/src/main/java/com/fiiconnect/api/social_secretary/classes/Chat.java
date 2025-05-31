@@ -1,7 +1,5 @@
 package com.fiiconnect.api.social_secretary.classes;
 
-import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
-import com.fiiconnect.api.auth_userMgmt.models.User;
 import com.fiiconnect.api.social_secretary.enums.ChatType;
 import jakarta.persistence.*;
 

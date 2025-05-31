@@ -1,9 +1,6 @@
 package com.fiiconnect.api.social_secretary.classes;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
-import com.fiiconnect.api.auth_userMgmt.models.User;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.HashSet;

@@ -1,7 +1,7 @@
 package com.fiiconnect.api.didactic.controllers;
 
 import com.fiiconnect.api.auth_userMgmt.controllers.PersonController;
-import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
+import com.fiiconnect.api.auth_userMgmt.dtos.personDTO.PersonInfoDTO;
 import com.fiiconnect.api.didactic.exceptions.ProfessorAlreadyEnrolled;
 import com.fiiconnect.api.didactic.exceptions.ProfessorNotFoundException;
 

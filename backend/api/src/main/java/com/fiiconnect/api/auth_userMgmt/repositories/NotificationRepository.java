@@ -11,8 +11,11 @@ import java.util.List;
 
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
-    List<Notification> findByRecipientAndReadFalse(User user);
     List<Notification> findByRecipient(User user);
+    List<Notification> findByRecipientAndReadFalse(User user);
+    List<Notification> findByRecipientAndReadTrue(User user);
+    List<Notification> findByRecipient(User user, Pageable pageable);
+    List<Notification> findByRecipientAndRead(User user, boolean read, Pageable pageable);
 
     @Query("""
         SELECT n FROM Notification n

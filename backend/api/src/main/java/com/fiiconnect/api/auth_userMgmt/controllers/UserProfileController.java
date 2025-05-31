@@ -1,19 +1,32 @@
 package com.fiiconnect.api.auth_userMgmt.controllers;
 
-import com.fiiconnect.api.auth_userMgmt.dtos.FullUpdateUserProfileRequest;
-import com.fiiconnect.api.auth_userMgmt.dtos.UserProfileRequest;
-import com.fiiconnect.api.auth_userMgmt.dtos.UpdateUserProfileRequest;
+import com.fiiconnect.api.auth_userMgmt.dtos.userProfileDTO.UpdateUserProfileRequest;
+import com.fiiconnect.api.auth_userMgmt.dtos.userProfileDTO.UserProfileRequest;
+import com.fiiconnect.api.auth_userMgmt.exceptions.UserNotFoundException;
 import com.fiiconnect.api.auth_userMgmt.models.User;
 import com.fiiconnect.api.auth_userMgmt.models.UserProfile;
 import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository;
 import com.fiiconnect.api.auth_userMgmt.services.UserProfileService;
-import jakarta.annotation.security.RolesAllowed;
+import com.fiiconnect.api.didactic.services.SftpService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/profile")
@@ -25,9 +38,15 @@ public class UserProfileController {
     @Autowired
     private UserProfileService profileService;
 
+    @Autowired
+    private SftpService sftpService;
+
+    private final String PROFILE_FOLDER = "faculty_files/profile_pictures/";
+
     @GetMapping
     public ResponseEntity<?> getProfile(@AuthenticationPrincipal UserDetails userDetails) {
-        User user = userRepository.findByUsername(userDetails.getUsername());
+        User user = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
         UserProfile profile = profileService.getByUser(user);
 
         if (profile == null) {
@@ -37,34 +56,27 @@ public class UserProfileController {
         return ResponseEntity.ok(new UserProfileRequest(user, profile));
     }
 
-
     @PutMapping
     public ResponseEntity<?> updateProfile(@AuthenticationPrincipal UserDetails userDetails,
                                            @RequestBody UpdateUserProfileRequest dto) {
-        User user = userRepository.findByUsername(userDetails.getUsername());
+        User user = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
         UserProfile profile = profileService.getByUser(user);
 
-        if (dto.getPhone() != null)
-            profile.setPhone(dto.getPhone());
-
-        if (dto.getAbout() != null)
-            profile.setAbout(dto.getAbout());
-
-        if (dto.getFirstName() != null)
-            profile.setFirstName(dto.getFirstName());
-
-        if (dto.getLastName() != null)
-            profile.setLastName(dto.getLastName());
+        profile.setPhone(dto.getPhone());
+        profile.setAbout(dto.getAbout());
+        profile.setFirstName(dto.getFirstName());
+        profile.setLastName(dto.getLastName());
 
         profileService.updateProfile(profile);
-        return ResponseEntity.ok(profile);
+        return ResponseEntity.ok(dto);
     }
-
 
     @PostMapping("/setup")
     public ResponseEntity<?> createProfile(@AuthenticationPrincipal UserDetails userDetails,
                                            @RequestBody UpdateUserProfileRequest dto) {
-        User user = userRepository.findByUsername(userDetails.getUsername());
+        User user = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
 
         if (profileService.getByUser(user) != null) {
             return ResponseEntity.badRequest().body("Profilul există deja");
@@ -85,26 +97,85 @@ public class UserProfileController {
         return ResponseEntity.ok("Profil creat cu succes");
     }
 
-    @PutMapping("/admin/{username}")
-    @RolesAllowed({"ROLE_ADMIN", "ROLE_PROFESSOR"})
-    public ResponseEntity<?> adminUpdateProfile(@PathVariable String username,
-                                                @RequestBody FullUpdateUserProfileRequest dto) {
-        User user = userRepository.findByUsername(username);
-        if (user == null) return ResponseEntity.notFound().build();
-
+    @PostMapping("/photo")
+    public ResponseEntity<?> uploadProfilePhoto(@AuthenticationPrincipal UserDetails userDetails,
+                                                @RequestParam("file") MultipartFile file) throws IOException {
+        User user = userRepository.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
         UserProfile profile = profileService.getByUser(user);
-        if (profile == null) return ResponseEntity.notFound().build();
 
-        profile.setFirstName(dto.getFirstName());
-        profile.setLastName(dto.getLastName());
-        profile.setPhone(dto.getPhone());
-        profile.setAbout(dto.getAbout());
-        profile.setKycStatus(dto.getKycStatus());
-        profile.setTwoFactorEnabled(dto.isTwoFactorEnabled());
-        profile.setCurrentYear(dto.getCurrentYear());
-        profile.setRating(dto.getRating());
+        if (profile == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Profile not found");
+        }
 
+        String filename = "profile-" + user.getId() + getExtension(Objects.requireNonNull(file.getOriginalFilename()));
+
+        // Upload pe SFTP
+        sftpService.uploadFile(file, PROFILE_FOLDER, filename);
+
+        // Salvează numele pozei în UserProfile
+        profile.setProfilePicture(filename);
         profileService.updateProfile(profile);
-        return ResponseEntity.ok("Profil actualizat cu succes");
+
+        return ResponseEntity.ok("Poza a fost încărcată");
+    }
+
+    @GetMapping("/photo")
+    public ResponseEntity<?> getProfilePhoto(@AuthenticationPrincipal UserDetails userDetails) {
+        try {
+            User user = userRepository.findByUsername(userDetails.getUsername())
+                    .orElseThrow(() -> new UserNotFoundException(userDetails.getUsername()));
+            UserProfile profile = profileService.getByUser(user);
+
+            if (profile == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("Profile not found for user: " + user.getUsername());
+            }
+            if (profile.getProfilePicture() == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No profile picture set for user: " + user.getUsername());
+            }
+
+            // Descarcă fișierul
+            File file = sftpService.downloadFile(PROFILE_FOLDER + profile.getProfilePicture(),
+                    profile.getProfilePicture());
+            if (!file.exists()) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Downloaded file not found on disk: " + file.getAbsolutePath());
+            }
+
+            Path path = file.toPath();
+            Resource resource = new UrlResource(path.toUri());
+
+            String contentType = Files.probeContentType(path);
+            if (contentType == null) {
+                contentType = MediaType.APPLICATION_OCTET_STREAM_VALUE;
+            }
+
+            return ResponseEntity.ok()
+                    .contentType(MediaType.parseMediaType(contentType))
+                    .header(HttpHeaders.CONTENT_DISPOSITION,
+                            "inline; filename=\"" + file.getName() + "\"")
+                    .body(resource);
+
+        } catch (AccessDeniedException ade) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body("Access denied: " + ade.getMessage());
+        } catch (MalformedURLException mue) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Invalid file URL: " + mue.getMessage());
+        } catch (IOException ioe) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("I/O error: " + ioe.getMessage());
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Unexpected error ("
+                            + ex.getClass().getSimpleName() + "): "
+                            + ex.getMessage());
+        }
+    }
+
+    private String getExtension(String filename) {
+        return filename.substring(filename.lastIndexOf("."));
     }
 }
