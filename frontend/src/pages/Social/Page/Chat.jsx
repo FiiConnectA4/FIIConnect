@@ -28,9 +28,10 @@ function Chat() {
         });
         if (!response.ok) throw new Error("Failed to fetch user info");
         const user = await response.json();
+        console.log("User primit de la backend:", user); // DEBUG: vezi structura user-ului
         setCurrentUser({
-          id: user.id,
-          name: user.name,
+          id: user.userId || user.id, // asigură-te că iei id-ul corect
+          name: user.username || user.name,
           role: user.role,
         });
         setUserTags(user.tags || []);
@@ -146,7 +147,7 @@ function Chat() {
 
     const tempId = Date.now();
     const chatMessage = {
-      sender: { id: currentUser.id }, // Only send ID to backend
+      sender: currentUser.id, // Send only the user ID to backend
       message: newMessage.trim(),
       timestamp: new Date().toISOString(),
       type: 'CHAT',
@@ -154,13 +155,18 @@ function Chat() {
       tempId,
     };
 
-    // Optimistic update with temporary message
+    // DEBUG: Verifică dacă currentUser are id
+    console.log("currentUser la trimitere:", currentUser);
+    console.log("Trimitem mesaj:", chatMessage);
+
+    // Optimistic update with temporary message (for UI)
     setPendingMessages(prev => [...prev, {
       ...chatMessage,
-      sender: { id: currentUser.id, name: "You" } // Add temporary sender info
+      sender: { id: currentUser.id, name: "You" } // For UI display only
     }]);
     
     setNewMessage("");
+
     stompClient.send("/app/chat.sendMessage", {}, JSON.stringify(chatMessage));
   };
 
@@ -217,26 +223,35 @@ function Chat() {
                 {displayMessages.length === 0 ? (
                   <div className="no-messages">Nu există mesaje în acest canal.</div>
                 ) : (
-                  displayMessages.map((message) => (
-                    <div
-                      key={message.id || message.tempId}
-                      className={`message ${message.sender?.id === currentUser.id ? 'sent' : 'received'}`}
-                    >
-                      <div className="message-sender">
-                        {message.sender?.id === currentUser.id ? 'Tu' : message.sender?.name}
+                  displayMessages.map((message) => {
+                    // Determină id-ul senderului (poate fi number sau object)
+                    const senderId = typeof message.sender === "object" ? message.sender?.id : message.sender;
+                    const isSentByCurrentUser = senderId === currentUser.id;
+                    return (
+                      <div
+                        key={message.id || message.tempId}
+                        className={`message ${isSentByCurrentUser ? 'sent' : 'received'}`}
+                      >
+                        <div className="message-sender">
+                          {isSentByCurrentUser
+                            ? 'Tu'
+                            : (typeof message.sender === "object"
+                                ? message.sender?.name
+                                : `User ${message.sender}`)}
+                        </div>
+                        <div className="message-text">{message.message}</div>
+                        <div className="message-time">
+                          {new Date(message.timestamp).toLocaleTimeString('ro-RO', {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                          })}
+                        </div>
                       </div>
-                      <div className="message-text">{message.message}</div>
-                      <div className="message-time">
-                        {new Date(message.timestamp).toLocaleTimeString('ro-RO', {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                        })}
-                      </div>
-                    </div>
-                  ))
+                    );
+                  })
                 )}
                 <div ref={messagesEndRef} />
               </div>

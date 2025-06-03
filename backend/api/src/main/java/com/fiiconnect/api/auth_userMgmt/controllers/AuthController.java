@@ -219,7 +219,7 @@ public class AuthController {
         userRepository.save(user);
         tokenRepository.delete(resetToken);
 
-        return ResponseEntity.ok("Password reset successfully");
+        return ResponseEntity.ok(   "Password reset successfully");
     }
 
     @PostMapping("/change-password")
@@ -362,7 +362,7 @@ public class AuthController {
                 if (role == null) {
                     throw new IllegalArgumentException(
                             "Rol invalid pentru utilizatorul " + req.getUsername()
-                                    + ". Roluri posibile: STUDENT sau PROFESSOR.");
+                                    + ". Roluri posibile: STUDENT sau PROFESOR.");
                 }
 
                 // creare user
@@ -380,7 +380,7 @@ public class AuthController {
                             .orElseThrow(() -> new IllegalArgumentException(
                                     "Studentul nu există: " + req.getStudentId()));
                     user.setStudent(student);
-                } else if ("ROLE_PROFESSOR".equals(roleName)) {
+                } else if ("ROLE_PROFESOR".equals(roleName)) {
                     Professor prof = professorRepository.findById(req.getProfessorId())
                             .orElseThrow(() -> new IllegalArgumentException(
                                     "Profesorul nu există: " + req.getProfessorId()));
