@@ -1,7 +1,9 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
 function ServiceAdminPage() {
+  const navigate = useNavigate();
   const [status, setStatus] = useState(null);
   const [serverTime, setServerTime] = useState("");
   const [usersCount, setUsersCount] = useState(null);
@@ -62,6 +64,13 @@ function ServiceAdminPage() {
 
   return (
     <div style={styles.container}>
+      <button
+          style={{ ...styles.button, marginBottom: "1.5rem" }}
+          onClick={() => navigate("/app/dashboard")}
+      >
+        ← Înapoi la Dashboard
+      </button>
+
       <h1 style={styles.title}>🛠️ Pagina de Service Admin</h1>
 
       <div style={styles.card}>

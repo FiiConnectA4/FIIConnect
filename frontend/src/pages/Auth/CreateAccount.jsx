@@ -1,125 +1,154 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import "../../styles/CreateAccount.css";
 
 export default function CreateAccount() {
-    const [username, setUsername] = useState("");
-    const [password, setPassword] = useState("");
-    const [email,    setEmail]    = useState("");
-    const [role,     setRole]     = useState("");
-    const [msg,      setMsg]      = useState("");
-
+    const [unassigned, setUnassigned] = useState([]);
+    const [selected, setSelected] = useState([]);
+    const [msg, setMsg] = useState("");
     const token = localStorage.getItem("token");
+
+    const fetchUnassigned = async () => {
+        try {
+            const { data } = await axios.get(
+                "http://localhost:34101/person/unassigned",
+                { headers: token ? { Authorization: `Bearer ${token}` } : {} }
+            );
+            setUnassigned(data);
+            setSelected([]); // curăță selecția când reîncarci lista
+        } catch (err) {
+            console.error("Error fetching unassigned:", err);
+        }
+    };
+
+    useEffect(() => {
+        fetchUnassigned();
+        }, []);
+
+
+    const toggleSelect = (item) => {
+        const key = `${item.role}-${item.entityId}`;
+        setSelected((prev) => {
+            const exists = prev.find((x) => `${x.role}-${x.entityId}` === key);
+            if (exists) return prev.filter((x) => `${x.role}-${x.entityId}` !== key);
+            return [...prev, item];
+        });
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setMsg("");
+
+        if (!selected.length) {
+            setMsg("❌ Nicio persoană selectată.");
+            return;
+        }
+
+        // construiește payload-ul: un array de obiecte user
+        const usersToCreate = selected.map((item) => {
+            const uname = `${item.firstName.toLowerCase()}.${item.lastName.toLowerCase()}.${item.entityId}`;
+            const userObj = {
+                username: uname,
+                email: `${uname}@fiiconnect.com`,
+                password: "Test123!",
+                role: item.role,
+            };
+            if (item.role === "STUDENT") userObj.studentId = item.entityId;
+            else userObj.professorId = item.entityId;
+            return userObj;
+        });
+
         try {
             await axios.post(
-                "http://localhost:34101/users/register",
-                { username, password, email, role },
-                { headers: { "Content-Type": "application/json",
-                        // only add the Authorization header if we actually have a token
-                        ...(token && { Authorization: `Bearer ${token}` })
-                    }, }
+                "http://localhost:34101/users/register-multiple",
+                usersToCreate,
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        ...(token && { Authorization: `Bearer ${token}` }),
+                    },
+                }
             );
-            setMsg("✅ User creat cu succes!");
-            setUsername("");
-            setPassword("");
-            setEmail("");
-            setRole("");
+            setMsg(`✅ Au fost create ${usersToCreate.length} conturi.`);
+            setSelected([]);
+            fetchUnassigned();
         } catch (err) {
             console.error(err);
             setMsg(
                 "❌ " +
-                (err.response?.data?.message || "Eroare la crearea user-ului.")
+                (err.response?.data?.message || "Eroare la crearea conturilor.")
             );
         }
     };
 
     const isSuccess = msg.startsWith("✅");
-    const isError   = msg.startsWith("❌");
+    const isError = msg.startsWith("❌");
 
     return (
         <div className="create-page">
             <div className="create-card">
-                <h1 className="create-title">Create Account</h1>
+                <h1 className="create-title">Create Accounts in Bulk</h1>
 
                 {msg && (
                     <div
-                        className={
-                            `message ` +
-                            (isSuccess ? "success" : isError ? "error" : "")
-                        }
+                        className={`message ${
+                            isSuccess ? "success" : isError ? "error" : ""
+                        }`}
                     >
                         {msg}
                     </div>
                 )}
 
+                <button onClick={fetchUnassigned} className="btn-refresh">
+                    Refresh
+                </button>
+
+                <div className="unassigned-container">
+                    <h2>Conturi disponibile</h2>
+                    <table className="unassigned-table">
+                        <thead>
+                        <tr>
+                            <th></th>
+                            <th>Entity ID</th>
+                            <th>First Name</th>
+                            <th>Last Name</th>
+                            <th>Role</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {unassigned.map((item) => {
+                            const key = `${item.role}-${item.entityId}`;
+                            const checked = selected.some(
+                                (x) => `${x.role}-${x.entityId}` === key
+                            );
+                            return (
+                                <tr key={key}>
+                                    <td>
+                                        <input
+                                            type="checkbox"
+                                            checked={checked}
+                                            onChange={() => toggleSelect(item)}
+                                        />
+                                    </td>
+                                    <td>{item.entityId}</td>
+                                    <td>{item.firstName}</td>
+                                    <td>{item.lastName}</td>
+                                    <td>{item.role}</td>
+                                </tr>
+                            );
+                        })}
+                        </tbody>
+                    </table>
+                </div>
+
                 <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label htmlFor="username">Username</label>
-                        <input
-                            id="username"
-                            className="form-control"
-                            type="text"
-                            placeholder="Enter username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                            required
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="password">Password</label>
-                        <input
-                            id="password"
-                            className="form-control"
-                            type="password"
-                            placeholder="Enter password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            required
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="email">Email</label>
-                        <input
-                            id="email"
-                            className="form-control"
-                            type="email"
-                            placeholder="you@example.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            required
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="role">Role</label>
-                        <select
-                            id="role"
-                            className="form-control"
-                            value={role}
-                            onChange={(e) => setRole(e.target.value)}
-                            required
-                        >
-                            <option value="" disabled>
-                                -- Select a role --
-                            </option>
-                            <option value="Student">Student</option>
-                            <option value="Professor">Professor</option>
-                            <option value="Admin">Admin</option>
-                        </select>
-                    </div>
-
                     <button
                         type="submit"
                         className="btn-create"
-                        disabled={!role}
+                        disabled={!selected.length}
                     >
-                        Create Account
+                        Create {selected.length} Account
+                        {selected.length > 1 ? "s" : ""}
                     </button>
                 </form>
             </div>

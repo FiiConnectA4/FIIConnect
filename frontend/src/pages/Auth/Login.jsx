@@ -26,11 +26,13 @@ const Login = () => {
         password,
       });
 
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-        navigate("/app/dashboard");
-        return;
-      }
+     if (data.token && data.user) {
+       localStorage.setItem("token", data.token);
+       localStorage.setItem("user", JSON.stringify({ username: data.user.username }));
+       navigate("/app/dashboard");
+       return;
+     }
+
 
       if (data.message === "2FA_REQUIRED") {
         navigate("/app/2fa", { state: { username } });
