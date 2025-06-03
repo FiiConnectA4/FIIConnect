@@ -34,7 +34,6 @@ public class NotificationController {
     @PostMapping("/send")
     @RolesAllowed({"ADMIN", "PROFESSOR"})
     public ResponseEntity<List<NotificationResponse>> sendBulk(@RequestBody BulkNotificationRequest req) {
-        // Dacă unul dintre recipientIds nu există, service va arunca UserNotFoundException
         List<NotificationResponse> dtos = notificationService.sendBulk(req);
         return ResponseEntity.ok(dtos);
     }
@@ -50,8 +49,6 @@ public class NotificationController {
             @PathVariable Long id,
             @AuthenticationPrincipal UserDetails userDetails
     ) {
-        // Dacă notificarea nu există, service va arunca NotificationNotFoundException
-        // Dacă utilizatorul nu are permisiunea, se aruncă AccessDeniedException
         notificationService.deleteNotificationById(id, userDetails.getUsername());
         return ResponseEntity.noContent().build();
     }

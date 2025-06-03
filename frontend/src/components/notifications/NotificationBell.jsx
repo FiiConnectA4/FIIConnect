@@ -29,6 +29,7 @@ const NotificationBell = () => {
             console.error("Format JWT invalid:", err);
             return;
         }
+        console.log(username);
 
         // 1) Obținem notificările inițiale prin REST
         const fetchInitial = async () => {
