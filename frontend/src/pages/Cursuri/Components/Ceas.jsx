@@ -1,14 +1,16 @@
 import React from 'react';
 import './Component.css';
-const Ceas = () => {
+
+const Ceas = ({ onClick, style }) => {
     return (
-        < button className="buton-icon" >
+        <button className="buton-icon" onClick={onClick} style={style}>
             <img
                 src="/Clock.png"
                 alt="Ceas curs"
                 className="icon-curs"
             />
-        </button >);
-}
+        </button>
+    );
+};
 
 export default Ceas;
