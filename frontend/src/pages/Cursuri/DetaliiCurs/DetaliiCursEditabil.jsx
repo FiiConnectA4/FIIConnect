@@ -351,13 +351,17 @@ const PDetaliiCurs = ({ curs, onBack }) => {
         }
     };
 
-    if (loading) return <div>Se încarcă cursul...</div>;
+    // Replace your entire component return statement with this new layout:
+
+    if (loading) return <div className="loading">Se încarcă cursul...</div>;
 
     return (
         <div className="detalii-container">
-            <button className="buton-inapoi" onClick={onBack}>{'< Înapoi'}</button>
-            <div className="titlu-curs">
-                <h1><u>{curs.title}</u></h1>
+            {/* Header Section */}
+            <div className="header-section">
+                <button className="buton-inapoi" onClick={onBack}>
+                    ← Înapoi la cursuri
+                </button>
                 <Ceas
                     onClick={() => {
                         const disciplina = encodeURIComponent(curs.title);
@@ -365,103 +369,134 @@ const PDetaliiCurs = ({ curs, onBack }) => {
                     }}
                 />
             </div>
-            <ButonExtensibil text="Profesori" professors={profesori} />
 
-            <div className="sectiune">
-                <h2>Descriere:</h2>
-                {isEditingDescription ? (
-                    <div>
-                        <Edit
-                            value={description}
-                            onChange={(newDescription) => setDescription(newDescription)}
-                        />
-                        <button className='buton-sectiune' onClick={saveCourseChanges}>Salvează</button>
-                        <button className='buton-sectiune' onClick={() => setIsEditingDescription(false)}>Anulează</button>
-                    </div>
-                ) : (
-                    <div>
-                        <p>{description || 'Fără descriere'}</p>
-                        <button className='buton-sectiune' onClick={() => setIsEditingDescription(true)}>Editează</button>
-                    </div>
-                )}
+            {/* Course Title Section */}
+            <div className="course-title-section">
+                <h1>{curs.title}</h1>
             </div>
 
-            <div className="sectiune">
-                <h2>Metoda de notare:</h2>
-                {isEditingFormula ? (
-                    <div>
-                        <input
-                            type="text"
-                            value={formulaText}
-                            onChange={(e) => setFormulaText(e.target.value)}
-                            placeholder="ex. Notă finală = laborator + examen"
-                        />
-                        <button className='buton-sectiune' onClick={saveFormula}>Salvează</button>
-                        <button className='buton-sectiune' onClick={() => setIsEditingFormula(false)}>Anulează</button>
-                    </div>
-                ) : (
-                    <div>
-                        <p>{formula?.text || 'Fără formulă definită'}</p>
-                        {formula?.components?.length > 0 && (
-                            <ul>
-                                {formula.components.map(comp => (
-                                    <li key={comp.id}>{comp.name}</li>
-                                ))}
-                            </ul>
-                        )}
-                        <button className='buton-sectiune' onClick={() => setIsEditingFormula(true)}>Editează</button>
-                    </div>
-                )}
+            {/* Professors Section */}
+            <div className="grid-item professors-section">
+                <h2>Profesori</h2>
+                <div className="professors-list">
+                    {profesori.length > 0 ? (
+                        profesori.map((prof, index) => (
+                            <span key={index} className="professor-badge">
+                            {prof.name}
+                        </span>
+                        ))
+                    ) : (
+                        <span className="professor-badge">Niciun profesor asociat</span>
+                    )}
+                </div>
             </div>
 
-            <div className="sectiune bibliografie">
-                <h2>Materiale (Resurse):</h2>
+            {/* Main Content Grid */}
+            <div className="content-grid">
+                {/* Description Section */}
+                <div className="grid-item description-section">
+                    <h2>Descriere Curs</h2>
+                    <textarea
+                        className="description-textarea"
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        onBlur={saveCourseChanges}
+                        placeholder="Introduceți o descriere detaliată a cursului, obiectivele de învățare, conținutul principal și cerințele pentru studenți..."
+                        rows={8}
+                    />
+                </div>
+
+                {/* Formula Section */}
+                <div className="grid-item formula-section">
+                    <h2>Metodă de Notare</h2>
+                    {isEditingFormula ? (
+                        <div>
+                            <input
+                                type="text"
+                                className="formula-input"
+                                value={formulaText}
+                                onChange={(e) => setFormulaText(e.target.value)}
+                                placeholder="ex. Notă finală = 0.4 * Laborator + 0.6 * Examen"
+                            />
+                            <div>
+                                <button className="btn-primary" onClick={saveFormula}>
+                                    Salvează Formula
+                                </button>
+                                <button className="btn-secondary" onClick={() => setIsEditingFormula(false)}>
+                                    Anulează
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div>
+                            <div className="formula-display">
+                                {formula?.text || 'Nicio metodă de notare definită'}
+                            </div>
+                            {formula?.components?.length > 0 && (
+                                <div className="formula-components">
+                                    <strong>Componente:</strong>
+                                    <ul>
+                                        {formula.components.map(comp => (
+                                            <li key={comp.id}>{comp.name}</li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
+                            <button className="btn-primary" onClick={() => setIsEditingFormula(true)}>
+                                Editează Formula
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Materials Section */}
+            <div className="grid-item materials-section">
+                <h2>Materiale de Curs</h2>
+
                 {materials.length > 0 ? (
-                    <div>
-                        {materials.map((m) => (
-                            <div
-                                key={m.id}
-                                style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}
-                            >
-                                {renameMaterialId === m.id ? (
-                                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div className="materials-grid">
+                        {materials.map((material) => (
+                            <div key={material.id} className="material-card">
+                                {renameMaterialId === material.id ? (
+                                    <div>
                                         <input
                                             type="text"
+                                            className="material-rename-input"
                                             value={newFilename}
                                             onChange={(e) => setNewFilename(e.target.value)}
-                                            placeholder="Nume nou fișier"
-                                            style={{ marginRight: '10px' }}
+                                            placeholder="Nume nou pentru fișier"
                                         />
-                                        <button className='buton-sectiune' onClick={saveNewFilename}>Salvează</button>
-                                        <button
-                                            className='buton-sectiune'
-                                            onClick={cancelRename}
-                                        >
-                                            Anulează
-                                        </button>
+                                        <div className="material-actions">
+                                            <button className="btn-primary" onClick={saveNewFilename}>
+                                                Salvează
+                                            </button>
+                                            <button className="btn-secondary" onClick={cancelRename}>
+                                                Anulează
+                                            </button>
+                                        </div>
                                     </div>
                                 ) : (
-                                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                                        <span style={{ flex: 1 }}>{m.filename}</span>
-                                        <div style={{ display: 'flex' }}>
+                                    <div>
+                                        <div className="material-name">{material.filename}</div>
+                                        <div className="material-actions">
                                             <button
-                                                style={{ marginLeft: '10px' }}
-                                                onClick={() => downloadMaterial(m.id, m.filename)}
+                                                className="btn-primary"
+                                                onClick={() => downloadMaterial(material.id, material.filename)}
                                             >
-                                                Descarcă
+                                                📥 Descarcă
                                             </button>
                                             <button
-                                                style={{ marginLeft: '10px' }}
-                                                onClick={() => startRenameMaterial(m.id, m.filename)}
+                                                className="btn-secondary"
+                                                onClick={() => startRenameMaterial(material.id, material.filename)}
                                             >
-                                                Redenumește
+                                                ✏️ Redenumește
                                             </button>
                                             <button
-                                                className="stergere"
-                                                style={{ marginLeft: '10px' }}
-                                                onClick={() => deleteMaterial(m.id)}
+                                                className="btn-danger"
+                                                onClick={() => deleteMaterial(material.id)}
                                             >
-                                                Șterge
+                                                🗑️ Șterge
                                             </button>
                                         </div>
                                     </div>
@@ -470,28 +505,19 @@ const PDetaliiCurs = ({ curs, onBack }) => {
                         ))}
                     </div>
                 ) : (
-                    <p>Fără materiale disponibile</p>
+                    <div className="no-materials">
+                        📚 Nu există materiale încărcate pentru acest curs
+                    </div>
                 )}
-                <div style={{ marginTop: '20px' }}>
+
+                {/* Upload Section */}
+                <div className="upload-section" onClick={handleIconClick}>
                     <button
-                        onClick={handleIconClick}
-                        style={{
-                            backgroundColor: '#28a745',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '50%',
-                            width: '40px',
-                            height: '40px',
-                            fontSize: '24px',
-                            cursor: userId ? 'pointer' : 'not-allowed',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}
+                        className="upload-button"
                         disabled={!userId}
-                        title="Încarcă material nou"
+                        title={userId ? "Încarcă material nou" : "ID-ul profesorului nu este disponibil"}
                     >
-                        +
+                        Încarcă Material Nou
                     </button>
                     <input
                         type="file"
