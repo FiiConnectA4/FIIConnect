@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './DetaliiCurs.css';
 import Ceas from './../Components/Ceas';
+import SwitchToggle from './../Components/SwitchToggle';
 import Edit from './../Components/Edit';
 import ButonExtensibil from '../Components/ButonExtensibil';
 import { useNavigate } from 'react-router-dom';
@@ -373,6 +374,11 @@ const PDetaliiCurs = ({ curs, onBack }) => {
             {/* Course Title Section */}
             <div className="course-title-section">
                 <h1>{curs.title}</h1>
+                <SwitchToggle
+                    label="Afiseaza feedback"
+
+
+                />
             </div>
 
             {/* Professors Section */}
@@ -382,8 +388,8 @@ const PDetaliiCurs = ({ curs, onBack }) => {
                     {profesori.length > 0 ? (
                         profesori.map((prof, index) => (
                             <span key={index} className="professor-badge">
-                            {prof.name}
-                        </span>
+                                {prof.name}
+                            </span>
                         ))
                     ) : (
                         <span className="professor-badge">Niciun profesor asociat</span>

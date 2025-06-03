@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import './DetaliiCurs.css';
 import Ceas from './../Components/Ceas';
-import { useNavigate } from 'react-router-dom';
+import Buton from './../Components/Buton';
 import ButonExtensibil from '../Components/ButonExtensibil';
+import TrimiteFeedback from './TrimiteFeedback';
 
 // Backend base URL (remove if using package.json proxy)
-const API_BASE_URL = ''; // Set to 'http://localhost:8080' if no proxy, or leave empty with proxy
+const API_BASE_URL = ''; // Setează dacă nu folosești proxy
 
 const DetaliiCurs = ({ curs, onBack }) => {
     const [profesori, setProfesori] = useState([]);
@@ -13,52 +14,47 @@ const DetaliiCurs = ({ curs, onBack }) => {
     const [formula, setFormula] = useState(null);
     const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(true);
+
+    // Acesta controlează dacă afișăm pagina de feedback sau detaliile cursului
+    const [showFeedback, setShowFeedback] = useState(false);
+
     const token = localStorage.getItem('token');
-    const navigate = useNavigate();
+
     useEffect(() => {
         console.log('ID-ul cursului:', curs.id);
 
         // Fetch materials
-        fetch(`${API_BASE_URL}/didactic/course/material`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            })
-            .then(response => {
-                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-                return response.json();
+        fetch(`${API_BASE_URL}/didactic/course/material`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+            .then(res => {
+                if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+                return res.json();
             })
             .then(data => {
-                console.log('Răspuns API pentru materiale:', data);
                 setMaterials(Array.isArray(data) ? data.filter(m => m.idCourse === curs.id) : []);
             })
-            .catch(error => {
-                console.error('Eroare la încărcarea materialelor:', error);
-                alert('Eroare la încărcarea materialelor: ' + error.message);
+            .catch(err => {
+                console.error('Eroare la încărcarea materialelor:', err);
+                alert('Eroare la încărcarea materialelor: ' + err.message);
                 setMaterials([]);
             });
 
         // Fetch professors and description
-        fetch(`${API_BASE_URL}/didactic/course/${curs.id}`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    console.error(`HTTP error! Status: ${response.status}`);
+        fetch(`${API_BASE_URL}/didactic/course/${curs.id}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+            .then(res => {
+                if (!res.ok) {
+                    console.error(`HTTP error! Status: ${res.status}`);
                     setProfesori([]);
                     setDescription('');
                     return {};
                 }
-                return response.json();
+                return res.json();
             })
             .then(data => {
-                console.log('Răspuns API profesori:', data);
                 const professorsArray = data.professors || [];
-                console.log('Array profesori:', professorsArray);
                 if (Array.isArray(professorsArray)) {
                     const profList = professorsArray.map(prof => ({
                         name: `${prof.professor.firstName} ${prof.professor.lastName}`,
@@ -70,71 +66,69 @@ const DetaliiCurs = ({ curs, onBack }) => {
                 }
                 setDescription(data.description || 'Fără descriere');
             })
-            .catch(error => {
-                console.error('Eroare la încărcarea profesorilor:', error);
-                alert('Eroare la încărcarea profesorilor: ' + error.message);
+            .catch(err => {
+                console.error('Eroare la încărcarea profesorilor:', err);
+                alert('Eroare la încărcarea profesorilor: ' + err.message);
                 setProfesori([]);
                 setDescription('Fără descriere');
             });
 
         // Fetch formula
-        fetch(`${API_BASE_URL}/didactic/course/${curs.id}/formula`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${token}`
+        fetch(`${API_BASE_URL}/didactic/course/${curs.id}/formula`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+            .then(res => {
+                if (!res.ok) {
+                    console.error(`Nicio formulă găsită pentru cursul ${curs.id}`);
+                    setFormula(null);
+                    return null;
                 }
+                return res.json();
             })
-    .then(response => {
-        if (!response.ok) {
-            console.error(`Nicio formulă găsită pentru cursul ${curs.id}`);
-            setFormula(null);
-            return null;
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Răspuns API formula:', data);
-        setFormula(data);
-        setLoading(false);
-    })
-    .catch(error => {
-        console.error('Eroare la încărcarea formulei:', error);
-        alert('Eroare la încărcarea formulei: ' + error.message);
-        setFormula(null);
-        setLoading(false);
-    });
-}, [curs.id]);
+            .then(data => {
+                setFormula(data);
+                setLoading(false);
+            })
+            .catch(err => {
+                console.error('Eroare la încărcarea formulei:', err);
+                alert('Eroare la încărcarea formulei: ' + err.message);
+                setFormula(null);
+                setLoading(false);
+            });
+    }, [curs.id, token]);
 
-const downloadMaterial = (materialId, filename) => {
-    fetch(`${API_BASE_URL}/didactic/course/material/${materialId}/file`,
-        {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+    const downloadMaterial = (materialId, filename) => {
+        fetch(`${API_BASE_URL}/didactic/course/material/${materialId}/file`, {
+            headers: { 'Authorization': `Bearer ${token}` }
         })
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => {
-                    throw new Error(`HTTP error! Status: ${response.status}, Message: ${text}`);
-                });
-            }
-            return response.blob();
-        })
-        .then(blob => {
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            a.remove();
-            window.URL.revokeObjectURL(url);
-        })
-        .catch(err => {
-            console.error('Eroare la descărcarea materialului:', err);
-            alert('Eroare la descărcarea materialului: ' + err.message);
-        });
-};
+            .then(res => {
+                if (!res.ok) {
+                    return res.text().then(text => {
+                        throw new Error(`HTTP error! Status: ${res.status}, Message: ${text}`);
+                    });
+                }
+                return res.blob();
+            })
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(err => {
+                console.error('Eroare la descărcarea materialului:', err);
+                alert('Eroare la descărcarea materialului: ' + err.message);
+            });
+    };
+
+    // Dacă showFeedback e true, afișăm componentea de feedback în locul detaliilor
+    if (showFeedback) {
+        return <TrimiteFeedback onBack={() => setShowFeedback(false)} />;
+    }
 
     if (loading) {
         return <div className="loading">Se încarcă detaliile cursului...</div>;
@@ -147,17 +141,18 @@ const downloadMaterial = (materialId, filename) => {
                 <button className="buton-inapoi" onClick={onBack}>
                     ← Înapoi la cursuri
                 </button>
-                <Ceas
-                    onClick={() => {
-                        const disciplina = encodeURIComponent(curs.title);
-                        navigate(`/app/orar/discipline/${disciplina}`);
-                    }}
-                />
+                <Ceas />
             </div>
 
             {/* Course Title Section */}
             <div className="course-title-section">
                 <h1>{curs.title}</h1>
+                <button
+                    className="buton-feedback"
+                    onClick={() => setShowFeedback(true)}
+                >
+                    Feedback
+                </button>
             </div>
 
             {/* Professors Section */}
@@ -167,8 +162,8 @@ const downloadMaterial = (materialId, filename) => {
                     {profesori.length > 0 ? (
                         profesori.map((prof, index) => (
                             <span key={index} className="professor-badge">
-                            {prof.name}
-                        </span>
+                                {prof.name}
+                            </span>
                         ))
                     ) : (
                         <span className="professor-badge">Niciun profesor asociat</span>
@@ -181,16 +176,19 @@ const downloadMaterial = (materialId, filename) => {
                 {/* Description Section */}
                 <div className="grid-item description-section">
                     <h2>Descriere Curs</h2>
-                    <div className="description-textarea" style={{
-                        padding: '20px',
-                        minHeight: '150px',
-                        border: '2px solid rgba(83, 122, 156, 0.15)',
-                        borderRadius: '15px',
-                        background: 'rgba(255, 255, 255, 0.8)',
-                        fontSize: '16px',
-                        lineHeight: '1.6',
-                        color: '#1a355e'
-                    }}>
+                    <div
+                        className="description-textarea"
+                        style={{
+                            padding: '20px',
+                            minHeight: '150px',
+                            border: '2px solid rgba(83, 122, 156, 0.15)',
+                            borderRadius: '15px',
+                            background: 'rgba(255, 255, 255, 0.8)',
+                            fontSize: '16px',
+                            lineHeight: '1.6',
+                            color: '#1a355e'
+                        }}
+                    >
                         {description}
                     </div>
                 </div>
@@ -220,7 +218,7 @@ const downloadMaterial = (materialId, filename) => {
 
                 {materials.length > 0 ? (
                     <div className="materials-grid">
-                        {materials.map((material) => (
+                        {materials.map(material => (
                             <div key={material.id} className="material-card">
                                 <div className="material-name">{material.filename}</div>
                                 <div className="material-actions">
