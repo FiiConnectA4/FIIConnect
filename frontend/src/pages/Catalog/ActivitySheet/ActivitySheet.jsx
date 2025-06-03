@@ -67,10 +67,14 @@ const ActivitySheet = () => {
     return (
         <div className="container-fisa">
             <h1>Fișă activitate — {student?.firstName} {student?.lastName}</h1>
-            <p><strong>Grupa:</strong> {student?.facultyGroup} | <strong>An:</strong> {student?.year}</p>
-            <p><strong>Materie:</strong> {course?.title} | <strong>Semestru:</strong> {course?.semester}</p>
+            <div className="fisa-info">
+                <p><strong>Grupa:</strong> {student?.facultyGroup}</p>
+                <p><strong>An:</strong> {student?.year}</p>
+                <p><strong>Materie:</strong> {course?.title}</p>
+                <p><strong>Semestru:</strong> {course?.semester}</p>
+            </div>
 
-            <button onClick={() => navigate(-1)} className="buton-catalog" style={{ marginBottom: '1rem' }}>Înapoi la Catalog</button>
+            <button onClick={() => navigate('/app/catalog')} className="buton-catalog">Înapoi la Catalog</button>
 
             <div className="activity-table">
                 <table>

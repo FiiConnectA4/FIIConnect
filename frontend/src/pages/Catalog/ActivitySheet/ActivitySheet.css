@@ -4,8 +4,27 @@
 }
 
 .container-fisa h1 {
-    font-size: 1.8rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
+    color: var(--text-color, #1a1a1a);
+}
+
+h1 {
+    font-size: 1.6rem;
+    margin-bottom: 0.5rem;
+    color: #1a1a1a;
+}
+
+.fisa-info {
+    background-color: #eaf3fb;
+    padding: 1rem;
+    border-radius: 15px;
+    border: 1px solid #ccc;
+    margin-bottom: 1rem;
+}
+
+.fisa-info p {
+    margin: 0.4rem 0;
+    font-size: 1rem;
 }
 
 .buton-catalog {
@@ -45,7 +64,14 @@
     color: black;
 }
 
-/* 🔁 DARK MODE */
+/* DARK MODE */
+
+[data-theme="dark"] .fisa-info {
+    background-color: #1e2a38;
+    border: 1px solid #3c4d5e;
+    color: #e0e6ed;
+}
+
 [data-theme="dark"] .container-fisa {
     background-color: transparent;
     color: white;
