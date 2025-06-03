@@ -6,6 +6,7 @@ import PageControl from '../Components/PageControl';
 import './../Student/Student.css';
 import PDetaliiCurs from '../DetaliiCurs/DetaliiCursEditabil';
 import PAdaugaCurs from '../DetaliiCurs/PAdaugaCurs';
+import { useNavigate } from 'react-router-dom';
 
 const Profesor = () => {
     const [professorId, setProfessorId] = useState(null);
@@ -14,6 +15,7 @@ const Profesor = () => {
     const [selectedCourseId, setSelectedCourseId] = useState(null);
     const [loading, setLoading] = useState(true);
     const [adaugaCurs, setAdaugaCurs] = useState(false);
+    const navigate = useNavigate();
 
     const token = localStorage.getItem('token');
 
@@ -157,7 +159,7 @@ const Profesor = () => {
         <div className="container-cursuri">
             <div className="cursuri-titlu">
                 <h1>Cursurile mele</h1>
-                <Ceas />
+                <Ceas onClick={() => navigate('/app/orar')} />
             </div>
 
             {professor && (
@@ -171,7 +173,7 @@ const Profesor = () => {
                     courses.map(({ course }) => (
                         <div key={course.id} className="rand-curs">
                             <Carte id={course.id} userType='professor' />
-                            <Ceas />
+                            <Ceas onClick={() => navigate(`/app/orar/discipline/${encodeURIComponent(course.title)}`)} />
                             <Buton
                                 text={course.title || 'Titlu indisponibil'}
                                 onNavigate={() => setSelectedCourseId(course.id)}
