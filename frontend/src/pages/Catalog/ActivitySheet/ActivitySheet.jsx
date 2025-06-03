@@ -2,51 +2,74 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './ActivitySheet.css';
 
+const API_BASE_URL = '';
+
 const ActivitySheet = () => {
     const { courseId } = useParams();
     const navigate = useNavigate();
     const [student, setStudent] = useState(null);
     const [components, setComponents] = useState([]);
     const [grades, setGrades] = useState([]);
+    const [course, setCourse] = useState(null);
     const [loading, setLoading] = useState(true);
 
     const token = localStorage.getItem('token');
-    const headers = {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-    };
 
     useEffect(() => {
         if (!token) return;
 
-        fetch('/person/me', { headers })
-            .then(res => res.json())
-            .then(data => {
-                setStudent(data.student);
-                return fetch(`/didactic/course/${courseId}/grades`, { headers });
-            })
-            .then(res => res.json())
-            .then(gradesData => {
-                setGrades(gradesData);
-                return fetch(`/didactic/course/${courseId}/formula-components`, { headers });
-            })
-            .then(res => res.json())
-            .then(compData => {
-                let comps = compData;
+        const fetchData = async () => {
+            try {
+                // Get student info
+                const studentRes = await fetch(`${API_BASE_URL}/person/me`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const studentData = await studentRes.json();
+                setStudent(studentData.student);
+
+                // Get course info
+                const courseRes = await fetch(`${API_BASE_URL}/didactic/course/${courseId}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const courseData = await courseRes.json();
+                setCourse(courseData);
+
+                // Get formula components
+                const formulaRes = await fetch(`${API_BASE_URL}/didactic/course/${courseId}/formula-components`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const formulaData = await formulaRes.json();
+                let comps = formulaData;
                 if (!comps.find(c => c.name.toLowerCase().includes('prezen'))) {
                     comps.push({ name: 'Prezențe' });
                 }
                 setComponents(comps);
-            })
-            .catch(err => console.error('⛔ Eroare:', err))
-            .finally(() => setLoading(false));
-    }, [courseId]);
+
+                // Get grades
+                const gradesRes = await fetch(`${API_BASE_URL}/didactic/course/${courseId}/grades`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const gradesData = await gradesRes.json();
+                setGrades(gradesData);
+
+            } catch (err) {
+                console.error('⛔ Eroare:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [courseId, token]);
 
     if (loading) return <div className="container-fisa">Se încarcă fișa de activitate…</div>;
 
     return (
         <div className="container-fisa">
             <h1>Fișă activitate — {student?.firstName} {student?.lastName}</h1>
+            <p><strong>Grupa:</strong> {student?.facultyGroup} | <strong>An:</strong> {student?.year}</p>
+            <p><strong>Materie:</strong> {course?.title} | <strong>Semestru:</strong> {course?.semester}</p>
+
             <button onClick={() => navigate(-1)} className="buton-catalog" style={{ marginBottom: '1rem' }}>Înapoi la Catalog</button>
 
             <div className="activity-table">

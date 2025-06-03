@@ -6,13 +6,26 @@
 .container-fisa h1 {
     font-size: 1.8rem;
     margin-bottom: 1.5rem;
-    text-align: center;
+}
+
+.buton-catalog {
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    border: none;
+    background-color: #6195C9;
+    border-radius: 20px;
+    cursor: pointer;
+    color: white;
+}
+
+.activity-table {
+    margin-top: 1rem;
+    width: 100%;
 }
 
 .activity-table table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 1rem;
 }
 
 .activity-table th,
@@ -20,7 +33,6 @@
     border: 1px solid #ccc;
     padding: 0.6rem;
     text-align: center;
-    font-size: 1rem;
 }
 
 .activity-table th {
@@ -28,12 +40,14 @@
     color: white;
 }
 
-[data-theme="dark"] .activity-table th {
-    background-color: #1A3C5A;
+.activity-table td {
+    background-color: white;
+    color: black;
 }
 
+/* 🔁 DARK MODE */
 [data-theme="dark"] .container-fisa {
-    background-color: #1e1e1e;
+    background-color: transparent;
     color: white;
 }
 
@@ -42,6 +56,12 @@
     color: white;
 }
 
-[data-theme="dark"] .activity-table {
-    border-color: #555;
+[data-theme="dark"] .activity-table th {
+    background-color: #1A3C5A;
+    color: white;
+}
+
+[data-theme="dark"] .buton-catalog {
+    background-color: #4A6C8A;
+    color: white;
 }
