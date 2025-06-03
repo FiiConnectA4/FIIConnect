@@ -109,3 +109,11 @@ a {
     cursor: pointer;
     font-size: 13px;
 }
+
+.butoane-container {
+    display: flex;
+    align-items: center;
+    /* le aliniezi pe verticală */
+    gap: 8px;
+    /* spațiu între ele */
+}
