@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import './DetaliiCurs.css';
 import Ceas from './../Components/Ceas';
 import Edit from './../Components/Edit';
+import SwitchFeedback from './../Components/SwitchFeedback';
 import ButonExtensibil from '../Components/ButonExtensibil';
 
 // Backend base URL (remove if using package.json proxy)
@@ -23,7 +24,7 @@ const PDetaliiCurs = ({ curs, onBack }) => {
     const [userId, setUserId] = useState(null);
     const fileInputRef = useRef(null);
     const token = localStorage.getItem('token');
-
+    const [showMaterials, setShowMaterials] = useState(true);
     useEffect(() => {
         // Fetch materials
         fetch(`${API_BASE_URL}/didactic/course/material`,
@@ -357,6 +358,12 @@ const PDetaliiCurs = ({ curs, onBack }) => {
             <div className="titlu-curs">
                 <h1><u>{curs.title}</u></h1>
                 <Ceas />
+                <SwitchFeedback
+                    label="Permite feedback"
+                    isOn={showMaterials}
+                    onToggle={() => setShowMaterials(prev => !prev)}
+                />
+
             </div>
             <ButonExtensibil text="Profesori" professors={profesori} />
 
