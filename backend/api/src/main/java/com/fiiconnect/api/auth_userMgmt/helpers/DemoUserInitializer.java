@@ -76,7 +76,7 @@ public class DemoUserInitializer implements CommandLineRunner {
                     "prof1",
                     "prof1@fiiconnect.com",
                     "Professor123!",
-                    "ROLE_PROFESSOR",
+                    "ROLE_PROFESOR",
                     null,
                     professor
             );

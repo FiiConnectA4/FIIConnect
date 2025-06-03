@@ -8,6 +8,7 @@ const PAdaugaCurs = ({ professorId, onBack, onCreated }) => {
     const [semester, setSemester] = useState('');
     const [credits, setCredits] = useState('');
     const [academicYear, setAcademicYear] = useState('');
+    const token = localStorage.getItem('token');
 
     const handleCreate = async () => {
         const newCourse = {
@@ -25,7 +26,8 @@ const PAdaugaCurs = ({ professorId, onBack, onCreated }) => {
 
             const res = await fetch('/didactic/course', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json' ,
+                    Authorization: `Bearer ${token}`},
                 body: JSON.stringify(newCourse)
             });
 
@@ -39,27 +41,6 @@ const PAdaugaCurs = ({ professorId, onBack, onCreated }) => {
 
             if (!courseId || isNaN(courseId)) throw new Error("ID-ul cursului este invalid!");
             console.log("🆕 Curs creat cu id =", courseId);
-
-            const teaching = {
-                id: {
-                    idProf: parseInt(professorId),
-                    idCourse: parseInt(courseId),
-                },
-                role: "titular"
-            };
-
-            console.log("📎 Trimitem teaching:", teaching);
-
-            const res2 = await fetch('/didactic/teach', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(teaching)
-            });
-
-            if (!res2.ok) {
-                const errText = await res2.text();
-                throw new Error("❌ Eroare asociere profesor: " + errText);
-            }
 
             alert("✅ Curs creat și asociat cu succes!");
             if (onCreated) onCreated();
