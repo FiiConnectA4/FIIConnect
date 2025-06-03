@@ -159,7 +159,7 @@ const Profesor = () => {
         <div className="container-cursuri">
             <div className="cursuri-titlu">
                 <h1>Cursurile mele</h1>
-                <Ceas />
+                <Ceas onClick={() => navigate('/app/orar')} />
             </div>
 
             {professor && (

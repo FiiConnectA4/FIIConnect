@@ -158,7 +158,7 @@ const Administrator = () => {
         <div className="container-cursuri">
             <div className="cursuri-titlu">
                 <h1>Administrare Cursuri</h1>
-                <Ceas/>
+                <Ceas onClick={() => navigate('/app/orar')} />
             </div>
             <div className="lista-cursuri">
                 {cursuri.length > 0 ? (
