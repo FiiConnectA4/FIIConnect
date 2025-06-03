@@ -85,7 +85,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/users/register", "/users/role")
                         .hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/notifications/**")
-                        .hasAnyAuthority("ROLE_ADMIN", "ROLE_PROFESSOR", "ROLE_STUDENT")
+                        .hasAnyAuthority("ROLE_ADMIN", "ROLE_PROFESOR", "ROLE_STUDENT")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
