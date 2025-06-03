@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './DetaliiCurs.css';
 import Ceas from './../Components/Ceas';
+import { useNavigate } from 'react-router-dom';
 import ButonExtensibil from '../Components/ButonExtensibil';
 
 // Backend base URL (remove if using package.json proxy)
@@ -13,7 +14,7 @@ const DetaliiCurs = ({ curs, onBack }) => {
     const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(true);
     const token = localStorage.getItem('token');
-
+    const navigate = useNavigate();
     useEffect(() => {
         console.log('ID-ul cursului:', curs.id);
 
@@ -146,7 +147,12 @@ const downloadMaterial = (materialId, filename) => {
                 <button className="buton-inapoi" onClick={onBack}>
                     ← Înapoi la cursuri
                 </button>
-                <Ceas />
+                <Ceas
+                    onClick={() => {
+                        const disciplina = encodeURIComponent(curs.title);
+                        navigate(`/app/orar/discipline/${disciplina}`);
+                    }}
+                />
             </div>
 
             {/* Course Title Section */}
