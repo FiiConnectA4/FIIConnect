@@ -3,6 +3,7 @@ import './DetaliiCurs.css';
 import Ceas from './../Components/Ceas';
 import Edit from './../Components/Edit';
 import ButonExtensibil from '../Components/ButonExtensibil';
+import { useNavigate } from 'react-router-dom';
 
 // Backend base URL (remove if using package.json proxy)
 const API_BASE_URL = ''; // Set to 'http://localhost:8080' if no proxy, or leave empty with proxy
@@ -23,6 +24,7 @@ const PDetaliiCurs = ({ curs, onBack }) => {
     const [userId, setUserId] = useState(null);
     const fileInputRef = useRef(null);
     const token = localStorage.getItem('token');
+    const navigate = useNavigate();
 
     useEffect(() => {
         // Fetch materials
@@ -356,7 +358,12 @@ const PDetaliiCurs = ({ curs, onBack }) => {
             <button className="buton-inapoi" onClick={onBack}>{'< Înapoi'}</button>
             <div className="titlu-curs">
                 <h1><u>{curs.title}</u></h1>
-                <Ceas />
+                <Ceas
+                    onClick={() => {
+                        const disciplina = encodeURIComponent(curs.title);
+                        navigate(`/app/orar/discipline/${disciplina}`);
+                    }}
+                />
             </div>
             <ButonExtensibil text="Profesori" professors={profesori} />
 
