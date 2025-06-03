@@ -7,6 +7,7 @@ import Anunturi from "../pages/Social/Page/Anunturi";
 import Harta from "../pages/Harta";
 import Cursuri from "../pages/Cursuri/Cursuri";
 import Catalog from "../pages/Catalog/Catalog";
+import ActivitySheet from "../pages/Catalog/ActivitySheet/ActivitySheet";
 import OrarToti from "../pages/Orar/OrarToti";
 import Secretariat from "../pages/Secretariat/Secretariat";
 import SecretariatToti from "../pages/Secretariat/SecretariatToti";
@@ -74,7 +75,9 @@ const AppRoutes = () => {
         <Route path="anunturi" element={<Anunturi />} />
         <Route path="harta" element={<Harta />} />
         <Route path="cursuri" element={<Cursuri />} />
+
         <Route path="catalog" element={<Catalog />} />
+          <Route path="catalog/activity-sheet/:courseId" element={<ActivitySheet />} />
 
         {/* Rutele pentru orar */}
         <Route path="orar" element={<OrarToti />} />

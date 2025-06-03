@@ -1,0 +1,47 @@
+.container-fisa {
+    padding: 2rem;
+    font-family: sans-serif;
+}
+
+.container-fisa h1 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.activity-table table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1rem;
+}
+
+.activity-table th,
+.activity-table td {
+    border: 1px solid #ccc;
+    padding: 0.6rem;
+    text-align: center;
+    font-size: 1rem;
+}
+
+.activity-table th {
+    background-color: #6195C9;
+    color: white;
+}
+
+[data-theme="dark"] .activity-table th {
+    background-color: #1A3C5A;
+}
+
+[data-theme="dark"] .container-fisa {
+    background-color: #1e1e1e;
+    color: white;
+}
+
+[data-theme="dark"] .activity-table td {
+    background-color: #2a2a2a;
+    color: white;
+}
+
+[data-theme="dark"] .activity-table {
+    border-color: #555;
+}
