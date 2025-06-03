@@ -3,6 +3,7 @@ import Ceas from './../Components/Ceas';
 import Carte from '../Components/Carte';
 import Buton from '../Components/Buton';
 import PageControl from '../Components/PageControl'; // opțional
+import { useNavigate } from 'react-router-dom';
 import './../Student/Student.css';
 import PDetaliiCurs from '../DetaliiCurs/DetaliiCurs';
 
@@ -11,6 +12,7 @@ const Student = () => {
     const [courses, setCourses] = useState([]);
     const [selectedCourseId, setSelectedCourseId] = useState(null);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -112,7 +114,7 @@ const Student = () => {
                                 userType='student'
                                 id={curs.id}
                             />
-                            <Ceas />
+                            <Ceas onClick={() => navigate(`/app/orar/discipline/${encodeURIComponent(curs.title)}`)} />
                             <Buton
                                 text={curs.title || 'Titlu indisponibil'}
                                 onNavigate={() => setSelectedCourseId(curs.id)}

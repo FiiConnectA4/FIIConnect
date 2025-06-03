@@ -6,12 +6,14 @@ import './../Student/Student.css';
 import PDetaliiCurs from '../DetaliiCurs/DetaliiCursEditabil';
 import PageControl from '../Components/PageControl';
 import AdaugaCurs from '../DetaliiCurs/AdaugaCurs';
+import { useNavigate } from 'react-router-dom';
 
 const Administrator = () => {
     const [selectedCursId, setSelectedCursId] = useState(null);
     const [cursuri, setCursuri] = useState([]);
     const [loading, setLoading] = useState(true);
     const [adaugaCurs, setAdaugaCurs] = useState(false);
+    const navigate = useNavigate();
 
     const fetchCourses = () => {
         const token = localStorage.getItem('token');
@@ -156,7 +158,7 @@ const Administrator = () => {
         <div className="container-cursuri">
             <div className="cursuri-titlu">
                 <h1>Administrare Cursuri</h1>
-                <Ceas />
+                <Ceas/>
             </div>
             <div className="lista-cursuri">
                 {cursuri.length > 0 ? (
@@ -166,7 +168,7 @@ const Administrator = () => {
                                 id={curs.id}
                                 userType='professor'
                             />
-                            <Ceas idCurs={curs.id} />
+                            <Ceas onClick={() => navigate(`/app/orar/discipline/${encodeURIComponent(curs.title)}`)} />
                             <Buton
                                 text={curs.title}
                                 onNavigate={() => setSelectedCursId(curs.id)}
