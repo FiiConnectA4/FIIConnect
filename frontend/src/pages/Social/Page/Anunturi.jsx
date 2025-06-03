@@ -1,6 +1,23 @@
 import React, { useState, useEffect } from "react";
 import "../Style/Anunturi.css";
 
+function Notification({ message, type, onClose }) {
+  return (
+    <div className={`notification ${type}`}>
+      <span className="notification-message" title={message}>
+        {message}
+      </span>
+      <button 
+        className="notification-close" 
+        onClick={onClose}
+        aria-label="Închide notificarea"
+      >
+        ×
+      </button>
+    </div>
+  );
+}
+
 function Anunturi() {
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,11 +32,18 @@ function Anunturi() {
     message: "",
     tags: []
   });
-  
+
   const [currentTag, setCurrentTag] = useState({
     name: "",
     type: "GENERAL"
   });
+
+  const [notification, setNotification] = useState(null);
+
+  const showNotification = (message, type) => {
+    setNotification({ message, type });
+  };
+
   const [currentUser, setCurrentUser] = useState(null);
   const [fullUser, setFullUser] = useState(null);
   const [userTags, setUserTags] = useState([]);
@@ -30,94 +54,67 @@ function Anunturi() {
     return type.charAt(0).toUpperCase() + type.slice(1).toLowerCase();
   };
 
-  const getAvailableTagNames = (selectedType) => {
-    if (!userTags || userTags.length === 0) return [];
-    return userTags
-      .filter(tag => tag.type === selectedType)
-      .map(tag => tag.name);
+  // Fetch user info, tags, and role from unified endpoint
+  const fetchUserData = async () => {
+    try {
+      setUserLoading(true);
+      const token = localStorage.getItem('token');
+      const response = await fetch("http://localhost:34101/person/me", {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!response.ok) throw new Error("Failed to fetch user info");
+      const user = await response.json();
+      setFullUser(user);
+      setUserTags(user.tags || []);
+      // Extract unique tag types
+      const uniqueTypes = [...new Set((user.tags || []).map(tag => tag.type))];
+      setAvailableTagTypes(uniqueTypes);
+      setCurrentTag(prev => ({ ...prev, type: uniqueTypes[0] || "GENERAL" }));
+      return user;
+    } catch (err) {
+      console.error("Error fetching user data:", err);
+      setError(err.message);
+      throw err;
+    } finally {
+      setUserLoading(false);
+    }
   };
 
-  const fetchUserData = async () => {
-  try {
-    setUserLoading(true);
-    const token = localStorage.getItem('token');
-    
-    const authResponse = await fetch("http://localhost:34101/auth/current-user", {
-      headers: { 'Authorization': `Bearer ${token}` }
-    });
-    
-    if (!authResponse.ok) throw new Error("Failed to fetch current user");
-    const authUser = await authResponse.json();
-    setCurrentUser(authUser);
-
-    const userResponse = await fetch(`http://localhost:34101/users/${authUser.id}`);
-    if (!userResponse.ok) throw new Error("Failed to fetch user details");
-    let userDetails = await userResponse.json();
-    
-    userDetails.type = normalizeUserType(userDetails.type);
-    setFullUser(userDetails);
-
-    const tagsResponse = await fetch(`http://localhost:34101/users/${authUser.id}/tags`);
-    if (!tagsResponse.ok) throw new Error("Failed to fetch user tags");
-    const tagsData = await tagsResponse.json();
-    
-    console.log("User tags from API:", tagsData);
-    setUserTags(tagsData);
-
-    // Extragem tipurile unice de tag-uri
-    const uniqueTypes = [...new Set(tagsData.map(tag => tag.type))];
-    setAvailableTagTypes(uniqueTypes);
-    setCurrentTag(prev => ({ ...prev, type: uniqueTypes[0] || "GENERAL" }));
-
-    return { ...userDetails, tags: tagsData };
-  } catch (err) {
-    console.error("Error fetching user data:", err);
-    setError(err.message);
-    throw err;
-  } finally {
-    setUserLoading(false);
-  }
-};
-
- const fetchAnnouncements = async (user) => {
-  try {
-    setLoading(true);
-    let url = "http://localhost:34101/announcement/prof-secretar";
-    
-    if (user.type === "Student") {
-      const tagIds = user.tags?.map(tag => tag.id) || [];
-      if (tagIds.length > 0) {
-        url = `http://localhost:34101/announcement/with-tag?${tagIds.map(id => `tagIds=${id}`).join('&')}`;
-      } else {
-        setAnnouncements([]);
-        return;
+  // Fetch announcements using user info and tags
+  const fetchAnnouncements = async (user) => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      let url = "http://localhost:34101/announcement/prof-secretar";
+      if (user.role === "student") {
+        const tagIds = user.tags?.map(tag => tag.id) || [];
+        if (tagIds.length > 0) {
+          url = `http://localhost:34101/announcement/with-tag?${tagIds.map(id => `tagIds=${id}`).join('&')}`;
+        } else {
+          setAnnouncements([]);
+          return;
+        }
       }
+      const response = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+      if (!response.ok) throw new Error("Failed to fetch announcements");
+      let announcementsData = await response.json();
+      announcementsData = announcementsData.map(announcement => ({
+        ...announcement,
+        author: announcement.author || null,
+        professor: announcement.author ? {
+          id: announcement.author.userId, // use userId for author
+          name: announcement.author.username || announcement.author.name || '',
+          type: normalizeUserType(announcement.author.role || announcement.author.type)
+        } : null
+      }));
+      announcementsData.sort((a, b) => new Date(b.publishedDate) - new Date(a.publishedDate));
+      setAnnouncements(announcementsData);
+    } catch (err) {
+      setError("Failed to load announcements: " + err.message);
+    } finally {
+      setLoading(false);
     }
-
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Failed to fetch announcements");
-    let announcementsData = await response.json();
-
-    // Normalizează structura anunțurilor
-    announcementsData = announcementsData.map(announcement => ({
-      ...announcement,
-      author: announcement.author || null, // Păstrează autorul original
-      professor: announcement.author ? { // Creează obiectul professor
-        id: announcement.author.id,
-        name: announcement.author.name,
-        type: normalizeUserType(announcement.author.type)
-      } : null
-    }));
-
-    // Sortează după dată
-    announcementsData.sort((a, b) => new Date(b.publishedDate) - new Date(a.publishedDate));
-    setAnnouncements(announcementsData);
-  } catch (err) {
-    setError("Failed to load announcements: " + err.message);
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   useEffect(() => {
     const loadData = async () => {
@@ -128,7 +125,6 @@ function Anunturi() {
         console.error("Initialization error:", err);
       }
     };
-
     loadData();
   }, []);
 
@@ -147,89 +143,87 @@ function Anunturi() {
     setCurrentTag(prev => ({ ...prev, [name]: value }));
   };
 
- const addTag = () => {
-  setError(null);
+  const addTag = () => {
+    setError(null);
 
-  const tagName = currentTag.name.trim();
-  const tagType = currentTag.type;
+    const tagName = currentTag.name.trim();
+    const tagType = currentTag.type;
 
-  if (!tagName) {
-    setError("Te rugăm să selectezi o etichetă");
-    return;
-  }
+    if (!tagName) {
+      setError("Te rugăm să selectezi o etichetă");
+      return;
+    }
 
-  // Verifică doar dacă tag-ul există deja în anunțul curent
-  const isDuplicate = newAnnouncement.tags.some(
-    tag => tag.name.toLowerCase() === tagName.toLowerCase() && tag.type === tagType
-  );
+    // Verifică doar dacă tag-ul există deja în anunțul curent
+    const isDuplicate = newAnnouncement.tags.some(
+      tag => tag.name.toLowerCase() === tagName.toLowerCase() && tag.type === tagType
+    );
 
-  if (isDuplicate) {
-    setError(`Eticheta "${tagName}" (${tagType}) există deja în acest anunț`);
-    return;
-  }
+    if (isDuplicate) {
+      showNotification(`Eticheta "${tagName}" (${tagType}) există deja`, 'error');
+      return;
+    }
 
-  // Verifică doar dacă utilizatorul are dreptul să folosească tag-ul
-  const userHasTag = userTags.some(
-    tag => tag.name.toLowerCase() === tagName.toLowerCase() && tag.type === tagType
-  );
+    // Verifică doar dacă utilizatorul are dreptul să folosească tag-ul
+    const userHasTag = userTags.some(
+      tag => tag.name.toLowerCase() === tagName.toLowerCase() && tag.type === tagType
+    );
 
-  if (!userHasTag) {
-    setError(`Nu ai permisiunea să folosești eticheta "${tagName}" (${tagType})`);
-    return;
-  }
+    if (!userHasTag) {
+      setError(`Nu ai permisiunea să folosești eticheta "${tagName}" (${tagType})`);
+      return;
+    }
 
-  // Adaugă tag-ul
-  setNewAnnouncement(prev => ({
-    ...prev,
-    tags: [...prev.tags, { name: tagName, type: tagType }]
-  }));
+    // Adaugă tag-ul
+    setNewAnnouncement(prev => ({
+      ...prev,
+      tags: [...prev.tags, { name: tagName, type: tagType }]
+    }));
 
-  // Resetare input
-  setCurrentTag(prev => ({ ...prev, name: "" }));
-};
-
-  
+    // Resetare input
+    setCurrentTag(prev => ({ ...prev, name: "" }));
+  };
 
   const addEditTag = () => {
-  setError(null);
+    setError(null);
 
-  const tagName = currentTag.name.trim();
-  const tagType = currentTag.type;
+    const tagName = currentTag.name.trim();
+    const tagType = currentTag.type;
 
-  if (!tagName) {
-    setError("Te rugăm să selectezi o etichetă");
-    return;
-  }
+    if (!tagName) {
+      setError("Te rugăm să selectezi o etichetă");
+      return;
+    }
 
-  // Verifică doar dacă tag-ul există deja în anunțul curent
-  const isDuplicate = editingAnnouncement.tags.some(
-    tag => tag.name.toLowerCase() === tagName.toLowerCase() && tag.type === tagType
-  );
+    // Verifică doar dacă tag-ul există deja în anunțul curent
+    const isDuplicate = editingAnnouncement.tags.some(
+      tag => tag.name.toLowerCase() === tagName.toLowerCase() && tag.type === tagType
+    );
 
-  if (isDuplicate) {
-    setError(`Eticheta "${tagName}" (${tagType}) există deja în acest anunț`);
-    return;
-  }
+    if (isDuplicate) {
+      showNotification(`Eticheta "${tagName}" (${tagType}) există deja`, 'error');
+      return;
+    }
 
-  // Verifică doar dacă utilizatorul are dreptul să folosească tag-ul
-  const userHasTag = userTags.some(
-    tag => tag.name.toLowerCase() === tagName.toLowerCase() && tag.type === tagType
-  );
+    // Verifică doar dacă utilizatorul are dreptul să folosească tag-ul
+    const userHasTag = userTags.some(
+      tag => tag.name.toLowerCase() === tagName.toLowerCase() && tag.type === tagType
+    );
 
-  if (!userHasTag) {
-    setError(`Nu ai permisiunea să folosești eticheta "${tagName}" (${tagType})`);
-    return;
-  }
+    if (!userHasTag) {
+      setError(`Nu ai permisiunea să folosești eticheta "${tagName}" (${tagType})`);
+      return;
+    }
 
-  // Adaugă tag-ul
-  setEditingAnnouncement(prev => ({
-    ...prev,
-    tags: [...prev.tags, { name: tagName, type: tagType }]
-  }));
+    // Adaugă tag-ul
+    setEditingAnnouncement(prev => ({
+      ...prev,
+      tags: [...prev.tags, { name: tagName, type: tagType }]
+    }));
 
-  // Resetare input
-  setCurrentTag(prev => ({ ...prev, name: "" }));
-};
+    // Resetare input
+    setCurrentTag(prev => ({ ...prev, name: "" }));
+  };
 
   const removeTag = (index) => {
     setNewAnnouncement(prev => ({
@@ -248,50 +242,44 @@ function Anunturi() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-    
     try {
       if (userLoading) {
         throw new Error("Datele utilizatorului se încarcă. Te rugăm să aștepți...");
       }
-
       if (!fullUser) {
         throw new Error("Informațiile utilizatorului nu sunt disponibile.");
       }
-
       if (!newAnnouncement.title.trim()) {
         throw new Error("Te rugăm să introduci un titlu");
       }
-
       if (!newAnnouncement.message.trim()) {
         throw new Error("Te rugăm să introduci un mesaj");
       }
-
+      const token = localStorage.getItem('token');
+      // Compose payload as expected by backend: AnnouncementDTO
       const payload = {
         title: newAnnouncement.title.trim(),
         message: newAnnouncement.message.trim(),
-        professor: {
-          id: fullUser.id,
-          name: fullUser.name,
-          type: fullUser.type
-        },
-        tags: newAnnouncement.tags,
-        publishedDate: new Date().toISOString()
+        authorId: fullUser.userId, // send only the userId
+        tags: newAnnouncement.tags.map(tag => ({ name: tag.name, type: tag.type })),
+        publishedDate: new Date().toISOString().split('T')[0] // LocalDate format (yyyy-MM-dd)
       };
-
-      
       const response = await fetch("http://localhost:34101/announcement/prof-secretar", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(payload),
       });
-
       if (!response.ok) {
-        const errorData = await response.json();
+        let errorData = {};
+        try { errorData = await response.json(); } catch { /* ignore */ }
         throw new Error(errorData.message || "Eroare la postarea anunțului");
       }
-      
       setShowModal(false);
       setNewAnnouncement({ title: "", message: "", tags: [] });
+      setCurrentTag({ name: "", type: availableTagTypes[0] || "GENERAL" });
       await fetchAnnouncements(fullUser);
     } catch (err) {
       setError(err.message);
@@ -301,49 +289,43 @@ function Anunturi() {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-    
     try {
       if (userLoading) {
         throw new Error("Datele utilizatorului se încarcă. Te rugăm să aștepți...");
       }
-
       if (!fullUser) {
         throw new Error("Informațiile utilizatorului nu sunt disponibile.");
       }
-
       if (!editingAnnouncement.title.trim()) {
         throw new Error("Te rugăm să introduci un titlu");
       }
-
       if (!editingAnnouncement.message.trim()) {
         throw new Error("Te rugăm să introduci un mesaj");
       }
-
+      const token = localStorage.getItem('token');
       const payload = {
         title: editingAnnouncement.title.trim(),
         message: editingAnnouncement.message.trim(),
-        professor: {
-          id: fullUser.id,
-          name: fullUser.name,
-          type: fullUser.type
-        },
-        tags: editingAnnouncement.tags,
+        authorId: fullUser.userId, // send only the userId
+        tags: editingAnnouncement.tags.map(tag => ({ name: tag.name, type: tag.type })),
         publishedDate: editingAnnouncement.publishedDate
       };
-
       const response = await fetch(`http://localhost:34101/announcement/prof-secretar/${editingAnnouncement.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          'Authorization': `Bearer ${token}`
+        },
         body: JSON.stringify(payload),
       });
-
       if (!response.ok) {
-        const errorData = await response.json();
+        let errorData = {};
+        try { errorData = await response.json(); } catch { /* ignore */ }
         throw new Error(errorData.message || "Eroare la actualizarea anunțului");
       }
-      
       setShowEditModal(false);
       setEditingAnnouncement(null);
+      setCurrentTag({ name: "", type: availableTagTypes[0] || "GENERAL" });
       await fetchAnnouncements(fullUser);
     } catch (err) {
       setError(err.message);
@@ -355,15 +337,14 @@ function Anunturi() {
       if (!window.confirm("Sigur dorești să ștergi acest anunț?")) {
         return;
       }
-
-      const response = await fetch(`http://localhost:34101/announcement/prof-secretar/${announcementId}`, {
-        method: "DELETE"
+      const token = localStorage.getItem('token');
+      const response = await fetch(`http://localhost:34101/announcement/prof-secretar/${announcementId}?userId=${fullUser.userId}`, {
+        method: "DELETE",
+        headers: { 'Authorization': `Bearer ${token}` }
       });
-
       if (!response.ok) {
         throw new Error("Eroare la ștergerea anunțului");
       }
-
       await fetchAnnouncements(fullUser);
     } catch (err) {
       setError(err.message);
@@ -389,19 +370,40 @@ function Anunturi() {
     });
   };
 
+  // Helper to get available tag names for a given type and current tags
+  const getAvailableTagNames = (selectedType, currentTags = []) => {
+    if (!userTags || userTags.length === 0) return { names: [], hasAvailableTags: false };
+    const filteredTags = userTags
+      .filter(tag => tag.type === selectedType)
+      .filter(tag => !currentTags.some(t => t.name === tag.name && t.type === tag.type));
+    return {
+      names: filteredTags.map(tag => tag.name),
+      hasAvailableTags: filteredTags.length > 0
+    };
+  };
+
   const filterAnnouncements = (allAnnouncements, tags) => {
     if (!tags || tags.length === 0) return [];
-    
     return allAnnouncements.filter(announcement => {
-      if (!announcement.tags || announcement.tags.length === 0) return true;
-      return announcement.tags.some(announcementTag => 
-        tags.some(userTag => 
-          userTag.name === announcementTag.name && 
+      if (!announcement.tags || announcement.tags.length === 0) return false;
+      return announcement.tags.some(announcementTag =>
+        tags.some(userTag =>
+          userTag.name === announcementTag.name &&
           userTag.type === announcementTag.type
         )
       );
     });
   };
+
+  // Helper to check if user can post (not a student)
+  const canPost = fullUser && fullUser.role && fullUser.role !== 'ROLE_STUDENT';
+
+  // Only students see filtered announcements, others see all
+  const isStudent = fullUser && fullUser.role === 'ROLE_STUDENT';
+  const uniqueAnnouncements = Array.from(new Map(announcements.map(a => [a.id, a])).values());
+  const announcementsToDisplay = isStudent
+    ? filterAnnouncements(uniqueAnnouncements, userTags)
+    : uniqueAnnouncements;
 
   if (userLoading) return <div className="loading">Se încarcă datele utilizatorului...</div>;
   if (loading) return <div className="loading">Se încarcă anunțurile...</div>;
@@ -410,93 +412,108 @@ function Anunturi() {
 
   console.log("Current user:", fullUser);
 
-  const announcementsToDisplay = fullUser.type === "Student"
-    ? filterAnnouncements(announcements, userTags)
-    : announcements;
-    
-
   return (
     <div className="announcements-container">
       <div className="announcements-header">
         <h1>Anunțuri</h1>
-       {(normalizeUserType(fullUser.type) === "Profesor" || normalizeUserType(fullUser.type) === "Secretar") && (
-        <button 
-          className="add-button"
-          onClick={() => setShowModal(true)}
-          disabled={userLoading}
-        >
-          +
-        </button>
-      )}
+        {canPost && (
+          <button 
+            className="add-button"
+            onClick={() => setShowModal(true)}
+            disabled={userLoading}
+          >
+            +
+          </button>
+        )}
       </div>
 
       {showModal && (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <h2>Adaugă Anunț Nou</h2>
-        {error && <div className="error-message">{error}</div>}
-        <form onSubmit={handleSubmit}>
-  <div className="form-group">
-    <label>Titlu:</label>
-    <input
-      type="text"
-      name="title"
-      value={newAnnouncement.title}
-      onChange={handleInputChange}
-      required  
-    />
-  </div>
-
-  <div className="form-group">
-    <label>Mesaj:</label>
-    <textarea
-      name="message"
-      value={newAnnouncement.message}
-      onChange={handleInputChange}
-      required
-    />
-  </div>
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Adaugă Anunț Nou</h2>
+            {notification && (
+              <Notification 
+                message={notification.message} 
+                type={notification.type} 
+                onClose={() => setNotification(null)}
+              />
+            )}
+            <form onSubmit={handleSubmit}>
+              <div className="form-group">
+                <label>Titlu:</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={newAnnouncement.title}
+                  onChange={handleInputChange}
+                  required  
+                />
+              </div>
 
               <div className="form-group">
-            <label>Adaugă Etichete:</label>
-            <div className="tag-input-container">
-              <select
-                name="type"
-                value={currentTag.type}
-                onChange={handleTagTypeChange}
-                disabled={userLoading || userTags.length === 0}
-              >
-                {availableTagTypes.map(type => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-              
-              <select
-                name="name"
-                value={currentTag.name}
-                onChange={handleTagInputChange}
-                disabled={userLoading || userTags.length === 0 || !currentTag.type}
-              >
-                <option value="">Selectează etichetă</option>
-                {getAvailableTagNames(currentTag.type).map(name => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-              
-              <button 
-                type="button" 
-                onClick={addTag}
-                className="add-tag-button"
-                disabled={userLoading || userTags.length === 0 || !currentTag.name}
-              >
-                Adaugă
-              </button>
-            </div>
-                
+                <label>Mesaj:</label>
+                <textarea
+                  name="message"
+                  value={newAnnouncement.message}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Adaugă Etichete:</label>
+                <div className="tag-input-container">
+                  <select
+                    name="type"
+                    value={currentTag.type}
+                    onChange={handleTagTypeChange}
+                    disabled={userLoading || userTags.length === 0}
+                  >
+                    {availableTagTypes.map(type => (
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
+                    ))}
+                  </select>
+                  
+                  {(() => {
+                    const { names, hasAvailableTags } = getAvailableTagNames(currentTag.type, newAnnouncement.tags);
+                    
+                    if (!hasAvailableTags) {
+                      return (
+                        <div className="no-tags-message">
+                          Nu mai ai etichete disponibile pentru acest tip
+                        </div>
+                      );
+                    }
+                    
+                    return (
+                      <select
+                        name="name"
+                        value={currentTag.name}
+                        onChange={handleTagInputChange}
+                        disabled={userLoading || userTags.length === 0 || !currentTag.type}
+                      >
+                        <option value="">Selectează etichetă</option>
+                        {names.map(name => (
+                          <option key={name} value={name}>
+                            {name}
+                          </option>
+                        ))}
+                      </select>
+                    );
+                  })()}
+                  
+                  <button 
+                    type="button" 
+                    onClick={addTag}
+                    className="add-tag-button"
+                    disabled={userLoading || userTags.length === 0 || !currentTag.name}
+                  >
+                    Adaugă
+                  </button>
+                </div>
+                    
                 {userTags.length === 0 && (
                   <div className="no-tags-warning">
                     Nu ai nicio etichetă atribuită. Contactează administratorul.
@@ -528,6 +545,9 @@ function Anunturi() {
                   onClick={() => {
                     setShowModal(false);
                     setError(null);
+                    setNotification(null);
+                    setNewAnnouncement({ title: "", message: "", tags: [] });
+                    setCurrentTag({ name: "", type: availableTagTypes[0] || "GENERAL" });
                   }}
                 >
                   Anulează
@@ -539,72 +559,92 @@ function Anunturi() {
       )}
 
       {showEditModal && editingAnnouncement && (
-    <div className="modal-overlay">
-      <div className="modal-content">
-        <h2>Editează Anunț</h2>
-        {error && <div className="error-message">{error}</div>}
-        <form onSubmit={handleEditSubmit}>
-  <div className="form-group">
-    <label>Titlu:</label>
-    <input
-      type="text"
-      name="title"
-      value={editingAnnouncement.title}
-      onChange={handleEditInputChange}
-      required  
-    />
-  </div>
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Editează Anunț</h2>
+            {notification && (
+              <Notification 
+                message={notification.message} 
+                type={notification.type} 
+                onClose={() => setNotification(null)}
+              />
+            )}
+            <form onSubmit={handleEditSubmit}>
+              <div className="form-group">
+                <label>Titlu:</label>
+                <input
+                  type="text"
+                  name="title"
+                  value={editingAnnouncement.title}
+                  onChange={handleEditInputChange}
+                  required  
+                />
+              </div>
 
-<div className="form-group">
-    <label>Mesaj:</label>
-    <textarea
-      name="message"
-      value={editingAnnouncement.message}
-      onChange={handleEditInputChange}
-      required
-    />
-  </div>
+              <div className="form-group">
+                <label>Mesaj:</label>
+                <textarea
+                  name="message"
+                  value={editingAnnouncement.message}
+                  onChange={handleEditInputChange}
+                  required
+                />
+              </div>
 
-             <div className="form-group">
-            <label>Etichete:</label>
-            <div className="tag-input-container">
-              <select
-                name="type"
-                value={currentTag.type}
-                onChange={handleTagTypeChange}
-                disabled={userLoading || userTags.length === 0}
-              >
-                {availableTagTypes.map(type => (
-                  <option key={type} value={type}>
-                    {type}
-                  </option>
-                ))}
-              </select>
-              
-              <select
-                name="name"
-                value={currentTag.name}
-                onChange={handleTagInputChange}
-                disabled={userLoading || userTags.length === 0 || !currentTag.type}
-              >
-                <option value="">Selectează etichetă</option>
-                {getAvailableTagNames(currentTag.type).map(name => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-              
-              <button 
-                type="button" 
-                onClick={addEditTag}
-                className="add-tag-button"
-                disabled={userLoading || userTags.length === 0 || !currentTag.name}
-              >
-                Adaugă
-              </button>
-            </div>
-                
+              <div className="form-group">
+                <label>Etichete:</label>
+                <div className="tag-input-container">
+                  <select
+                    name="type"
+                    value={currentTag.type}
+                    onChange={handleTagTypeChange}
+                    disabled={userLoading || userTags.length === 0}
+                  >
+                    {availableTagTypes.map(type => (
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
+                    ))}
+                  </select>
+                  
+                  {(() => {
+                    const { names, hasAvailableTags } = getAvailableTagNames(currentTag.type, editingAnnouncement.tags);
+                    
+                    if (!hasAvailableTags) {
+                      return (
+                        <div className="no-tags-message">
+                          Nu mai ai etichete disponibile pentru acest tip
+                        </div>
+                      );
+                    }
+                    
+                    return (
+                      <select
+                        name="name"
+                        value={currentTag.name}
+                        onChange={handleTagInputChange}
+                        disabled={userLoading || userTags.length === 0 || !currentTag.type}
+                      >
+                        <option value="">Selectează etichetă</option>
+                        {names.map(name => (
+                          <option key={name} value={name}>
+                            {name}
+                          </option>
+                        ))}
+                      </select>
+                    );
+                  })()}
+                  
+                  <button 
+                    type="button" 
+                    onClick={addEditTag}
+                    className="add-tag-button"
+                    disabled={userLoading || userTags.length === 0 || !currentTag.name}
+                  >
+                    Adaugă
+                  </button>
+                </div>
+                    
                 {userTags.length === 0 && (
                   <div className="no-tags-warning">
                     Nu ai nicio etichetă atribuită. Contactează administratorul.
@@ -636,6 +676,9 @@ function Anunturi() {
                   onClick={() => {
                     setShowEditModal(false);
                     setError(null);
+                    setNotification(null);
+                    setNewAnnouncement({ title: "", message: "", tags: [] });
+                    setCurrentTag({ name: "", type: availableTagTypes[0] || "GENERAL" });
                   }}
                 >
                   Anulează
@@ -652,50 +695,49 @@ function Anunturi() {
         ) : (
           announcementsToDisplay.map((announcement) => (
             <div key={announcement.id} className="announcement-card">
-  <div className="announcement-header">
-    <div className="announcement-title-container">
-      <h2>{announcement.title}</h2>
-      <div className="announcement-meta">
-        <span className="announcement-author-date">
-          {announcement.professor && (
-            <span className="announcement-author">
-              Postat de: {announcement.professor.name}
-              <span className="separator"> • </span>
-            </span>
-          )}
-          {announcement.publishedDate && (
-            <span className="announcement-date">
-              {new Date(announcement.publishedDate).toLocaleDateString('ro-RO', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
-            </span>
-          )}
-        </span>
-        {(normalizeUserType(fullUser.type) === "Profesor" || normalizeUserType(fullUser.type) === "Secretar") && 
-       fullUser.id === announcement.author?.id && (
-        <div className="announcement-actions">
-          <button 
-            className="edit-button"
-            onClick={() => handleEdit(announcement)}
-            title="Editează"
-          >
-            ✏️
-          </button>
-          <button 
-            className="delete-button"
-            onClick={() => handleDelete(announcement.id)}
-            title="Șterge"
-          >
-            🗑️
-          </button>
-        </div>
-      )}
-      </div>
-    </div>
-  </div>
-  <p className="announcement-message">{announcement.message}</p>
+              <div className="announcement-header">
+                <div className="announcement-title-container">
+                  <h2>{announcement.title}</h2>
+                  <div className="announcement-meta">
+                    <span className="announcement-author-date">
+                      {announcement.professor && (
+                        <span className="announcement-author">
+                          Postat de: {announcement.professor.name}
+                          <span className="separator"> • </span>
+                        </span>
+                      )}
+                      {announcement.publishedDate && (
+                        <span className="announcement-date">
+                          {new Date(announcement.publishedDate).toLocaleDateString('ro-RO', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })}
+                        </span>
+                      )}
+                    </span>
+                    {fullUser && (fullUser.userId === announcement.authorId || fullUser.userId === announcement.author) && (
+                      <div className="announcement-actions">
+                        <button 
+                          className="edit-button"
+                          onClick={() => handleEdit(announcement)}
+                          title="Editează"
+                        >
+                          ✏️
+                        </button>
+                        <button 
+                          className="delete-button"
+                          onClick={() => handleDelete(announcement.id)}
+                          title="Șterge"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <p className="announcement-message">{announcement.message}</p>
               {announcement.tags && announcement.tags.length > 0 && (
                 <div className="announcement-tags-container">
                   <div className="announcement-tags-header">Destinatar:</div>

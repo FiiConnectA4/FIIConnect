@@ -5,53 +5,140 @@ const Administrator = () => {
     const [grupe, setGrupe] = useState([]);
     const [selectedGrupa, setSelectedGrupa] = useState('');
 
-    const [cursuri] = useState(['Introducere Programare', 'Programare Avansata']);
-    const [selectedCurs, setSelectedCurs] = useState('Introducere Programare');
+    const [cursuri, setCursuri] = useState([]);
+    const [selectedCursId, setSelectedCursId] = useState(null);
 
     const [catalog, setCatalog] = useState([]);
     const [loading, setLoading] = useState(false);
 
-    const mockCatalog = {
-        '1A1': [
-            { name: 'Flavius Bors', grade: 9 },
-            { name: 'Iancu Stefan', grade: 7 },
-            { name: 'Inu Maf', grade: 9 },
-            { name: 'Yamil Yamal', grade: 10 },
-            { name: 'Lanu Maru', grade: 10 },
-        ],
-        '1A2': [
-            { name: 'Alex Moore', grade: 8 },
-            { name: 'Bianca White', grade: 6 },
-        ],
-        '1A3': [],
-        '1A4': [],
-        '1A5': [],
-    };
+    const [editingIndex, setEditingIndex] = useState(null);
+    const [editedGrade, setEditedGrade] = useState('');
+    const [prevGrade, setPrevGrade] = useState('');
 
-    // Setează grupele automat din cheile mockCatalog
-    useEffect(() => {
-        const mockGrupe = Object.keys(mockCatalog);
-        setGrupe(mockGrupe);
-        setSelectedGrupa(mockGrupe[0]); // selectează prima grupă
-    }, []);
+    const token = localStorage.getItem('token');
 
-    // Când se schimbă grupa sau cursul, încarcă catalogul
     useEffect(() => {
-        if (!selectedGrupa) return; // evită erori dacă încă nu e setată grupa
+        fetch('/didactic/course', { headers: { 'Authorization': `Bearer ${token}` } })
+            .then(res => res.json())
+            .then(data => {
+                const courseList = data._embedded?.courseList || [];
+                setCursuri(courseList);
+                if (courseList.length) setSelectedCursId(courseList[0].id);
+            })
+            .catch(err => console.error('Eroare la încărcarea cursurilor:', err));
+    }, [token]);
+
+    useEffect(() => {
+        if (!selectedCursId) return;
         setLoading(true);
-        setTimeout(() => {
-            const grupaData = mockCatalog[selectedGrupa] || [];
-            setCatalog(grupaData);
-            setLoading(false);
-        }, 500); // simulare delay
-    }, [selectedGrupa, selectedCurs]);
+        Promise.all([
+            fetch(`/didactic/course/${selectedCursId}/enrolled`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
+            fetch(`/didactic/course/${selectedCursId}/grades`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json())
+        ])
+            .then(([enrollments, grades]) => {
+                const allGroups = [...new Set(enrollments.map(e => e.student.facultyGroup))];
+                setGrupe(allGroups);
+                const defaultGroup = allGroups[0] || '';
+                setSelectedGrupa(defaultGroup);
 
-    const handleUploadExcel = () => {
-        alert("Upload Excel (mock)");
+                const groupStudents = enrollments
+                    .filter(e => e.student.facultyGroup === defaultGroup)
+                    .map(e => e.student);
+
+                const initialCatalog = groupStudents.map(student => {
+                    const gradeEntry = grades.find(g => g.student.id === student.id);
+                    return {
+                        name: `${student.firstName} ${student.lastName}`,
+                        grade: gradeEntry ? gradeEntry.value : '',
+                        studentId: student.id
+                    };
+                });
+
+                setCatalog(initialCatalog);
+                setLoading(false);
+            })
+            .catch(err => { console.error('Eroare la încărcarea datelor:', err); setLoading(false); });
+    }, [selectedCursId, token]);
+
+    useEffect(() => {
+        if (!selectedCursId || !selectedGrupa) return;
+        setLoading(true);
+        Promise.all([
+            fetch(`/didactic/course/${selectedCursId}/enrolled`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
+            fetch(`/didactic/course/${selectedCursId}/grades`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json())
+        ])
+            .then(([enrollments, grades]) => {
+                const groupStudents = enrollments
+                    .filter(e => e.student.facultyGroup === selectedGrupa)
+                    .map(e => e.student);
+
+                const filteredCatalog = groupStudents.map(student => {
+                    const gradeEntry = grades.find(g => g.student.id === student.id);
+                    return {
+                        name: `${student.firstName} ${student.lastName}`,
+                        grade: gradeEntry ? gradeEntry.value : '',
+                        studentId: student.id
+                    };
+                });
+
+                setCatalog(filteredCatalog);
+                setLoading(false);
+            })
+            .catch(err => { console.error('Eroare la fetch:', err); setLoading(false); });
+    }, [selectedCursId, selectedGrupa, token]);
+
+    const handleSaveGrade = (index) => {
+        const gradeEntry = catalog[index];
+        if (!gradeEntry) return;
+
+        const studentId = gradeEntry.studentId;
+        const courseId = selectedCursId;
+        const parsed = parseFloat(editedGrade);
+
+        if (isNaN(parsed) || parsed < 1 || parsed > 10) {
+            alert("Introduceți o notă validă între 1 și 10.");
+            return;
+        }
+
+        const hasExisting = gradeEntry.grade !== ""; // dacă e gol, e POST, altfel PUT
+        const url = '/didactic/grade';
+        const method = hasExisting ? 'PUT' : 'POST';
+        const payload = hasExisting
+            ? {
+                id: { idStud: studentId, idCourse: courseId },
+                value: parsed
+            }
+            : {
+                id: { idStud: studentId, idCourse: courseId },
+                value: parsed,
+                gradingDate: new Date().toISOString()
+            };
+
+        fetch(url, {
+            method,
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify(payload)
+        })
+            .then(res => {
+                if (!res.ok) return res.text().then(text => { throw new Error(text) });
+                // actualizează local
+                const updated = [...catalog];
+                updated[index].grade = parsed;
+                setCatalog(updated);
+                setEditingIndex(null);
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Eroare la salvarea notei: " + err.message);
+            });
     };
 
-    const handleDownloadExcel = () => {
-        alert("Download Excel (mock)");
+    const handleUndo = () => {
+        setEditedGrade(prevGrade);
+        setEditingIndex(null);
     };
 
     return (
@@ -62,9 +149,8 @@ const Administrator = () => {
                     <select value={selectedGrupa} onChange={e => setSelectedGrupa(e.target.value)}>
                         {grupe.map((g, i) => <option key={i} value={g}>{g}</option>)}
                     </select>
-
-                    <select value={selectedCurs} onChange={e => setSelectedCurs(e.target.value)}>
-                        {cursuri.map((c, i) => <option key={i} value={c}>{c}</option>)}
+                    <select value={selectedCursId || ''} onChange={e => setSelectedCursId(parseInt(e.target.value, 10))}>
+                        {cursuri.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
                     </select>
                 </div>
             </div>
@@ -86,27 +172,31 @@ const Administrator = () => {
                         ) : catalog.length === 0 ? (
                             <tr><td colSpan="5">Nicio înregistrare pentru grupa selectată.</td></tr>
                         ) : (
-                            catalog.map((item, index) => (
-                                <tr key={index}>
+                            catalog.map((item, idx) => (
+                                <tr key={idx}>
                                     <td><input type="checkbox" /></td>
                                     <td>{item.name}</td>
-                                    <td>{selectedCurs}</td>
-                                    <td>{item.grade}</td>
-                                    <td>
-                                        <button className="admin-button" onClick={() => alert(`Deschide fișa pentru ${item.name}`)}>
-                                            <img src="/icons/edit-icon.png" alt="Admin Note" className="icon-img" />
+                                    <td>{cursuri.find(c => c.id === selectedCursId)?.title || ''}</td>
+                                    <td>{editingIndex === idx ? (
+                                        <input type="number" value={editedGrade} onChange={e => setEditedGrade(e.target.value)} />
+                                    ) : (
+                                        item.grade
+                                    )}</td>
+                                    <td>{editingIndex === idx ? (
+                                        <>
+                                            <button onClick={() => handleSaveGrade(idx)}>💾</button>
+                                            <button onClick={handleUndo}>↩️</button>
+                                        </>
+                                    ) : (
+                                        <button onClick={() => { setPrevGrade(item.grade); setEditingIndex(idx); setEditedGrade(item.grade); }}>
+                                            ✏️
                                         </button>
-                                    </td>
+                                    )}</td>
                                 </tr>
                             ))
                         )}
                     </tbody>
                 </table>
-            </div>
-
-            <div className="catalog-buttons">
-                <button onClick={handleUploadExcel}>Upload Excel</button>
-                <button onClick={handleDownloadExcel}>Download Excel</button>
             </div>
         </div>
     );

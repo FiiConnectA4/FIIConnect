@@ -1,5 +1,6 @@
 package com.fiiconnect.api.didactic.services;
 
+import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
 import com.fiiconnect.api.didactic.models.Enrollment;
 import com.fiiconnect.api.didactic.models.Grade;
 import com.fiiconnect.api.didactic.models.Student;
@@ -30,5 +31,18 @@ public class StudentService {
     {
         List<Grade> grades = gradeService.getStudentGrades(student.getId());
         student.setGrades(grades);
+    }
+
+    public void limitVisibility(Student student, PersonInfoDTO person, boolean attachFull)
+    {
+        if(attachFull && (person.role().equals("ROLE_ADMIN") || (person.role().equals("ROLE_STUDENT") && person.student().id().equals(student.getId()))))
+        {
+            attachEnrollments(student);
+            attachGrades(student);
+        }
+        else
+        {
+            student.setCnp(null);
+        }
     }
 }

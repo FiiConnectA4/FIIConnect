@@ -1,11 +1,16 @@
 package com.fiiconnect.api.social_secretary.classes;
 
+import com.fiiconnect.api.auth_userMgmt.models.User;
 import com.fiiconnect.api.social_secretary.enums.TagType;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "TAG" )
@@ -60,4 +65,7 @@ public class Tag {
                 ", type=" + type +
                 '}';
     }
+
+  //  @ManyToMany(mappedBy = "TAG")
+  //  public Set<User> users = new HashSet<>();
 }

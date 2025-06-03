@@ -1,12 +1,21 @@
+// src/app/ThemeContext.js
 import { createContext, useContext, useState, useEffect } from "react";
 
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState("light");
+  // 1) inițializează din localStorage, cu fallback pe "light"
+  const [theme, setTheme] = useState(() => {
+    const saved = localStorage.getItem("theme");
+    return saved === "dark" || saved === "light" ? saved : "light";
+  });
 
+  // 2) când se schimbă tema:
   useEffect(() => {
+    // aplici atributul pe <html>
     document.documentElement.setAttribute("data-theme", theme);
+    // salvezi în localStorage
+    localStorage.setItem("theme", theme);
   }, [theme]);
 
   const toggleTheme = () => {
@@ -14,9 +23,9 @@ export const ThemeProvider = ({ children }) => {
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
-      {children}
-    </ThemeContext.Provider>
+      <ThemeContext.Provider value={{ theme, toggleTheme }}>
+        {children}
+      </ThemeContext.Provider>
   );
 };
 
