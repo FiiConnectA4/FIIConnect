@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Student.css';
 
 const API_BASE_URL = '';
@@ -31,19 +32,19 @@ async function getStudentId(token) {
 }
 
 const StudentCatalog = () => {
-    const [semestre, setSemestre]       = useState([]);
+    const [semestre, setSemestre] = useState([]);
     const [selectedSem, setSelectedSem] = useState('');
-    const [bySem, setBySem]             = useState({});
-    const [curCatalog, setCurCatalog]   = useState([]);
-    const [points, setPoints]           = useState(0);
-    const [avg, setAvg]                 = useState(0);
-    const [loading, setLoading]         = useState(true);
-    const [studentId, setStudentId]     = useState(null);
+    const [bySem, setBySem] = useState({});
+    const [curCatalog, setCurCatalog] = useState([]);
+    const [points, setPoints] = useState(0);
+    const [avg, setAvg] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [studentId, setStudentId] = useState(null);
 
-    const token   = localStorage.getItem('token');
+    const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
+    const navigate = useNavigate();
 
-    // 🔹 Obține ID-ul studentului din /person/me
     useEffect(() => {
         if (!token) return;
 
@@ -56,14 +57,13 @@ const StudentCatalog = () => {
         });
     }, [token]);
 
-    // 🔹 După ce avem ID-ul, încărcăm cursurile și notele
     useEffect(() => {
         if (!studentId) return;
 
         (async () => {
             try {
-                const res     = await fetch('/didactic/course', { headers });
-                const body    = await res.json();
+                const res = await fetch('/didactic/course', { headers });
+                const body = await res.json();
                 const courses = body._embedded?.courseList ?? [];
 
                 if (!courses.length) {
@@ -74,28 +74,27 @@ const StudentCatalog = () => {
                 const detailPromises = courses.map(async c => {
                     const [gradesRes, detailRes] = await Promise.all([
                         fetch(`/didactic/course/${c.id}/grades`, { headers }),
-                        fetch(`/didactic/course/${c.id}`,        { headers })
+                        fetch(`/didactic/course/${c.id}`, { headers })
                     ]);
 
                     const grades = await gradesRes.json();
-                    const det    = await detailRes.json();
+                    const det = await detailRes.json();
 
                     var myGrade = grades.find(g => Number(g.student?.id) === studentId);
                     if (!myGrade)
                         myGrade = { value: '' };
 
-                    const teaching   = det.professors?.[0];
-                    const profObj    = teaching?.professor;
-                    const profName   = profObj
-                        ? `${profObj.firstName} ${profObj.lastName}`
-                        : '—';
+                    const teaching = det.professors?.[0];
+                    const profObj = teaching?.professor;
+                    const profName = profObj ? `${profObj.firstName} ${profObj.lastName}` : '—';
 
                     return {
-                        semestru : `Semestrul ${det.semester}`,
-                        curs     : det.title,
-                        profesor : profName,
-                        credite  : det.credits,
-                        nota     : myGrade.value
+                        courseId: c.id,
+                        semestru: `Semestrul ${det.semester}`,
+                        curs: det.title,
+                        profesor: profName,
+                        credite: det.credits,
+                        nota: myGrade.value
                     };
                 });
 
@@ -118,12 +117,11 @@ const StudentCatalog = () => {
         })();
     }, [studentId]);
 
-    // 🔹 Recalculare punctaj și medie
     useEffect(() => {
         const cursuri = bySem[selectedSem] || [];
         setCurCatalog(cursuri);
 
-        const p  = cursuri.reduce((s, c) => s + c.credite * c.nota, 0);
+        const p = cursuri.reduce((s, c) => s + c.credite * c.nota, 0);
         const cr = cursuri.reduce((s, c) => s + c.credite, 0);
         setPoints(p);
         setAvg(cr ? (p / cr).toFixed(2) : 0);
@@ -165,7 +163,7 @@ const StudentCatalog = () => {
                             <td>{c.credite}</td>
                             <td>{c.nota}</td>
                             <td>
-                                <button onClick={() => alert(`Fișa activitate: ${c.curs}`)}>
+                                <button onClick={() => navigate(`/app/catalog/activity-sheet/${c.courseId}`)}>
                                     <img src="/icons/edit-icon.png" alt="Fișa" className="icon-img" />
                                 </button>
                             </td>

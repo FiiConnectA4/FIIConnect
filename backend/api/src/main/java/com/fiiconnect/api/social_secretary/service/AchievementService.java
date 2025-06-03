@@ -1,5 +1,6 @@
 package com.fiiconnect.api.social_secretary.service;
 
+import com.fiiconnect.api.social_secretary.DTO.AchievementDTO;
 import com.fiiconnect.api.social_secretary.classes.Achievement;
 import com.fiiconnect.api.social_secretary.repository.AchievementRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,20 +18,25 @@ public class AchievementService {
         return achievementRepository.findAll();
     }
 
-    public Achievement saveAchievement(Achievement achievement) {
-        return achievementRepository.save(achievement);
+    public Achievement getAchievementByName(String name){ return achievementRepository.findByName(name);}
+
+    public Achievement saveAchievement(AchievementDTO achievementDTO) {
+
+        return achievementRepository.save(
+                new Achievement(
+                        achievementDTO.getName(),
+                        achievementDTO.getDescription()
+                ));
     }
 
-    public Achievement updateAchievement(Long id, Achievement updatedAchievement) {
+    public Achievement updateAchievement(Long id, AchievementDTO updatedAchievement) {
         Achievement currentAchievement = achievementRepository.findById(id).orElse(null);
         if(currentAchievement == null){
             System.out.println("id-ul nu exista");
             return null;
         }
         currentAchievement.setName(updatedAchievement.getName());
-        currentAchievement.setDateAchieved(updatedAchievement.getDateAchieved());
         currentAchievement.setDescription(updatedAchievement.getDescription());
-        currentAchievement.setUser(updatedAchievement.getUser());
         return achievementRepository.save(currentAchievement);
     }
 

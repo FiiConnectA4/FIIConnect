@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './DetaliiCurs.css';
 import Ceas from './../Components/Ceas';
+import { useNavigate } from 'react-router-dom';
 import ButonExtensibil from '../Components/ButonExtensibil';
 
 // Backend base URL (remove if using package.json proxy)
@@ -13,7 +14,7 @@ const DetaliiCurs = ({ curs, onBack }) => {
     const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(true);
     const token = localStorage.getItem('token');
-
+    const navigate = useNavigate();
     useEffect(() => {
         console.log('ID-ul cursului:', curs.id);
 
@@ -135,66 +136,112 @@ const downloadMaterial = (materialId, filename) => {
         });
 };
 
-if (loading) {
-    return <div>Se încarcă detaliile cursului...</div>;
-}
+    if (loading) {
+        return <div className="loading">Se încarcă detaliile cursului...</div>;
+    }
 
-return (
-    <div className="detalii-container">
-        <button className="buton-inapoi" onClick={onBack}>{'< Înapoi'}</button>
-        <div className="titlu-curs">
-            <h1><u>{curs.title}</u></h1>
-            <Ceas />
-        </div>
-        <ButonExtensibil text="Profesori" professors={profesori} />
-        <div className="sectiune">
-            <h2>Descriere curs:</h2>
-            <p>{description}</p>
-        </div>
-        <div className="sectiune">
-            <h2>Metoda de notare (componente):</h2>
-            {formula ? (
-                <div>
-                    <p>{formula.text}</p>
-                    {formula.components?.length > 0 && (
-                        <ul>
-                            {formula.components.map(comp => (
-                                <li key={comp.id}>{comp.name}</li>
-                            ))}
-                        </ul>
+    return (
+        <div className="detalii-container">
+            {/* Header Section */}
+            <div className="header-section">
+                <button className="buton-inapoi" onClick={onBack}>
+                    ← Înapoi la cursuri
+                </button>
+                <Ceas
+                    onClick={() => {
+                        const disciplina = encodeURIComponent(curs.title);
+                        navigate(`/app/orar/discipline/${disciplina}`);
+                    }}
+                />
+            </div>
+
+            {/* Course Title Section */}
+            <div className="course-title-section">
+                <h1>{curs.title}</h1>
+            </div>
+
+            {/* Professors Section */}
+            <div className="grid-item professors-section">
+                <h2>Profesori</h2>
+                <div className="professors-list">
+                    {profesori.length > 0 ? (
+                        profesori.map((prof, index) => (
+                            <span key={index} className="professor-badge">
+                            {prof.name}
+                        </span>
+                        ))
+                    ) : (
+                        <span className="professor-badge">Niciun profesor asociat</span>
                     )}
                 </div>
-            ) : (
-                <p>Fără formulă definită</p>
-            )}
-        </div>
-        <div className="sectiune bibliografie">
-            <h2>Materiale de curs:</h2>
-            {materials.length > 0 ? (
-                <div>
-                    {materials.map(material => (
-                        <div
-                            key={material.id}
-                            style={{ padding: '10px 0', borderBottom: '1px solid #eee' }}
-                        >
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <span style={{ flex: 1 }}>{material.filename}</span>
-                                <button
-                                    style={{ marginLeft: '10px' }}
-                                    onClick={() => downloadMaterial(material.id, material.filename)}
-                                >
-                                    Descarcă
-                                </button>
-                            </div>
-                        </div>
-                    ))}
+            </div>
+
+            {/* Main Content Grid */}
+            <div className="content-grid">
+                {/* Description Section */}
+                <div className="grid-item description-section">
+                    <h2>Descriere Curs</h2>
+                    <div className="description-textarea" style={{
+                        padding: '20px',
+                        minHeight: '150px',
+                        border: '2px solid rgba(83, 122, 156, 0.15)',
+                        borderRadius: '15px',
+                        background: 'rgba(255, 255, 255, 0.8)',
+                        fontSize: '16px',
+                        lineHeight: '1.6',
+                        color: '#1a355e'
+                    }}>
+                        {description}
+                    </div>
                 </div>
-            ) : (
-                <p>Nu sunt materiale disponibile</p>
-            )}
+
+                {/* Formula Section */}
+                <div className="grid-item formula-section">
+                    <h2>Metodă de Notare</h2>
+                    <div className="formula-display">
+                        {formula?.text || 'Nicio metodă de notare definită'}
+                    </div>
+                    {formula?.components?.length > 0 && (
+                        <div className="formula-components">
+                            <strong>Componente:</strong>
+                            <ul>
+                                {formula.components.map(comp => (
+                                    <li key={comp.id}>{comp.name}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            {/* Materials Section */}
+            <div className="grid-item materials-section">
+                <h2>Materiale de Curs</h2>
+
+                {materials.length > 0 ? (
+                    <div className="materials-grid">
+                        {materials.map((material) => (
+                            <div key={material.id} className="material-card">
+                                <div className="material-name">{material.filename}</div>
+                                <div className="material-actions">
+                                    <button
+                                        className="btn-primary"
+                                        onClick={() => downloadMaterial(material.id, material.filename)}
+                                    >
+                                        📥 Descarcă
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="no-materials">
+                        📚 Nu există materiale încărcate pentru acest curs
+                    </div>
+                )}
+            </div>
         </div>
-    </div>
-);
+    );
 };
 
 export default DetaliiCurs;
