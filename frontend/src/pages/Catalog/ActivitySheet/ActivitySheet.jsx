@@ -34,24 +34,42 @@ const ActivitySheet = () => {
                 const courseData = await courseRes.json();
                 setCourse(courseData);
 
-                // Get formula components
-                const formulaRes = await fetch(`${API_BASE_URL}/didactic/course/${courseId}/formula-components`, {
+                // Get formula info
+                const formulaRes = await fetch(`${API_BASE_URL}/didactic/course/${courseId}/formula`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 const formulaData = await formulaRes.json();
-                let comps = formulaData;
+                const comps = formulaData.components || [];
+
                 if (!comps.find(c => c.name.toLowerCase().includes('prezen'))) {
                     comps.push({ name: 'Prezențe' });
                 }
                 setComponents(comps);
 
-                // Get grades
-                const gradesRes = await fetch(`${API_BASE_URL}/didactic/course/${courseId}/grades`, {
+                // Get all component scores by student
+                const scoresRes = await fetch(`${API_BASE_URL}/didactic/component-score/all/by-student?idStud=${studentData.student.id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                const gradesData = await gradesRes.json();
-                setGrades(gradesData);
+                const scoresData = await scoresRes.json();
 
+                // Map with component ID for faster access
+                const scoresMap = new Map();
+                for (const score of scoresData) {
+                    if (score.id && score.id.idComponent != null) {
+                        scoresMap.set(score.id.idComponent, score.value);
+                    }
+                }
+
+                // Match each formula component to its score
+                const scoredComponents = comps.map(comp => {
+                    const score = scoresData.find(g => g.component?.name === comp.name);
+                    return {
+                        ...comp,
+                        nota: score?.value ?? '-'
+                    };
+                });
+
+                setGrades(scoredComponents);
             } catch (err) {
                 console.error('⛔ Eroare:', err);
             } finally {
@@ -85,15 +103,12 @@ const ActivitySheet = () => {
                     </tr>
                     </thead>
                     <tbody>
-                    {components.map((comp, idx) => {
-                        const nota = grades.find(g => g.component?.name === comp.name)?.value ?? '-';
-                        return (
-                            <tr key={idx}>
-                                <td>{comp.name}</td>
-                                <td>{nota}</td>
-                            </tr>
-                        );
-                    })}
+                    {grades.map((comp, idx) => (
+                        <tr key={idx}>
+                            <td>{comp.name}</td>
+                            <td>{comp.nota}</td>
+                        </tr>
+                    ))}
                     </tbody>
                 </table>
             </div>
