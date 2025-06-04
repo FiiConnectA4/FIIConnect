@@ -94,7 +94,7 @@ public class FormulaController {
 
         FormulaParser.createSyntaxTree(formula);
         Double result = (double) Math.round(service.evaluateFormula(formula, idStud));
-        Grade newGrade = new Grade(new GradeCompositeKey(idStud, formula.getIdCourse()), result, Date.from(Instant.now()));
+        Grade newGrade = new Grade(new StudCourseCompositeKey(idStud, formula.getIdCourse()), result, Date.from(Instant.now()));
         return newGrade;
     }
 
@@ -115,7 +115,7 @@ public class FormulaController {
         {
             Long idStud = enrollment.getId().getIdStud();
             Double result = (double) Math.round(service.evaluateFormula(formula, idStud));
-            Grade newGrade = new Grade(new GradeCompositeKey(idStud, idCourse), result, Date.from(Instant.now()));
+            Grade newGrade = new Grade(new StudCourseCompositeKey(idStud, idCourse), result, Date.from(Instant.now()));
             out.add(newGrade);
         }
         return out;
