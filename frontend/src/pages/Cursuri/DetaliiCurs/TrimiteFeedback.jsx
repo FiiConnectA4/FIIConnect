@@ -29,19 +29,23 @@ const TrimiteFeedback = ({ onBack, curs, studentId }) => {
             return;
         }
 
-        if (!curs?.professorId) {
-            console.error("❌ ID profesor lipsă:", curs);
-            setStatus({ type: 'error', message: 'ID profesor lipsă. Nu se poate trimite feedback.' });
+        if (!curs?.professorId || !studentId) {
+            setStatus({ type: 'error', message: 'ID profesor sau student lipsă. Nu se poate trimite feedback.' });
             return;
         }
 
-        console.log("✅ Feedback payload:", {
-            id: { idProf: curs.professorId },
+        const payload = {
+            id: {
+                idProf: curs.professorId,
+                idStud: studentId
+            },
             feedbackText: trimmedText,
             teachingGrade: parseInt(teachingGrade),
             materialsGrade: parseInt(materialsGrade),
             evaluationGrade: parseInt(evaluationGrade)
-        });
+        };
+
+        console.log("📤 Trimitem feedback:", payload);
 
         setLoading(true);
         setStatus(null);
@@ -53,21 +57,15 @@ const TrimiteFeedback = ({ onBack, curs, studentId }) => {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({
-                    id: { idProf: curs.professorId },
-                    feedbackText: trimmedText,
-                    teachingGrade: parseInt(teachingGrade),
-                    materialsGrade: parseInt(materialsGrade),
-                    evaluationGrade: parseInt(evaluationGrade)
-                })
+                body: JSON.stringify(payload)
             });
 
             if (!response.ok) {
-                const err = await response.json().catch(() => ({}));
-                throw new Error(err.message || 'Eroare la trimiterea feedback-ului.');
+                const errText = await response.text();
+                throw new Error(errText || 'Eroare la trimiterea feedback-ului.');
             }
 
-            setStatus({ type: 'success', message: 'Feedback-ul a fost trimis cu succes!' });
+            setStatus({ type: 'success', message: '✅ Feedback-ul a fost trimis cu succes!' });
             setFormData({
                 feedbackText: '',
                 teachingGrade: '',
@@ -112,7 +110,6 @@ const TrimiteFeedback = ({ onBack, curs, studentId }) => {
             </div>
 
             <form onSubmit={handleSubmit} className="trimite-feedback-form">
-                <label htmlFor="feedbackText" className="sr-only">Mesaj:</label>
                 <textarea
                     id="feedbackText"
                     name="feedbackText"
