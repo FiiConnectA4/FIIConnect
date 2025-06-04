@@ -87,7 +87,11 @@ const Student = () => {
         }
         return (
             <PDetaliiCurs
-                curs={course}
+                curs={{
+                    ...course,
+                    professorId: course.professors?.[0]?.professor?.id || null
+                }}
+                studentId={student.id}
                 onBack={() => setSelectedCourseId(null)}
             />
         );
