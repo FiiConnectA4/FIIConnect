@@ -168,12 +168,13 @@ const Administrator = () => {
                                 id={curs.id}
                                 userType='professor'
                             />
-                            <Ceas onClick={() => navigate(`/app/orar/discipline/${encodeURIComponent(curs.title)}`)} />
                             <Buton
                                 text={curs.title}
                                 onNavigate={() => setSelectedCursId(curs.id)}
                                 className={curs.archived === 1 ? 'buton-arhivat' : ''}
                             />
+                            <Ceas onClick={() => navigate(`/app/orar/discipline/${encodeURIComponent(curs.title)}`)} />
+
                             <PageControl
                                 id={curs.id}
                                 title={curs.title}

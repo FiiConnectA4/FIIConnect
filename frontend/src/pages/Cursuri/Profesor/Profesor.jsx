@@ -173,12 +173,13 @@ const Profesor = () => {
                     courses.map(({ course }) => (
                         <div key={course.id} className="rand-curs">
                             <Carte id={course.id} userType='professor' />
-                            <Ceas onClick={() => navigate(`/app/orar/discipline/${encodeURIComponent(course.title)}`)} />
                             <Buton
                                 text={course.title || 'Titlu indisponibil'}
                                 onNavigate={() => setSelectedCourseId(course.id)}
                                 className={course.archived === 1 ? 'buton-arhivat' : ''}
                             />
+                            <Ceas onClick={() => navigate(`/app/orar/discipline/${encodeURIComponent(course.title)}`)} />
+
                             <PageControl
                                 onDelete={() => handleDeleteCourse(course.id)}
                                 onArchive={() => handleToggleArchiveCourse(course.id, course.archived)}

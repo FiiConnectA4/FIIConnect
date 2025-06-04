@@ -114,11 +114,12 @@ const Student = () => {
                                 userType='student'
                                 id={curs.id}
                             />
-                            <Ceas onClick={() => navigate(`/app/orar/discipline/${encodeURIComponent(curs.title)}`)} />
                             <Buton
                                 text={curs.title || 'Titlu indisponibil'}
                                 onNavigate={() => setSelectedCourseId(curs.id)}
                             />
+                            <Ceas onClick={() => navigate(`/app/orar/discipline/${encodeURIComponent(curs.title)}`)} />
+
                         </div>
                     ))
                 ) : (

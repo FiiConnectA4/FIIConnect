@@ -191,54 +191,43 @@
     padding-right: 45px;
 }
 
-.page-control-container {
-    position: absolute;
-    display: inline-block;
-    left: 90%;
-    top: 13%;
+.page-control {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
 }
 
 .dots-button {
-    position: relative;
-    width: 80px;
+    background-color: var(--card-bg);
+    border: 2px solid var(--gray-light);
+    width: 40px;
     height: 40px;
-    border-radius: 30px;
-    background-color: var(--dot-btn-bg);
-    border: none;
-    cursor: pointer;
+    border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
+    cursor: pointer;
     padding: 0;
     transition: all 0.2s ease;
 }
 
-.dots-button:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
 .dots {
     display: flex;
-    gap: 10px;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .dots::before,
 .dots::after {
     content: "";
     display: block;
-    width: 12px;
-    height: 12px;
-    background-color: #555;
+    width: 6px;
+    height: 6px;
+    background-color: var(--text-primary); /* adaptiv */
     border-radius: 50%;
 }
 
-.dots::before {
-    background-color: var(--dot-color);
-}
-
-.dots::before {
-    background-color: #000000;
-}
 
 .buton-edit {
     position: absolute;
@@ -291,37 +280,34 @@
 .buton-submenu {
     position: absolute;
     top: calc(100% + 5px);
-    /* Să fie puțin mai jos de butonul principal */
     left: 0;
-    background: var(--main-blue);
-    color: var(--text-white);
-    border-radius: 30px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    padding: 10px 20px;
-    min-width: 200px;
-    /* Ajustează după preferință */
+    background: var(--card-bg); /* 🔄 adaptiv */
+    color: var(--text-primary); /* 🔄 adaptiv */
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+    padding: 10px 16px;
+    min-width: 220px;
     z-index: 999;
-    /* Să fie peste alte elemente */
+    border: 1px solid var(--border-color);
 }
 
-/* Butoane din sub-meniu */
 .buton-submenu-item {
     display: block;
     width: 100%;
-    background: var(--main-blue);
-    color: var(--text-white);
+    background: transparent;
+    color: var(--text-primary);
     border: none;
-    border-radius: 25px;
-    padding: 10px;
-    margin-top: 5px;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin-top: 6px;
     text-align: left;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 0.9rem;
     transition: background 0.3s;
 }
 
 .buton-submenu-item:hover {
-    background: var(--main-blue-hover);
+    background: rgba(59, 130, 246, 0.1); /* soft accent hover */
 }
 
 /* Footer suplimentar din sub-meniu */
