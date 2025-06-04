@@ -6,6 +6,7 @@ import './../Student/Student.css';
 import PDetaliiCurs from '../DetaliiCurs/DetaliiCursEditabil';
 import PageControl from '../Components/PageControl';
 import AdaugaCurs from '../DetaliiCurs/AdaugaCurs';
+import AssignUsersToCourses from './AssignUsersToCourses'; // asigură-te că aceasta e calea corectă către fișier
 import { useNavigate } from 'react-router-dom';
 
 const Administrator = () => {
@@ -13,6 +14,7 @@ const Administrator = () => {
     const [cursuri, setCursuri] = useState([]);
     const [loading, setLoading] = useState(true);
     const [adaugaCurs, setAdaugaCurs] = useState(false);
+    const [assignUsers, setAssignUsers] = useState(false);
     const [feedbackEnabled, setFeedbackEnabled] = useState(false);
     const navigate = useNavigate();
 
@@ -47,13 +49,13 @@ const Administrator = () => {
         fetch('/didactic/globals/feedbacksAllowed', {
             headers: { Authorization: `Bearer ${token}` },
         })
-            .then(res => res.json())
-            .then(data => {
-                const enabled = data?.value === "true";
+            .then((res) => res.json())
+            .then((data) => {
+                const enabled = data?.value === 'true';
                 setFeedbackEnabled(enabled);
             })
-            .catch(err => {
-                console.error("Eroare la citirea statusului feedback:", err);
+            .catch((err) => {
+                console.error('Eroare la citirea statusului feedback:', err);
             });
     };
 
@@ -64,40 +66,39 @@ const Administrator = () => {
             headers: { Authorization: `Bearer ${token}` },
         })
             .then((res) => {
-                if (!res.ok) throw new Error("Eroare la activare feedback");
-                return res.json(); // backendul returnează obiectul GlobalConstant
+                if (!res.ok) throw new Error('Eroare la activare feedback');
+                return res.json();
             })
             .then((data) => {
-                // confirmă că valoarea a fost actualizată
-                setFeedbackEnabled(data.value === "true");
+                setFeedbackEnabled(data.value === 'true');
             })
             .catch((err) => {
-                console.error("Eroare la modificarea feedback:", err);
-                alert("Nu s-a putut modifica statusul feedback-ului.");
+                console.error('Eroare la modificarea feedback:', err);
+                alert('Nu s-a putut modifica statusul feedback-ului.');
             });
     };
 
     const handleDeleteCourse = (id) => {
-        if (!window.confirm("Ești sigur că vrei să ștergi acest curs?")) return;
+        if (!window.confirm('Ești sigur că vrei să ștergi acest curs?')) return;
         fetch(`/didactic/course/${id}`, {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${token}` },
         })
             .then((res) => {
-                if (!res.ok) throw new Error("Eroare la ștergere");
+                if (!res.ok) throw new Error('Eroare la ștergere');
                 setCursuri((prev) => prev.filter((c) => c.id !== id));
             })
             .catch((err) => {
-                console.error("Eroare la ștergere:", err);
-                alert("Nu s-a putut șterge cursul.");
+                console.error('Eroare la ștergere:', err);
+                alert('Nu s-a putut șterge cursul.');
             });
     };
 
     const handleToggleArchiveCourse = (id, currentArchived) => {
         const isArchiving = currentArchived === 0;
         const confirmText = isArchiving
-            ? "Ești sigur că vrei să arhivezi acest curs?"
-            : "Ești sigur că vrei să dezarhivezi acest curs?";
+            ? 'Ești sigur că vrei să arhivezi acest curs?'
+            : 'Ești sigur că vrei să dezarhivezi acest curs?';
         if (!window.confirm(confirmText)) return;
 
         if (isArchiving) {
@@ -106,18 +107,18 @@ const Administrator = () => {
                 headers: { Authorization: `Bearer ${token}` },
             })
                 .then((res) => {
-                    if (!res.ok) throw new Error("Eroare la arhivare");
+                    if (!res.ok) throw new Error('Eroare la arhivare');
                     setCursuri((prev) =>
                         prev.map((c) => (c.id === id ? { ...c, archived: 1 } : c))
                     );
                 })
                 .catch((err) => {
-                    console.error("Arhivare eșuată:", err);
-                    alert("Nu s-a putut arhiva cursul.");
+                    console.error('Arhivare eșuată:', err);
+                    alert('Nu s-a putut arhiva cursul.');
                 });
         } else {
             const curs = cursuri.find((c) => c.id === id);
-            if (!curs) return alert("Cursul nu a fost găsit local.");
+            if (!curs) return alert('Cursul nu a fost găsit local.');
 
             fetch(`/didactic/course/${id}`, {
                 method: 'PUT',
@@ -128,20 +129,21 @@ const Administrator = () => {
                 body: JSON.stringify({ ...curs, archived: 0 }),
             })
                 .then((res) => {
-                    if (!res.ok) throw new Error("Eroare la dezarhivare");
+                    if (!res.ok) throw new Error('Eroare la dezarhivare');
                     setCursuri((prev) =>
                         prev.map((c) => (c.id === id ? { ...c, archived: 0 } : c))
                     );
                 })
                 .catch((err) => {
-                    console.error("Dezarhivare eșuată:", err);
-                    alert("Nu s-a putut dezarhiva cursul.");
+                    console.error('Dezarhivare eșuată:', err);
+                    alert('Nu s-a putut dezarhiva cursul.');
                 });
         }
     };
 
     if (loading) return <div>Se încarcă lista de cursuri...</div>;
 
+    // Vizualizare detalii curs selectat
     if (selectedCursId) {
         const cursSelectat = cursuri.find((c) => c.id === selectedCursId);
         if (!cursSelectat) {
@@ -157,6 +159,7 @@ const Administrator = () => {
         );
     }
 
+    // Vizualizare formular adăugare curs
     if (adaugaCurs) {
         return (
             <AdaugaCurs
@@ -169,6 +172,16 @@ const Administrator = () => {
         );
     }
 
+    // Vizualizare componentă atribuire utilizatori
+    if (assignUsers) {
+        return (
+            <AssignUsersToCourses
+                onBack={() => setAssignUsers(false)}
+            />
+        );
+    }
+
+    // View principal: lista cursurilor + butoane
     return (
         <div className="container-cursuri">
             <div className="cursuri-titlu">
@@ -191,7 +204,8 @@ const Administrator = () => {
                     cursuri.map((curs) => (
                         <div
                             key={curs.id}
-                            className={`rand-curs ${curs.archived === 1 ? 'archived-course' : ''}`}
+                            className={`rand-curs ${curs.archived === 1 ? 'archived-course' : ''
+                                }`}
                         >
                             <Carte id={curs.id} userType="professor" />
                             <Buton
@@ -201,7 +215,9 @@ const Administrator = () => {
                             />
                             <Ceas
                                 onClick={() =>
-                                    navigate(`/app/orar/discipline/${encodeURIComponent(curs.title)}`)
+                                    navigate(
+                                        `/app/orar/discipline/${encodeURIComponent(curs.title)}`
+                                    )
                                 }
                             />
                             <PageControl
@@ -219,7 +235,12 @@ const Administrator = () => {
                 ) : (
                     <p>Nu există cursuri disponibile.</p>
                 )}
+
                 <Buton text="Adaugă curs" onNavigate={() => setAdaugaCurs(true)} />
+                <Buton
+                    text="Atribuire studenți/profesori"
+                    onNavigate={() => setAssignUsers(true)}
+                />
             </div>
         </div>
     );
