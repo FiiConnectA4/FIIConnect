@@ -10,6 +10,7 @@ drop table CHANNEL cascade constraints;
 
 drop table ANNOUNCEMENT cascade constraints;
 drop table ACHIEVEMENT cascade constraints;
+drop table ACHIEVEMENT_MANAGER cascade constraints;
 drop table CHAT cascade constraints;
 
 commit;
@@ -86,10 +87,18 @@ CREATE TABLE ANNOUNCEMENT_TAGS (
 CREATE TABLE ACHIEVEMENT (
                              ID NUMBER PRIMARY KEY,
                              NAME VARCHAR2(255),
-                             DESCRIPTION VARCHAR2(255),
-                             USER_ID NUMBER(19),
-                             DATE_ACHIEVED VARCHAR2(50),
-                             CONSTRAINT FK_ACHIEVEMENT_USER FOREIGN KEY (USER_ID) REFERENCES USERS(ID) ON DELETE CASCADE
+                             DESCRIPTION VARCHAR2(255)
+);
+
+
+-- =======================
+-- ACHIEVEMENT_MANAGER
+
+CREATE TABLE ACHIEVEMENT_MANAGER (
+    ID NUMBER(19) PRIMARY KEY,
+    USER_ID NUMBER(19) NOT NULL,
+    ACHIEVEMENT_ID NUMBER(19) NOT NULL,
+    RECEIVED_DATE DATE
 );
 
 -- =======================
