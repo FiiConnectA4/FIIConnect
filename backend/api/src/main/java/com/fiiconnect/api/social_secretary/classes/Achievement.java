@@ -3,6 +3,8 @@ package com.fiiconnect.api.social_secretary.classes;
 import com.fiiconnect.api.auth_userMgmt.models.User;
 import jakarta.persistence.*;
 
+import java.util.Objects;
+
 @Entity
 @Table(name = "ACHIEVEMENT")
 public class Achievement {
@@ -11,29 +13,24 @@ public class Achievement {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "achievement_seq")
     @SequenceGenerator(name = "achievement_seq", sequenceName = "achievement_seq", allocationSize = 1)
     private Long id;
-
     private String name;
     private String description;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-
-    private String dateAchieved;
 
     // Constructors, getters, setters
 
     public Achievement() {}
 
-    public Achievement(String name, String description, User user, String dateAchieved) {
+    public Achievement(String name, String description) {
         this.name = name;
         this.description = description;
-        this.user = user;
-        this.dateAchieved = dateAchieved;
     }
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -52,19 +49,25 @@ public class Achievement {
         this.description = description;
     }
 
-    public User getUser() {
-        return user;
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Achievement that)) return false;
+        return Objects.equals(id, that.id)
+                && Objects.equals(name, that.name)
+                && Objects.equals(description, that.description);
     }
 
-    public void setUser(User user) {
-        this.user = user;
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, description);
     }
 
-    public String getDateAchieved() {
-        return dateAchieved;
-    }
-
-    public void setDateAchieved(String dateAchieved) {
-        this.dateAchieved = dateAchieved;
+    @Override
+    public String toString() {
+        return "Achievement{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                '}';
     }
 }

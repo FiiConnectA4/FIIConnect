@@ -1,10 +1,14 @@
 package com.fiiconnect.api.didactic.controllers;
 
+import com.fiiconnect.api.auth_userMgmt.controllers.PersonController;
+import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
 import com.fiiconnect.api.didactic.exceptions.StudentNotFoundException;
+import com.fiiconnect.api.didactic.exceptions.UnauthorizedOperationException;
 import com.fiiconnect.api.didactic.models.Student;
 import com.fiiconnect.api.didactic.repositories.StudentRepository;
 import com.fiiconnect.api.didactic.services.StudentService;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,25 +17,30 @@ import java.util.List;
 public class StudentController {
     private final StudentRepository repository;
     private final StudentService service;
+    private final PersonController personController;
 
-    public StudentController(StudentRepository repository, StudentService service)
+    public StudentController(StudentRepository repository, StudentService service, PersonController personController)
     {
         this.repository = repository;
         this.service = service;
+        this.personController = personController;
     }
 
     @GetMapping("/didactic/student")
     public List<Student> all()
     {
-        return repository.findAll();
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
+        List<Student> students = repository.findAll();
+        students.forEach(s -> {service.limitVisibility(s, person, false);});
+        return students;
     }
 
     @GetMapping("/didactic/student/{id}")
     public Student one(@PathVariable Long id)
-    {  
+    {
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
         Student student = repository.findById(id).orElseThrow(() -> new StudentNotFoundException(id));
-        service.attachEnrollments(student);
-        service.attachGrades(student);
+        service.limitVisibility(student, person, true);
         return student;
     }
 

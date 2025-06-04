@@ -3,7 +3,10 @@ package com.fiiconnect.api.didactic.controllers;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
+import com.fiiconnect.api.auth_userMgmt.controllers.PersonController;
+import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
 import com.fiiconnect.api.didactic.exceptions.CourseNotFoundException;
+import com.fiiconnect.api.didactic.exceptions.UnauthorizedOperationException;
 import com.fiiconnect.api.didactic.helpers.SQLExceptionMessageParser;
 import com.fiiconnect.api.didactic.models.*;
 import com.fiiconnect.api.didactic.repositories.CourseRepository;
@@ -39,8 +42,10 @@ public class CourseController {
     private final CourseMaterialService materialService;
     private final GradeService gradeService;
     private final SftpService sftpService;
+    private final PersonController personController;
+    private final TeachingService teachingService;
 
-    public CourseController(CourseRepository repository, CourseModelAssembler assembler, CourseService service, SQLExceptionMessageParser exceptionHelper, EnrollmentService enrollmentService, CourseMaterialService materialService, GradeService gradeService, SftpService sftpService) {
+    public CourseController(CourseRepository repository, CourseModelAssembler assembler, CourseService service, SQLExceptionMessageParser exceptionHelper, EnrollmentService enrollmentService, CourseMaterialService materialService, GradeService gradeService, SftpService sftpService, PersonController personController, TeachingService teachingService) {
         this.repository = repository;
         this.assembler = assembler;
         this.service = service;
@@ -49,12 +54,16 @@ public class CourseController {
         this.materialService = materialService;
         this.gradeService = gradeService;
         this.sftpService = sftpService;
+        this.personController = personController;
+        this.teachingService = teachingService;
     }
 
     // get all courses
     @GetMapping("/didactic/course")
      public CollectionModel<EntityModel<Course>> all() {
-        List<Course> courseList = repository.findAll();
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
+        List<Course> courseList = repository.findAll().stream().filter(c -> service.allowCourseViewing(person, c.getId())).toList();
+
         courseList.forEach(service::attachIcon);
         List<EntityModel<Course>> courses = courseList.stream().map(assembler::toModel).collect(Collectors.toList());
         return CollectionModel.of(courses, linkTo(methodOn(CourseController.class).all()).withSelfRel());
@@ -62,7 +71,9 @@ public class CourseController {
 
     @GetMapping("didactic/courses/{year}/{semester}")
     public CollectionModel<EntityModel<Course>> allCourse(@PathVariable("year") Integer year, @PathVariable("semester") Integer semester) {
-        List<Course> courseList = service.viewAllCoursesAvailable(year, semester);
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
+        List<Course> courseList = service.viewAllCoursesAvailable(year, semester).stream().filter(c -> service.allowCourseViewing(person, c.getId())).toList();
+
         courseList.forEach((c) -> {c.setMaterials(null); service.attachIcon(c);});
         List<EntityModel<Course>>  courses = courseList.stream().map(assembler::toModel).toList();
         return CollectionModel.of(courses, linkTo(methodOn(CourseController.class).all()).withSelfRel());
@@ -71,6 +82,10 @@ public class CourseController {
     @GetMapping("didactic/course/{id}")
     public EntityModel<Course> one(@PathVariable("id") Long id){
         Course course = repository.findById(id).orElseThrow(() -> new CourseNotFoundException(id));
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
+        if(!service.allowCourseViewing(person, id))
+            throw new UnauthorizedOperationException("Only students enrolled in a course or professors who teach the course may see it");
+
         service.attachProfessors(course);
         service.attachMaterials(course);
         service.attachDescription(course);
@@ -83,6 +98,10 @@ public class CourseController {
     public List<Enrollment> getEnrolledStudents(@PathVariable Long id)
     {
         if(!repository.existsById(id)) throw new CourseNotFoundException(id);
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
+        if(!service.allowCourseViewing(person, id))
+            throw new UnauthorizedOperationException("Only students enrolled in a course or professors who teach the course may see it");
+
         List<Enrollment> enrollments = enrollmentService.getCourseEnrollments(id);
         enrollments.forEach(enrollmentService::attachStudent);
         return enrollments;
@@ -92,6 +111,10 @@ public class CourseController {
     public List<Grade> getStudentGrades(@PathVariable Long id)
     {
         if(!repository.existsById(id)) throw new CourseNotFoundException(id);
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
+        if(!service.allowCourseViewing(person, id))
+            throw new UnauthorizedOperationException("Only students enrolled in a course or professors who teach the course may see it");
+
         List<Grade> grades = gradeService.getCourseGrades(id);
         grades.forEach(gradeService::attachStudent);
         return grades;
@@ -102,12 +125,22 @@ public class CourseController {
     public ResponseEntity<?> newCourse(@RequestBody Course newCourse) {
         newCourse.setId(null); // enforcing to choose a random id the db should create a sequence for id generation
         EntityModel<Course> entityModel = assembler.toModel(repository.save(newCourse));
+
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
+        System.out.println(newCourse);
+        if(person.role().equals("ROLE_PROFESOR"))
+            teachingService.addTeaching(new Teaching(new TeachingCompositeKey(person.professor().id(), newCourse.getId()), "titular"));
+
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).build();
     }
 
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PutMapping("/didactic/course/{id}")
     public ResponseEntity<?> replaceCourse(@PathVariable("id") Long id, @RequestBody Course newCourse) {
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
+        if(!service.authorizeCourseOperation(person, id, true))
+            throw new UnauthorizedOperationException("Only professors who teach the course change see it");
+
         Course temp = repository.findById(id)
                 .map(course -> {
                     course.setArchived(newCourse.getArchived());
@@ -119,7 +152,7 @@ public class CourseController {
                     course.setArchived(newCourse.getArchived());
                     service.attachIcon(course);
                     return repository.save(course);
-                }).orElseGet(() -> repository.save(newCourse));
+                }).orElseThrow(() -> new CourseNotFoundException(id));
         EntityModel<Course> entityModel = assembler.toModel(temp);
         return ResponseEntity.created(entityModel.getRequiredLink(IanaLinkRelations.SELF).toUri()).body(entityModel);
     }
@@ -128,6 +161,10 @@ public class CourseController {
     @DeleteMapping("/didactic/course/{id}")
     public ResponseEntity<?> deleteCourse(@PathVariable("id") Long id) throws CourseNotFoundException, IOException {
         Course course = repository.findById(id).orElseThrow(() -> new CourseNotFoundException(id));
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
+        if(!service.authorizeCourseOperation(person, id, true))
+            throw new UnauthorizedOperationException("Only professors who teach the course may delete it");
+
         service.attachMaterials(course);
 
         for(CourseMaterial material : course.getMaterials())
@@ -166,11 +203,19 @@ public class CourseController {
     @PutMapping("/didactic/course/{id}/description")
     public void addDescription(@PathVariable Long id, @RequestBody String description)
     {
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
+        if(!service.authorizeCourseOperation(person, id, true))
+            throw new UnauthorizedOperationException("Only professors who teach the course may change its description");
+
         service.saveDescription(id, description);
     }
 
     @GetMapping("/didactic/course/{id}/icon.png")
     public ResponseEntity<?> getIcon(@PathVariable Long id) {
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
+        if(!service.allowCourseViewing(person, id))
+            throw new UnauthorizedOperationException("Only students enrolled in a course or professors who teach the course may see its icon");
+
         try {
             File iconFile = sftpService.downloadFile("/faculty_files/didactic/course-" + id + "/icon.png", "didactic/course-" + id + "/icon.png");
             InputStreamResource resource = new InputStreamResource(new FileInputStream(iconFile));
@@ -207,6 +252,10 @@ public class CourseController {
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PutMapping("didactic/course/{id}/icon")
     public ResponseEntity<?> updateIcon(@PathVariable Long id, @RequestParam MultipartFile iconFile) {
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
+        if(!service.authorizeCourseOperation(person, id, true))
+            throw new UnauthorizedOperationException("Only students enrolled in a course or professors who teach the course may change its icon");
+
         try{
             sftpService.uploadFile(iconFile, "faculty_files/didactic/course-" + id, "icon.png");
         } catch (IOException e) {
@@ -218,6 +267,10 @@ public class CourseController {
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @DeleteMapping("didactic/course/{id}/icon")
     public ResponseEntity<?> deleteIcon(@PathVariable Long id) {
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
+        if(!service.authorizeCourseOperation(person, id, true))
+            throw new UnauthorizedOperationException("Only students enrolled in a course or professors who teach the course may delete its icon");
+
         try{
             sftpService.deleteFile("faculty_files/didactic/course-" + id + "/icon.png", false);
         }
@@ -232,7 +285,10 @@ public class CourseController {
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PutMapping("/didactic/course/{id}/archive")
     public void archiveCourse(@PathVariable Long id)
-    {
+    {PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
+        if(!service.authorizeCourseOperation(person, id, true))
+            throw new UnauthorizedOperationException("Only students enrolled in a course or professors who teach the course may archive it");
+
         Course course = repository.findById(id).orElseThrow(() -> new CourseNotFoundException(id));
         course.setArchived(1);
         repository.save(course);
@@ -242,6 +298,10 @@ public class CourseController {
     @PutMapping("/didactic/course/{id}/desarchive")
     public void desarchiveCourse(@PathVariable Long id)
     {
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
+        if(!service.authorizeCourseOperation(person, id, true))
+            throw new UnauthorizedOperationException("Only students enrolled in a course or professors who teach the course may unarchive it");
+
         Course course = repository.findById(id).orElseThrow(() -> new CourseNotFoundException(id));
         course.setArchived(0);
         repository.save(course);

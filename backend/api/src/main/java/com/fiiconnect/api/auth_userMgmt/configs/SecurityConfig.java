@@ -79,12 +79,13 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/ws/**").permitAll()
+                        
                         .requestMatchers(HttpMethod.POST, "/users/login", "/users/login/verify", "/users/forgot-password", "/users/reset-password")
                         .permitAll()
                         .requestMatchers(HttpMethod.POST, "/users/register", "/users/role")
                         .hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/notifications/**")
-                        .hasAnyAuthority("ROLE_ADMIN", "ROLE_PROFESSOR", "ROLE_STUDENT")
+                        .hasAnyAuthority("ROLE_ADMIN", "ROLE_PROFESOR", "ROLE_STUDENT")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
