@@ -25,6 +25,7 @@ public class Announcement {
    // @ManyToOne(cascade = CascadeType.PERSIST)
    // @JoinColumn(name = "author_id")
    //@JsonIgnore
+    @Column(name="AUTHOR_ID")
     private Long author;
 
     @ManyToMany//(cascade = CascadeType.PERSIST)
@@ -36,6 +37,7 @@ public class Announcement {
     //@JsonIgnore
     private Set<Tag> tags = new HashSet<>();
 
+    @Column(name = "PUBLISHED_DATE")
     private LocalDate publishedDate;
 
     public Announcement() {}
