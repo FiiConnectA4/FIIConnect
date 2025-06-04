@@ -4,19 +4,15 @@ import com.fiiconnect.api.didactic.exceptions.ComponentNotFoundException;
 import com.fiiconnect.api.didactic.exceptions.ComponentScoreNotFoundException;
 import com.fiiconnect.api.didactic.exceptions.FormulaEvaluateException;
 import com.fiiconnect.api.didactic.exceptions.FormulaNotFoundException;
-import com.fiiconnect.api.didactic.models.ComponentScore;
-import com.fiiconnect.api.didactic.models.ComponentScoreCompositeKey;
-import com.fiiconnect.api.didactic.models.Formula;
-import com.fiiconnect.api.didactic.models.FormulaComponent;
+import com.fiiconnect.api.didactic.models.*;
 import com.fiiconnect.api.didactic.repositories.ComponentScoreRepository;
 import com.fiiconnect.api.didactic.repositories.FormulaComponentRepository;
 import com.fiiconnect.api.didactic.repositories.FormulaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.Instant;
+import java.util.*;
 import java.util.logging.Logger;
 
 @Service
@@ -131,5 +127,70 @@ public class FormulaService {
             variableValues.put(component.getName(), score.getValue());
         }
         return formula.getTreeRoot().evaluateTree(variableValues);
+    }
+
+    public List<Grade> applyGaussScaling(List<Grade> grades)
+    {
+        List<Grade> outputGrades = new ArrayList<>();
+        List<Grade> sortedGrades = new ArrayList<>();
+        grades.stream().filter(g -> g.getValue() >= 4.5).sorted((a,b) -> {double dif = a.getValue() - b.getValue(); if(dif < 0) return 1; if(dif == 0) return 0; return -1;}).forEach(sortedGrades::add);
+
+        int endIndex10, endIndex9, endIndex8, endIndex7, endIndex6;
+
+        endIndex10 = (int) Math.round(sortedGrades.size() * 0.1);
+        if(endIndex10 == 0)
+            endIndex10 = 1;
+
+        endIndex9 = endIndex10 + (int) Math.round(sortedGrades.size() * 0.25);
+        if(endIndex9 == endIndex10)
+            endIndex9++;
+
+        endIndex8 = endIndex9 + (int) Math.round(sortedGrades.size() * 0.3);
+        if(endIndex8 == endIndex9)
+            endIndex8++;
+
+        endIndex7 = endIndex8 + (int) Math.round(sortedGrades.size() * 0.25);
+        if(endIndex7 == endIndex8)
+            endIndex7++;
+
+        endIndex6 = sortedGrades.size();
+        if(endIndex6 < endIndex7)
+            endIndex6 = endIndex7 + 1;
+
+        double[] gradeArray = new double[]{10, 9, 8, 7, 6};
+        int[] indexArray = new int[]{endIndex10, endIndex9, endIndex8, endIndex7, endIndex6};
+
+        int currentArrayIndex = 0;
+        Double prevGrade = 10.0;
+        for(int i = 0; i < sortedGrades.size(); i++)
+        {
+            Grade currentGrade = sortedGrades.get(i);
+            if(i >= indexArray[currentArrayIndex] && !currentGrade.getValue().equals(prevGrade))
+                currentArrayIndex++;
+
+            outputGrades.add(new Grade(new GradeCompositeKey(currentGrade.getId().getIdStud().longValue(), currentGrade.getId().getIdCourse().longValue()), gradeArray[currentArrayIndex], Date.from(currentGrade.getGradingDate().toInstant())));
+            prevGrade = currentGrade.getValue();
+        }
+
+//        sortedGrades.stream().limit(endIndex10).forEach(g -> outputGrades.add(new Grade(new GradeCompositeKey(g.getId().getIdStud().longValue(), g.getId().getIdCourse().longValue()), 10.0, Date.from(g.getGradingDate().toInstant()))));
+//        sortedGrades.stream().skip(endIndex10).limit(endIndex9 - endIndex10).forEach(g -> outputGrades.add(new Grade(new GradeCompositeKey(g.getId().getIdStud().longValue(), g.getId().getIdCourse().longValue()), 9.0, Date.from(g.getGradingDate().toInstant()))));
+//        sortedGrades.stream().skip(endIndex9).limit(endIndex8 - endIndex9).forEach(g -> outputGrades.add(new Grade(new GradeCompositeKey(g.getId().getIdStud().longValue(), g.getId().getIdCourse().longValue()), 8.0, Date.from(g.getGradingDate().toInstant()))));
+//        sortedGrades.stream().skip(endIndex8).limit(endIndex7 - endIndex8).forEach(g -> outputGrades.add(new Grade(new GradeCompositeKey(g.getId().getIdStud().longValue(), g.getId().getIdCourse().longValue()), 7.0, Date.from(g.getGradingDate().toInstant()))));
+//        sortedGrades.stream().skip(endIndex7).limit(endIndex6 - endIndex7).forEach(g -> outputGrades.add(new Grade(new GradeCompositeKey(g.getId().getIdStud().longValue(), g.getId().getIdCourse().longValue()), 6.0, Date.from(g.getGradingDate().toInstant()))));
+
+        grades.stream().filter(g -> g.getValue() < 4.5).forEach(g -> outputGrades.add(new Grade(new GradeCompositeKey(g.getId().getIdStud().longValue(), g.getId().getIdCourse().longValue()), g.getValue().doubleValue(), Date.from(g.getGradingDate().toInstant()))));
+        return outputGrades;
+    }
+
+    public List<Grade> applyBestScaling(List<Grade> grades)
+    {
+        List<Grade> outputGrades = new ArrayList<>();
+        Grade maxGrade = grades.stream().filter(g -> g.getValue() >= 4.5).max((a,b) -> {double dif = a.getValue() - b.getValue(); if(dif < 0) return -1; if(dif == 0) return 0; return 1;}).orElse(null);
+        if(maxGrade == null)
+            return grades;
+
+        grades.stream().filter(g -> g.getValue() >= 4.5).forEach(g -> outputGrades.add(new Grade(new GradeCompositeKey(g.getId().getIdStud().longValue(), g.getId().getIdCourse().longValue()), g.getValue() / maxGrade.getValue() * 10, Date.from(g.getGradingDate().toInstant()))));
+        grades.stream().filter(g -> g.getValue() < 4.5).forEach(g -> outputGrades.add(new Grade(new GradeCompositeKey(g.getId().getIdStud().longValue(), g.getId().getIdCourse().longValue()), g.getValue().doubleValue(), Date.from(g.getGradingDate().toInstant()))));
+        return outputGrades;
     }
 }
