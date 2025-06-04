@@ -22,6 +22,8 @@ import com.fiiconnect.api.didactic.models.Professor;
 import com.fiiconnect.api.didactic.models.Student;
 import com.fiiconnect.api.didactic.repositories.ProfessorRepository;
 import com.fiiconnect.api.didactic.repositories.StudentRepository;
+import com.fiiconnect.api.social_secretary.repository.UserTagManagerRepository;
+import com.fiiconnect.api.social_secretary.service.UserTagManagerService;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -68,6 +70,9 @@ public class AuthController {
 
     @Autowired
     private UserProfileRepository userProfileRepository;
+
+    @Autowired
+    private UserTagManagerService userTagManagerService;
 
     // Test Token Repository
     @PostConstruct
@@ -312,6 +317,9 @@ public class AuthController {
             }
 
             userRepository.save(user);
+
+            //aici voi apela functia din UserTagManagerService ca sa atribui automat toate tagurile default
+            userTagManagerService.automaticallyAddTags(user);
 
             return ResponseEntity.ok(new ApiResponse("Register successful. Username: " + registerRequest.getUsername() + ", Password: " + registerRequest.getPassword(), true));
         } catch (Exception e) {

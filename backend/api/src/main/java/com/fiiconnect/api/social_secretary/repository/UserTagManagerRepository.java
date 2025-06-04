@@ -21,6 +21,7 @@ public interface UserTagManagerRepository  extends JpaRepository<UserTagManager,
 
     @Query(value="SELECT TAG_ID FROM USER_TAGS where USER_ID= :userId",nativeQuery = true)
      List<Long> getAllUserTags(@Param("userId") Long userId);
+
     @Modifying
     @Query(value="DELETE FROM USER_TAGS WHERE USER_ID= :userId AND TAG_ID= :tagId",nativeQuery = true)
     void deleteByUserIdAndTagId(@Param("userId") Long userId,@Param("tagId") Long tagId);
