@@ -7,6 +7,18 @@ const CitesteFeedback = ({ onBack }) => {
         { id: { idCurs: 1, idStud: 101 }, message: 'Mi s-a părut cursul foarte util și bine structurat.' },
         { id: { idCurs: 1, idStud: 102 }, message: 'Profesorul explică clar, dar aș dori mai multe exemple practice.' },
         { id: { idCurs: 1, idStud: 103 }, message: 'Materialele suplimentare ar putea fi organizate mai bine.' },
+        { id: { idCurs: 1, idStud: 101 }, message: 'Mi s-a părut cursul foarte util și bine structurat.' },
+        { id: { idCurs: 1, idStud: 102 }, message: 'Profesorul explică clar, dar aș dori mai multe exemple practice.' },
+        { id: { idCurs: 1, idStud: 103 }, message: 'Materialele suplimentare ar putea fi organizate mai bine.' },
+        { id: { idCurs: 1, idStud: 101 }, message: 'Mi s-a părut cursul foarte util și bine structurat.' },
+        { id: { idCurs: 1, idStud: 102 }, message: 'Profesorul explică clar, dar aș dori mai multe exemple practice.' },
+        { id: { idCurs: 1, idStud: 103 }, message: 'Materialele suplimentare ar putea fi organizate mai bine.' },
+        { id: { idCurs: 1, idStud: 101 }, message: 'Mi s-a părut cursul foarte util și bine structurat.' },
+        { id: { idCurs: 1, idStud: 102 }, message: 'Profesorul explică clar, dar aș dori mai multe exemple practice.' },
+        { id: { idCurs: 1, idStud: 103 }, message: 'Materialele suplimentare ar putea fi organizate mai bine.' },
+        { id: { idCurs: 1, idStud: 101 }, message: 'Mi s-a părut cursul foarte util și bine structurat.' },
+        { id: { idCurs: 1, idStud: 102 }, message: 'Profesorul explică clar, dar aș dori mai multe exemple practice.' },
+        { id: { idCurs: 1, idStud: 103 }, message: 'Materialele suplimentare ar putea fi organizate mai bine.' },
     ];
 
     const [feedbacks, setFeedbacks] = useState([]);
