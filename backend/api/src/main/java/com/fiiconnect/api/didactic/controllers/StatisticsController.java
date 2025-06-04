@@ -3,6 +3,7 @@ package com.fiiconnect.api.didactic.controllers;
 import com.fiiconnect.api.auth_userMgmt.controllers.PersonController;
 import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
 import com.fiiconnect.api.didactic.exceptions.ProfessorNotFoundException;
+import com.fiiconnect.api.didactic.exceptions.StudentNotFoundException;
 import com.fiiconnect.api.didactic.exceptions.UnauthorizedOperationException;
 import com.fiiconnect.api.didactic.models.Course;
 import com.fiiconnect.api.didactic.models.Grade;
@@ -10,6 +11,7 @@ import com.fiiconnect.api.didactic.models.Professor;
 import com.fiiconnect.api.didactic.models.Student;
 import com.fiiconnect.api.didactic.models.Teaching;
 import com.fiiconnect.api.didactic.repositories.ProfessorRepository;
+import com.fiiconnect.api.didactic.repositories.StudentRepository;
 import com.fiiconnect.api.didactic.services.CourseService;
 import com.fiiconnect.api.didactic.services.GradeService;
 import com.fiiconnect.api.didactic.services.ProfessorService;
@@ -35,6 +37,7 @@ public class StatisticsController {
     private final CourseService courseService;
     private final StudentService studentService;
     private final GradeService gradeService;
+    private final StudentRepository studentRepository;
 
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @GetMapping("/didactic/statistics/prof/avgGrade")
@@ -66,6 +69,7 @@ public class StatisticsController {
     @PreAuthorize("hasRole('STUDENT') or hasRole('ADMIN')")
     @GetMapping("/didactic/statistics/grades/distribution/{userID}")
     public List<Map<String, Object>> getStudentGradeDistribution(@PathVariable Long userID, @RequestParam int year, @RequestParam int semester) {
+        System.out.println("pula");
         PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
 
         if (person.role().equals("ROLE_STUDENT") && !userID.equals(person.student().id())) {
@@ -74,8 +78,8 @@ public class StatisticsController {
 
         List<Grade> grades = gradeService.getStudentGrades(userID);
 
-        Student student = new Student();
-        student.setId(userID);
+        Student student = studentRepository.findById(userID).orElseThrow(() -> new StudentNotFoundException(userID));
+
         studentService.attachGrades(student);
 
         List<Course> semesterCourses = courseService.viewAllCoursesAvailable(year, semester);
