@@ -27,12 +27,12 @@ public class EnrollmentController {
         repository.save(enrollment);
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/didactic/enroll")
-    public void deleteEnrollment(@RequestParam Long idStud, @RequestParam Long idCourse) {
-        EnrollmentCompositeKey compKey = new EnrollmentCompositeKey(idStud, idCourse);
-        repository.deleteById(compKey);
-    }
+//    @PreAuthorize("hasRole('ADMIN')")
+//    @DeleteMapping("/didactic/enroll")
+//    public void deleteEnrollment(@RequestParam Long idStud, @RequestParam Long idCourse) {
+//        EnrollmentCompositeKey compKey = new EnrollmentCompositeKey(idStud, idCourse);
+//        repository.deleteById(compKey);
+//    }
 
     @ResponseStatus(HttpStatus.CONFLICT)
     @ExceptionHandler(ConstraintViolationException.class)

@@ -27,8 +27,9 @@ const Administrator = () => {
                 return response.json();
             })
             .then((data) => {
-                const courses = data._embedded?.courseList || [];
-                setCursuri(courses);
+                // Aici am scos filtrarea, afisam toate cursurile
+                const courseList = data._embedded?.courseList || [];
+                setCursuri(courseList);
                 setLoading(false);
             })
             .catch((error) => {
@@ -41,7 +42,9 @@ const Administrator = () => {
     useEffect(() => {
         fetchCourses();
     }, []);
+
     const token = localStorage.getItem('token');
+
     const handleDeleteCourse = (id) => {
         if (!window.confirm("Ești sigur că vrei să ștergi acest curs?")) return;
         fetch(`/didactic/course/${id}`, {
@@ -49,7 +52,6 @@ const Administrator = () => {
             headers: {
                 'Authorization': `Bearer ${token}`
             }
-
         })
             .then((res) => {
                 if (!res.ok) throw new Error("Eroare la ștergere");
@@ -149,7 +151,7 @@ const Administrator = () => {
             />
         );
     }
-    console.log("Lista de cursuri:", cursuri); // <-- aici vezi array-ul complet
+
     return (
         <div className="container-cursuri">
             <div className="cursuri-titlu">

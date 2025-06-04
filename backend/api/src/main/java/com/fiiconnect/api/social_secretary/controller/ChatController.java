@@ -68,6 +68,7 @@ public class ChatController {
 
         // Verifică sender
         Long senderId = chatMessage.getSender();
+        System.out.println(senderId);
 
         chatMessage.setTimestamp(LocalDateTime.now().toString());
 
