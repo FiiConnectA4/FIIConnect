@@ -29,6 +29,10 @@
     margin-bottom: 18px;
     text-align: left;
 }
+[data-theme="dark"] .dashboard-title {
+    color: #fff;
+;
+}
 
 
 /* Pentru dark mode */
