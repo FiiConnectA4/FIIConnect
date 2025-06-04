@@ -22,7 +22,12 @@ const OrarSecretariat = () => {
 
   const fetchSchedule = async (url) => {
     try {
-      const response = await fetch(url);
+      const token = localStorage.getItem("token");
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       const data = await response.json();
 
       console.log("Server data:", data);
@@ -38,10 +43,6 @@ const OrarSecretariat = () => {
       console.error("Eroare la preluarea datelor:", err);
       setScheduleData([]);
     }
-  };
-
-  const handleSwitchToOrar = () => {
-    navigate("/app/orar");
   };
 
   useEffect(() => {
@@ -174,81 +175,77 @@ const OrarSecretariat = () => {
   };
 
   return (
-    <div className="orar-container">
-      <button className="toggle-button" onClick={handleSwitchToOrar}>
-        Switch la Orar
-      </button>
-
-      {["/app/orar-secretariat/studenti", "/app/orar-secretariat/profesori", "/app/orar-secretariat/sali", "/app/orar-secretariat/discipline"].includes(location.pathname) && (
-        <button className="orar-button inapoi" onClick={handleBackToMain}>
-          🔙 Înapoi
-        </button>
-      )}
-
-      {selectedGroup || selectedProfessor || selectedRoom || selectedDiscipline ? (
-        <div className="orar-afisat">
-          <h3>
-            Orar pentru{" "}
-            {selectedGroup ||
-              (selectedProfessor && `Profesor ${selectedProfessor}`) ||
-              (selectedRoom && `Sala ${selectedRoom}`) ||
-              (selectedDiscipline && `Disciplina ${selectedDiscipline}`)}
-          </h3>
-
-          <ScheduleTable
-            schedule={Array.isArray(scheduleData) ? scheduleData : []}
-            
-            editable={true}
-            onDataChange={(newData) => {
-              console.log("Updated data:", newData);
-              const sortedData = sorteazaOrar(newData);
-              setScheduleData(sortedData);
-              handleDataUpdated();
-            }}
-          />
-
-          <button className="orar-button inapoi" onClick={handleBackButtonClick}>
-            🔙 Înapoi
-          </button>
-
-          {selectedRoom && (
-            <button className="orar-button dotari" onClick={handleDotariClick}>
-              Dotări
+      <div className="orar-container">
+        {["/app/orar-secretariat/studenti", "/app/orar-secretariat/profesori", "/app/orar-secretariat/sali", "/app/orar-secretariat/discipline"].includes(location.pathname) && (
+            <button className="orar-button inapoi" onClick={handleBackToMain}>
+              🔙 Înapoi
             </button>
-          )}
-        </div>
-      ) : (
-        <>
-          <div className="orar-titlu">
-            <h1>Orar Secretariat</h1>
-            {!currentSection && <h2>Alege o categorie</h2>}
-            {currentSection === "studenti" && <h2>Alege anul și grupa</h2>}
-          </div>
+        )}
 
-          {!currentSection && (
-            <div className="orar-buttons">
-              <button className="orar-button" onClick={() => handleSectionChange("studenti")}>
-                🎓 Orar Studenți
+        {selectedGroup || selectedProfessor || selectedRoom || selectedDiscipline ? (
+            <div className="orar-afisat">
+              <h3>
+                Orar pentru{" "}
+                {selectedGroup ||
+                    (selectedProfessor && `Profesor ${selectedProfessor}`) ||
+                    (selectedRoom && `Sala ${selectedRoom}`) ||
+                    (selectedDiscipline && `Disciplina ${selectedDiscipline}`)}
+              </h3>
+
+              <ScheduleTable
+                  schedule={Array.isArray(scheduleData) ? scheduleData : []}
+
+                  editable={true}
+                  onDataChange={(newData) => {
+                    console.log("Updated data:", newData);
+                    const sortedData = sorteazaOrar(newData);
+                    setScheduleData(sortedData);
+                    handleDataUpdated();
+                  }}
+              />
+
+              <button className="orar-button inapoi" onClick={handleBackButtonClick}>
+                🔙 Înapoi
               </button>
-              <button className="orar-button" onClick={() => handleSectionChange("profesori")}>
-                👨‍🏫 Orar Profesori
-              </button>
-              <button className="orar-button" onClick={() => handleSectionChange("sali")}>
-                🏫 Orar Săli
-              </button>
-              <button className="orar-button" onClick={() => handleSectionChange("discipline")}>
-                📚 Orar Discipline
-              </button>
+
+              {selectedRoom && (
+                  <button className="orar-button dotari" onClick={handleDotariClick}>
+                    Dotări
+                  </button>
+              )}
             </div>
-          )}
+        ) : (
+            <>
+              <div className="orar-titlu">
+                <h1>Orar Secretariat</h1>
+                {!currentSection && <h2>Alege o categorie</h2>}
+                {currentSection === "studenti" && <h2>Alege anul și grupa</h2>}
+              </div>
 
-          {currentSection === "studenti" && <OrarStudenti isSecretariat={true} />}
-          {currentSection === "profesori" && <OrarProfesori onProfessorClick={handleProfessorClick} />}
-          {currentSection === "discipline" && <OrarDiscipline isSecretariat={true} />}
-          {currentSection === "sali" && <OrarSali onRoomClick={handleRoomClick} />}
-        </>
-      )}
-    </div>
+              {!currentSection && (
+                  <div className="orar-buttons">
+                    <button className="orar-button" onClick={() => handleSectionChange("studenti")}>
+                      🎓 Orar Studenți
+                    </button>
+                    <button className="orar-button" onClick={() => handleSectionChange("profesori")}>
+                      👨‍🏫 Orar Profesori
+                    </button>
+                    <button className="orar-button" onClick={() => handleSectionChange("sali")}>
+                      🏫 Orar Săli
+                    </button>
+                    <button className="orar-button" onClick={() => handleSectionChange("discipline")}>
+                      📚 Orar Discipline
+                    </button>
+                  </div>
+              )}
+
+              {currentSection === "studenti" && <OrarStudenti isSecretariat={true} />}
+              {currentSection === "profesori" && <OrarProfesori onProfessorClick={handleProfessorClick} />}
+              {currentSection === "discipline" && <OrarDiscipline isSecretariat={true} />}
+              {currentSection === "sali" && <OrarSali onRoomClick={handleRoomClick} />}
+            </>
+        )}
+      </div>
   );
 };
 

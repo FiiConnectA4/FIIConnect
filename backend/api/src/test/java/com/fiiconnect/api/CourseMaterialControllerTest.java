@@ -95,7 +95,7 @@ public class CourseMaterialControllerTest {
     void uploadMaterial_SavesMaterialAndReturns201() throws IOException {
         CourseMaterial input = new CourseMaterial();
         input.setIdCourse(1010L);
-        input.setIdProfessor(2010L);
+//        input.setIdProfessor(2010L);
         input.setFilename("lab1.pdf");
         input.setUploadDate(new Date());
         input.setUpdateDate(new Date());
@@ -114,7 +114,7 @@ public class CourseMaterialControllerTest {
         when(repository.save(any(CourseMaterial.class))).thenReturn(saved);
         doNothing().when(sftpService).uploadFile(any(), any());
 
-        ResponseEntity<?> response = controller.uploadFile(2010L, 1010L, file);
+        ResponseEntity<?> response = controller.uploadFile(1010L, file);
 
         assertEquals(201, response.getStatusCode().value());
         verify(repository, times(1)).save(any());

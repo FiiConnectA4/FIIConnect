@@ -306,3 +306,6 @@
   .channel-item.active .channel-name.materie { color: #ffe8a8; }
   .channel-item.active .channel-name.grupa { color: #ffb3b3; }
   .channel-item.active .channel-name.seminar { color: #a8e6ff; }
+  .chat-messages {
+  overflow-anchor: auto;
+}

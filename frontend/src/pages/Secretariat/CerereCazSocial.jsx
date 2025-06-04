@@ -48,6 +48,7 @@ const studentId = 7;
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`, // Adaugă token-ul aici
     },
     body: JSON.stringify(payload),
   })

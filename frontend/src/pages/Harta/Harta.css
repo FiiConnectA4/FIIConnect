@@ -1,0 +1,83 @@
+/* Frontend/src/styles/Harta.css */
+.harta-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.harta-title {
+    /* Add custom styles if needed */
+}
+
+.harta-button {
+    width: 340px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.7rem;
+    padding-left: 1.2rem;
+}
+
+.harta-dropdown,
+.harta-rezerva {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.harta-select {
+    width: 200px;
+    background-color: #003087;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    border-radius: 0.5rem;
+    border: none;
+    height: 44px;
+    font-size: 1rem;
+    padding-left: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.harta-img {
+    width: 300px;
+    height: auto;
+    border-radius: 1rem;
+    box-shadow: 0 2px 12px #00308733;
+}
+
+.harta-label {
+    color: #003087;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.harta-selected {
+    color: #003087;
+    font-weight: bold;
+}
+
+.harta-img-icon {
+    width: 28px;
+    height: 28px;
+    margin-right: 0.5rem;
+}
+
+.harta-intervale {
+    color: #003087;
+    font-weight: bold;
+    font-size: 1.1rem;
+    margin-top: 1rem;
+}
+
+.harta-intervale-mock {
+    color: #222;
+    font-weight: normal;
+    font-size: 1rem;
+    margin-top: 0.5rem;
+}

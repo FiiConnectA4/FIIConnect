@@ -2,51 +2,77 @@ import { useState, useEffect } from 'react';
 import Ceas from './../Components/Ceas';
 import Carte from '../Components/Carte';
 import Buton from '../Components/Buton';
-import PageControl from '../Components/PageControl'; // doar dacă vrei și acțiuni extra
+import PageControl from '../Components/PageControl'; // opțional
 import './../Student/Student.css';
 import PDetaliiCurs from '../DetaliiCurs/DetaliiCurs';
-import { useSearchParams } from 'react-router-dom';
 
 const Student = () => {
-    const [searchParams] = useSearchParams();
-    const studentId = searchParams.get('studentId') || 5;
-
     const [student, setStudent] = useState(null);
     const [courses, setCourses] = useState([]);
     const [selectedCourseId, setSelectedCourseId] = useState(null);
     const [loading, setLoading] = useState(true);
 
-
     useEffect(() => {
-
         const token = localStorage.getItem('token');
-        console.log(token);
-        fetch(`/didactic/student/${studentId}`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            })
-            .then((res) => {
+
+        if (!token) {
+            console.error("⛔ Token not found in localStorage");
+            setLoading(false);
+            return;
+        }
+
+        // Pasul 1: ia studentId din JWT
+        fetch('/person/me', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(res => {
                 if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
                 return res.json();
             })
-            .then((data) => {
+            .then(user => {
+                console.log("🔍 User info:", user);
+                const studentId = user?.student?.id;
+
+                if (!studentId) {
+                    console.error("⛔ studentId not found in user object");
+                    setLoading(false);
+                    return;
+                }
+
+                // Pasul 2: încarcă studentul
+                return fetch(`/didactic/student/${studentId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+            })
+            .then(res => {
+                if (!res) return;
+                if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+                return res.json();
+            })
+            .then(data => {
+                if (!data) return;
                 console.log("👨‍🎓 Student info:", data);
                 setStudent(data);
+
                 const inscrieri = data.enrollments || [];
                 const cursuri = inscrieri
                     .map((e) => e.course)
                     .filter((c) => c.archived !== 1);
                 setCourses(cursuri);
-                setLoading(false);
             })
-            .catch((err) => {
-                console.error("⛔ Eroare la încărcarea studentului:", err);
+            .catch(err => {
+                console.error("⛔ Eroare la încărcarea datelor:", err);
                 setCourses([]);
+            })
+            .finally(() => {
                 setLoading(false);
             });
-    }, [studentId]);
+
+    }, []);
 
     if (loading) return <div>Loading...</div>;
 

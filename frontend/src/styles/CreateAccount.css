@@ -1,7 +1,9 @@
+/* src/styles/CreateAccount.css */
+
 .create-page {
     flex: 1;
     min-height: 80vh;
-    background: #f0f4f8; /* match your app background */
+    background: #f0f4f8;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -79,4 +81,60 @@
 .btn-create:disabled {
     opacity: 0.6;
     cursor: default;
+}
+
+/* Unassigned container styling */
+.unassigned-container {
+    border: 1px solid #cbd5e0;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    background: #fafafa;
+    max-height: 200px;
+    overflow-y: auto;
+}
+.unassigned-container h2 {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    font-size: 1.25rem;
+    color: #2d3748;
+}
+.unassigned-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+}
+.unassigned-table th,
+.unassigned-table td {
+    border: 1px solid #e2e8f0;
+    padding: 0.5rem;
+    text-align: left;
+    font-size: 0.9rem;
+}
+.unassigned-table th {
+    background: #edf2f7;
+    font-weight: 600;
+}
+.unassigned-table tbody tr {
+    height: 30px;
+}
+
+/* Refresh button styling */
+.btn-refresh {
+    padding: 0.5rem 1rem;
+    background-color: #3182ce;
+    color: white;
+    font-weight: 500;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-bottom: 1rem;
+}
+.btn-refresh:hover {
+    background-color: #2b6cb0;
+}
+.btn-refresh:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(49,130,206,0.4);
 }
