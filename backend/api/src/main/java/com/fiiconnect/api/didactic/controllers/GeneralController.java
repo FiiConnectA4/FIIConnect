@@ -34,7 +34,6 @@ public class GeneralController {
         return eligibleStudentIds;
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/didactic/globals/{name}")
     public GlobalConstant queryConstant(@PathVariable String name)
     {

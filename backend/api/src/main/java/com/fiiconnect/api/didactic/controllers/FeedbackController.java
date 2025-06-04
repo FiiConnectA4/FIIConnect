@@ -8,7 +8,9 @@ import com.fiiconnect.api.didactic.exceptions.FeedbackNotFound;
 import com.fiiconnect.api.didactic.exceptions.UnauthorizedOperationException;
 import com.fiiconnect.api.didactic.models.Feedback;
 import com.fiiconnect.api.didactic.models.FeedbackCompositeKey;
+import com.fiiconnect.api.didactic.models.GlobalConstant;
 import com.fiiconnect.api.didactic.repositories.FeedbackRepository;
+import com.fiiconnect.api.didactic.repositories.GlobalConstantRepository;
 import com.fiiconnect.api.didactic.services.FeedbackService;
 import jakarta.websocket.server.PathParam;
 import lombok.AllArgsConstructor;
@@ -26,6 +28,7 @@ public class FeedbackController {
     private final FeedbackRepository repository;
     private final FeedbackService service;
     private final PersonController personController;
+    private final GlobalConstantRepository globalConstantRepository;
 
     @GetMapping("/didactic/feedback")
     public List<Feedback> getFeedback() {
@@ -68,6 +71,10 @@ public class FeedbackController {
     @PreAuthorize("hasRole('STUDENT')")
     @PostMapping("/didactic/feedback")
     public ResponseEntity<?> createFeedback(@RequestBody Feedback feedback) {
+        GlobalConstant feedbacksAllowed = globalConstantRepository.findByName("feedbacksAllowed");
+        if(feedbacksAllowed == null || !feedbacksAllowed.getValue().equals("true"))
+            throw new UnauthorizedOperationException("Feedbacks are currently disabled");
+
         PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
         if(!service.authorizeFeedbackOperation(person, feedback.getId()))
             throw new UnauthorizedOperationException("Only students can create feedbacks");
