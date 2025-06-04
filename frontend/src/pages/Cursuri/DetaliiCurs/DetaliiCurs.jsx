@@ -127,7 +127,7 @@ const DetaliiCurs = ({ curs, onBack }) => {
 
     // Dacă showFeedback e true, afișăm componentea de feedback în locul detaliilor
     if (showFeedback) {
-        return <TrimiteFeedback onBack={() => setShowFeedback(false)} />;
+        return <TrimiteFeedback onBack={() => setShowFeedback(false)} cursId={curs.id} />;
     }
 
     if (loading) {
