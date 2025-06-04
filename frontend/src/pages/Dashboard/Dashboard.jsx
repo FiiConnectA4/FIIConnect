@@ -9,18 +9,18 @@ function Dashboard() {
     const [nrCursuri, setNrCursuri] = useState("-");
     const [ultimaNota, setUltimaNota] = useState("-");
     const [orarAzi, setOrarAzi] = useState({ ora: "-", disciplina: "-" });
-
-    // State pentru an și grupă (pentru orar)
+    // Pentru id student, an, grupă
+    const [studentId, setStudentId] = useState(null);
     const [an, setAn] = useState("");
     const [grupa, setGrupa] = useState("");
 
     const navigate = useNavigate();
 
+    // Fetch profile + anunțuri + cursuri
     useEffect(() => {
         const token = localStorage.getItem("token");
         if (!token) return;
 
-        // Fetch profil: username, an, grupa
         fetch("/profile", {
             headers: { Authorization: `Bearer ${token}` }
         })
@@ -30,7 +30,7 @@ function Dashboard() {
                 if (data.firstName) nume += data.firstName + " ";
                 if (data.lastName) nume += data.lastName;
                 setUsername(nume.trim() || data.username || "utilizator");
-                // ADAPTEAZĂ: cum se numesc câmpurile pentru an și grupa
+                setStudentId(data.studentId || data.id || null); // adaptează dacă e altă cheie!
                 setAn(data.year || data.an || "");
                 setGrupa(data.group || data.grupa || "");
             })
@@ -44,7 +44,7 @@ function Dashboard() {
             .then(data => setNrAnunturi(Array.isArray(data) ? data.length : "-"))
             .catch(() => setNrAnunturi("-"));
 
-        // Număr cursuri (adaptat la backend)
+        // Număr cursuri (Spring HATEOAS sau array simplu)
         fetch("/didactic/course", {
             headers: { Authorization: `Bearer ${token}` }
         })
@@ -59,27 +59,35 @@ function Dashboard() {
                 setNrCursuri(lista.length);
             })
             .catch(() => setNrCursuri("-"));
+    }, []);
 
-        // Ultima notă
-        fetch("/didactic/grades", {
+    // Fetch pentru ultima notă (după ce ai studentId)
+    useEffect(() => {
+        if (!studentId) return;
+        const token = localStorage.getItem("token");
+        fetch(`/didactic/student/${studentId}`, {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(res => res.json())
             .then(data => {
-                if (Array.isArray(data) && data.length > 0) {
-                    // Poate vrei ultima după dată (dacă ai gradingDate)
-                    const sorted = data.sort((a, b) => new Date(b.gradingDate) - new Date(a.gradingDate));
-                    setUltimaNota(sorted[0].value || "-");
-                } else setUltimaNota("-");
+                const grades = data.grades || [];
+                let nota = "-";
+                if (grades.length > 0) {
+                    // Dacă ai gradingDate, poți sorta, altfel iei ultimul
+                    // grades.sort((a, b) => new Date(b.gradingDate) - new Date(a.gradingDate));
+                    // nota = grades[0].value;
+                    nota = grades[grades.length - 1].value;
+                }
+                setUltimaNota(nota);
             })
             .catch(() => setUltimaNota("-"));
-    }, []);
+    }, [studentId]);
 
-    // Fetch pentru orarul de azi, când ai an + grupa
+    // Fetch pentru orarul de azi (după ce ai an și grupă)
     useEffect(() => {
         if (!an || !grupa) return;
         const token = localStorage.getItem("token");
-        // Ziua curentă în format backend (ex: "Luni", "Marți" etc.)
+        // Numele zilei curente (backend-ul folosește "Luni", "Marți" etc.)
         const zileSapt = ["Duminică", "Luni", "Marți", "Miercuri", "Joi", "Vineri", "Sâmbătă"];
         const ziAstazi = zileSapt[new Date().getDay()];
 
@@ -89,8 +97,6 @@ function Dashboard() {
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) {
-                    // OrarDTO: { zi, ora, disciplina, ... }
-                    // Filtrăm după ziua de azi, luăm primul curs
                     const orarAziObj = data.find(item => item.zi === ziAstazi);
                     if (orarAziObj) {
                         setOrarAzi({
