@@ -7,6 +7,8 @@ import com.fiiconnect.api.didactic.exceptions.TransferRequestNotFound;
 import com.fiiconnect.api.didactic.models.StudCourseCompositeKey;
 import com.fiiconnect.api.didactic.models.TransferRequest;
 import com.fiiconnect.api.didactic.repositories.TransferRequestRepository;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 
+@AllArgsConstructor
 @RestController
 public class TransferRequestController {
     TransferRequestRepository repository;
@@ -46,6 +49,7 @@ public class TransferRequestController {
         }
 
         StudCourseCompositeKey id = transferRequest.getId();
+        System.out.println(transferRequest.getId());
         if(id == null || id.getIdStud() == null || id.getIdCourse() == null) {
             throw new InvalidArgumentsException("Arguments provided idStud and idCourse are both required for transfer requests");
         }
