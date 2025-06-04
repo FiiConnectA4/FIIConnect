@@ -1,115 +1,108 @@
 import React, { useState, useEffect } from 'react';
 import './DetaliiCurs.css';
 import Ceas from './../Components/Ceas';
-import Buton from './../Components/Buton';
-import ButonExtensibil from '../Components/ButonExtensibil';
 import TrimiteFeedback from './TrimiteFeedback';
 
-// Backend base URL (remove if using package.json proxy)
-const API_BASE_URL = ''; // Setează dacă nu folosești proxy
+const API_BASE_URL = ''; // Dacă nu folosești proxy
 
 const DetaliiCurs = ({ curs, onBack }) => {
     const [profesori, setProfesori] = useState([]);
     const [materials, setMaterials] = useState([]);
     const [formula, setFormula] = useState(null);
     const [description, setDescription] = useState('');
-    const [loading, setLoading] = useState(true);
-
-    // Acesta controlează dacă afișăm pagina de feedback sau detaliile cursului
+    const [loadingDetails, setLoadingDetails] = useState(true);
+    const [loadingFeedback, setLoadingFeedback] = useState(true);
     const [showFeedback, setShowFeedback] = useState(false);
+    const [feedbackAllowed, setFeedbackAllowed] = useState(false);
 
     const token = localStorage.getItem('token');
 
     useEffect(() => {
-        console.log('ID-ul cursului:', curs.id);
+        // Fetch detalii curs
+        const fetchCourseDetails = async () => {
+            try {
+                const [materialsRes, courseRes, formulaRes] = await Promise.all([
+                    fetch(`${API_BASE_URL}/didactic/course/material`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }),
+                    fetch(`${API_BASE_URL}/didactic/course/${curs.id}`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }),
+                    fetch(`${API_BASE_URL}/didactic/course/${curs.id}/formula`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    }),
+                ]);
 
-        // Fetch materials
-        fetch(`${API_BASE_URL}/didactic/course/material`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        })
-            .then(res => {
-                if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-                return res.json();
-            })
-            .then(data => {
-                setMaterials(Array.isArray(data) ? data.filter(m => m.idCourse === curs.id) : []);
-            })
-            .catch(err => {
-                console.error('Eroare la încărcarea materialelor:', err);
-                alert('Eroare la încărcarea materialelor: ' + err.message);
-                setMaterials([]);
-            });
+                // MATERIALS
+                const materialsData = await materialsRes.json();
+                setMaterials(
+                    Array.isArray(materialsData)
+                        ? materialsData.filter((m) => m.idCourse === curs.id)
+                        : []
+                );
 
-        // Fetch professors and description
-        fetch(`${API_BASE_URL}/didactic/course/${curs.id}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        })
-            .then(res => {
-                if (!res.ok) {
-                    console.error(`HTTP error! Status: ${res.status}`);
-                    setProfesori([]);
-                    setDescription('');
-                    return {};
-                }
-                return res.json();
-            })
-            .then(data => {
-                const professorsArray = data.professors || [];
-                if (Array.isArray(professorsArray)) {
-                    const profList = professorsArray.map(prof => ({
-                        name: `${prof.professor.firstName} ${prof.professor.lastName}`,
-                    }));
-                    setProfesori(profList);
+                // COURSE INFO
+                const courseData = await courseRes.json();
+                const profArray = courseData.professors || [];
+                setProfesori(
+                    Array.isArray(profArray)
+                        ? profArray.map((p) => ({
+                            name: `${p.professor.firstName} ${p.professor.lastName}`,
+                        }))
+                        : []
+                );
+                setDescription(courseData.description || 'Fără descriere');
+
+                // FORMULA
+                if (formulaRes.ok) {
+                    const formulaData = await formulaRes.json();
+                    setFormula(formulaData);
                 } else {
-                    console.error('Răspuns invalid: nu conține un array de profesori.', data);
-                    setProfesori([]);
-                }
-                setDescription(data.description || 'Fără descriere');
-            })
-            .catch(err => {
-                console.error('Eroare la încărcarea profesorilor:', err);
-                alert('Eroare la încărcarea profesorilor: ' + err.message);
-                setProfesori([]);
-                setDescription('Fără descriere');
-            });
-
-        // Fetch formula
-        fetch(`${API_BASE_URL}/didactic/course/${curs.id}/formula`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        })
-            .then(res => {
-                if (!res.ok) {
-                    console.error(`Nicio formulă găsită pentru cursul ${curs.id}`);
                     setFormula(null);
-                    return null;
                 }
-                return res.json();
-            })
-            .then(data => {
-                setFormula(data);
-                setLoading(false);
-            })
-            .catch(err => {
-                console.error('Eroare la încărcarea formulei:', err);
-                alert('Eroare la încărcarea formulei: ' + err.message);
-                setFormula(null);
-                setLoading(false);
-            });
+
+                setLoadingDetails(false);
+            } catch (err) {
+                console.error('Eroare la încărcarea detaliilor cursului:', err);
+                setLoadingDetails(false);
+            }
+        };
+
+        // Fetch feedback status
+        const fetchFeedbackStatus = async () => {
+            try {
+                const res = await fetch(`${API_BASE_URL}/didactic/globals/feedbacksAllowed`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const data = await res.json();
+                console.log('🧪 feedbacksAllowed response:', data);
+                const allowed = data?.value === "true";  // interpretare corectă a stringului "true"
+                setFeedbackAllowed(allowed);
+            } catch (err) {
+                console.error('Eroare la statusul feedback:', err);
+                setFeedbackAllowed(false);
+            } finally {
+                setLoadingFeedback(false);
+            }
+        };
+
+        fetchCourseDetails();
+        fetchFeedbackStatus();
     }, [curs.id, token]);
 
     const downloadMaterial = (materialId, filename) => {
         fetch(`${API_BASE_URL}/didactic/course/material/${materialId}/file`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${token}` },
         })
-            .then(res => {
+            .then((res) => {
                 if (!res.ok) {
-                    return res.text().then(text => {
+                    return res.text().then((text) => {
                         throw new Error(`HTTP error! Status: ${res.status}, Message: ${text}`);
                     });
                 }
                 return res.blob();
             })
-            .then(blob => {
+            .then((blob) => {
                 const url = window.URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
@@ -119,24 +112,23 @@ const DetaliiCurs = ({ curs, onBack }) => {
                 a.remove();
                 window.URL.revokeObjectURL(url);
             })
-            .catch(err => {
+            .catch((err) => {
                 console.error('Eroare la descărcarea materialului:', err);
-                alert('Eroare la descărcarea materialului: ' + err.message);
+                alert('Eroare: ' + err.message);
             });
     };
 
-    // Dacă showFeedback e true, afișăm componentea de feedback în locul detaliilor
     if (showFeedback) {
         return <TrimiteFeedback onBack={() => setShowFeedback(false)} />;
     }
 
-    if (loading) {
+    if (loadingDetails || loadingFeedback) {
         return <div className="loading">Se încarcă detaliile cursului...</div>;
     }
 
     return (
         <div className="detalii-container">
-            {/* Header Section */}
+            {/* Header */}
             <div className="header-section">
                 <button className="buton-inapoi" onClick={onBack}>
                     ← Înapoi la cursuri
@@ -144,24 +136,23 @@ const DetaliiCurs = ({ curs, onBack }) => {
                 <Ceas />
             </div>
 
-            {/* Course Title Section */}
+            {/* Titlu și Feedback */}
             <div className="course-title-section">
                 <h1>{curs.title}</h1>
-                <button
-                    className="buton-feedback"
-                    onClick={() => setShowFeedback(true)}
-                >
-                    Feedback
-                </button>
+                {feedbackAllowed && (
+                    <button className="buton-feedback" onClick={() => setShowFeedback(true)}>
+                        Feedback
+                    </button>
+                )}
             </div>
 
-            {/* Professors Section */}
+            {/* Profesori */}
             <div className="grid-item professors-section">
                 <h2>Profesori</h2>
                 <div className="professors-list">
                     {profesori.length > 0 ? (
-                        profesori.map((prof, index) => (
-                            <span key={index} className="professor-badge">
+                        profesori.map((prof, idx) => (
+                            <span key={idx} className="professor-badge">
                                 {prof.name}
                             </span>
                         ))
@@ -171,29 +162,15 @@ const DetaliiCurs = ({ curs, onBack }) => {
                 </div>
             </div>
 
-            {/* Main Content Grid */}
+            {/* Descriere și Formula */}
             <div className="content-grid">
-                {/* Description Section */}
                 <div className="grid-item description-section">
                     <h2>Descriere Curs</h2>
-                    <div
-                        className="description-textarea"
-                        style={{
-                            padding: '20px',
-                            minHeight: '150px',
-                            border: '2px solid rgba(83, 122, 156, 0.15)',
-                            borderRadius: '15px',
-                            background: 'rgba(255, 255, 255, 0.8)',
-                            fontSize: '16px',
-                            lineHeight: '1.6',
-                            color: '#1a355e'
-                        }}
-                    >
+                    <div className="description-textarea">
                         {description}
                     </div>
                 </div>
 
-                {/* Formula Section */}
                 <div className="grid-item formula-section">
                     <h2>Metodă de Notare</h2>
                     <div className="formula-display">
@@ -203,7 +180,7 @@ const DetaliiCurs = ({ curs, onBack }) => {
                         <div className="formula-components">
                             <strong>Componente:</strong>
                             <ul>
-                                {formula.components.map(comp => (
+                                {formula.components.map((comp) => (
                                     <li key={comp.id}>{comp.name}</li>
                                 ))}
                             </ul>
@@ -212,19 +189,20 @@ const DetaliiCurs = ({ curs, onBack }) => {
                 </div>
             </div>
 
-            {/* Materials Section */}
+            {/* Materiale */}
             <div className="grid-item materials-section">
                 <h2>Materiale de Curs</h2>
-
                 {materials.length > 0 ? (
                     <div className="materials-grid">
-                        {materials.map(material => (
+                        {materials.map((material) => (
                             <div key={material.id} className="material-card">
                                 <div className="material-name">{material.filename}</div>
                                 <div className="material-actions">
                                     <button
                                         className="btn-primary"
-                                        onClick={() => downloadMaterial(material.id, material.filename)}
+                                        onClick={() =>
+                                            downloadMaterial(material.id, material.filename)
+                                        }
                                     >
                                         📥 Descarcă
                                     </button>
@@ -233,9 +211,7 @@ const DetaliiCurs = ({ curs, onBack }) => {
                         ))}
                     </div>
                 ) : (
-                    <div className="no-materials">
-                        📚 Nu există materiale încărcate pentru acest curs
-                    </div>
+                    <div className="no-materials">📚 Nu există materiale pentru acest curs</div>
                 )}
             </div>
         </div>
