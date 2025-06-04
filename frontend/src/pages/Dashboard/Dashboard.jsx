@@ -33,6 +33,7 @@ function Dashboard() {
         <div className="dashboard-content">
             {/* Afișează numele real */}
             <div className="dashboard-title">Salut, {username}!</div>
+
             <div className="dashboard-cards-row">
                 <div
                     className="dashboard-card"
@@ -80,6 +81,7 @@ function Dashboard() {
                     </span>
                 </div>
             </div>
+
             <div className="dashboard-bottom-row">
                 {/* Calendar */}
                 <div className="glass-card dashboard-calendar">
@@ -96,13 +98,14 @@ function Dashboard() {
                         </div>
                         <div className="calendar-dates">
                             {[...Array(31)].map((_, i) => (
-                                <span key={i} className={i === 28 ? "calendar-today" : ""}>
+                                <span key={i} className={i === new Date().getDate() - 1 ? "calendar-today" : ""}>
                                     {i + 1}
                                 </span>
                             ))}
                         </div>
                     </div>
                 </div>
+
                 {/* Ultimele activități */}
                 <div className="glass-card dashboard-activities">
                     <div className="activities-title">Ultimele activități</div>
@@ -121,6 +124,7 @@ function Dashboard() {
                         </li>
                     </ul>
                 </div>
+
                 {/* News Feed */}
                 <div className="glass-card dashboard-news">
                     <div className="news-title">News Feed</div>

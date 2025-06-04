@@ -1,9 +1,6 @@
 package com.fiiconnect.api.auth_userMgmt.controllers;
 
-import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
-import com.fiiconnect.api.auth_userMgmt.dtos.PersonRoleDTO;
-import com.fiiconnect.api.auth_userMgmt.dtos.ProfessorDTO;
-import com.fiiconnect.api.auth_userMgmt.dtos.StudentDTO;
+import com.fiiconnect.api.auth_userMgmt.dtos.*;
 import com.fiiconnect.api.auth_userMgmt.models.Role;
 import com.fiiconnect.api.auth_userMgmt.models.User;
 import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository;
@@ -20,9 +17,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -77,6 +72,49 @@ public class PersonController {
 
         return ResponseEntity.ok(result);
     }
+
+    @GetMapping("/unassigned")
+    @RolesAllowed("ROLE_ADMIN")
+    public ResponseEntity<List<UnassignedPersonDTO>> getUnassignedPersons() {
+        Set<Long> studentIdsTaken = userRepository.findAll().stream()
+                .map(User::getStudent)
+                .filter(Objects::nonNull)
+                .map(Student::getId)
+                .collect(Collectors.toSet());
+
+        Set<Long> professorIdsTaken = userRepository.findAll().stream()
+                .map(User::getProfessor)
+                .filter(Objects::nonNull)
+                .map(Professor::getId)
+                .collect(Collectors.toSet());
+
+        List<UnassignedPersonDTO> unassignedStudents = studentRepository.findAll().stream()
+                .filter(s -> !studentIdsTaken.contains(s.getId()))
+                .map(s -> new UnassignedPersonDTO(
+                        s.getId(),
+                        s.getFirstName(),
+                        s.getLastName(),
+                        "STUDENT"
+                ))
+                .toList();
+
+        List<UnassignedPersonDTO> unassignedProfessors = professorRepository.findAll().stream()
+                .filter(p -> !professorIdsTaken.contains(p.getId()))
+                .map(p -> new UnassignedPersonDTO(
+                        p.getId(),
+                        p.getFirstName(),
+                        p.getLastName(),
+                        "PROFESSOR"
+                ))
+                .toList();
+
+        List<UnassignedPersonDTO> result = new ArrayList<>();
+        result.addAll(unassignedStudents);
+        result.addAll(unassignedProfessors);
+
+        return ResponseEntity.ok(result);
+    }
+
 
     @GetMapping("/student/{userId}")
     public ResponseEntity<?> getStudentInfo(@PathVariable Long userId) {
