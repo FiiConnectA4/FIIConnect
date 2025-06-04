@@ -4,6 +4,7 @@ import Ceas from './../Components/Ceas';
 import SwitchToggle from './../Components/SwitchToggle';
 import Edit from './../Components/Edit';
 import ButonExtensibil from '../Components/ButonExtensibil';
+import CitesteFeedback from './CitesteFeedback'; // ≪ import nou ≫
 import { useNavigate } from 'react-router-dom';
 
 // Backend base URL (remove if using package.json proxy)
@@ -23,38 +24,34 @@ const PDetaliiCurs = ({ curs, onBack }) => {
     const [renameMaterialId, setRenameMaterialId] = useState(null);
     const [newFilename, setNewFilename] = useState('');
     const [userId, setUserId] = useState(null);
+    const [showFeedback, setShowFeedback] = useState(false); // ≪ stare nouă ≫
+
     const fileInputRef = useRef(null);
     const token = localStorage.getItem('token');
     const navigate = useNavigate();
 
     useEffect(() => {
         // Fetch materials
-        fetch(`${API_BASE_URL}/didactic/course/material`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            })
-            .then((res) => {
+        fetch(`${API_BASE_URL}/didactic/course/material`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+            .then(res => {
                 if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
                 return res.json();
             })
-            .then((data) => {
+            .then(data => {
                 setMaterials(Array.isArray(data) ? data.filter(m => m.idCourse === curs.id) : []);
             })
-            .catch((err) => {
+            .catch(err => {
                 console.error('Eroare la încărcarea materialelor:', err);
                 alert('Eroare la încărcarea materialelor: ' + err.message);
                 setMaterials([]);
             });
 
         // Fetch professors and userId
-        fetch(`${API_BASE_URL}/didactic/course/${curs.id}`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            })
+        fetch(`${API_BASE_URL}/didactic/course/${curs.id}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
             .then(response => {
                 if (!response.ok) {
                     console.error(`HTTP error! Status: ${response.status}`);
@@ -93,12 +90,9 @@ const PDetaliiCurs = ({ curs, onBack }) => {
             });
 
         // Fetch formula
-        fetch(`${API_BASE_URL}/didactic/course/${curs.id}/formula`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            })
+        fetch(`${API_BASE_URL}/didactic/course/${curs.id}/formula`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
             .then(response => {
                 if (!response.ok) {
                     console.error(`Nicio formulă găsită pentru cursul ${curs.id}`);
@@ -108,7 +102,6 @@ const PDetaliiCurs = ({ curs, onBack }) => {
                 return response.json();
             })
             .then(data => {
-                console.log('Răspuns API formula:', data);
                 setFormula(data);
                 setFormulaText(data?.text || '');
                 setGradingMethod(data?.text || '');
@@ -123,7 +116,6 @@ const PDetaliiCurs = ({ curs, onBack }) => {
     }, [curs.id]);
 
     const saveCourseChanges = () => {
-        console.log('📤 Trimitem descriere simplă (text/plain):', description);
         fetch(`${API_BASE_URL}/didactic/course/${curs.id}/description`, {
             method: 'PUT',
             headers: {
@@ -133,17 +125,15 @@ const PDetaliiCurs = ({ curs, onBack }) => {
             body: description
         })
             .then(res => {
-                console.log('📥 Status răspuns:', res.status);
                 if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
                 return res.text();
             })
-            .then(text => {
-                console.log('Răspuns complet:', text);
+            .then(() => {
                 alert('Descriere salvată!');
                 setIsEditingDescription(false);
             })
             .catch(err => {
-                console.error('⛔ Eroare la salvarea descrierii:', err);
+                console.error('Eroare la salvarea descrierii:', err);
                 alert('Eroare la salvarea descrierii: ' + err.message);
             });
     };
@@ -154,8 +144,6 @@ const PDetaliiCurs = ({ curs, onBack }) => {
             text: formulaText
         };
         const isExistingFormula = formula && formula.id;
-        console.log(isExistingFormula);
-        console.log(formula);
         fetch(`${API_BASE_URL}${isExistingFormula ? `/didactic/formula/${formula.id}` : '/didactic/formula'}`, {
             method: isExistingFormula ? 'PUT' : 'POST',
             headers: {
@@ -169,7 +157,6 @@ const PDetaliiCurs = ({ curs, onBack }) => {
                 return response.json();
             })
             .then(data => {
-                console.log('Formula salvată:', data);
                 setFormula(data);
                 setGradingMethod(data.text);
                 setIsEditingFormula(false);
@@ -186,23 +173,19 @@ const PDetaliiCurs = ({ curs, onBack }) => {
             alert('Vă rugăm să selectați un fișier pentru încărcare');
             return;
         }
-
         if (!userId || isNaN(userId)) {
             alert('Eroare: ID-ul profesorului nu este disponibil. Vă rugăm să reîncărcați pagina sau să contactați suportul.');
             return;
         }
-
-        const formData = new FormData();
-        formData.append('file', file);
-        formData.append('idCourse', curs.id);
-        formData.append('idProf', userId);
+        const formDataObj = new FormData();
+        formDataObj.append('file', file);
+        formDataObj.append('idCourse', curs.id);
+        formDataObj.append('idProf', userId);
 
         fetch(`${API_BASE_URL}/didactic/course/material`, {
             method: 'POST',
-            body: formData,
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            body: formDataObj,
+            headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(response => {
                 if (!response.ok) {
@@ -214,12 +197,9 @@ const PDetaliiCurs = ({ curs, onBack }) => {
             })
             .then(location => {
                 const materialId = location.split('/').pop();
-                return fetch(`${API_BASE_URL}/didactic/course/material/${materialId}`,
-                    {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
-                    });
+                return fetch(`${API_BASE_URL}/didactic/course/material/${materialId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
             })
             .then(response => {
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
@@ -238,12 +218,9 @@ const PDetaliiCurs = ({ curs, onBack }) => {
     };
 
     const downloadMaterial = (materialId, filename) => {
-        fetch(`${API_BASE_URL}/didactic/course/material/${materialId}/file`,
-            {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            })
+        fetch(`${API_BASE_URL}/didactic/course/material/${materialId}/file`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
             .then(response => {
                 if (!response.ok) {
                     return response.text().then(text => {
@@ -271,10 +248,7 @@ const PDetaliiCurs = ({ curs, onBack }) => {
     const deleteMaterial = (materialId) => {
         fetch(`${API_BASE_URL}/didactic/course/material/${materialId}`, {
             method: 'DELETE',
-
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
+            headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(response => {
                 if (!response.ok) {
@@ -297,11 +271,10 @@ const PDetaliiCurs = ({ curs, onBack }) => {
     };
 
     const saveNewFilename = () => {
-        if (!newFilename || newFilename.trim() === '') {
+        if (!newFilename.trim()) {
             alert('Numele fișierului nu poate fi gol');
             return;
         }
-
         fetch(`${API_BASE_URL}/didactic/course/material/${renameMaterialId}`, {
             method: 'PUT',
             headers: {
@@ -352,9 +325,14 @@ const PDetaliiCurs = ({ curs, onBack }) => {
         }
     };
 
-    // Replace your entire component return statement with this new layout:
+    if (showFeedback) {
+        // Afișăm componenta CitesteFeedback și trimitem onBack pentru revenire
+        return <CitesteFeedback onBack={() => setShowFeedback(false)} />;
+    }
 
-    if (loading) return <div className="loading">Se încarcă cursul...</div>;
+    if (loading) {
+        return <div className="loading">Se încarcă cursul...</div>;
+    }
 
     return (
         <div className="detalii-container">
@@ -374,11 +352,20 @@ const PDetaliiCurs = ({ curs, onBack }) => {
             {/* Course Title Section */}
             <div className="course-title-section">
                 <h1>{curs.title}</h1>
+
+                {/* Switch care comută afișarea componentei CitesteFeedback */}
                 <SwitchToggle
-                    label="Afiseaza feedback"
-
-
+                    label="Afișează feedback"
+                //isOn={showFeedback}
+                //onToggle={() => setShowFeedback(prev => !prev)}
                 />
+
+                <button
+                    className="buton-feedback"
+                    onClick={() => setShowFeedback(true)}
+                >
+                    Feedback-uri
+                </button>
             </div>
 
             {/* Professors Section */}
@@ -405,9 +392,9 @@ const PDetaliiCurs = ({ curs, onBack }) => {
                     <textarea
                         className="description-textarea"
                         value={description}
-                        onChange={(e) => setDescription(e.target.value)}
+                        onChange={e => setDescription(e.target.value)}
                         onBlur={saveCourseChanges}
-                        placeholder="Introduceți o descriere detaliată a cursului, obiectivele de învățare, conținutul principal și cerințele pentru studenți..."
+                        placeholder="Introduceți o descriere detaliată a cursului..."
                         rows={8}
                     />
                 </div>
@@ -421,7 +408,7 @@ const PDetaliiCurs = ({ curs, onBack }) => {
                                 type="text"
                                 className="formula-input"
                                 value={formulaText}
-                                onChange={(e) => setFormulaText(e.target.value)}
+                                onChange={e => setFormulaText(e.target.value)}
                                 placeholder="ex. Notă finală = 0.4 * Laborator + 0.6 * Examen"
                             />
                             <div>
@@ -459,10 +446,9 @@ const PDetaliiCurs = ({ curs, onBack }) => {
             {/* Materials Section */}
             <div className="grid-item materials-section">
                 <h2>Materiale de Curs</h2>
-
                 {materials.length > 0 ? (
                     <div className="materials-grid">
-                        {materials.map((material) => (
+                        {materials.map(material => (
                             <div key={material.id} className="material-card">
                                 {renameMaterialId === material.id ? (
                                     <div>
@@ -470,7 +456,7 @@ const PDetaliiCurs = ({ curs, onBack }) => {
                                             type="text"
                                             className="material-rename-input"
                                             value={newFilename}
-                                            onChange={(e) => setNewFilename(e.target.value)}
+                                            onChange={e => setNewFilename(e.target.value)}
                                             placeholder="Nume nou pentru fișier"
                                         />
                                         <div className="material-actions">
