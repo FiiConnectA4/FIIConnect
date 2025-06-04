@@ -12,8 +12,14 @@ drop table formula;
 drop table student cascade constraints;
 drop table course cascade constraints;
 drop table professor cascade constraints;
+drop table global_constant;
 
 commit;
+
+create table global_constant(
+    name varchar2(256) primary key,
+    value varchar2(256)
+);
 
 create table student(
     id integer constraint c_student_pk_id primary key,

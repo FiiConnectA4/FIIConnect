@@ -23,6 +23,8 @@ begin
 
 --DIDACTIC
 
+insert into global_constant values('feedbacksAllowed', 'false');
+
 for v_index in 1..6 loop
     student_ids.extend;
     student_ids(student_ids.last) := seq_student_id.nextval;

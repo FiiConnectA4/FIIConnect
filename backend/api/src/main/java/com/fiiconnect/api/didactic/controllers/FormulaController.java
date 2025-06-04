@@ -93,7 +93,7 @@ public class FormulaController {
             throw new UnauthorizedOperationException("Only professors who teach the course may evaluate its formula");
 
         FormulaParser.createSyntaxTree(formula);
-        Double result = service.evaluateFormula(formula, idStud);
+        Double result = (double) Math.round(service.evaluateFormula(formula, idStud));
         Grade newGrade = new Grade(new GradeCompositeKey(idStud, formula.getIdCourse()), result, Date.from(Instant.now()));
         return newGrade;
     }
@@ -114,11 +114,25 @@ public class FormulaController {
         for(Enrollment enrollment : enrolled)
         {
             Long idStud = enrollment.getId().getIdStud();
-            Double result = service.evaluateFormula(formula, idStud);
+            Double result = (double) Math.round(service.evaluateFormula(formula, idStud));
             Grade newGrade = new Grade(new GradeCompositeKey(idStud, idCourse), result, Date.from(Instant.now()));
             out.add(newGrade);
         }
         return out;
+    }
+
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
+    @GetMapping("/formula/gauss")
+    public List<Grade> applyGaussScaling(@RequestBody List<Grade> grades)
+    {
+        return service.applyGaussScaling(grades);
+    }
+
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
+    @GetMapping("/formula/best")
+    public List<Grade> applyBestScaling(@RequestBody List<Grade> grades)
+    {
+        return service.applyBestScaling(grades);
     }
 
     @GetMapping("/course/{idCourse}/formula")
@@ -447,6 +461,12 @@ public class FormulaController {
     @ExceptionHandler(ComponentScoreNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String scoreNotFound(ComponentScoreNotFoundException e) {
+        return e.getMessage();
+    }
+
+    @ExceptionHandler(InvalidGradeException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public String invalidGrade(InvalidGradeException e) {
         return e.getMessage();
     }
 }
