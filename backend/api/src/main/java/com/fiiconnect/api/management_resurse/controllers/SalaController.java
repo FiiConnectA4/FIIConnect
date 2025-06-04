@@ -79,7 +79,7 @@ public class SalaController {
     }
 
 
-    @PutMapping("/{nume}")
+    @PutMapping("/nume/{nume}")
     public ResponseEntity<Sala> updateSala(@PathVariable String nume, @RequestBody Sala sala) {
         List<Sala> salaList = salaRepository.findByNume(nume);
         Sala existingSala = salaList.getFirst();
@@ -101,5 +101,20 @@ public class SalaController {
         Sala updatedSala = salaRepository.save(existingSala);
         return ResponseEntity.ok(updatedSala);
     }
+
+
+    @PostMapping("/nume")
+public ResponseEntity<Sala> createSala(@RequestBody Sala sala) {
+    // Poți adăuga validări dacă vrei, ex: să nu existe deja sala cu același nume
+    // De exemplu:
+    List<Sala> existingSali = salaRepository.findByNume(sala.getNume());
+    if (!existingSali.isEmpty()) {
+        return ResponseEntity.status(409).build(); // Conflict, sala cu acest nume există deja
+    }
+
+    Sala savedSala = salaRepository.save(sala);
+    return ResponseEntity.ok(savedSala);
+}
+
 
 }
