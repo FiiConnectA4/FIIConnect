@@ -255,6 +255,10 @@ function Anunturi() {
       if (!newAnnouncement.message.trim()) {
         throw new Error("Te rugăm să introduci un mesaj");
       }
+      if (!newAnnouncement.tags || newAnnouncement.tags.length === 0) {
+        showNotification("Nu poți posta un anunț fără niciun tag!", "error");
+        return;
+      }
       const token = localStorage.getItem('token');
       // Compose payload as expected by backend: AnnouncementDTO
       const payload = {
