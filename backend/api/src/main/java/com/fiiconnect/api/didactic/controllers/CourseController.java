@@ -59,6 +59,7 @@ public class CourseController {
     }
 
     // get all courses
+    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @GetMapping("/didactic/course")
      public CollectionModel<EntityModel<Course>> all() {
         PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
@@ -305,6 +306,16 @@ public class CourseController {
         Course course = repository.findById(id).orElseThrow(() -> new CourseNotFoundException(id));
         course.setArchived(0);
         repository.save(course);
+    }
+
+    @PostMapping("/didactic/course/{id}/upload_csv")
+    public ResponseEntity<String> uploadGradesCsv(@RequestParam("file") MultipartFile file, @PathVariable Long id) {
+        try {
+            gradeService.updateGradesFromCsv(file, id);
+            return ResponseEntity.ok("CSV processed successfully!");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
+        }
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)

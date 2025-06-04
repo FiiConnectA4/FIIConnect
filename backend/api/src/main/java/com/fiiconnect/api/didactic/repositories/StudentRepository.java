@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 public interface StudentRepository extends JpaRepository<Student, Long> {
@@ -17,4 +18,6 @@ public interface StudentRepository extends JpaRepository<Student, Long> {
     @Modifying(flushAutomatically = true, clearAutomatically = true)
     @Query("update Student s set s.year = s.year + 1 where s.id in ?1")
     void executeYearAdvance(Set<Long> studentIds);
+
+    Optional<Student> findByRegNumber(String nrMatricol);
 }
