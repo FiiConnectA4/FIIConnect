@@ -26,6 +26,6 @@ public interface AnnouncementRepository extends JpaRepository<Announcement, Long
             "a.AUTHOR_ID = u.ID WHERE a.ID = :idAnnouncement" , nativeQuery = true)
     String getAuthorUserName(@Param("idAnnouncement") Long idAnnouncement);
 
-    @Query(value="select count(id) from ANNOUNCEMENT where AUTHOR= :userId",nativeQuery = true)
+    @Query(value="select count(id) from ANNOUNCEMENT where AUTHOR_ID= :userId",nativeQuery = true)
     Integer countUserAnnouncements(@Param("userId") Long userId);
 }

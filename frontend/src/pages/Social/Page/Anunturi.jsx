@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../Style/Anunturi.css";
+import { API_ROUTES } from '../../../app/router';
 
 function Notification({ message, type, onClose }) {
   return (
@@ -59,20 +60,20 @@ function Anunturi() {
     try {
       setUserLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch("http://localhost:34101/person/me", {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await fetch(API_ROUTES.PERSON_ME, {
+        headers: { 'Authorization': `Bearer ${token}` },
       });
-      if (!response.ok) throw new Error("Failed to fetch user info");
+      if (!response.ok) throw new Error('Failed to fetch user info');
       const user = await response.json();
       setFullUser(user);
       setUserTags(user.tags || []);
       // Extract unique tag types
       const uniqueTypes = [...new Set((user.tags || []).map(tag => tag.type))];
       setAvailableTagTypes(uniqueTypes);
-      setCurrentTag(prev => ({ ...prev, type: uniqueTypes[0] || "GENERAL" }));
+      setCurrentTag(prev => ({ ...prev, type: uniqueTypes[0] || 'GENERAL' }));
       return user;
     } catch (err) {
-      console.error("Error fetching user data:", err);
+      console.error('Error fetching user data:', err);
       setError(err.message);
       throw err;
     } finally {
@@ -85,18 +86,18 @@ function Anunturi() {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      let url = "http://localhost:34101/announcement/prof-secretar";
-      if (user.role === "student") {
+      let url = API_ROUTES.ANNOUNCEMENT_PROF_SECRETAR;
+      if (user.role === 'student') {
         const tagIds = user.tags?.map(tag => tag.id) || [];
         if (tagIds.length > 0) {
-          url = `http://localhost:34101/announcement/with-tag?${tagIds.map(id => `tagIds=${id}`).join('&')}`;
+          url = `${API_ROUTES.ANNOUNCEMENT_WITH_TAG}?${tagIds.map(id => `tagIds=${id}`).join('&')}`;
         } else {
           setAnnouncements([]);
           return;
         }
       }
       const response = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
-      if (!response.ok) throw new Error("Failed to fetch announcements");
+      if (!response.ok) throw new Error('Failed to fetch announcements');
       let announcementsData = await response.json();
       announcementsData = announcementsData.map(announcement => ({
         ...announcement,
@@ -268,7 +269,8 @@ function Anunturi() {
         tags: newAnnouncement.tags.map(tag => ({ name: tag.name, type: tag.type })),
         publishedDate: new Date().toISOString().split('T')[0] // LocalDate format (yyyy-MM-dd)
       };
-      const response = await fetch("http://localhost:34101/announcement/prof-secretar", {
+      // Înlocuirea URL-ului hardcodat cu ruta centralizată
+      const response = await fetch(API_ROUTES.ANNOUNCEMENT_PROF_SECRETAR, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -314,7 +316,8 @@ function Anunturi() {
         tags: editingAnnouncement.tags.map(tag => ({ name: tag.name, type: tag.type })),
         publishedDate: editingAnnouncement.publishedDate
       };
-      const response = await fetch(`http://localhost:34101/announcement/prof-secretar/${editingAnnouncement.id}`, {
+      // Înlocuirea URL-ului pentru actualizare
+      const response = await fetch(`${API_ROUTES.ANNOUNCEMENT_PROF_SECRETAR}/${editingAnnouncement.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -342,7 +345,8 @@ function Anunturi() {
         return;
       }
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:34101/announcement/prof-secretar/${announcementId}?userId=${fullUser.userId}`, {
+      // Înlocuirea URL-ului pentru ștergere
+      const response = await fetch(`${API_ROUTES.ANNOUNCEMENT_PROF_SECRETAR}/${announcementId}?userId=${fullUser.userId}`, {
         method: "DELETE",
         headers: { 'Authorization': `Bearer ${token}` }
       });
