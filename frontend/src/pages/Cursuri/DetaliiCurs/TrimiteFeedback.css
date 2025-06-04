@@ -1,15 +1,16 @@
 /* Containerul principal, similar cu .detalii-container */
-.feedback-container {
-    height: 100vh;
+.trimite-feedback-container {
+    height: 85vh;
     padding: 20px;
     background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+    border-radius: 20px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #1a355e;
     box-sizing: border-box;
 }
 
 /* Butonul de revenire: reutilizăm exact stilul din DetaliiCurs.css */
-.buton-inapoi {
+.trimite-feedback-buton-inapoi {
     background: linear-gradient(135deg, #537A9C 0%, #4a6d8a 100%);
     color: white;
     border: none;
@@ -23,18 +24,18 @@
     margin-bottom: 30px;
 }
 
-.buton-inapoi:hover {
+.trimite-feedback-buton-inapoi:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(83, 122, 156, 0.4);
 }
 
 /* Header-ul paginii de feedback */
-.feedback-header {
+.trimite-feedback-header {
     text-align: center;
     margin-bottom: 20px;
 }
 
-.feedback-header h1 {
+.trimite-feedback-header h1 {
     font-size: 36px;
     font-weight: 700;
     margin: 0;
@@ -43,7 +44,7 @@
 }
 
 /* Formularul de feedback */
-.feedback-form {
+.trimite-feedback-form {
     max-width: 600px;
     margin: 0 auto;
     display: flex;
@@ -52,7 +53,7 @@
 }
 
 /* Textarea-ul de feedback, în stil cu description-textarea */
-.feedback-textarea {
+.trimite-feedback-textarea {
     width: 100%;
     padding: 20px;
     border: 2px solid rgba(83, 122, 156, 0.15);
@@ -68,7 +69,7 @@
     min-height: 150px;
 }
 
-.feedback-textarea:focus {
+.trimite-feedback-textarea:focus {
     outline: none;
     border-color: #537A9C;
     box-shadow: 0 0 0 4px rgba(83, 122, 156, 0.1);
@@ -76,7 +77,7 @@
 }
 
 /* Butonul de submit: combinăm .btn-primary cu un mic padding extra în .feedback-submit */
-.feedback-submit {
+.trimite-feedback-submit {
     align-self: flex-end;
     padding: 12px 24px;
     font-size: 16px;
@@ -85,7 +86,7 @@
 
 /* Reutilizăm .btn-primary din DetaliiCurs.css */
 /* Dacă nu ai deja .btn-primary în același fișier, adaugă-l: */
-.btn-primary {
+.trimite-feedback-btn-primary {
     background: linear-gradient(135deg, #537A9C 0%, #4a6d8a 100%);
     color: white;
     border: none;
@@ -96,13 +97,13 @@
     box-shadow: 0 3px 10px rgba(83, 122, 156, 0.3);
 }
 
-.btn-primary:hover {
+.trimite-feedback-btn-primary:hover {
     transform: translateY(-1px);
     box-shadow: 0 5px 15px rgba(83, 122, 156, 0.4);
 }
 
 /* Mesajul de status (success sau error) */
-.feedback-status {
+.trimite-feedback-status {
     padding: 12px;
     border-radius: 8px;
     text-align: center;
@@ -111,103 +112,103 @@
 }
 
 /* Culoare verde pentru success, roșu pentru error */
-.feedback-status.success {
+.trimite-feedback-status.success {
     background-color: #d4edda;
     color: #155724;
 }
 
-.feedback-status.error {
+.trimite-feedback-status.error {
     background-color: #f8d7da;
     color: #721c24;
 }
 
 /* Responsive: formularul se adaptează la ecrane mici */
 @media (max-width: 768px) {
-    .feedback-form {
+    .trimite-feedback-form {
         padding: 0 10px;
     }
 
-    .feedback-header h1 {
+    .trimite-feedback-header h1 {
         font-size: 28px;
     }
 }
 
-[data-theme="dark"] .feedback-container {
+[data-theme="dark"] .trimite-feedback-container {
     background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
     color: #e0e6ed;
 }
 
-[data-theme="dark"] .buton-inapoi {
+[data-theme="dark"] .trimite-feedback-buton-inapoi {
     background: linear-gradient(135deg, #3a3a3a 0%, #4a4a4a 100%);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
-[data-theme="dark"] .buton-inapoi:hover {
+[data-theme="dark"] .trimite-feedback-buton-inapoi:hover {
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
 }
 
 /* Header */
-[data-theme="dark"] .feedback-header h1 {
+[data-theme="dark"] .trimite-feedback-header h1 {
     color: #a9c5e6;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Formular */
-[data-theme="dark"] .feedback-form {
+[data-theme="dark"] .trimite-feedback-form {
     /* nu trebuie schimbări majore */
 }
 
 /* Textarea */
-[data-theme="dark"] .feedback-textarea {
+[data-theme="dark"] .trimite-feedback-textarea {
     background: rgba(58, 58, 58, 0.8);
     border: 2px solid rgba(169, 197, 230, 0.3);
     color: #e0e6ed;
 }
 
-[data-theme="dark"] .feedback-textarea:focus {
+[data-theme="dark"] .trimite-feedback-textarea:focus {
     background: rgba(64, 64, 64, 1);
     border-color: #a9c5e6;
     box-shadow: 0 0 0 4px rgba(169, 197, 230, 0.2);
 }
 
 /* Buton submit */
-[data-theme="dark"] .btn-primary,
-[data-theme="dark"] .feedback-submit {
+[data-theme="dark"] .trimite-feedback-btn-primary,
+[data-theme="dark"] .trimite-feedback-submit {
     background: linear-gradient(135deg, #4a4a4a 0%, #5a5a5a 100%);
     box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
     color: #e0e6ed;
 }
 
-[data-theme="dark"] .btn-primary:hover {
+[data-theme="dark"] .trimite-feedback-btn-primary:hover {
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
 }
 
 /* Mesaje status */
-[data-theme="dark"] .feedback-status.success {
+[data-theme="dark"] .trimite-feedback-status.success {
     background-color: rgba(52, 73, 94, 0.4);
     color: #d4edda;
 }
 
-[data-theme="dark"] .feedback-status.error {
+[data-theme="dark"] .trimite-feedback-status.error {
     background-color: rgba(88, 24, 69, 0.6);
     color: #f8d7da;
 }
 
-[data-theme="dark"] .buton-inapoi {
+[data-theme="dark"] .trimite-feedback-buton-inapoi {
     background: #4A6C8A;
     box-shadow: 0 4px 15px rgba(74, 108, 138, 0.3);
 }
 
-[data-theme="dark"] .buton-inapoi:hover {
+[data-theme="dark"] .trimite-feedback-buton-inapoi:hover {
     box-shadow: 0 6px 20px rgba(74, 108, 138, 0.4);
 }
 
-[data-theme="dark"] .btn-primary,
-[data-theme="dark"] .feedback-submit {
+[data-theme="dark"] .trimite-feedback-btn-primary,
+[data-theme="dark"] .trimite-feedback-submit {
     background: #4A6C8A;
     box-shadow: 0 3px 10px rgba(74, 108, 138, 0.3);
 }
 
-[data-theme="dark"] .btn-primary:hover {
+[data-theme="dark"] .trimite-feedback-btn-primary:hover {
     box-shadow: 0 5px 15px rgba(74, 108, 138, 0.4);
 }

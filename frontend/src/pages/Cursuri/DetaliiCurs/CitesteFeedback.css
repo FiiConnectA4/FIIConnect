@@ -1,9 +1,7 @@
-/* CitesteFeedback.css */
-
-/* Containerul principal, similar cu .detalii-container */
 .feedback-container {
-    min-height: 100vh;
+    height: 85vh;
     padding: 20px;
+    border-radius: 20px;
     background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #1a355e;

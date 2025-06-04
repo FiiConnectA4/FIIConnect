@@ -42,31 +42,31 @@ const TrimiteFeedback = ({ onBack }) => {
     };
 
     return (
-        <div className="feedback-container">
-            <button className="buton-inapoi" onClick={onBack}>
+        <div className="trimite-feedback-container">
+            <button className="trimite-feedback-buton-inapoi" onClick={onBack}>
                 ← Înapoi la detaliile cursului
             </button>
 
-            <div className="feedback-header">
+            <div className="trimite-feedback-header">
                 <h1>Trimite Feedback</h1>
             </div>
 
-            <form onSubmit={handleSubmit} className="feedback-form">
+            <form onSubmit={handleSubmit} className="trimite-feedback-form">
                 <textarea
                     name="message"
                     placeholder="Scrie aici mesajul tău..."
                     rows="6"
-                    className="feedback-textarea"
+                    className="trimite-feedback-textarea"
                     value={formData.message}
                     onChange={handleChange}
                 />
 
-                <button type="submit" className="btn-primary feedback-submit" disabled={loading}>
+                <button type="submit" className="trimite-feedback-btn-primary trimite-feedback-submit" disabled={loading}>
                     {loading ? 'Se trimite...' : 'Trimite'}
                 </button>
 
                 {status && (
-                    <div className={`feedback-status ${status.type}`}>
+                    <div className={`trimite-feedback-status ${status.type}`}>
                         {status.message}
                     </div>
                 )}
