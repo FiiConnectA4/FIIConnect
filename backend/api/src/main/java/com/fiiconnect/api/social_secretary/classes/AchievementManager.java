@@ -1,11 +1,13 @@
 package com.fiiconnect.api.social_secretary.classes;
 
 import jakarta.persistence.*;
+import jdk.jfr.Name;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
+@Table(name = "ACHIEVEMENT_MANAGER")
 public class AchievementManager {
 
     @Id
@@ -13,9 +15,11 @@ public class AchievementManager {
     @SequenceGenerator(name = "achievement_man_seq", sequenceName = "achievement_man_seq", allocationSize = 1)
     private Long id;
 
+    @Column(name="USER_ID")
     private Long userId;
+    @Column(name="ACHIEVEMENT_ID")
     private Long achievementId;
-
+    @Column(name="RECEIVED_DATE")
     private LocalDate receivedDate;
 
     public AchievementManager() {}
