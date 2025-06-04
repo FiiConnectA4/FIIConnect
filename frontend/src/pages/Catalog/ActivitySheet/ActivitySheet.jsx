@@ -80,37 +80,83 @@ const ActivitySheet = () => {
         fetchData();
     }, [courseId, token]);
 
-    if (loading) return <div className="container-fisa">Se încarcă fișa de activitate…</div>;
+    if (loading) {
+        return (
+            <div className="container-fisa">
+                <div className="loading-container">
+                    <div className="loading-spinner"></div>
+                    <p className="loading-text">Se încarcă fișa de activitate…</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="container-fisa">
-            <h1>Fișă activitate — {student?.firstName} {student?.lastName}</h1>
-            <div className="fisa-info">
-                <p><strong>Grupa:</strong> {student?.facultyGroup}</p>
-                <p><strong>An:</strong> {student?.year}</p>
-                <p><strong>Materie:</strong> {course?.title}</p>
-                <p><strong>Semestru:</strong> {course?.semester}</p>
+            <div className="header-section">
+                <h1 className="page-title">
+                    <span className="title-icon">📋</span>
+                    Fișă activitate — {student?.firstName} {student?.lastName}
+                </h1>
+
+                <button
+                    onClick={() => navigate('/app/catalog')}
+                    className="buton-catalog"
+                >
+                    <span className="button-icon">←</span>
+                    Înapoi la Catalog
+                </button>
             </div>
 
-            <button onClick={() => navigate('/app/catalog')} className="buton-catalog">Înapoi la Catalog</button>
+            <div className="content-wrapper">
+                <div className="fisa-info">
+                    <div className="info-grid">
+                        <div className="info-item">
+                            <span className="info-label">Grupa:</span>
+                            <span className="info-value">{student?.facultyGroup}</span>
+                        </div>
+                        <div className="info-item">
+                            <span className="info-label">An:</span>
+                            <span className="info-value">{student?.year}</span>
+                        </div>
+                        <div className="info-item">
+                            <span className="info-label">Materie:</span>
+                            <span className="info-value">{course?.title}</span>
+                        </div>
+                        <div className="info-item">
+                            <span className="info-label">Semestru:</span>
+                            <span className="info-value">{course?.semester}</span>
+                        </div>
+                    </div>
+                </div>
 
-            <div className="activity-table">
-                <table>
-                    <thead>
-                    <tr>
-                        <th>Componentă</th>
-                        <th>Notă</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {grades.map((comp, idx) => (
-                        <tr key={idx}>
-                            <td>{comp.name}</td>
-                            <td>{comp.nota}</td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
+                <div className="activity-table">
+                    <div className="table-header">
+                        <h2>Evaluări și Note</h2>
+                    </div>
+                    <div className="table-wrapper">
+                        <table>
+                            <thead>
+                            <tr>
+                                <th>Componentă</th>
+                                <th>Notă</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {grades.map((comp, idx) => (
+                                <tr key={idx} className={idx % 2 === 0 ? 'row-even' : 'row-odd'}>
+                                    <td className="component-name">{comp.name}</td>
+                                    <td className="grade-value">
+                                            <span className={`grade-badge ${comp.nota !== '-' ? 'has-grade' : 'no-grade'}`}>
+                                                {comp.nota}
+                                            </span>
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     );
