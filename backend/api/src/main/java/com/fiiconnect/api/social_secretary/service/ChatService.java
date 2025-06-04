@@ -26,7 +26,9 @@ public class ChatService {
 
     public Chat saveChatMessages(Chat chatMessage) {
         //check for achievements
-    /*    Integer messageCount = chatRepository.getUserMessageCount(chatMessage.getSender());
+        System.out.println("am ajuns in chat service inainte de count");
+        Integer messageCount = chatRepository.getUserMessageCount(chatMessage.getSender())+1;
+        System.out.println("asta e messagecountul " + messageCount);
         Achievement achievement;
         if(messageCount==1){
             achievement=achievementService.getAchievementByName("Primul mesaj");
@@ -44,8 +46,6 @@ public class ChatService {
                     chatMessage.getSender(), achievement.getId());
         }
 
-
-     */
         //save the message to the db
         return chatRepository.save(chatMessage);
     }
