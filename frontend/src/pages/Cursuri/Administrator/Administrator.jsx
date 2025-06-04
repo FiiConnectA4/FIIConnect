@@ -167,11 +167,11 @@ const Administrator = () => {
                                 userType='professor'
                             />
                             <Ceas idCurs={curs.id} />
-                            <Buton
-                                text={curs.title}
-                                onNavigate={() => setSelectedCursId(curs.id)}
-                                className={curs.archived === 1 ? 'buton-arhivat' : ''}
-                            />
+                                <Buton
+                                    text={curs.title}
+                                    onNavigate={() => setSelectedCursId(curs.id)}
+                                    className={curs.archived === 1 ? 'buton-arhivat' : ''}
+                                />
                             <PageControl
                                 id={curs.id}
                                 title={curs.title}
