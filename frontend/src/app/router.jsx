@@ -38,6 +38,18 @@ import ForgotPassword from "../pages/Auth/ForgotPassword";
 import ResetPassword from "../pages/Auth/ResetPassword";
 import Orar from "../pages/Orar/Orar"; // Import pentru componenta de routing
 
+export const API_ROUTES = {
+  PERSON_ME: '/person/me',
+  PERSON_GET_ALL: '/person/get-all',
+  TAGS: '/tags',
+  MANAGE_TAGS: '/manage_tags',
+  ANNOUNCEMENT_PROF_SECRETAR: '/announcement/prof-secretar',
+  ANNOUNCEMENT_WITH_TAG: '/announcement/with-tag',
+  CHANNEL_WITH_TAGS: '/channel/with-tags',
+  CHAT_GET_CHATS: '/chat/get-chats',
+  WS: '/ws',
+};
+
 const AppRoutes = () => {
 
   return (
