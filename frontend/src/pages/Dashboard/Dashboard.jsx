@@ -1,33 +1,26 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import pentru redirect
+import { useNavigate } from "react-router-dom";
 import "./Dashboard.css";
 
 function Dashboard() {
-    // 1. State pentru numele userului
+    // State-uri pentru date reale
     const [username, setUsername] = useState("utilizator");
+    const [nrAnunturi, setNrAnunturi] = useState("-");
+    const [nrCursuri, setNrCursuri] = useState("-");
+    const [ultimaNota, setUltimaNota] = useState("-");
+    const [orarAzi, setOrarAzi] = useState({ ora: "-", disciplina: "-" });
 
-    // 2. Hook pentru redirect
+    // State pentru an și grupă (pentru orar)
+    const [an, setAn] = useState("");
+    const [grupa, setGrupa] = useState("");
+
     const navigate = useNavigate();
 
-    // 3. Preia numele real din localStorage și din backend la mount
     useEffect(() => {
-        // Preia obiectul user din localStorage
-        const storedUser = localStorage.getItem("user");
-        if (storedUser) {
-            try {
-                const userObj = JSON.parse(storedUser);
-                if (userObj.username) {
-                    setUsername(userObj.username);
-                }
-            } catch (err) {
-                console.error("Eroare la parsarea user din localStorage:", err);
-            }
-        }
-
-        // Ia tokenul JWT din localStorage (adaptează dacă îl salvezi altfel!)
         const token = localStorage.getItem("token");
         if (!token) return;
 
+        // Fetch profil: username, an, grupa
         fetch("/profile", {
             headers: { Authorization: `Bearer ${token}` }
         })
@@ -36,17 +29,87 @@ function Dashboard() {
                 let nume = "";
                 if (data.firstName) nume += data.firstName + " ";
                 if (data.lastName) nume += data.lastName;
-                const realName = nume.trim() || data.username;
-                if (realName) setUsername(realName);
+                setUsername(nume.trim() || data.username || "utilizator");
+                // ADAPTEAZĂ: cum se numesc câmpurile pentru an și grupa
+                setAn(data.year || data.an || "");
+                setGrupa(data.group || data.grupa || "");
             })
-            .catch(() => {});
+            .catch(() => setUsername("utilizator"));
+
+        // Număr anunțuri
+        fetch("/announcement", {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then(res => res.json())
+            .then(data => setNrAnunturi(Array.isArray(data) ? data.length : "-"))
+            .catch(() => setNrAnunturi("-"));
+
+        // Număr cursuri (adaptat la backend)
+        fetch("/didactic/course", {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then(res => res.json())
+            .then(data => {
+                let lista = [];
+                if (data._embedded && data._embedded.courseList) {
+                    lista = data._embedded.courseList;
+                } else if (Array.isArray(data)) {
+                    lista = data;
+                }
+                setNrCursuri(lista.length);
+            })
+            .catch(() => setNrCursuri("-"));
+
+        // Ultima notă
+        fetch("/didactic/grades", {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data) && data.length > 0) {
+                    // Poate vrei ultima după dată (dacă ai gradingDate)
+                    const sorted = data.sort((a, b) => new Date(b.gradingDate) - new Date(a.gradingDate));
+                    setUltimaNota(sorted[0].value || "-");
+                } else setUltimaNota("-");
+            })
+            .catch(() => setUltimaNota("-"));
     }, []);
+
+    // Fetch pentru orarul de azi, când ai an + grupa
+    useEffect(() => {
+        if (!an || !grupa) return;
+        const token = localStorage.getItem("token");
+        // Ziua curentă în format backend (ex: "Luni", "Marți" etc.)
+        const zileSapt = ["Duminică", "Luni", "Marți", "Miercuri", "Joi", "Vineri", "Sâmbătă"];
+        const ziAstazi = zileSapt[new Date().getDay()];
+
+        fetch(`/orar/studenti/${an}/${grupa}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) {
+                    // OrarDTO: { zi, ora, disciplina, ... }
+                    // Filtrăm după ziua de azi, luăm primul curs
+                    const orarAziObj = data.find(item => item.zi === ziAstazi);
+                    if (orarAziObj) {
+                        setOrarAzi({
+                            ora: orarAziObj.ora || "-",
+                            disciplina: orarAziObj.disciplina || "-"
+                        });
+                    } else {
+                        setOrarAzi({ ora: "-", disciplina: "-" });
+                    }
+                } else {
+                    setOrarAzi({ ora: "-", disciplina: "-" });
+                }
+            })
+            .catch(() => setOrarAzi({ ora: "-", disciplina: "-" }));
+    }, [an, grupa]);
 
     return (
         <div className="dashboard-content">
-            {/* Afișează numele real */}
             <div className="dashboard-title">Salut, {username}!</div>
-
             <div className="dashboard-cards-row">
                 <div
                     className="dashboard-card"
@@ -56,7 +119,7 @@ function Dashboard() {
                 >
                     <span className="icon purple">💬</span>
                     <span className="card-title">Anunțuri noi</span>
-                    <span className="card-value">3</span>
+                    <span className="card-value">{nrAnunturi}</span>
                 </div>
                 <div
                     className="dashboard-card"
@@ -66,7 +129,7 @@ function Dashboard() {
                 >
                     <span className="icon blue">📚</span>
                     <span className="card-title">Cursuri active</span>
-                    <span className="card-value">5</span>
+                    <span className="card-value">{nrCursuri}</span>
                 </div>
                 <div
                     className="dashboard-card"
@@ -76,7 +139,7 @@ function Dashboard() {
                 >
                     <span className="icon yellow">⭐</span>
                     <span className="card-title">Ultima notă</span>
-                    <span className="card-value">8.5</span>
+                    <span className="card-value">{ultimaNota}</span>
                 </div>
                 <div
                     className="dashboard-card"
@@ -87,9 +150,9 @@ function Dashboard() {
                     <span className="icon pink">📅</span>
                     <span className="card-title">Orar azi</span>
                     <span className="card-value card-orar">
-                        <span className="ora">9:00</span>
+                        <span className="ora">{orarAzi.ora}</span>
                         <span className="disciplina" style={{ marginLeft: 8 }}>
-                            Algoritmi fundamentali
+                            {orarAzi.disciplina}
                         </span>
                     </span>
                 </div>
