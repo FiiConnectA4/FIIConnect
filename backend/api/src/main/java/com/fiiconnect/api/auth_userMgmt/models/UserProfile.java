@@ -1,5 +1,6 @@
 package com.fiiconnect.api.auth_userMgmt.models;
 
+import com.fiiconnect.api.social_secretary.classes.Achievement;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -40,6 +41,7 @@ public class UserProfile {
     @ElementCollection
     private List<String> expertise;
 
+    //ar trebuie sa fie list de achievements
     @ElementCollection
     private List<String> achievements;
 

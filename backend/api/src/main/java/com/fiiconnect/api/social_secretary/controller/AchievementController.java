@@ -1,5 +1,6 @@
 package com.fiiconnect.api.social_secretary.controller;
 
+import com.fiiconnect.api.social_secretary.DTO.AchievementDTO;
 import com.fiiconnect.api.social_secretary.service.AchievementService;
 import com.fiiconnect.api.social_secretary.classes.Achievement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +22,12 @@ public class AchievementController {
     }
 
     @PostMapping
-    public Achievement createAchievement(@RequestBody Achievement achievement) {
-        return achievementService.saveAchievement(achievement);
+    public Achievement createAchievement(@RequestBody AchievementDTO achievementDTO) {
+        return achievementService.saveAchievement(achievementDTO);
     }
 
     @PutMapping("/{id}")
-    public Achievement updateAchievement(@PathVariable Long id, @RequestBody Achievement updatedAchievement){
+    public Achievement updateAchievement(@PathVariable Long id, @RequestBody AchievementDTO updatedAchievement){
         return achievementService.updateAchievement(id,updatedAchievement);
     }
 

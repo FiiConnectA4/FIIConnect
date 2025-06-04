@@ -57,7 +57,7 @@ public class PersonController {
                         Professor p = u.getProfessor();
                         firstName = p.getFirstName();
                         lastName  = p.getLastName();
-                        role      = "PROFESSOR";
+                        role      = "PROFESOR";
                     }
 
                     Set<TagDTO> tags = Optional.ofNullable(u.getTags())
@@ -124,7 +124,7 @@ public class PersonController {
                         p.getId(),
                         p.getFirstName(),
                         p.getLastName(),
-                        "PROFESSOR"
+                        "PROFESOR"
                 ))
                 .collect(Collectors.toList());
 

@@ -7,6 +7,7 @@ import com.fiiconnect.api.didactic.models.Professor;
 import com.fiiconnect.api.didactic.models.Student;
 import com.fiiconnect.api.social_secretary.DTO.AnnouncementDTO;
 import com.fiiconnect.api.social_secretary.DTO.TagDTO;
+import com.fiiconnect.api.social_secretary.classes.Achievement;
 import com.fiiconnect.api.social_secretary.classes.Announcement;
 import com.fiiconnect.api.social_secretary.classes.Tag;
 import com.fiiconnect.api.social_secretary.repository.AnnouncementRepository;
@@ -35,6 +36,11 @@ public class AnnouncementService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private AchievementManagerService achievementManagerService;
+
+    @Autowired AchievementService achievementService;
 
     // Get all announcements (as entities)
     public List<Announcement> getAllAnnouncements() {
@@ -90,6 +96,24 @@ public class AnnouncementService {
                 tags,
                 today
         );
+
+        // Check for achievements
+
+        Integer announcementCount= announcementRepository.countUserAnnouncements(authorId)+1;
+        Achievement achievement;
+        if(announcementCount ==1){
+            achievement=achievementService.getAchievementByName("Primul anunt");
+            achievementManagerService.addAchievementToUser(authorId, achievement.getId());
+        }
+        else if(announcementCount ==5){
+            achievement=achievementService.getAchievementByName("5 Anunturi, WoW");
+            achievementManagerService.addAchievementToUser(authorId, achievement.getId());
+        }
+        else if(announcementCount==20){
+            achievement=achievementService.getAchievementByName("N-ai treaba si p-acasa, bre?");
+            achievementManagerService.addAchievementToUser(authorId, achievement.getId());
+        }
+
         return announcementRepository.save(announcement);
     }
 

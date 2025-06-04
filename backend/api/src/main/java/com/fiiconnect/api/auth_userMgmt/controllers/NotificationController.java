@@ -32,7 +32,7 @@ public class NotificationController {
      * Service-ul poate arunca UserNotFoundException sau alte erori pe bază de validări.
      */
     @PostMapping("/send")
-    @RolesAllowed({"ADMIN", "PROFESSOR"})
+    @RolesAllowed({"ADMIN", "PROFESOR"})
     public ResponseEntity<List<NotificationResponse>> sendBulk(@RequestBody BulkNotificationRequest req) {
         List<NotificationResponse> dtos = notificationService.sendBulk(req);
         return ResponseEntity.ok(dtos);

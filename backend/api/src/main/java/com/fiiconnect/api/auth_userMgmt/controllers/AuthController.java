@@ -399,10 +399,10 @@ public class AuthController {
                         .orElseThrow(() -> new BadRequestException("Student inexistent cu ID-ul: " + studentId));
                 user.setStudent(student);
 
-            } else if ("ROLE_PROFESSOR".equals(role.getRoleName())) {
+            } else if ("ROLE_PROFESOR".equals(role.getRoleName())) {
                 Long profId = req.getProfessorId();
                 if (profId == null) {
-                    throw new BadRequestException("Pentru PROFESSOR '" + username + "' nu s-a furnizat professorId.");
+                    throw new BadRequestException("Pentru PROFESOR '" + username + "' nu s-a furnizat professorId.");
                 }
                 Professor prof = professorRepository.findById(profId)
                         .orElseThrow(() -> new BadRequestException("Profesor inexistent cu ID-ul: " + profId));
