@@ -335,7 +335,7 @@ useEffect(() => {
       onClick={() => handleUserSelect(user)}
     >
       <div className="user-name">{user.name}</div>
-      <div className="user-email">{user.id}</div>
+      <div className="user-id">{user.id}</div>
       <div className="user-role">{user.role}</div>
       
     </div>
