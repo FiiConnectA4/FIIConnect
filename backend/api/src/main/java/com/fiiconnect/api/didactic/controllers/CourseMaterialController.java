@@ -1,15 +1,22 @@
 package com.fiiconnect.api.didactic.controllers;
 
 import com.fiiconnect.api.auth_userMgmt.controllers.PersonController;
+import com.fiiconnect.api.auth_userMgmt.dtos.BulkNotificationRequest;
 import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
+import com.fiiconnect.api.auth_userMgmt.models.User;
+import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository;
+import com.fiiconnect.api.auth_userMgmt.services.NotificationService;
 import com.fiiconnect.api.didactic.exceptions.UnauthorizedOperationException;
 import com.fiiconnect.api.didactic.helpers.SQLExceptionMessageParser;
 import com.fiiconnect.api.didactic.models.CourseMaterial;
 import com.fiiconnect.api.didactic.exceptions.CourseMaterialNotFoundException;
 import com.fiiconnect.api.didactic.repositories.CourseMaterialRepository;
+import com.fiiconnect.api.didactic.repositories.CourseRepository;
+import com.fiiconnect.api.didactic.repositories.EnrollmentRepository;
 import com.fiiconnect.api.didactic.services.CourseMaterialService;
 import com.fiiconnect.api.didactic.services.CourseService;
 import com.fiiconnect.api.didactic.services.SftpService;
+import lombok.AllArgsConstructor;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,7 +34,9 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
+@AllArgsConstructor
 @RestController
 public class CourseMaterialController {
     private final SQLExceptionMessageParser exceptionHelper;
@@ -36,15 +45,10 @@ public class CourseMaterialController {
     private final CourseService courseService;
     private final SftpService sftpService;
     private final PersonController personController;
-
-    public CourseMaterialController(SQLExceptionMessageParser exceptionHelper, CourseMaterialRepository repository, CourseMaterialService service, CourseService courseService, SftpService sftpService, PersonController personController) {
-        this.exceptionHelper = exceptionHelper;
-        this.repository = repository;
-        this.service = service;
-        this.courseService = courseService;
-        this.sftpService = sftpService;
-        this.personController = personController;
-    }
+    private final UserRepository userRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final CourseRepository courseRepository;
+    private final NotificationService notificationService;
 
     @GetMapping("/didactic/course/material")
     public List<CourseMaterial> all()
@@ -92,6 +96,14 @@ public class CourseMaterialController {
             throw e;
         }
 
+        List<Long> userIds = enrollmentRepository.findByIdIdCourse(idCourse).stream().map(e -> e.getId().getIdStud()).map(i -> userRepository.findByStudentId(i).orElse(null)).filter(Objects::nonNull).map(User::getId).toList();
+        BulkNotificationRequest req = new BulkNotificationRequest();
+        req.setRecipientIds(userIds);
+        req.setTitle("Course material notification");
+        req.setContent("A new material has been added to the course " + courseRepository.findById(idCourse).get().getTitle() + ".");
+        req.setType("course");
+
+        notificationService.sendBulk(req);
         return ResponseEntity.created(URI.create("/didactic/course/material/" + material.getId())).build();
     }
 

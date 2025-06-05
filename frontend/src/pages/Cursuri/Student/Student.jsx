@@ -3,6 +3,7 @@ import Ceas from './../Components/Ceas';
 import Carte from '../Components/Carte';
 import Buton from '../Components/Buton';
 import PageControl from '../Components/PageControl'; // opțional
+import { useNavigate } from 'react-router-dom';
 import './../Student/Student.css';
 import PDetaliiCurs from '../DetaliiCurs/DetaliiCurs';
 
@@ -11,6 +12,7 @@ const Student = () => {
     const [courses, setCourses] = useState([]);
     const [selectedCourseId, setSelectedCourseId] = useState(null);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -85,7 +87,11 @@ const Student = () => {
         }
         return (
             <PDetaliiCurs
-                curs={course}
+                curs={{
+                    ...course,
+                    professorId: course.professors?.[0]?.professor?.id || null
+                }}
+                studentId={student.id}
                 onBack={() => setSelectedCourseId(null)}
             />
         );
@@ -95,7 +101,7 @@ const Student = () => {
         <div className="container-cursuri">
             <div className="cursuri-titlu">
                 <h1>Cursurile mele</h1>
-                <Ceas />
+                <Ceas onClick={() => navigate('/app/orar')} />
             </div>
 
             {student && (
@@ -112,11 +118,12 @@ const Student = () => {
                                 userType='student'
                                 id={curs.id}
                             />
-                            <Ceas />
                             <Buton
                                 text={curs.title || 'Titlu indisponibil'}
                                 onNavigate={() => setSelectedCourseId(curs.id)}
                             />
+                            <Ceas onClick={() => navigate(`/app/orar/discipline/${encodeURIComponent(curs.title)}`)} />
+
                         </div>
                     ))
                 ) : (

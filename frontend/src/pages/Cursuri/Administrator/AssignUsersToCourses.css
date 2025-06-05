@@ -1,0 +1,298 @@
+/* src/DetaliiCurs/AssignUsersToCourses.css */
+
+/* Containerul principal */
+.trimite-feedback-container {
+    min-height: 85vh;
+    padding: 20px;
+    background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+    border-radius: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #1a355e;
+    box-sizing: border-box;
+}
+
+/* Butonul de revenire */
+.trimite-feedback-buton-inapoi {
+    background: linear-gradient(135deg, #537A9C 0%, #4a6d8a 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(83, 122, 156, 0.3);
+    margin-bottom: 30px;
+}
+
+.trimite-feedback-buton-inapoi:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(83, 122, 156, 0.4);
+}
+
+/* Header-ul paginii */
+.trimite-feedback-header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.trimite-feedback-header h1 {
+    font-size: 36px;
+    font-weight: 700;
+    margin: 0;
+    color: #1a355e;
+    text-shadow: 0 2px 4px rgba(26, 53, 94, 0.1);
+}
+
+/* Formularul de atribuiri */
+.trimite-feedback-form {
+    max-width: 800px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+/* Responsive pentru formă */
+@media (max-width: 768px) {
+    .trimite-feedback-form {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Dropdown */
+.trimite-feedback-select {
+    grid-column: span 2;
+    padding: 1rem;
+    border: 2px solid rgba(83, 122, 156, 0.15);
+    border-radius: 15px;
+    font-size: 16px;
+    background-color: rgba(255, 255, 255, 0.8);
+    color: #1a355e;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%231a355e" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    background-size: 1.5em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-sizing: border-box;
+}
+
+.trimite-feedback-select:focus {
+    outline: none;
+    border-color: #537A9C;
+    box-shadow: 0 0 0 4px rgba(83, 122, 156, 0.1);
+    background: rgba(255, 255, 255, 1);
+}
+
+.trimite-feedback-select option {
+    padding: 1rem;
+    font-size: 1rem;
+    color: #1a355e;
+    background-color: #ffffff;
+}
+
+/* Lista de utilizatori */
+.trimite-feedback-lista-users,
+.trimite-feedback-lista-cursuri {
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 2px solid rgba(83, 122, 156, 0.15);
+    border-radius: 15px;
+    grid-column: span 1;
+}
+
+.trimite-feedback-user-item,
+.trimite-feedback-course-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.trimite-feedback-user-item input,
+.trimite-feedback-course-item input {
+    margin-right: 10px;
+    width: 18px;
+    height: 18px;
+    accent-color: #537A9C;
+}
+
+/* Butonul de submit */
+.trimite-feedback-submit {
+    grid-column: span 2;
+    align-self: end;
+    padding: 12px 24px;
+    font-size: 16px;
+    border-radius: 25px;
+}
+
+.trimite-feedback-btn-primary {
+    background: linear-gradient(135deg, #537A9C 0%, #4a6d8a 100%);
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 3px 10px rgba(83, 122, 156, 0.3);
+}
+
+.trimite-feedback-btn-primary:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(83, 122, 156, 0.4);
+}
+
+.trimite-feedback-btn-primary:disabled {
+    background: linear-gradient(135deg, #a0aec0 0%, #718096 100%);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Mesajul de status */
+.trimite-feedback-status {
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    font-size: 15px;
+    margin-top: 10px;
+    grid-column: span 2;
+}
+
+.trimite-feedback-status.success {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.trimite-feedback-status.error {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* Dark Theme */
+[data-theme='dark'] .trimite-feedback-container {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    color: #e0e6ed;
+}
+
+[data-theme='dark'] .trimite-feedback-buton-inapoi {
+    background: #4A6C8A;
+    box-shadow: 0 4px 15px rgba(74, 108, 138, 0.3);
+}
+
+[data-theme='dark'] .trimite-feedback-buton-inapoi:hover {
+    box-shadow: 0 6px 20px rgba(74, 108, 138, 0.4);
+}
+
+[data-theme='dark'] .trimite-feedback-header h1 {
+    color: #a9c5e6;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+[data-theme='dark'] .trimite-feedback-select {
+    background-color: rgba(58, 58, 58, 0.8);
+    border: 2px solid rgba(169, 197, 230, 0.3);
+    color: #e0e6ed;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23e0e6ed" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+}
+
+[data-theme='dark'] .trimite-feedback-select:focus {
+    background: rgba(64, 64, 64, 1);
+    border-color: #a9c5e6;
+    box-shadow: 0 0 0 4px rgba(169, 197, 230, 0.2);
+}
+
+[data-theme='dark'] .trimite-feedback-select option {
+    background-color: #3a3a3a;
+    color: #e0e6ed;
+}
+
+[data-theme='dark'] .trimite-feedback-lista-users,
+[data-theme='dark'] .trimite-feedback-lista-cursuri {
+    background: rgba(50, 50, 50, 0.8);
+    border: 2px solid rgba(169, 197, 230, 0.3);
+}
+
+[data-theme='dark'] .trimite-feedback-user-item input,
+[data-theme='dark'] .trimite-feedback-course-item input {
+    accent-color: #a9c5e6;
+}
+
+[data-theme='dark'] .trimite-feedback-btn-primary,
+[data-theme='dark'] .trimite-feedback-submit {
+    background: #4A6C8A;
+    box-shadow: 0 3px 10px rgba(74, 108, 138, 0.3);
+    color: #e0e6ed;
+}
+
+[data-theme='dark'] .trimite-feedback-btn-primary:hover {
+    box-shadow: 0 5px 15px rgba(74, 108, 138, 0.4);
+}
+
+[data-theme='dark'] .trimite-feedback-status.success {
+    background-color: rgba(52, 73, 94, 0.4);
+    color: #d4edda;
+}
+
+[data-theme='dark'] .trimite-feedback-status.error {
+    background-color: rgba(88, 24, 69, 0.6);
+    color: #f8d7da;
+}
+
+/* Stiluri pentru dropdown-ul rolurilor profesorilor */
+.role-dropdown {
+    padding: 0.75rem 1rem;
+    font-size: 15px;
+    color: #1a355e;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(83, 122, 156, 0.15);
+    border-radius: 12px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%231a355e" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1.2em;
+    cursor: pointer;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+.role-dropdown:focus {
+    outline: none;
+    border-color: #537A9C;
+    box-shadow: 0 0 0 4px rgba(83, 122, 156, 0.1);
+    background-color: rgba(255, 255, 255, 1);
+}
+
+.role-dropdown option {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    color: #1a355e;
+    background-color: #ffffff;
+}
+
+/* Adaptare la tema întunecată */
+[data-theme='dark'] .role-dropdown {
+    background-color: rgba(58, 58, 58, 0.9);
+    border: 2px solid rgba(169, 197, 230, 0.3);
+    color: #e0e6ed;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23e0e6ed" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+}
+
+[data-theme='dark'] .role-dropdown:focus {
+    background-color: rgba(64, 64, 64, 1);
+    border-color: #a9c5e6;
+    box-shadow: 0 0 0 4px rgba(169, 197, 230, 0.2);
+}
+
+[data-theme='dark'] .role-dropdown option {
+    background-color: #3a3a3a;
+    color: #e0e6ed;
+}
