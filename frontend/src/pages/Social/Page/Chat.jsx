@@ -89,7 +89,7 @@ function Chat() {
     const token = localStorage.getItem("token");
     if (!currentUser || !activeChannel) return;
 
-    const socket = new SockJS(`http://localhost:34101/ws?token=${token}`);
+    const socket = new SockJS(`${API_ROUTES.WS}?token=${token}`);
     const client = Stomp.over(socket);
 
     client.connect({}, () => {
