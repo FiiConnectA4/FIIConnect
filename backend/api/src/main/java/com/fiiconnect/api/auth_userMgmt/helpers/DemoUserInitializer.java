@@ -31,7 +31,8 @@ import org.springframework.stereotype.Component;
  *      username: prof1
  *      email: prof1@fiiconnect.com
  *      password: Professor123!
- */
+*/
+
 @Component
 public class DemoUserInitializer implements CommandLineRunner {
 
@@ -87,7 +88,7 @@ public class DemoUserInitializer implements CommandLineRunner {
      * Creează un utilizator dacă nu există deja pe baza email-ului sau username-ului,
      * îi atribuie rolul (creându-l dacă e nevoie), și (opțional) îl leagă de un Student
      * sau un Professor.
-     */
+   */
     private void createIfNotExists(
             String username,
             String email,

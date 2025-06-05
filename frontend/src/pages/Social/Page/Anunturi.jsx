@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "../Style/Anunturi.css";
+import { API_ROUTES } from '../../../app/router';
 
 function Notification({ message, type, onClose }) {
   return (
@@ -47,6 +48,7 @@ function Anunturi() {
   const [currentUser, setCurrentUser] = useState(null);
   const [fullUser, setFullUser] = useState(null);
   const [userTags, setUserTags] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
 
   // Helper function to normalize user type
   const normalizeUserType = (type) => {
@@ -59,20 +61,20 @@ function Anunturi() {
     try {
       setUserLoading(true);
       const token = localStorage.getItem('token');
-      const response = await fetch("http://localhost:34101/person/me", {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await fetch(API_ROUTES.PERSON_ME, {
+        headers: { 'Authorization': `Bearer ${token}` },
       });
-      if (!response.ok) throw new Error("Failed to fetch user info");
+      if (!response.ok) throw new Error('Failed to fetch user info');
       const user = await response.json();
       setFullUser(user);
       setUserTags(user.tags || []);
       // Extract unique tag types
       const uniqueTypes = [...new Set((user.tags || []).map(tag => tag.type))];
       setAvailableTagTypes(uniqueTypes);
-      setCurrentTag(prev => ({ ...prev, type: uniqueTypes[0] || "GENERAL" }));
+      setCurrentTag(prev => ({ ...prev, type: uniqueTypes[0] || 'GENERAL' }));
       return user;
     } catch (err) {
-      console.error("Error fetching user data:", err);
+      console.error('Error fetching user data:', err);
       setError(err.message);
       throw err;
     } finally {
@@ -85,18 +87,18 @@ function Anunturi() {
     try {
       setLoading(true);
       const token = localStorage.getItem('token');
-      let url = "http://localhost:34101/announcement/prof-secretar";
-      if (user.role === "student") {
+      let url = API_ROUTES.ANNOUNCEMENT_PROF_SECRETAR;
+      if (user.role === 'student') {
         const tagIds = user.tags?.map(tag => tag.id) || [];
         if (tagIds.length > 0) {
-          url = `http://localhost:34101/announcement/with-tag?${tagIds.map(id => `tagIds=${id}`).join('&')}`;
+          url = `${API_ROUTES.ANNOUNCEMENT_WITH_TAG}?${tagIds.map(id => `tagIds=${id}`).join('&')}`;
         } else {
           setAnnouncements([]);
           return;
         }
       }
       const response = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
-      if (!response.ok) throw new Error("Failed to fetch announcements");
+      if (!response.ok) throw new Error('Failed to fetch announcements');
       let announcementsData = await response.json();
       announcementsData = announcementsData.map(announcement => ({
         ...announcement,
@@ -116,6 +118,21 @@ function Anunturi() {
     }
   };
 
+  // Fetch all users for name lookup
+  const fetchAllUsers = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(API_ROUTES.PERSON_GET_ALL, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!response.ok) throw new Error('Failed to fetch all users');
+      const data = await response.json();
+      setAllUsers(data);
+    } catch (err) {
+      console.error('Error fetching all users:', err);
+    }
+  };
+
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -126,7 +143,15 @@ function Anunturi() {
       }
     };
     loadData();
+    fetchAllUsers();
   }, []);
+
+  // Helper to get full name by userId
+  const getUserNameById = (userId) => {
+    const user = allUsers.find(u => u.userId === userId || u.id === userId);
+    if (!user) return `User ${userId}`;
+    return `${user.firstName || ''} ${user.lastName || ''}`.trim();
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -255,6 +280,10 @@ function Anunturi() {
       if (!newAnnouncement.message.trim()) {
         throw new Error("Te rugăm să introduci un mesaj");
       }
+      if (!newAnnouncement.tags || newAnnouncement.tags.length === 0) {
+        showNotification("Nu poți posta un anunț fără niciun tag!", "error");
+        return;
+      }
       const token = localStorage.getItem('token');
       // Compose payload as expected by backend: AnnouncementDTO
       const payload = {
@@ -264,7 +293,8 @@ function Anunturi() {
         tags: newAnnouncement.tags.map(tag => ({ name: tag.name, type: tag.type })),
         publishedDate: new Date().toISOString().split('T')[0] // LocalDate format (yyyy-MM-dd)
       };
-      const response = await fetch("http://localhost:34101/announcement/prof-secretar", {
+      // Înlocuirea URL-ului hardcodat cu ruta centralizată
+      const response = await fetch(API_ROUTES.ANNOUNCEMENT_PROF_SECRETAR, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -302,6 +332,10 @@ function Anunturi() {
       if (!editingAnnouncement.message.trim()) {
         throw new Error("Te rugăm să introduci un mesaj");
       }
+      if (!editingAnnouncement.tags || editingAnnouncement.tags.length === 0) {
+        showNotification("Nu poți posta un anunț fără niciun tag!", "error");
+        return;
+      }
       const token = localStorage.getItem('token');
       const payload = {
         title: editingAnnouncement.title.trim(),
@@ -310,7 +344,8 @@ function Anunturi() {
         tags: editingAnnouncement.tags.map(tag => ({ name: tag.name, type: tag.type })),
         publishedDate: editingAnnouncement.publishedDate
       };
-      const response = await fetch(`http://localhost:34101/announcement/prof-secretar/${editingAnnouncement.id}`, {
+      // Înlocuirea URL-ului pentru actualizare
+      const response = await fetch(`${API_ROUTES.ANNOUNCEMENT_PROF_SECRETAR}/${editingAnnouncement.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -338,7 +373,8 @@ function Anunturi() {
         return;
       }
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:34101/announcement/prof-secretar/${announcementId}?userId=${fullUser.userId}`, {
+      // Înlocuirea URL-ului pentru ștergere
+      const response = await fetch(`${API_ROUTES.ANNOUNCEMENT_PROF_SECRETAR}/${announcementId}?userId=${fullUser.userId}`, {
         method: "DELETE",
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -693,69 +729,71 @@ function Anunturi() {
         {announcementsToDisplay.length === 0 ? (
           <p>Nu există anunțuri disponibile.</p>
         ) : (
-          announcementsToDisplay.map((announcement) => (
-            <div key={announcement.id} className="announcement-card">
-              <div className="announcement-header">
-                <div className="announcement-title-container">
-                  <h2>{announcement.title}</h2>
-                  <div className="announcement-meta">
-                    <span className="announcement-author-date">
-                      {announcement.professor && (
+          announcementsToDisplay.map((announcement) => {
+            // Determină id-ul autorului din toate variantele posibile
+            const authorId = announcement.authorId || announcement.author || (announcement.professor && announcement.professor.id);
+            return (
+              <div key={announcement.id} className="announcement-card">
+                <div className="announcement-header">
+                  <div className="announcement-title-container">
+                    <h2>{announcement.title}</h2>
+                    <div className="announcement-meta">
+                      <span className="announcement-author-date">
                         <span className="announcement-author">
-                          Postat de: {announcement.professor.name}
+                          Postat de: {getUserNameById(authorId)}
                           <span className="separator"> • </span>
                         </span>
-                      )}
-                      {announcement.publishedDate && (
-                        <span className="announcement-date">
-                          {new Date(announcement.publishedDate).toLocaleDateString('ro-RO', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </span>
-                      )}
-                    </span>
-                    {fullUser && (fullUser.userId === announcement.authorId || fullUser.userId === announcement.author) && (
-                      <div className="announcement-actions">
-                        <button 
-                          className="edit-button"
-                          onClick={() => handleEdit(announcement)}
-                          title="Editează"
-                        >
-                          ✏️
-                        </button>
-                        <button 
-                          className="delete-button"
-                          onClick={() => handleDelete(announcement.id)}
-                          title="Șterge"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-              <p className="announcement-message">{announcement.message}</p>
-              {announcement.tags && announcement.tags.length > 0 && (
-                <div className="announcement-tags-container">
-                  <div className="announcement-tags-header">Destinatar:</div>
-                  <div className="announcement-tags">
-                    {announcement.tags.map((tag, index) => (
-                      <span 
-                        key={index} 
-                        className={`tag ${tag.type.toLowerCase()}`}
-                        title={tag.type}
-                      >
-                        {tag.name}
+                        {announcement.publishedDate && (
+                          <span className="announcement-date">
+                            {new Date(announcement.publishedDate).toLocaleDateString('ro-RO', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric'
+                            })}
+                          </span>
+                        )}
                       </span>
-                    ))}
+                      {fullUser && (fullUser.userId === announcement.authorId || fullUser.userId === announcement.author) && (
+                        <div className="announcement-actions">
+                          <button 
+                            className="edit-button"
+                            onClick={() => handleEdit(announcement)}
+                            title="Editează"
+                          >
+                            ✏️
+                          </button>
+                          <button 
+                            className="delete-button"
+                            onClick={() => handleDelete(announcement.id)}
+                            title="Șterge"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-              )}
-            </div>
-          ))
+                <p className="announcement-message">{announcement.message}</p>
+                {announcement.tags && announcement.tags.length > 0 && (
+                  <div className="announcement-tags-container">
+                    <div className="announcement-tags-header">Destinatar:</div>
+                    <div className="announcement-tags">
+                      {announcement.tags.map((tag, index) => (
+                        <span 
+                          key={index} 
+                          className={`tag ${tag.type.toLowerCase()}`}
+                          title={tag.type}
+                        >
+                          {tag.name}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })
         )}
       </div>
     </div>

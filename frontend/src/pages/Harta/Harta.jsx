@@ -11,6 +11,8 @@ import hartaCompletaImg from "./Images/complet.png";
 const Harta = () => {
   const navigate = useNavigate();
 
+  const [profesorId, setProfesorId] = useState(null);
+
   const [showDropdown, setShowDropdown] = useState(false);
   const [showRezerva, setShowRezerva] = useState(false);
 
@@ -28,11 +30,11 @@ const Harta = () => {
   const [rezervareStatus, setRezervareStatus] = useState(null);
 
   const saliPeEtaj = {
-    Demisol: ["112"],
-    Parter: ["210", "C2"],
-    "Etajul 1": ["308", "309"],
-    "Etajul 2": ["401", "403", "405", "409", "411", "412", "413"],
-    "Etajul 7": ["901", "903", "905", "909"],
+    Demisol: ["C112"],
+    Parter: ["C210", "C2"],
+    "Etajul 1": ["C308", "C309"],
+    "Etajul 2": ["C401", "C403", "C405", "C409", "C411", "C412", "C413"],
+    "Etajul 7": ["C901", "C903", "C905", "C909"],
   };
 
   const etaje = [
@@ -44,6 +46,33 @@ const Harta = () => {
     "Harta completă",
   ];
 
+  // Fetch profesorId la mount
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    fetch("http://localhost:34101/person/me", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Nu s-a putut prelua profesorul.");
+        return res.json();
+      })
+      .then((data) => {
+        if (data.professor && data.professor.id) {
+          setProfesorId(data.professor.id);
+        } else {
+          console.warn("Nu s-a găsit profesorId în răspuns");
+        }
+      })
+      .catch((err) => {
+        console.error("Eroare la preluarea persoanei:", err);
+      });
+  }, []);
+
+  // Fetch intervale libere când sala și ziua se schimbă
   useEffect(() => {
     if (sala && zi) {
       setLoading(true);
@@ -79,12 +108,17 @@ const Harta = () => {
   }, [sala, zi]);
 
   const trimiteRezervare = () => {
+    if (!profesorId) {
+      alert("Nu s-a identificat profesorul. Te rugăm să te autentifici.");
+      return;
+    }
+
     const payload = {
       sala,
       zi,
       oraStart,
       oraEnd,
-      profesorId: 1,
+      profesorId,
     };
 
     fetch("http://localhost:34101/harta/rezerva", {

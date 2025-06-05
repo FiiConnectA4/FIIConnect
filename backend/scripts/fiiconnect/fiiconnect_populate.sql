@@ -23,6 +23,8 @@ begin
 
 --DIDACTIC
 
+insert into global_constant values('feedbacksAllowed', 'false');
+
 for v_index in 1..6 loop
     student_ids.extend;
     student_ids(student_ids.last) := seq_student_id.nextval;
@@ -505,7 +507,14 @@ SELECT c.ID, t.ID
 FROM CHANNEL c, TAG t
 WHERE c.NAME = t.NAME;
 
+delete achievement;
 
+INSERT INTO ACHIEVEMENT (ID,NAME, DESCRIPTION) VALUES (achievement_seq.NEXTVAL,'Primul anunt', 'Felicitari, ai postat primul anunt');
+INSERT INTO ACHIEVEMENT (ID,NAME, DESCRIPTION) VALUES (achievement_seq.NEXTVAL,'5 Anunturi, WoW', 'Felicitari, ai postat 5 anunturi');
+INSERT INTO ACHIEVEMENT (ID,NAME, DESCRIPTION) VALUES (achievement_seq.NEXTVAL,'N-ai treaba si p-acasa, bre?', 'Felicitari, ai postat 20 de anunt');
+INSERT INTO ACHIEVEMENT (ID,NAME, DESCRIPTION) VALUES (achievement_seq.NEXTVAL,'Primul mesaj', 'Felicitari, ai trimis primul mesaj');
+INSERT INTO ACHIEVEMENT (ID,NAME, DESCRIPTION) VALUES (achievement_seq.NEXTVAL,'Yapper', 'Felicitari, ai trimis 5 mesaje');
+INSERT INTO ACHIEVEMENT (ID,NAME, DESCRIPTION) VALUES (achievement_seq.NEXTVAL,'Popular', 'Felicitari, ai trimis 20 de mesaje');
 
 commit;
 

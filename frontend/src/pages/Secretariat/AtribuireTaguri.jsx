@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_ROUTES } from '../../app/router';
 import "./AtribuireTaguri.css";
 
 const AtribuireTaguri = () => {
@@ -25,14 +26,14 @@ const AtribuireTaguri = () => {
   const fetchCurrentUser = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch("http://localhost:34101/person/me", {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await fetch(API_ROUTES.PERSON_ME, {
+        headers: { 'Authorization': `Bearer ${token}` },
       });
-      if (!response.ok) throw new Error("Failed to fetch current user");
+      if (!response.ok) throw new Error('Failed to fetch current user');
       const data = await response.json();
       return data;
     } catch (err) {
-      console.error("Error fetching current user:", err);
+      console.error('Error fetching current user:', err);
       throw err;
     }
   };
@@ -42,14 +43,10 @@ const AtribuireTaguri = () => {
 const fetchAllUsers = async () => {
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch("http://localhost:34101/person/get-all", {
-      headers: { 'Authorization': `Bearer ${token}` }
+    const response = await fetch(API_ROUTES.PERSON_GET_ALL, {
+      headers: { 'Authorization': `Bearer ${token}` },
     });
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     const data = await response.json();
     console.log("User JSON:", data); // Debug: verifică structura primită
 
@@ -76,14 +73,14 @@ const fetchAllUsers = async () => {
   const fetchAllTags = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch("http://localhost:34101/tags", {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await fetch(API_ROUTES.TAGS, {
+        headers: { 'Authorization': `Bearer ${token}` },
       });
-      if (!response.ok) throw new Error("Failed to fetch tags");
+      if (!response.ok) throw new Error('Failed to fetch tags');
       const data = await response.json();
       return data;
     } catch (err) {
-      console.error("Error fetching tags:", err);
+      console.error('Error fetching tags:', err);
       throw err;
     }
   };
@@ -92,14 +89,14 @@ const fetchAllUsers = async () => {
   const fetchUserTags = async (userId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:34101/manage_tags/${userId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+      const response = await fetch(`${API_ROUTES.MANAGE_TAGS}/${userId}`, {
+        headers: { 'Authorization': `Bearer ${token}` },
       });
-      if (!response.ok) throw new Error("Failed to fetch user tags");
+      if (!response.ok) throw new Error('Failed to fetch user tags');
       const data = await response.json();
       return data;
     } catch (err) {
-      console.error("Error fetching user tags:", err);
+      console.error('Error fetching user tags:', err);
       throw err;
     }
   };
@@ -226,7 +223,7 @@ useEffect(() => {
       const tagId = currentTag.id;
       // DEBUG: log parametri request și currentUser
       console.log('AddTag params:', { whoIsLoggedId, userId, tagId, currentUser });
-      const response = await fetch(`http://localhost:34101/manage_tags/${whoIsLoggedId}/${userId}/${tagId}`, {
+      const response = await fetch(`${API_ROUTES.MANAGE_TAGS}/${whoIsLoggedId}/${userId}/${tagId}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -271,7 +268,7 @@ useEffect(() => {
       const userId = selectedUser.id;
       // DEBUG: log parametri request
       console.log('RemoveTag params:', { whoIsLoggedId, userId, tagId, currentUser });
-      const response = await fetch(`http://localhost:34101/manage_tags/${whoIsLoggedId}/${userId}/${tagId}`, {
+      const response = await fetch(`${API_ROUTES.MANAGE_TAGS}/${whoIsLoggedId}/${userId}/${tagId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`,

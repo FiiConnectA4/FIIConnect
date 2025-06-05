@@ -6,7 +6,7 @@ const OrarSali = ({ onRoomClick }) => {
 
   // Listă cu săli
   const sali = [
-    "C2", "C112", "C210", "C308", "C309", "C401", "C403", "C405", "C409", "C411", "C412", "C413", "C901", "C903"
+    "C2", "C112", "C210", "C308", "C309", "C401", "C403", "C405", "C409", "C411", "C412", "C413", "C901", "C903", "C905", "C909"
   ];
 
   // Selectează sala și navighează către URL-ul corespunzător

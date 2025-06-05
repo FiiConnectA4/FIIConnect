@@ -1,123 +1,958 @@
+/* Student Page Redesign - Modern & Dark Mode Compatible */
+
 :root[data-theme="light"] {
-    --btn-archived-bg: #6c757d;
-    --btn-archived-hover: #5a6268;
-    --card-bg: #f0f0f0;
-    --main-blue: #537a9c;
-    --main-blue-hover: #567998;
-    --gray-light: #cccccc;
-    --dot-btn-bg: #668298;
-    --dot-color: #000000;
-    --title-color: #1a3c5a;
-    --btn-delete: #dc3545;
-    --text-white: #ffffff;
+    --primary-bg: #ffffff;
+    --secondary-bg: #f8fafc;
+    --card-bg: #ffffff;
+    --border-color: #e2e8f0;
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --accent-color: #3b82f6;
+    --accent-hover: #2563eb;
+    --success-color: #10b981;
+    --danger-color: #ef4444;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --gradient-primary: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    --student-info-bg: #f1f5f9;
+    --admin-bg: #fef3c7;
+    --admin-border: #f59e0b;
 }
 
 :root[data-theme="dark"] {
-    --btn-archived-bg: #4e5b66;
-    --btn-archived-hover: #3c454d;
-    --card-bg: #2a2f35;
-    --main-blue: #335a77;
-    --main-blue-hover: #3a607c;
-    --gray-light: #999999;
-    --dot-btn-bg: #4e6374;
-    --dot-color: #e0e0e0;
-    --title-color: #a9c5e6;
-    --btn-delete: #b33a40;
-    --text-white: #f5f5f5;
+    --primary-bg: #0f172a;
+    --secondary-bg: #1e293b;
+    --card-bg: #334155;
+    --border-color: #475569;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --accent-color: #60a5fa;
+    --accent-hover: #3b82f6;
+    --success-color: #34d399;
+    --danger-color: #f87171;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+    --gradient-primary: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+    --student-info-bg: #1e293b;
+    --admin-bg: #451a03;
+    --admin-border: #d97706;
 }
 
-/* ----------------- CONTAINER PRINCIPAL ----------------- */
+/* Main Container */
 .container-cursuri {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
+    gap: 24px;
     width: 100%;
-    max-width: 800px;
-    margin: 0;
-    padding: 20px 30px;
-}
-
-/* ----------------- TITLURI ----------------- */
-.cursuri-titlu {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    color: var(--title-color);
-    text-align: left;
-    width: 100%;
-}
-
-.cursuri-titlu h1 {
-    font-size: 2.2em;
-    padding-left: 10px;
-}
-
-h2 {
-    font-size: 1.4em;
-    color: var(--main-blue);
-    padding-left: 10px;
-}
-
-/* ----------------- LISTA CURSURE ----------------- */
-.lista-cursuri {
-    width: 100%;
-    padding-left: 0;
-    margin: 0;
-}
-
-/* ----------------- RAND CURSUL ----------------- */
-.rand-curs {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 32px;
+    background: var(--primary-bg);
+    border-radius: 16px;
+    box-shadow: var(--shadow-lg);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 400px;
     position: relative;
+}
+
+/* Admin Page Specific Styling */
+.container-cursuri:has(.cursuri-titlu h1:contains("Administrare")) {
+    border: 2px solid var(--admin-border);
+    background: linear-gradient(135deg, var(--primary-bg) 0%, var(--admin-bg) 100%);
+}
+
+/* Header Section */
+.container-cursuri .cursuri-titlu {
     display: flex;
     align-items: center;
-    gap: 15px;
-    width: 100%;
-    margin-bottom: 12px;
-    padding-left: 10px;
+    justify-content: space-between;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 8px;
 }
 
-.rand-curs .buton-curs {
-    width: 100%;
-    min-width: 300px;
-    padding: 20px 35px;
-    text-align: left;
-    font-size: 18px;
-    white-space: nowrap;
+.container-cursuri .cursuri-titlu h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin: 0;
+    color: var(--text-primary);
+    letter-spacing: -0.025em;
+    background: var(--gradient-primary);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-.rand-curs .buton-curs:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+/* Admin title styling */
+.container-cursuri .cursuri-titlu h1[data-admin="true"] {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-
-@keyframes ripple {
-    0% {
-        width: 10px;
-        height: 10px;
-        opacity: 1;
-    }
-
-    100% {
-        width: 400px;
-        height: 400px;
-        opacity: 0;
-    }
+/* Student Info Card */
+.container-cursuri .student-info {
+    background: var(--student-info-bg);
+    padding: 20px 24px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
 }
 
-.Adauga {
-    height: 90px;
-    width: 250px !important;
-    border-radius: 50px;
-    left: 10%;
+.container-cursuri .student-info::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--gradient-primary);
+}
+
+.container-cursuri .student-info:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.container-cursuri .student-info p {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.container-cursuri .student-info p::before {
+    content: '🎓';
     font-size: 1.5rem;
-    text-align: center;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
 }
 
-.buton-arhivat {
-    background-color: var(--btn-delete);
-    color: var(--text-white);
+/* Courses List */
+.container-cursuri .lista-cursuri {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center; /* 🔧 Asta e cheia: centrează toate rand-curs */
+}
+
+/* Empty State */
+.container-cursuri .lista-cursuri > p {
+    text-align: center;
+    padding: 48px 32px;
+    color: var(--text-secondary);
+    font-size: 1.125rem;
+    font-weight: 500;
+    background: var(--card-bg);
+    border-radius: 12px;
+    border: 2px dashed var(--border-color);
+    margin: 0;
+    position: relative;
+}
+
+.container-cursuri .lista-cursuri > p::before {
+    content: '📚';
+    display: block;
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.7;
+}
+
+/* Course Row - FIXED LAYOUT */
+.container-cursuri .rand-curs {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 24px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    width: 100%;
+    max-width: 860px;
+    margin: 0 auto;
+}
+
+/* FIXED: Always show PageControl for admin pages */
+.container-cursuri:has(.cursuri-titlu h1:contains("Administrare")) .rand-curs > *:nth-child(1) {
+    /* Carte component */
+    grid-column: 1;
+}
+
+.container-cursuri:has(.cursuri-titlu h1:contains("Administrare")) .rand-curs > *:nth-child(2) {
+    /* Ceas component */
+    grid-column: 3;
+    transform: scale(1.1);
+    justify-self: center;
+}
+
+.container-cursuri:has(.cursuri-titlu h1:contains("Administrare")) .rand-curs > *:nth-child(3) {
+    /* Buton component */
+    grid-column: 2;
+    justify-self: start;
+}
+
+.container-cursuri:has(.cursuri-titlu h1:contains("Administrare")) .rand-curs > *:nth-child(4) {
+    /* PageControl component - ALWAYS VISIBLE */
+    grid-column: 4;
+    justify-self: end;
+    display: block !important;
+}
+
+.container-cursuri .rand-curs > *:nth-child(4) {
+    justify-self: center; /* sau end dacă preferi dreapta */
+}
+
+/* Student Page Layout (hide PageControl) */
+.container-cursuri:not(:has(.cursuri-titlu h1:contains("Administrare"))) .rand-curs {
+    grid-template-columns: auto 1fr auto;
+}
+
+.container-cursuri:not(:has(.cursuri-titlu h1:contains("Administrare"))) .rand-curs > *:nth-child(1) {
+    /* Carte component */
+    grid-column: 1;
+}
+
+.container-cursuri:not(:has(.cursuri-titlu h1:contains("Administrare"))) .rand-curs > *:nth-child(2) {
+    /* Ceas component */
+    grid-column: 3;
+    transform: scale(1.2);
+    justify-self: center;
+}
+
+.container-cursuri:not(:has(.cursuri-titlu h1:contains("Administrare"))) .rand-curs > *:nth-child(3) {
+    /* Buton component */
+    grid-column: 2;
+    justify-self: start;
+}
+
+.container-cursuri:not(:has(.cursuri-titlu h1:contains("Administrare"))) .rand-curs > *:nth-child(4) {
+    /* PageControl component - HIDDEN for students */
+    display: none;
+}
+
+/* Admin Page Course Row Hover Effect */
+.container-cursuri:has(.cursuri-titlu h1:contains("Administrare")) .rand-curs:hover {
+    transform: translateX(4px);
+    border-left: 4px solid var(--admin-border);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Regular hover effects for student page */
+.container-cursuri .rand-curs::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--gradient-primary);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.container-cursuri .rand-curs:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--accent-color);
+}
+
+.container-cursuri .rand-curs:hover::before {
+    transform: scaleY(1);
+}
+
+/* Course Button */
+.container-cursuri .rand-curs .buton-curs {
+    padding: 20px 24px;
+    text-align: left;
+    font-size: 1.125rem;
+    font-weight: 600;
+    background: transparent;
     border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 56px;
+    width: 100%;
+}
+
+/* Admin page button styling */
+.container-cursuri:has(.cursuri-titlu h1:contains("Administrare")) .rand-curs .buton-curs {
+    padding: 12px 16px;
+    min-height: 48px;
+    font-size: 1rem;
+}
+
+.container-cursuri .rand-curs .buton-curs:hover {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--accent-color);
+}
+
+/* Special Buttons */
+.container-cursuri .Adauga {
+    height: 56px;
+    padding: 0 32px;
+    border-radius: 28px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    background: var(--gradient-primary);
+    color: white;
+    border: none;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Admin Add Button */
+.container-cursuri:has(.cursuri-titlu h1:contains("Administrare")) .Adauga {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.container-cursuri .Adauga::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+}
+
+.container-cursuri .Adauga:hover::before {
+    left: 100%;
+}
+
+.container-cursuri .Adauga:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.container-cursuri .buton-arhivat {
+    background: var(--danger-color);
+    color: white;
+    border: none;
+    font-weight: 600;
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-size: 0.875rem;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.container-cursuri .buton-arhivat:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+}
+
+/* Archived Course Styling */
+.container-cursuri .rand-curs.archived-course {
+    opacity: 0.7;
+    background: var(--secondary-bg);
+    border: 1px dashed var(--border-color);
+    position: relative;
+}
+
+.container-cursuri .rand-curs.archived-course::before {
+    background: linear-gradient(135deg, #6b7280 0%, #9ca3af 100%);
+}
+
+.container-cursuri .rand-curs.archived-course::after {
+    content: '📦 ARCHIVED';
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    background: rgba(107, 114, 128, 0.9);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    z-index: 5;
+}
+
+.container-cursuri .rand-curs.archived-course .buton-curs {
+    color: var(--text-primary); /* mai vizibil */
+    opacity: 0.6;
+    text-decoration: line-through;
+}
+
+.container-cursuri .rand-curs.archived-course:hover {
+    opacity: 0.85;
+}
+
+/* REDESIGNED PAGE CONTROL - FIXED */
+.container-cursuri .page-control {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+    position: relative;
+    min-width: 120px;
+    z-index: 10;
+}
+
+/* Main control button (three dots) */
+.container-cursuri .page-control .control-toggle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: var(--shadow-sm);
+    position: relative;
+    z-index: 25;
+}
+
+.container-cursuri .page-control .control-toggle:hover {
+    background: var(--accent-color);
+    border-color: var(--accent-color);
+    transform: scale(1.1);
+    box-shadow: var(--shadow-md);
+}
+
+.container-cursuri .page-control .control-toggle::before {
+    content: '⋮';
+    font-size: 18px;
     font-weight: bold;
+    color: var(--text-primary);
+    transition: color 0.3s ease;
+}
+
+.container-cursuri .page-control .control-toggle:hover::before {
+    color: white;
+}
+
+/* Dropdown menu */
+.container-cursuri .page-control .control-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    box-shadow: var(--shadow-lg);
+    min-width: 140px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 30;
+    overflow: hidden;
+}
+
+.container-cursuri .page-control.active .control-menu {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.container-cursuri .page-control .control-menu::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    right: 18px;
+    width: 12px;
+    height: 12px;
+    background: var(--card-bg);
+    border-left: 1px solid var(--border-color);
+    border-top: 1px solid var(--border-color);
+    transform: rotate(45deg);
+}
+
+/* Menu buttons */
+.container-cursuri .page-control .menu-button {
+    width: 100%;
+    padding: 12px 16px;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-align: left;
+}
+
+.container-cursuri .page-control .menu-button:hover {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--accent-color);
+}
+
+.container-cursuri .page-control .menu-button.delete-btn {
+    color: var(--danger-color);
+}
+
+.container-cursuri .page-control .menu-button.delete-btn:hover {
+    background: rgba(239, 68, 68, 0.1);
+    color: #dc2626;
+}
+
+.container-cursuri .page-control .menu-button.archive-btn {
+    color: #f59e0b;
+}
+
+.container-cursuri .page-control .menu-button.archive-btn:hover {
+    background: rgba(245, 158, 11, 0.1);
+    color: #d97706;
+}
+
+.container-cursuri .rand-curs.archived-course .page-control .menu-button.archive-btn {
+    color: var(--success-color);
+}
+
+.container-cursuri .rand-curs.archived-course .page-control .menu-button.archive-btn:hover {
+    background: rgba(16, 185, 129, 0.1);
+    color: #059669;
+}
+
+/* Icons for menu buttons */
+.container-cursuri .page-control .menu-button::before {
+    font-size: 14px;
+    min-width: 16px;
+}
+
+.container-cursuri .page-control .menu-button.delete-btn::before {
+    content: '🗑️';
+}
+
+.container-cursuri .page-control .menu-button.archive-btn::before {
+    content: '📦';
+}
+
+.container-cursuri .rand-curs.archived-course .page-control .menu-button.archive-btn::before {
+    content: '📤';
+}
+
+/* Add Course Button Styling */
+.container-cursuri .lista-cursuri > .Adauga,
+.container-cursuri .lista-cursuri > button {
+    margin-top: 24px;
+    align-self: center;
+    min-width: 200px;
+}
+
+/* Section Headers */
+.container-cursuri h2 {
+    font-size: 1.5rem;
+    color: var(--text-primary);
+    font-weight: 700;
+    margin: 24px 0 16px 0;
+    position: relative;
+    padding-left: 16px;
+}
+
+.container-cursuri h2::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 4px;
+    height: 24px;
+    background: var(--gradient-primary);
+    border-radius: 2px;
+}
+
+/* Admin h2 styling */
+.container-cursuri:has(.cursuri-titlu h1:contains("Administrare")) h2::before {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+/* Animations */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.container-cursuri {
+    animation: fadeIn 0.6s ease-out;
+}
+
+.container-cursuri .rand-curs {
+    animation: slideInUp 0.5s ease-out;
+    animation-fill-mode: both;
+}
+
+.container-cursuri .rand-curs:nth-child(1) { animation-delay: 0.1s; }
+.container-cursuri .rand-curs:nth-child(2) { animation-delay: 0.15s; }
+.container-cursuri .rand-curs:nth-child(3) { animation-delay: 0.2s; }
+.container-cursuri .rand-curs:nth-child(4) { animation-delay: 0.25s; }
+.container-cursuri .rand-curs:nth-child(5) { animation-delay: 0.3s; }
+
+/* Close menu when clicking outside */
+.container-cursuri .page-control-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 20;
+    background: transparent;
+    display: none;
+}
+
+.container-cursuri .page-control.active .page-control-overlay {
+    display: block;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container-cursuri {
+        padding: 24px 20px;
+        margin: 16px;
+        max-width: calc(100% - 32px);
+        gap: 20px;
+    }
+
+    .container-cursuri .cursuri-titlu {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        text-align: left;
+    }
+
+    .container-cursuri .cursuri-titlu h1 {
+        font-size: 2rem;
+    }
+
+    .container-cursuri .rand-curs,
+    .container-cursuri:has(.cursuri-titlu h1:contains("Administrare")) .rand-curs {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto auto;
+        gap: 16px;
+        padding: 20px;
+        text-align: center;
+    }
+
+    /* Reset grid positioning for mobile */
+    .container-cursuri .rand-curs > *:nth-child(1),
+    .container-cursuri .rand-curs > *:nth-child(2),
+    .container-cursuri .rand-curs > *:nth-child(3),
+    .container-cursuri .rand-curs > *:nth-child(4) {
+        grid-column: unset;
+        justify-self: unset;
+        transform: none;
+    }
+
+    .container-cursuri:has(.cursuri-titlu h1:contains("Administrare")) .rand-curs > *:nth-child(4) {
+        display: block !important;
+        align-self: center;
+        margin-top: 12px;
+    }
+
+    /* Mobile PageControl styling */
+    .container-cursuri .page-control {
+        flex-direction: row;
+        justify-content: center;
+        min-width: auto;
+    }
+
+    .container-cursuri .page-control .control-menu {
+        position: relative;
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+        box-shadow: none;
+        border: none;
+        background: transparent;
+        display: flex;
+        gap: 8px;
+        min-width: auto;
+    }
+
+    .container-cursuri .page-control .control-toggle {
+        display: none;
+    }
+
+    .container-cursuri .page-control .menu-button {
+        padding: 8px 12px;
+        border-radius: 6px;
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        min-width: 80px;
+        justify-content: center;
+    }
+
+    /* Archived label positioning for mobile */
+    .container-cursuri .rand-curs.archived-course::after {
+        position: static;
+        display: block;
+        margin: 8px 0;
+        text-align: center;
+        width: 100%;
+    }
+
+    .container-cursuri .rand-curs .buton-curs {
+        text-align: center;
+        white-space: normal;
+    }
+
+    .container-cursuri .student-info {
+        padding: 16px 20px;
+    }
+
+    .container-cursuri .student-info p {
+        font-size: 1rem;
+        flex-wrap: wrap;
+        justify-content: center;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .container-cursuri {
+        padding: 20px 16px;
+    }
+
+    .container-cursuri .cursuri-titlu h1 {
+        font-size: 1.75rem;
+    }
+
+    .container-cursuri .rand-curs {
+        padding: 16px;
+    }
+
+    .container-cursuri .Adauga {
+        width: 100%;
+        height: 48px;
+        font-size: 1rem;
+    }
+}
+
+/* Loading State */
+.loading-skeleton {
+    background: linear-gradient(90deg,
+    var(--border-color) 25%,
+    rgba(59, 130, 246, 0.1) 50%,
+    var(--border-color) 75%);
+    background-size: 200% 100%;
+    animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Focus States for Accessibility */
+.container-cursuri .rand-curs .buton-curs:focus,
+.container-cursuri .Adauga:focus,
+.container-cursuri .buton-arhivat:focus,
+.container-cursuri .page-control .control-toggle:focus,
+.container-cursuri .page-control .menu-button:focus {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+/* Smooth scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Admin badge for identification */
+.container-cursuri:has(.cursuri-titlu h1:contains("Administrare"))::before {
+    content: '👨‍💼 ADMIN MODE';
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 16px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    z-index: 5;
+}
+/* Course Button - UPDATED: Centered and Bigger */
+.container-cursuri .rand-curs .buton-curs {
+    padding: 24px 32px; /* Increased padding */
+    text-align: center; /* Centered text */
+    font-size: 1.25rem; /* Increased font size from 1.125rem */
+    font-weight: 600;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 280px; /* Increased from 200px */
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Changed from flex-start to center */
+    min-height: 64px; /* Increased from 56px */
+    width: 100%;
+}
+
+/* Admin page button styling - UPDATED */
+.container-cursuri:has(.cursuri-titlu h1:contains("Administrare")) .rand-curs .buton-curs {
+    padding: 16px 24px; /* Increased from 12px 16px */
+    min-height: 56px; /* Increased from 48px */
+    font-size: 1.125rem; /* Increased from 1rem */
+    text-align: center; /* Ensure center alignment for admin too */
+    justify-content: center; /* Ensure center alignment for admin too */
+}
+
+.container-cursuri .rand-curs .buton-curs:hover {
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--accent-color);
+}
+/* UPDATED: Course Row Layout - Center the course button */
+
+/* Admin Page Layout (with PageControl visible) */
+.container-cursuri:has(.cursuri-titlu h1:contains("Administrare")) .rand-curs {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    align-items: center;
+    gap: 20px;
+    padding: 20px 24px;
+    background: var(--card-bg);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: visible;
+    min-height: 80px;
+}
+
+.container-cursuri:has(.cursuri-titlu h1:contains("Administrare")) .rand-curs > *:nth-child(1) {
+    /* Carte component */
+    grid-column: 1;
+}
+
+.container-cursuri:has(.cursuri-titlu h1:contains("Administrare")) .rand-curs > *:nth-child(2) {
+    /* Ceas component */
+    grid-column: 3;
+    transform: scale(1.1);
+    justify-self: center;
+}
+
+.container-cursuri:has(.cursuri-titlu h1:contains("Administrare")) .rand-curs > *:nth-child(3) {
+    /* Buton component - CENTERED */
+    grid-column: 2;
+    justify-self: center; /* Changed from start to center */
+}
+
+.container-cursuri:has(.cursuri-titlu h1:contains("Administrare")) .rand-curs > *:nth-child(4) {
+    /* PageControl component - ALWAYS VISIBLE */
+    grid-column: 4;
+    justify-self: end;
+    display: block !important;
+}
+
+/* Student Page Layout (hide PageControl) */
+.container-cursuri:not(:has(.cursuri-titlu h1:contains("Administrare"))) .rand-curs {
+    grid-template-columns: auto 1fr auto;
+}
+
+.container-cursuri:not(:has(.cursuri-titlu h1:contains("Administrare"))) .rand-curs > *:nth-child(1) {
+    /* Carte component */
+    grid-column: 1;
+}
+
+.container-cursuri:not(:has(.cursuri-titlu h1:contains("Administrare"))) .rand-curs > *:nth-child(2) {
+    /* Ceas component */
+    grid-column: 3;
+    transform: scale(1.2);
+    justify-self: center;
+}
+
+.container-cursuri:not(:has(.cursuri-titlu h1:contains("Administrare"))) .rand-curs > *:nth-child(3) {
+    /* Buton component - CENTERED */
+    grid-column: 2;
+    justify-self: center; /* Changed from start to center */
+}
+
+.container-cursuri:not(:has(.cursuri-titlu h1:contains("Administrare"))) .rand-curs > *:nth-child(4) {
+    /* PageControl component - HIDDEN for students */
+    display: none;
+}
+
+/* Course Button - ALREADY CENTERED INTERNALLY */
+.container-cursuri .rand-curs .buton-curs {
+    padding: 24px 32px;
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    background: transparent;
+    border: none;
+    color: var(--text-primary);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 280px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 64px;
+    width: 100%;
+}
+
+/* Admin page button styling */
+.container-cursuri:has(.cursuri-titlu h1:contains("Administrare")) .rand-curs .buton-curs {
+    padding: 16px 24px;
+    min-height: 56px;
+    font-size: 1.125rem;
+    text-align: center;
+    justify-content: center;
+}
+
+.feedback-switch {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-left: 2rem;
+    font-size: 1rem;
+}
+.feedback-switch input[type="checkbox"] {
+    transform: scale(1.2);
+    margin-right: 0.4rem;
+    cursor: pointer;
 }

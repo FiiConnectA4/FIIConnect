@@ -93,6 +93,16 @@ public class CourseController {
         return assembler.toModel(course);
     }
 
+    @GetMapping("didactic/course/{id}/groups")
+    public List<String> getGroups(@PathVariable("id") Long id){
+        Course course = repository.findById(id).orElseThrow(() -> new CourseNotFoundException(id));
+        PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
+        if(!service.allowCourseViewing(person, id))
+            throw new UnauthorizedOperationException("Only students enrolled in a course or professors who teach the course may see it");
+
+        return repository.findGroups(id);
+    }
+
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @GetMapping("/didactic/course/{id}/enrolled")
     public List<Enrollment> getEnrolledStudents(@PathVariable Long id)
@@ -305,6 +315,16 @@ public class CourseController {
         Course course = repository.findById(id).orElseThrow(() -> new CourseNotFoundException(id));
         course.setArchived(0);
         repository.save(course);
+    }
+
+    @PostMapping("/didactic/course/{id}/upload_csv")
+    public ResponseEntity<String> uploadGradesCsv(@RequestParam("file") MultipartFile file, @PathVariable Long id) {
+        try {
+            gradeService.updateGradesFromCsv(file, id);
+            return ResponseEntity.ok("CSV processed successfully!");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: " + e.getMessage());
+        }
     }
 
     @ResponseStatus(HttpStatus.CONFLICT)

@@ -12,8 +12,14 @@ drop table formula;
 drop table student cascade constraints;
 drop table course cascade constraints;
 drop table professor cascade constraints;
+drop table global_constant;
 
 commit;
+
+create table global_constant(
+    name varchar2(256) primary key,
+    value varchar2(256)
+);
 
 create table student(
     id integer constraint c_student_pk_id primary key,
@@ -122,7 +128,7 @@ create table transfer_request(
     idCourse integer constraint c_tr_req_nn_idCourse not null,
     facultyGroup varchar2(3) constraint c_tr_req_nn_facultyGroup not null,
     reasonText varchar2(300) constraint c_tr_req_nn_reasonText not null,
-    requestDate date constraint c_tr_req_nn_requestDate not null,
+    requestDate date default sysdate constraint c_tr_req_nn_requestDate not null,
     
     constraint c_tr_req_fk_idStud foreign key (idStud) references student(id) on delete cascade,
     constraint c_tr_req_fk_idCourse foreign key (idCourse) references course(id) on delete cascade,

@@ -30,4 +30,3 @@ rm -rf ~/.ssh/known_hosts
 
 cd "$sftp_dir"
 sftp -P 2222 fiiconnect@localhost
-

@@ -7,20 +7,21 @@ import Anunturi from "../pages/Social/Page/Anunturi";
 import EtajeHarta from "../pages/Harta/EtajeHarta";
 import Cursuri from "../pages/Cursuri/Cursuri";
 import Catalog from "../pages/Catalog/Catalog";
+import ActivitySheet from "../pages/Catalog/ActivitySheet/ActivitySheet";
+import ProfessorActivitySheet from "../pages/Catalog/ActivitySheet/ProfessorActivitySheet";
 import OrarToti from "../pages/Orar/OrarToti";
 import Secretariat from "../pages/Secretariat/Secretariat";
 
-import CerereDecontari from "../pages/Secretariat/CerereDecontari"; // ✅ Import corect
-import CerereAdeverinte from "../pages/Secretariat/CerereAdeverinte"; // ✅ Import corect
-import CerereBursaSociala from "../pages/Secretariat/CerereBursaSociala"; // ✅ Import corect
-import CerereCazSocial from "../pages/Secretariat/CerereCazSocial"; // ✅ Import corect
-import IstoricCereri from "../pages/Secretariat/IstoricCereri"; // ✅ Import corect
+import CerereAdeverinte from "../pages/Secretariat/CerereAdeverinte"; 
+import CerereBursaSociala from "../pages/Secretariat/CerereBursaSociala"; 
+import CerereCazSocial from "../pages/Secretariat/CerereCazSocial";
+import IstoricCereri from "../pages/Secretariat/IstoricCereri"; 
 import Harta from "../pages/Harta/Harta";
 import HartaFullScreen from "../pages/Harta/HartaFullScreen";
 import AtribuireTaguri from "../pages/Secretariat/AtribuireTaguri";
-import SecretariatCerereAdeverinte from "../pages/Secretariat/SecretariatCerereAdeverinte"; // ✅ Import corect
-import SecretariatBursaSociala from "../pages/Secretariat/SecretariatBursaSociala"; // ✅ Import corect
-import SecretariatCazSocial from "../pages/Secretariat/SecretariatCazSocial"; // ✅ Import corect
+import SecretariatCerereAdeverinte from "../pages/Secretariat/SecretariatCerereAdeverinte"; 
+import SecretariatBursaSociala from "../pages/Secretariat/SecretariatBursaSociala"; 
+import SecretariatCazSocial from "../pages/Secretariat/SecretariatCazSocial"; 
 
 import Chat from "../pages/Social/Page/Chat";
 import SetupProfile from "../pages/Dashboard/SetupProfile";
@@ -37,6 +38,18 @@ import CreateAccount from "../pages/Auth/CreateAccount";
 import ForgotPassword from "../pages/Auth/ForgotPassword";
 import ResetPassword from "../pages/Auth/ResetPassword";
 import Orar from "../pages/Orar/Orar"; // Import pentru componenta de routing
+
+export const API_ROUTES = {
+  PERSON_ME: '/person/me',
+  PERSON_GET_ALL: '/person/get-all',
+  TAGS: '/tags',
+  MANAGE_TAGS: '/manage_tags',
+  ANNOUNCEMENT_PROF_SECRETAR: '/announcement/prof-secretar',
+  ANNOUNCEMENT_WITH_TAG: '/announcement/with-tag',
+  CHANNEL_WITH_TAGS: '/channel/with-tags',
+  CHAT_GET_CHATS: '/chat/get-chats',
+  WS: '/ws',
+};
 
 const AppRoutes = () => {
 
@@ -81,10 +94,17 @@ const AppRoutes = () => {
         <Route path="harta" element={<Harta />} />
         <Route path="etaje-harta" element={<EtajeHarta />} />
         <Route path="cursuri" element={<Cursuri />} />
+
         <Route path="catalog" element={<Catalog />} />
+          <Route path="catalog/activity-sheet/:courseId" element={<ActivitySheet />} />
+          <Route path="/app/catalog/activity-sheet/:courseId/:studentId" element={<ActivitySheet />} />
+          <Route
+              path="/app/catalog/activity-sheet/group/:courseId"
+              element={<ProfessorActivitySheet />}
+          />
 
         {/* Rutele pentru orar */}
-        <Route path="orar" element={<OrarToti />} />
+        <Route path="orar" element={<Orar />} />
         <Route path="orar/studenti" element={<OrarToti />} />
         <Route path="orar/studenti/:an/:grupa" element={<OrarToti />} />
         <Route path="orar/profesori" element={<OrarToti />} />
@@ -105,13 +125,11 @@ const AppRoutes = () => {
         <Route path="orar-secretariat/discipline" element={<OrarSecretariat />} />
         <Route path="orar-secretariat/discipline/:disciplina" element={<OrarSecretariat />} />
 
-        <Route path="secretariat" element={<Secretariat />}>
-          <Route path="cerere-decontare" element={<CerereDecontari />} />
-          <Route path="cerere-adeverinte" element={<SecretariatCerereAdeverinte />} />
-          <Route path="cerere-bursa-sociala" element={<SecretariatBursaSociala />} />
-          <Route path="cerere-caz-social" element={<SecretariatCazSocial />} />
-          <Route path="atribuire-taguri" element={<AtribuireTaguri />} />
-        </Route>
+        <Route path="secretariat" element={<Secretariat />} />
+        <Route path="secretariat/cerere-adeverinte" element={<SecretariatCerereAdeverinte />} />
+        <Route path="secretariat/cerere-bursa-sociala" element={<SecretariatBursaSociala />} />
+        <Route path="secretariat/cerere-caz-social" element={<SecretariatCazSocial />} />
+        <Route path="secretariat/atribuire-taguri" element={<AtribuireTaguri />} />
 
                 <Route path="orar-secretariat" element={<OrarSecretariat />} />
                 <Route path="orar-secretariat/studenti" element={<OrarSecretariat />} />
@@ -122,17 +140,18 @@ const AppRoutes = () => {
                 <Route path="orar-secretariat/sali/:sala" element={<OrarSecretariat />} />
                 <Route path="orar-secretariat/discipline" element={<OrarSecretariat />} />
                 <Route path="orar-secretariat/discipline/:disciplina" element={<OrarSecretariat />} />
+                <Route path="orar-secretariat/sali/:sala/dotari" element={<DotariSala />} />
+
 
                 <Route path="harta" element={<Harta />} />
                 <Route path="harta/fullscreen" element={<HartaFullScreen />} />
 
                 <Route path="secretariat" element={<Secretariat />} />
-                <Route path="secretariat/cerere-decontare" element={<CerereDecontari />} />
                 <Route path="secretariat/cerere-adeverinte" element={<SecretariatCerereAdeverinte />} />
                 <Route path="secretariat/cerere-bursa-sociala" element={<SecretariatBursaSociala />} />
                 <Route path="secretariat/cerere-caz-social" element={<SecretariatCazSocial />} />
 
-                <Route path="student/cerere-decontare" element={<CerereDecontari />} />
+                
                 <Route path="student/cerere-adeverinte" element={<CerereAdeverinte />} />
                 <Route path="student/cerere-bursa-sociala" element={<CerereBursaSociala />} />
                 <Route path="student/cerere-caz-social" element={<CerereCazSocial />} />

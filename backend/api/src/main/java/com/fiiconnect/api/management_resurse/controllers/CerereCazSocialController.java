@@ -8,12 +8,18 @@ import com.fiiconnect.api.management_resurse.viewdtos.CerereCazSocialViewDTO;
 import com.fiiconnect.api.management_resurse.models.CerereCazSocial;
 import com.fiiconnect.api.management_resurse.repositories.CerereCazSocialRepository;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import com.fiiconnect.api.didactic.services.SftpService;
+
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.time.LocalDate;
 
 import org.springframework.http.MediaType;
 
@@ -21,16 +27,20 @@ import org.springframework.http.MediaType;
 import java.util.List;
 import java.util.Optional;
 
-@RestController
+      @RestController
 @RequestMapping("/cereri/caz-social")
 public class CerereCazSocialController {
 
     private final CerereCazSocialRepository repository;
     private final StudentRepository studentRepository;
+    private final SftpService sftpService;
 
-    public CerereCazSocialController(CerereCazSocialRepository repository, StudentRepository studentRepository) {
+    public CerereCazSocialController(CerereCazSocialRepository repository,
+                                     StudentRepository studentRepository,
+                                     SftpService sftpService) {
         this.repository = repository;
         this.studentRepository = studentRepository;
+        this.sftpService = sftpService;
     }
 
     // POST: creare cerere caz social
@@ -50,6 +60,44 @@ public class CerereCazSocialController {
         return ResponseEntity.ok(repository.save(cerere));
     }
 
+
+
+
+
+    @PostMapping("/cereri-cu-upload")
+    public ResponseEntity<?> createWithFileUpload(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("studentId") Long studentId,
+            @RequestParam("status") String status,
+            @RequestParam("comentariu") String comentariu,
+            @RequestParam("dataTrimitere") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dataTrimitere,
+            @RequestParam("justificare") String justificare
+    ) {
+        Optional<Student> studentOpt = studentRepository.findById(studentId);
+        if (studentOpt.isEmpty()) {
+            return ResponseEntity.badRequest().body("Student inexistent");
+        }
+
+        try {
+            String remoteDir = "/faculty_files/";
+            sftpService.uploadFile(file, remoteDir);
+
+            CerereCazSocial cerere = new CerereCazSocial();
+            cerere.setStudent(studentOpt.get());
+            cerere.setStatus(status);
+            cerere.setComentariu(comentariu);
+            cerere.setDataTrimitere(dataTrimitere.toString());
+            cerere.setJustificare(justificare);
+            cerere.setDocumentePath(remoteDir + file.getOriginalFilename());
+
+            return ResponseEntity.ok(repository.save(cerere));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Eroare la salvare: " + e.getMessage());
+        }
+    }
+
+
+
     // GET: cerere după ID
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Integer id) {
@@ -58,34 +106,36 @@ public class CerereCazSocialController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    
 @GetMapping("/{id}/document")
 public ResponseEntity<?> getDocument(@PathVariable Integer id) {
     Optional<CerereCazSocial> opt = repository.findById(id);
     if (opt.isEmpty()) return ResponseEntity.notFound().build();
 
     CerereCazSocial cerere = opt.get();
-    String path = cerere.getDocumentePath(); // presupunem că e calea completă sau relativă
+    String remotePath = cerere.getDocumentePath();
 
-    if (path == null || path.isBlank()) {
+    if (remotePath == null || remotePath.isBlank()) {
         return ResponseEntity.badRequest().body("Documentul nu este disponibil.");
     }
 
-    File file = new File(path);
-    if (!file.exists()) {
-        return ResponseEntity.notFound().build();
-    }
-
     try {
+        // Folosești downloadFile pentru a obține fișierul local
+        File file = sftpService.downloadFile(remotePath);
+
         InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+
         return ResponseEntity.ok()
                 .header("Content-Disposition", "inline; filename=" + file.getName())
                 .contentLength(file.length())
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(resource);
-    } catch (FileNotFoundException e) {
+    } catch (Exception e) {
+        e.printStackTrace();
         return ResponseEntity.status(500).body("Eroare la deschiderea fișierului.");
     }
 }
+
 
 
 

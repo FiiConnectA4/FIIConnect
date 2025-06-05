@@ -7,16 +7,17 @@ const PageControl = ({ onDelete, onArchive, ariaLabel = "Menu" }) => {
     const toggleVisibility = () => setIsVisible(prev => !prev);
 
     return (
-        <div className="page-control-container">
+        <div className="page-control">
             <button
                 className="dots-button"
                 onClick={toggleVisibility}
                 aria-label={ariaLabel}
             >
-                <span className="dots"></span>
+                <span className="dots" />
             </button>
             {isVisible && <Optiuni onDelete={onDelete} onArchive={onArchive} />}
         </div>
+
     );
 };
 
