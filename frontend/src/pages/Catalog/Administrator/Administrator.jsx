@@ -1,201 +1,224 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './Administrator.css';
+// Administrator.jsx – variantă fără GET-cu-body
+import {useEffect, useState} from "react";
+import {useNavigate} from "react-router-dom";
+import "./Administrator.css";
 
-const Administrator = () => {
-    const [grupe, setGrupe] = useState([]);
-    const [selectedGrupa, setSelectedGrupa] = useState('');
-    const [cursuri, setCursuri] = useState([]);
-    const [selectedCursId, setSelectedCursId] = useState(null);
-    const [catalog, setCatalog] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [editingIndex, setEditingIndex] = useState(null);
-    const [editedGrade, setEditedGrade] = useState('');
-    const [prevGrade, setPrevGrade] = useState('');
-    const [gaussResults, setGaussResults] = useState([]);
-    const token = localStorage.getItem('token');
+export default function Administrator() {
+    /* ---------- state ---------- */
+    const [grupe,        setGrupe]        = useState([]);
+    const [selectedGr,   setSelectedGr]   = useState("");
+    const [cursuri,      setCursuri]      = useState([]);
+    const [idCurs,       setIdCurs]       = useState(null);
+
+    const [catalog,      setCatalog]      = useState([]);   // [{studentId,name,grade}]
+    const [loading,      setLoading]      = useState(false);
+
+    const [editIdx,      setEditIdx]      = useState(null);
+    const [editVal,      setEditVal]      = useState("");
+
+    const [gaussView,    setGaussView]    = useState([]);   // rezultate simulate pt UI
+    const [gaussPayload, setGaussPayload] = useState([]);   // array <Grade> pt salvare
+
+    const token    = localStorage.getItem("token");
     const navigate = useNavigate();
 
-
+    /* ---------- inițializare cursuri ---------- */
     useEffect(() => {
-        fetch('/didactic/course', { headers: { 'Authorization': `Bearer ${token}` } })
-            .then(res => res.json())
-            .then(data => {
-                const courseList = data._embedded?.courseList || [];
-                setCursuri(courseList);
-                if (courseList.length) setSelectedCursId(courseList[0].id);
+        fetch("/didactic/course", {headers:{Authorization:`Bearer ${token}`}})
+            .then(r => r.json())
+            .then(d => {
+                const list = d._embedded?.courseList ?? [];
+                setCursuri(list);
+                if (list.length) setIdCurs(list[0].id);
             });
     }, [token]);
 
-    useEffect(() => {
-        if (!selectedCursId) return;
-        loadCatalog(selectedCursId, selectedGrupa);
-    }, [selectedCursId, selectedGrupa]);
+    /* ---------- încărcare catalog ---------- */
+    useEffect(() => { if (idCurs) loadCatalog(idCurs, selectedGr); }, [idCurs, selectedGr]);
 
-    const loadCatalog = async (cursId, grupa) => {
+    async function loadCatalog(idCourse, grupaSel) {
         setLoading(true);
         try {
-            const [enrollments, grades] = await Promise.all([
-                fetch(`/didactic/course/${cursId}/enrolled`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
-                fetch(`/didactic/course/${cursId}/grades`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json())
+            const [enrolled, grades] = await Promise.all([
+                fetch(`/didactic/course/${idCourse}/enrolled`, {headers:{Authorization:`Bearer ${token}`}}).then(r=>r.json()),
+                fetch(`/didactic/course/${idCourse}/grades`,   {headers:{Authorization:`Bearer ${token}`}}).then(r=>r.json())
             ]);
 
-            const groups = [...new Set(enrollments.map(e => e.student.facultyGroup))];
+            const groups = [...new Set(enrolled.map(e => e.student.facultyGroup))];
             setGrupe(groups);
-            if (!grupa && groups.length) setSelectedGrupa(groups[0]);
+            if (!grupaSel && groups.length) setSelectedGr(groups[0]);
 
-            const groupStudents = enrollments.filter(e => e.student.facultyGroup === (grupa || groups[0])).map(e => e.student);
-            const list = groupStudents.map(student => {
-                const grade = grades.find(g => g.student.id === student.id);
-                return { name: `${student.firstName} ${student.lastName}`, grade: grade ? grade.value : '', studentId: student.id };
-            });
+            const students = enrolled
+                .filter(e => e.student.facultyGroup === (grupaSel || groups[0]))
+                .map(e => e.student);
 
-            setCatalog(list);
+            setCatalog(students.map(st => ({
+                studentId : st.id,
+                name      : `${st.firstName} ${st.lastName}`,
+                grade     : grades.find(g => g.student.id === st.id)?.value ?? ""
+            })));
+            /* resetăm eventualele calcule Gauss anterioare */
+            setGaussView([]);
+            setGaussPayload([]);
         } finally {
             setLoading(false);
         }
-    };
+    }
 
-    const handleSaveGrade = async (index) => {
-        const gradeEntry = catalog[index];
-        const parsed = parseFloat(editedGrade);
-        if (isNaN(parsed) || parsed < 1 || parsed > 10) return alert("Nota invalidă");
+    /* ---------- salvare manuală pentru o singură notă ---------- */
+    async function saveSingle(idx) {
+        const row  = catalog[idx];
+        const val  = parseFloat(editVal);
+        if (isNaN(val) || val < 1 || val > 10) return alert("Nota invalidă.");
 
-        const method = gradeEntry.grade ? 'PUT' : 'POST';
-        const payload = {
-            id: { idStud: gradeEntry.studentId, idCourse: selectedCursId },
-            value: parsed,
-            gradingDate: new Date().toISOString()
-        };
-
-        const res = await fetch('/didactic/grade', {
-            method,
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify(payload)
+        await fetch("/didactic/grade", {
+            method : row.grade === "" ? "POST" : "PUT",
+            headers: {"Content-Type":"application/json", Authorization:`Bearer ${token}`},
+            body   : JSON.stringify({
+                id          : {idStud:row.studentId, idCourse:idCurs},
+                value       : val,
+                gradingDate : new Date().toISOString()
+            })
         });
-        if (!res.ok) return alert("Eroare la salvare");
+        setCatalog(catalog.map((r,i)=> i===idx ? {...r,grade:val} : r));
+        setEditIdx(null);
+    }
 
-        const updated = [...catalog];
-        updated[index].grade = parsed;
-        setCatalog(updated);
-        setEditingIndex(null);
-    };
+    /* ---------- algoritmul Gauss (copiat din backend) ---------- */
+    function gaussLocal(gradesArr) {
+        const copy = gradesArr.filter(g => g.value >= 4.5)
+            .sort((a,b)=>b.value-a.value);  // desc
 
-    const handleApplyGauss = async () => {
-        if (!selectedCursId) {
-            alert("Selectează un curs mai întâi.");
-            return;
+        const n = copy.length;
+        const idx10 = Math.max(1, Math.round(0.10*n));
+        const idx9  = idx10 + Math.max(1, Math.round(0.25*n));
+        const idx8  = idx9  + Math.max(1, Math.round(0.30*n));
+        const idx7  = idx8  + Math.max(1, Math.round(0.25*n));
+        const idx6  = n;
+
+        const thresholds = [idx10, idx9, idx8, idx7, idx6];
+        const values     = [10, 9, 8, 7, 6];
+
+        let tier = 0, prev = 10;
+        const scaled = [];
+
+        for (let i=0; i<copy.length; ++i) {
+            const g = copy[i];
+            if (i>=thresholds[tier] && g.value!==prev) tier++;
+            scaled.push({...g, value:values[tier]});
+            prev = g.value;
         }
+        // note <4.5 rămân la fel
+        gradesArr.filter(g=>g.value<4.5).forEach(g=>scaled.push({...g}));
+
+        return scaled;
+    }
+
+    /* ---------- “Aplică Gauss” ---------- */
+    async function handleGauss() {
+        if (!idCurs) return;
 
         try {
-            const gradesRes = await fetch(`/didactic/course/${selectedCursId}/grades`, {
-                headers: { 'Authorization': `Bearer ${token}` }
+            const res = await fetch(`/didactic/course/${idCurs}/grades`, {
+                headers:{Authorization:`Bearer ${token}`}
             });
+            if (!res.ok) throw new Error(await res.text());
+            const all = await res.json();          // listă Grade DTO (id, value, ...)
 
-            if (!gradesRes.ok) {
-                const text = await gradesRes.text();
-                throw new Error(`Nu s-au putut obține notele: ${text}`);
-            }
+            const scaled = gaussLocal(all);        // <-- local, fără backend
 
-            const grades = await gradesRes.json();
-
-            // Eliminăm câmpurile inutile
-            const cleanedGrades = grades.map(g => ({
-                id: g.id,
-                value: g.value,
-                gradingDate: g.gradingDate
-            }));
-
-            const response = await fetch(`/didactic/formula/gauss`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(cleanedGrades)
-            });
-
-            if (!response.ok) {
-                const errText = await response.text();
-                throw new Error(`Eroare server la aplicarea Gauss: ${errText}`);
-            }
-
-            const gaussGrades = await response.json();
-
-            const transformed = gaussGrades.map(g => {
-                const existing = catalog.find(c => c.studentId === g.id.idStud);
-                return {
-                    studentId: g.id.idStud,
-                    value: g.value,
-                    name: existing?.name ?? `Student ${g.id.idStud}`
-                };
-            });
-
-            setCatalog(prev =>
-                prev.map(entry => {
-                    const updated = gaussGrades.find(g => g.id.idStud === entry.studentId);
-                    return updated ? { ...entry, grade: updated.value } : entry;
+            // actualizăm tabelul doar vizual
+            setCatalog(cur =>
+                cur.map(r => {
+                    const f = scaled.find(s => s.id.idStud === r.studentId);
+                    return f ? {...r, grade:f.value} : r;
                 })
             );
-
-            setGaussResults(transformed);
-            alert(`Distribuția Gauss a fost aplicată cu succes la ${transformed.length} studenți.`);
-        } catch (err) {
-            console.error("Eroare la aplicarea Gauss:", err);
-            alert("Eroare la aplicarea Gauss: " + err.message);
+            setGaussPayload(scaled);               // pt salvare
+            setGaussView(
+                scaled.map(s => ({
+                    studentId : s.id.idStud,
+                    name      : catalog.find(c=>c.studentId===s.id.idStud)?.name ?? `Student ${s.id.idStud}`,
+                    value     : s.value
+                }))
+            );
+            alert("Notele scalate au fost calculate. Dacă ești mulțumit, apasă “💾 Salvează note Gauss”.");
+        } catch(e) {
+            console.error(e);
+            alert("Eroare la calculul Gauss: "+e.message);
         }
-    };
+    }
 
+    /* ---------- “Salvează note Gauss” ---------- */
+    async function saveGauss() {
+        if (!gaussPayload.length) return;
+
+        try {
+            await Promise.all(
+                gaussPayload.map(g =>
+                    fetch("/didactic/grade", {
+                        method : "PUT",                   // presupunem existența notei; schimbă în "POST" pt absență
+                        headers: {"Content-Type":"application/json", Authorization:`Bearer ${token}`},
+                        body   : JSON.stringify({
+                            id          : g.id,
+                            value       : g.value,
+                            gradingDate : g.gradingDate
+                        })
+                    })
+                )
+            );
+            alert("Notele scalate au fost salvate!");
+            // re-împrospătăm catalogul din server ca să fim siguri
+            loadCatalog(idCurs, selectedGr);
+        } catch(e) {
+            console.error(e);
+            alert("Eroare la salvarea notelor: "+e.message);
+        }
+    }
+
+    /* ---------- UI ---------- */
     return (
         <div className="container-catalog">
             <div className="catalog-header">
                 <h1>CATALOG</h1>
                 <div className="select-controls">
-                    <select value={selectedGrupa} onChange={e => setSelectedGrupa(e.target.value)}>
-                        {grupe.map((g, i) => <option key={i} value={g}>{g}</option>)}
+                    <select value={selectedGr} onChange={e=>setSelectedGr(e.target.value)}>
+                        {grupe.map(g=><option key={g}>{g}</option>)}
                     </select>
-                    <select value={selectedCursId || ''} onChange={e => setSelectedCursId(parseInt(e.target.value))}>
-                        {cursuri.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+                    <select value={idCurs||""} onChange={e=>setIdCurs(Number(e.target.value))}>
+                        {cursuri.map(c=><option key={c.id} value={c.id}>{c.title}</option>)}
                     </select>
                 </div>
             </div>
 
             <div className="catalog-table">
                 <table>
-                    <thead>
-                    <tr>
-                        <th>Student</th>
-                        <th>Nota finală</th>
-                        <th>Acțiuni</th>
-                    </tr>
-                    </thead>
+                    <thead><tr><th>Student</th><th>Notă finală</th><th>Acțiuni</th></tr></thead>
                     <tbody>
                     {loading ? (
-                        <tr><td colSpan="3">Loading...</td></tr>
+                        <tr><td colSpan={3}>Se încarcă…</td></tr>
                     ) : (
-                        catalog.map((item, idx) => (
-                            <tr key={idx}>
-                                <td>{item.name}</td>
+                        catalog.map((row,idx)=>(
+                            <tr key={row.studentId}>
+                                <td>{row.name}</td>
                                 <td>
-                                    {editingIndex === idx ? (
-                                        <input value={editedGrade} onChange={e => setEditedGrade(e.target.value)} />
-                                    ) : (
-                                        item.grade
-                                    )}
+                                    {editIdx===idx
+                                        ? <input
+                                            type="number" min="1" max="10" step="0.01"
+                                            value={editVal} onChange={e=>setEditVal(e.target.value)}
+                                        />
+                                        : row.grade}
                                 </td>
                                 <td>
-                                    {editingIndex === idx ? (
+                                    {editIdx===idx ? (
                                         <>
-                                            <button onClick={() => handleSaveGrade(idx)}>💾</button>
-                                            <button onClick={() => setEditingIndex(null)}>↩️</button>
+                                            <button onClick={()=>saveSingle(idx)}>💾</button>
+                                            <button onClick={()=>setEditIdx(null)}>↩️</button>
                                         </>
                                     ) : (
                                         <>
-                                            <button onClick={() => {
-                                                setEditedGrade(item.grade);
-                                                setEditingIndex(idx);
-                                            }}>✏️</button>
-                                            <button onClick={() => navigate(`/app/catalog/activity-sheet/${selectedCursId}/${item.studentId}`)}>📋</button>
+                                            <button onClick={()=>{setEditIdx(idx);setEditVal(row.grade);}}>✏️</button>
+                                            <button onClick={()=>navigate(`/app/catalog/activity-sheet/${idCurs}/${row.studentId}`)}>📋</button>
                                         </>
                                     )}
                                 </td>
@@ -208,33 +231,22 @@ const Administrator = () => {
 
             <div className="catalog-buttons">
                 <button
-                    onClick={() => navigate(`/app/catalog/activity-sheet/group/${selectedCursId}?grupa=${encodeURIComponent(selectedGrupa)}`)}
-                    disabled={!selectedCursId || !selectedGrupa}
-                >
-                    🧾 Fișa de activitate — grupă curentă
-                </button>
-                <button onClick={handleApplyGauss} disabled={!selectedCursId}>
-                    📊 Aplică Gauss
-                </button>
+                    onClick={()=>navigate(`/app/catalog/activity-sheet/group/${idCurs}?grupa=${encodeURIComponent(selectedGr)}`)}
+                    disabled={!idCurs || !selectedGr}
+                >🧾 Fișa de activitate — grupă curentă</button>
+
+                <button onClick={handleGauss} disabled={!idCurs}>📊 Aplică Gauss</button>
+
+                <button onClick={saveGauss} disabled={!gaussPayload.length}>💾 Salvează note Gauss</button>
             </div>
 
-            {/* Afișare rezultate Gauss */}
-            {gaussResults && gaussResults.length > 0 && (
-                <div className="catalog-table" style={{ marginTop: '2rem' }}>
+            {gaussView.length>0 && (
+                <div className="catalog-table" style={{marginTop:"2rem"}}>
                     <h2>Note după Gauss (simulate)</h2>
-                    <table>
-                        <thead>
-                        <tr>
-                            <th>Student</th>
-                            <th>Notă scalată</th>
-                        </tr>
-                        </thead>
+                    <table><thead><tr><th>Student</th><th>Notă scalată</th></tr></thead>
                         <tbody>
-                        {gaussResults.map((g, i) => (
-                            <tr key={i}>
-                                <td>{g.name}</td>
-                                <td>{g.value}</td>
-                            </tr>
+                        {gaussView.map(r=>(
+                            <tr key={r.studentId}><td>{r.name}</td><td>{r.value}</td></tr>
                         ))}
                         </tbody>
                     </table>
@@ -242,6 +254,4 @@ const Administrator = () => {
             )}
         </div>
     );
-};
-
-export default Administrator;
+}
