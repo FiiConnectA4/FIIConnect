@@ -45,7 +45,7 @@ const NotificationBell = () => {
         };
 
         fetchInitial();
-        const socket = new SockJS(`/ws?token=${token}`);
+        const socket = new SockJS(`http://localhost:34101/ws?token=${token}`);
         const stompClient = new Client({
             webSocketFactory: () => socket,
             reconnectDelay: 5000,
