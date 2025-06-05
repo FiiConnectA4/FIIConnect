@@ -392,3 +392,60 @@
 .container-fisa {
     animation: fadeIn 0.3s ease-out;
 }
+
+/* Editable grade input style */
+.grade-input {
+    width: 60px;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+    color: #2c3e50;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.grade-input:focus {
+    border-color: #6195C9;
+    box-shadow: 0 0 4px rgba(97, 149, 201, 0.3);
+}
+
+/* Button to save */
+.save-button {
+    background-color: #27ae60;
+    color: white;
+    padding: 0.6rem 1.2rem;
+    font-weight: 600;
+    font-size: 0.95rem;
+    border-radius: 20px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(39, 174, 96, 0.25);
+    transition: background-color 0.2s ease;
+}
+
+.save-button:hover {
+    background-color: #1e874f;
+}
+
+[data-theme="dark"] .grade-input {
+    background-color: #2a2a2a;
+    border: 1px solid #555;
+    color: #e0e6ed;
+}
+
+[data-theme="dark"] .grade-input:focus {
+    border-color: #4A6C8A;
+    box-shadow: 0 0 4px rgba(74, 108, 138, 0.4);
+}
+
+[data-theme="dark"] .save-button {
+    background-color: #1e874f;
+    box-shadow: 0 2px 6px rgba(46, 204, 113, 0.15);
+}
+
+[data-theme="dark"] .save-button:hover {
+    background-color: #145c37;
+}

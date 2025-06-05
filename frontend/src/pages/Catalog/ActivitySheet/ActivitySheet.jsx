@@ -1,3 +1,4 @@
+// ... importurile tale
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import './ActivitySheet.css';
@@ -17,6 +18,7 @@ const ActivitySheet = () => {
     const [loading, setLoading] = useState(true);
 
     const token = localStorage.getItem('token');
+    const isEditable = userRole === 'ROLE_PROFESOR' || userRole === 'ROLE_ADMIN';
 
     useEffect(() => {
         if (!token) return;
@@ -54,24 +56,37 @@ const ActivitySheet = () => {
                 });
                 const formulaData = await formulaRes.json();
                 const comps = formulaData.components || [];
-
-                if (!comps.find(c => c.name.toLowerCase().includes('prezen'))) {
-                    comps.push({ name: 'Prezențe' });
-                }
                 setComponents(comps);
 
-                const scoresRes = await fetch(`${API_BASE_URL}/didactic/component-score/all/by-student?idStud=${routeStudentId || data.student.id}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                const scoresData = await scoresRes.json();
+                const studentToFetch = routeStudentId || data.student.id;
+                const scoredComponents = [];
 
-                const scoredComponents = comps.map(comp => {
-                    const score = scoresData.find(g => g.component?.name === comp.name);
-                    return {
-                        ...comp,
-                        nota: score?.value ?? '-'
-                    };
-                });
+                for (const comp of comps) {
+                    if (!comp.id) {
+                        scoredComponents.push({ ...comp, nota: '-' });
+                        continue;
+                    }
+
+                    try {
+                        const scoreRes = await fetch(`${API_BASE_URL}/didactic/component-score?idStud=${studentToFetch}&idComponent=${comp.id}`, {
+                            headers: { Authorization: `Bearer ${token}` }
+                        });
+
+                        if (scoreRes.ok) {
+                            const scoreData = await scoreRes.json();
+                            scoredComponents.push({
+                                ...comp,
+                                nota: scoreData?.value ?? '-',
+                                scoreId: scoreData?.id ?? null,
+                            });
+                        } else {
+                            scoredComponents.push({ ...comp, nota: '-', scoreId: null });
+                        }
+                    } catch (e) {
+                        console.warn(`Eroare la componenta ${comp.name}:`, e);
+                        scoredComponents.push({ ...comp, nota: '-', scoreId: null });
+                    }
+                }
 
                 setGrades(scoredComponents);
             } catch (err) {
@@ -83,6 +98,37 @@ const ActivitySheet = () => {
 
         fetchData();
     }, [courseId, token, routeStudentId]);
+
+    const handleGradeChange = (index, value) => {
+        setGrades(prev =>
+            prev.map((comp, idx) => idx === index ? { ...comp, nota: value } : comp)
+        );
+    };
+
+    const handleSave = async () => {
+        for (const comp of grades) {
+            if (!comp.id || comp.nota === '-') continue;
+            const payload = {
+                id: {
+                    idStud: studentId,
+                    idComponent: comp.id
+                },
+                value: parseFloat(comp.nota)
+            };
+
+            const method = comp.scoreId ? 'PUT' : 'POST';
+
+            await fetch(`${API_BASE_URL}/didactic/component-score`, {
+                method,
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+        }
+        alert("Notele au fost salvate!");
+    };
 
     if (loading) {
         return (
@@ -102,7 +148,6 @@ const ActivitySheet = () => {
                     <span className="title-icon">📋</span>
                     Fișă activitate — {student?.firstName} {student?.lastName}
                 </h1>
-
                 <button
                     onClick={() => navigate('/app/catalog')}
                     className="buton-catalog"
@@ -137,6 +182,11 @@ const ActivitySheet = () => {
                 <div className="activity-table">
                     <div className="table-header">
                         <h2>Evaluări și Note</h2>
+                        {isEditable && (
+                            <button className="save-button" onClick={handleSave}>
+                                💾 Salvează toate
+                            </button>
+                        )}
                     </div>
                     <div className="table-wrapper">
                         <table>
@@ -151,9 +201,20 @@ const ActivitySheet = () => {
                                 <tr key={idx} className={idx % 2 === 0 ? 'row-even' : 'row-odd'}>
                                     <td className="component-name">{comp.name}</td>
                                     <td className="grade-value">
+                                        {isEditable ? (
+                                            <input
+                                                type="number"
+                                                step="0.01"
+                                                min="1"
+                                                max="10"
+                                                value={comp.nota === '-' ? '' : comp.nota}
+                                                onChange={(e) => handleGradeChange(idx, e.target.value)}
+                                            />
+                                        ) : (
                                             <span className={`grade-badge ${comp.nota !== '-' ? 'has-grade' : 'no-grade'}`}>
-                                                {comp.nota}
-                                            </span>
+                                                    {comp.nota}
+                                                </span>
+                                        )}
                                     </td>
                                 </tr>
                             ))}

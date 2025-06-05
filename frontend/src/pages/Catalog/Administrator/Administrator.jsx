@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Administrator.css';
+import ProfessorActivitySheet from "../ActivitySheet/ProfessorActivitySheet";
 
 const Administrator = () => {
     const [grupe, setGrupe] = useState([]);
@@ -209,6 +210,16 @@ const Administrator = () => {
                         )}
                     </tbody>
                 </table>
+            </div>
+            <div className="catalog-buttons">
+                <button
+                    onClick={() =>
+                        navigate(`/app/catalog/activity-sheet/group/${selectedCursId}?grupa=${encodeURIComponent(selectedGrupa)}`)
+                    }
+                    disabled={!selectedCursId || !selectedGrupa}
+                >
+                    🧾 Fișa de activitate — grupă curentă
+                </button>
             </div>
         </div>
     );
