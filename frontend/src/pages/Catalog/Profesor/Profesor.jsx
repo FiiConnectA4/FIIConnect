@@ -222,7 +222,25 @@ const Profesor = () => {
                                             <button onClick={handleUndo}>↩️</button>
                                         </>
                                     ) : (
-                                        <button onClick={() => { setPrevGrade(item.grade); setEditingIndex(idx); setEditedGrade(item.grade); }}>✏️</button>
+                                        <>
+                                            <button
+                                                onClick={() => {
+                                                    setPrevGrade(item.grade);
+                                                    setEditingIndex(idx);
+                                                    setEditedGrade(item.grade);
+                                                }}
+                                            >
+                                                ✏️
+                                            </button>
+                                            <button
+                                                onClick={() =>
+                                                    navigate(`/app/catalog/activity-sheet/${selectedCursId}/${item.studentId}`)
+                                                }
+                                                title="Deschide fișa de activitate"
+                                            >
+                                                📋
+                                            </button>
+                                        </>
                                     )}
                                 </td>
                             </tr>
@@ -232,9 +250,6 @@ const Profesor = () => {
             </div>
             <div className="catalog-buttons">
                 <button onClick={handleUploadExcel}>Încarcă CSV</button>
-                <button onClick={() => navigate(`/app/catalog/activity-sheet/${c.courseId}`)}>
-                    <img src="/icons/edit-icon.png" alt="Fișa activitate" className="icon-img" />
-                </button>
             </div>
         </div>
     );

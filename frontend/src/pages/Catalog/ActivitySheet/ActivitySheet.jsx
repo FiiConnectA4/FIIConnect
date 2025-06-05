@@ -5,8 +5,11 @@ import './ActivitySheet.css';
 const API_BASE_URL = '';
 
 const ActivitySheet = () => {
-    const { courseId } = useParams();
+    const { courseId, studentId: routeStudentId } = useParams();
     const navigate = useNavigate();
+
+    const [userRole, setUserRole] = useState(null);
+    const [studentId, setStudentId] = useState(null);
     const [student, setStudent] = useState(null);
     const [components, setComponents] = useState([]);
     const [grades, setGrades] = useState([]);
@@ -20,21 +23,32 @@ const ActivitySheet = () => {
 
         const fetchData = async () => {
             try {
-                // Get student info
-                const studentRes = await fetch(`${API_BASE_URL}/person/me`, {
+                const res = await fetch(`${API_BASE_URL}/person/me`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                const studentData = await studentRes.json();
-                setStudent(studentData.student);
+                const data = await res.json();
+                setUserRole(data.role);
 
-                // Get course info
+                if (data.role === 'ROLE_STUDENT') {
+                    setStudentId(data.student?.id);
+                    setStudent(data.student);
+                } else if (routeStudentId) {
+                    setStudentId(routeStudentId);
+                    const stuRes = await fetch(`${API_BASE_URL}/didactic/student/${routeStudentId}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    const stuData = await stuRes.json();
+                    setStudent(stuData);
+                } else {
+                    throw new Error("Profesor/Admin fără studentId în URL");
+                }
+
                 const courseRes = await fetch(`${API_BASE_URL}/didactic/course/${courseId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 const courseData = await courseRes.json();
                 setCourse(courseData);
 
-                // Get formula info
                 const formulaRes = await fetch(`${API_BASE_URL}/didactic/course/${courseId}/formula`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -46,21 +60,11 @@ const ActivitySheet = () => {
                 }
                 setComponents(comps);
 
-                // Get all component scores by student
-                const scoresRes = await fetch(`${API_BASE_URL}/didactic/component-score/all/by-student?idStud=${studentData.student.id}`, {
+                const scoresRes = await fetch(`${API_BASE_URL}/didactic/component-score/all/by-student?idStud=${routeStudentId || data.student.id}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 const scoresData = await scoresRes.json();
 
-                // Map with component ID for faster access
-                const scoresMap = new Map();
-                for (const score of scoresData) {
-                    if (score.id && score.id.idComponent != null) {
-                        scoresMap.set(score.id.idComponent, score.value);
-                    }
-                }
-
-                // Match each formula component to its score
                 const scoredComponents = comps.map(comp => {
                     const score = scoresData.find(g => g.component?.name === comp.name);
                     return {
@@ -78,7 +82,7 @@ const ActivitySheet = () => {
         };
 
         fetchData();
-    }, [courseId, token]);
+    }, [courseId, token, routeStudentId]);
 
     if (loading) {
         return (

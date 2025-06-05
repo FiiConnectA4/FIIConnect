@@ -85,6 +85,7 @@ const AppRoutes = () => {
 
         <Route path="catalog" element={<Catalog />} />
           <Route path="catalog/activity-sheet/:courseId" element={<ActivitySheet />} />
+          <Route path="/app/catalog/activity-sheet/:courseId/:studentId" element={<ActivitySheet />} />
 
         {/* Rutele pentru orar */}
         <Route path="orar" element={<OrarToti />} />

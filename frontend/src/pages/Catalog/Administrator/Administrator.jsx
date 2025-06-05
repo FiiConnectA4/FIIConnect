@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Administrator.css';
 
 const Administrator = () => {
@@ -16,6 +17,7 @@ const Administrator = () => {
     const [prevGrade, setPrevGrade] = useState('');
 
     const token = localStorage.getItem('token');
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetch('/didactic/course', { headers: { 'Authorization': `Bearer ${token}` } })
@@ -182,16 +184,26 @@ const Administrator = () => {
                                     ) : (
                                         item.grade
                                     )}</td>
-                                    <td>{editingIndex === idx ? (
-                                        <>
-                                            <button onClick={() => handleSaveGrade(idx)}>💾</button>
-                                            <button onClick={handleUndo}>↩️</button>
-                                        </>
-                                    ) : (
-                                        <button onClick={() => { setPrevGrade(item.grade); setEditingIndex(idx); setEditedGrade(item.grade); }}>
-                                            ✏️
-                                        </button>
-                                    )}</td>
+                                    <td>
+                                        {editingIndex === idx ? (
+                                            <>
+                                                <button onClick={() => handleSaveGrade(idx)}>💾</button>
+                                                <button onClick={handleUndo}>↩️</button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <button onClick={() => { setPrevGrade(item.grade); setEditingIndex(idx); setEditedGrade(item.grade); }}>
+                                                    ✏️
+                                                </button>
+                                                <button
+                                                    onClick={() => navigate(`/app/catalog/activity-sheet/${selectedCursId}/${item.studentId}`)}
+                                                    title="Vezi fișa de activitate"
+                                                >
+                                                    📋
+                                                </button>
+                                            </>
+                                        )}
+                                    </td>
                                 </tr>
                             ))
                         )}
