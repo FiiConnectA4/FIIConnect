@@ -243,3 +243,56 @@
     background-color: rgba(88, 24, 69, 0.6);
     color: #f8d7da;
 }
+
+/* Stiluri pentru dropdown-ul rolurilor profesorilor */
+.role-dropdown {
+    padding: 0.75rem 1rem;
+    font-size: 15px;
+    color: #1a355e;
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 2px solid rgba(83, 122, 156, 0.15);
+    border-radius: 12px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%231a355e" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1.2em;
+    cursor: pointer;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+.role-dropdown:focus {
+    outline: none;
+    border-color: #537A9C;
+    box-shadow: 0 0 0 4px rgba(83, 122, 156, 0.1);
+    background-color: rgba(255, 255, 255, 1);
+}
+
+.role-dropdown option {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    color: #1a355e;
+    background-color: #ffffff;
+}
+
+/* Adaptare la tema întunecată */
+[data-theme='dark'] .role-dropdown {
+    background-color: rgba(58, 58, 58, 0.9);
+    border: 2px solid rgba(169, 197, 230, 0.3);
+    color: #e0e6ed;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23e0e6ed" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+}
+
+[data-theme='dark'] .role-dropdown:focus {
+    background-color: rgba(64, 64, 64, 1);
+    border-color: #a9c5e6;
+    box-shadow: 0 0 0 4px rgba(169, 197, 230, 0.2);
+}
+
+[data-theme='dark'] .role-dropdown option {
+    background-color: #3a3a3a;
+    color: #e0e6ed;
+}

@@ -131,13 +131,50 @@ const Profesor = () => {
                 const updated = [...catalog]; updated[index].grade = parsed;
                 setCatalog(updated);
                 setEditingIndex(null);
+                return updateFinalGrade(entry.studentId); // ✅ evaluare și salvare notă finală
             })
-            .catch(err => { console.error(err); alert('Eroare salvare nota: ' + err.message); });
+            .catch(err => {
+                console.error(err);
+                alert('Eroare salvare nota: ' + err.message);
+            });
     };
 
     const handleUndo = () => {
         setEditedGrade(prevGrade);
         setEditingIndex(null);
+    };
+
+    const updateFinalGrade = async (studentId) => {
+        try {
+            const formulaRes = await fetch(`/didactic/course/${selectedCursId}/formula`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!formulaRes.ok) throw new Error("Formulă inexistentă");
+            const formula = await formulaRes.json();
+
+            const gradeRes = await fetch(`/didactic/formula/${formula.id}/evaluate?idStud=${studentId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!gradeRes.ok) throw new Error("Eroare evaluare formulă");
+            const finalGrade = await gradeRes.json();
+
+            const postRes = await fetch('/didactic/grade', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(finalGrade)
+            });
+
+            if (!postRes.ok) throw new Error("Eroare salvare notă finală");
+            console.log(`Nota finală actualizată pentru studentul ${studentId}: ${finalGrade.value}`);
+        } catch (err) {
+            console.error("Eroare nota finală:", err);
+            alert("Eroare la actualizarea notei finale: " + err.message);
+        }
     };
 
     const handleUploadExcel = () => {

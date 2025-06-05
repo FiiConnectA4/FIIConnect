@@ -163,13 +163,16 @@ const ProfessorActivitySheet = () => {
             const formulaRes = await fetch(`/didactic/course/${courseId}/formula`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
+            console.log(formulaRes);
 
             if (!formulaRes.ok) throw new Error("Formulă inexistentă pentru acest curs");
             const formula = await formulaRes.json();
+            console.log(formula);
 
             const gradeRes = await fetch(`/didactic/formula/${formula.id}/evaluate?idStud=${studentId}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
+            console.log(gradeRes);
 
             if (!gradeRes.ok) throw new Error("Eroare la evaluarea formulei");
 
