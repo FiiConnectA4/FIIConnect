@@ -309,3 +309,105 @@
   .chat-messages {
   overflow-anchor: auto;
 }
+
+/* === DARK MODE SUPPORT === */
+[data-theme="dark"] .chat-container {
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+[data-theme="dark"] .chat-header h1 {
+  color: var(--text-color);
+}
+[data-theme="dark"] .chat-layout {
+  border-color: #222;
+}
+[data-theme="dark"] .chat-sidebar {
+  background-color: var(--sidebar-bg);
+  color: var(--text-color);
+  border-right: 1px solid #222;
+}
+[data-theme="dark"] .chat-main {
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+[data-theme="dark"] .chat-channel-header {
+  border-bottom: 1px solid #222;
+}
+[data-theme="dark"] .chat-channel-header h2 {
+  color: var(--text-color);
+}
+[data-theme="dark"] .channel-type-badge {
+  background-color: var(--main-blue, #335a77);
+  color: var(--text-white, #fff);
+}
+[data-theme="dark"] .chat-messages {
+  background-color: #232b39;
+  color: var(--text-color);
+}
+[data-theme="dark"] .no-messages {
+  color: #aaa;
+}
+[data-theme="dark"] .message.sent {
+  background-color: var(--main-blue, #335a77);
+  color: var(--text-white, #fff);
+}
+[data-theme="dark"] .message.received {
+  background-color: #232b39;
+  color: var(--text-color);
+}
+[data-theme="dark"] .message-sender {
+  color: var(--main-blue, #7ec9e6);
+}
+[data-theme="dark"] .message.sent .message-sender {
+  color: rgba(255,255,255,0.8);
+}
+[data-theme="dark"] .message.received .message-sender {
+  color: #7ec9e6;
+}
+[data-theme="dark"] .message-time {
+  color: #aaa;
+}
+[data-theme="dark"] .chat-input-form {
+  background-color: var(--sidebar-bg);
+}
+[data-theme="dark"] .chat-input-form input {
+  background: #232b39;
+  color: var(--text-color);
+  border: 1px solid #333;
+}
+[data-theme="dark"] .chat-input-form button {
+  background-color: var(--main-blue, #335a77);
+  color: var(--text-white, #fff);
+}
+[data-theme="dark"] .chat-input-form button:hover {
+  background-color: var(--main-blue-hover, #3a607c);
+}
+[data-theme="dark"] .channel-item {
+  background: transparent;
+  color: var(--text-color);
+}
+[data-theme="dark"] .channel-item:hover {
+  background-color: #232b39;
+}
+[data-theme="dark"] .channel-item.active {
+  background-color: var(--main-blue, #335a77);
+  color: var(--text-white, #fff);
+}
+[data-theme="dark"] .channel-item.active .channel-type {
+  color: rgba(255,255,255,0.7);
+}
+[data-theme="dark"] .channel-name.general { color: #7ec9e6; }
+[data-theme="dark"] .channel-name.an { color: #7ee67e; }
+[data-theme="dark"] .channel-name.materie { color: #e6c97e; }
+[data-theme="dark"] .channel-name.grupa { color: #e67e7e; }
+[data-theme="dark"] .channel-name.seminar { color: #c97ee6; }
+[data-theme="dark"] .channel-item.active .channel-name.general { color: #fff; }
+[data-theme="dark"] .channel-item.active .channel-name.an { color: #a8ffa8; }
+[data-theme="dark"] .channel-item.active .channel-name.materie { color: #ffe8a8; }
+[data-theme="dark"] .channel-item.active .channel-name.grupa { color: #ffb3b3; }
+[data-theme="dark"] .channel-item.active .channel-name.seminar { color: #a8e6ff; }
+
+/* Light mode: channel-type-badge text alb pentru vizibilitate */
+.channel-type-badge {
+  color: #fff !important;
+}
