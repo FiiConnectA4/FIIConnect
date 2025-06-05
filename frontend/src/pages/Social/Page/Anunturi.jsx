@@ -446,7 +446,6 @@ function Anunturi() {
   if (error) return <div className="error">{error}</div>;
   if (!fullUser) return <div className="error">Datele utilizatorului nu sunt disponibile</div>;
 
-  console.log("Current user:", fullUser);
 
   return (
     <div className="announcements-container">
@@ -731,7 +730,7 @@ function Anunturi() {
         ) : (
           announcementsToDisplay.map((announcement) => {
             // Determină id-ul autorului din toate variantele posibile
-            const authorId = announcement.authorId || announcement.author || (announcement.professor && announcement.professor.id);
+            const authorId = announcement.author || announcement.authorId;
             return (
               <div key={announcement.id} className="announcement-card">
                 <div className="announcement-header">
