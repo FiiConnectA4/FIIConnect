@@ -86,7 +86,7 @@ public class UserProfileController {
     }
 
     @PutMapping("/admin/{username}")
-    @RolesAllowed({"ROLE_ADMIN", "ROLE_PROFESSOR"})
+    @RolesAllowed({"ROLE_ADMIN", "ROLE_PROFESOR"})
     public ResponseEntity<?> adminUpdateProfile(@PathVariable String username,
                                                 @RequestBody FullUpdateUserProfileRequest dto) {
         User user = userRepository.findByUsername(username);

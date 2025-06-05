@@ -1,16 +1,4 @@
-.sidebar {
-    width: 240px;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    background: var(--sidebar-bg);
-    color: var(--text-color);
-    padding: 1.5rem 1rem;
-    box-sizing: border-box;
-  }
-  
-  .logo {
+.logo {
     font-size: 1.8rem;
     font-weight: bold;
     margin-bottom: 2rem;
@@ -64,3 +52,30 @@
     margin-bottom: 0.5rem;
     color: #888;
   }
+
+.main-content {
+  margin-left: 300px;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+:root {
+  --sidebar-width: 240px;
+  --sidebar-offset: 0px;
+}
+
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-offset);
+  bottom: 0;
+  width: var(--sidebar-width);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 1rem;
+  box-sizing: border-box;
+  background: var(--sidebar-bg);
+  z-index: 1000;
+}
+

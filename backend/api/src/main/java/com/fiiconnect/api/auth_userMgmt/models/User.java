@@ -2,11 +2,14 @@ package com.fiiconnect.api.auth_userMgmt.models;
 
 import com.fiiconnect.api.didactic.models.Professor;
 import com.fiiconnect.api.didactic.models.Student;
+import com.fiiconnect.api.social_secretary.classes.Tag;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 
@@ -32,7 +35,13 @@ public class User {
     @Column(name = "two_factor_secret")
     private String twoFactorSecret;
 
+    @Column(name="is_active", columnDefinition = "NUMBER(1)")
     private boolean isActive = false;
+
+    public boolean isActive() {
+        return isActive;
+    }
+
     private String pendingTwoFactorSecret;
     private boolean twoFactorEnabled = false;
 
@@ -58,4 +67,13 @@ public class User {
             joinColumns        = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "professor_id"))
     private Professor professor;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "user_tags",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private Set<Tag> tags = new HashSet<>();
+
 }

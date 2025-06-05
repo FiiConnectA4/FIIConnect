@@ -1,5 +1,8 @@
 package com.fiiconnect.api.social_secretary.classes;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
+import com.fiiconnect.api.auth_userMgmt.models.User;
 import com.fiiconnect.api.social_secretary.enums.ChatType;
 import jakarta.persistence.*;
 
@@ -14,9 +17,8 @@ public class Chat {
 
     private String message;
 
-    @ManyToOne
-    @JoinColumn(name = "sender_id")
-    private User_Anunturi sender;
+    @JsonProperty("sender")
+    private Long sender;
 
 
     private String timestamp;
@@ -30,7 +32,7 @@ public class Chat {
 
     public Chat() {}
 
-    public Chat(String message, User_Anunturi sender, String timestamp, ChatType type, Long channelId) {
+    public Chat(String message, Long sender, String timestamp, ChatType type, Long channelId) {
         this.message = message;
         this.sender = sender;
         this.timestamp = timestamp;
@@ -62,14 +64,13 @@ public class Chat {
         this.message = message;
     }
 
-    public User_Anunturi getSender() {
+    public Long getSender() {
         return sender;
     }
 
-    public void setSender(User_Anunturi sender) {
+    public void setSender(Long sender) {
         this.sender = sender;
     }
-
 
 
     public String getTimestamp() {

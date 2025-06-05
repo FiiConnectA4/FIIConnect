@@ -34,8 +34,8 @@ public class CRUDStudentController {
         this.repository = repository;
     }
 
-    //@PreAuthorize("hasRole('ADMIN')")
-    @PostMapping("didactic/enroll/student")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/didactic/student")
     public ResponseEntity<EntityModel<Student>> create(@RequestBody Student student) throws URISyntaxException {
         if (repository.existsByCnp(student.getCnp())) {
             throw new StudentAlreadyEnrolled(student.getCnp());
@@ -56,8 +56,8 @@ public class CRUDStudentController {
     }
 
     // Example: didactic/enroll?studentId=x&courseId=y$faculty_group=z
-   // @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("didactic/enroll")
+    @PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/didactic/enroll")
     public ResponseEntity<Object> updateEnroll(@RequestParam Long studentId, @RequestParam Long courseId, @RequestParam String facultyGroup) {
         if(repository.findById(studentId).isEmpty())
             throw new StudentNotFoundException(studentId);
@@ -73,8 +73,8 @@ public class CRUDStudentController {
     }
 
     // Example: didactic/unenroll?studentId=x&courseId=y$faculty_group=z
-    //@PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("didactic/unenroll")
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/didactic/enroll")
     public ResponseEntity<Object> updateUnenroll(@RequestParam Long studentId, @RequestParam Long courseId, @RequestParam String facultyGroup) {
         if(repository.findById(studentId).isEmpty())
             throw new StudentNotFoundException(studentId);
@@ -91,8 +91,8 @@ public class CRUDStudentController {
     }
 
     // Will also unenroll student from all of his courses (cascade)
-    //@PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("didactic/unenroll/student/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/didactic/student/{id}")
     public ResponseEntity<EntityModel<Student>> delete(@PathVariable Long id){
         if (!repository.existsById(id)) {
             throw new StudentNotFoundException(id);

@@ -2,57 +2,154 @@ import { useEffect, useState } from 'react';
 import './Profesor.css';
 
 const Profesor = () => {
-    const mockCatalog = {
-        '2A4': {
-            'Introducere Programare': [
-                { name: 'Lindsey Stroud', grade: 9 },
-                { name: 'Sarah Brown', grade: 7 },
-                { name: 'Michael Owen', grade: 9 },
-                { name: 'Ivory Jane', grade: 9 },
-                { name: 'Peter Odell', grade: 10 }
-            ]
-        },
-        '2A5': {
-            'Programare Avansata': [
-                { name: 'Ion Popescu', grade: 8 },
-                { name: 'Maria Ionescu', grade: 9 }
-            ]
-        }
-    };
+    const [profesorId, setProfesorId] = useState(null);
+
+    const [cursuri, setCursuri] = useState([]);
+    const [selectedCursId, setSelectedCursId] = useState(null);
 
     const [grupe, setGrupe] = useState([]);
     const [selectedGrupa, setSelectedGrupa] = useState('');
-    const [cursuri, setCursuri] = useState([]);
-    const [selectedCurs, setSelectedCurs] = useState('');
+
     const [catalog, setCatalog] = useState([]);
     const [loading, setLoading] = useState(false);
 
+    const [editingIndex, setEditingIndex] = useState(null);
+    const [editedGrade, setEditedGrade] = useState('');
+    const [prevGrade, setPrevGrade] = useState('');
+
+    const token = localStorage.getItem('token');
     useEffect(() => {
-        const availableGrupe = Object.keys(mockCatalog);
-        setGrupe(availableGrupe);
-        setSelectedGrupa(availableGrupe[0]);
+        fetch('/person/me', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(res => res.json())
+            .then(data => {
+                if (data.role === "ROLE_PROFESOR" && data.professor?.id) {
+                    setProfesorId(data.professor.id);
+                } else {
+                    console.error("Nu s-a putut obține profesorId.");
+                }
+            })
+            .catch(err => console.error("Eroare la fetch /person/me:", err));
     }, []);
-
     useEffect(() => {
-        if (!selectedGrupa) return;
-        const availableCursuri = Object.keys(mockCatalog[selectedGrupa]);
-        setCursuri(availableCursuri);
-        setSelectedCurs(availableCursuri[0]);
-    }, [selectedGrupa]);
-
+        if (!profesorId) return;
+        fetch(`/didactic/professor/${profesorId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+            .then(res => res.json())
+            .then(data => {
+                const courses = (data.courses || [])
+                    .map(c => c.course)
+                    .filter(c => c.archived !== 1);
+                setCursuri(courses);
+                if (courses.length) setSelectedCursId(courses[0].id);
+            })
+            .catch(err => console.error(err));
+    }, [profesorId, token]);
     useEffect(() => {
-        if (!selectedGrupa || !selectedCurs) return;
+        if (!selectedCursId) return;
         setLoading(true);
-        setTimeout(() => {
-            const data = mockCatalog[selectedGrupa]?.[selectedCurs] || [];
-            setCatalog(data);
-            setLoading(false);
-        }, 300);
-    }, [selectedGrupa, selectedCurs]);
+        Promise.all([
+            fetch(`/didactic/course/${selectedCursId}/enrolled`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
+            fetch(`/didactic/course/${selectedCursId}/grades`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json())
+        ])
+            .then(([enrollments, grades]) => {
+                const uniqueGroups = [...new Set(enrollments.map(e => e.student.facultyGroup))];
+                setGrupe(uniqueGroups);
+                const defaultGroup = uniqueGroups[0] || '';
+                setSelectedGrupa(defaultGroup);
 
-    const handleUploadExcel = () => alert("Upload Excel (mock)");
-    const handleDownloadExcel = () => alert("Download Excel (mock)");
-    const handleCerereMutare = () => alert("Cerere mutare grupă activitate trimisă (mock)");
+                // build initial catalog for default group
+                const students = enrollments
+                    .filter(e => e.student.facultyGroup === defaultGroup)
+                    .map(e => e.student);
+                const initCatalog = students.map(student => {
+                    const g = grades.find(x => x.student.id === student.id);
+                    return { name: `${student.firstName} ${student.lastName}`, grade: g ? g.value : '', studentId: student.id };
+                });
+                setCatalog(initCatalog);
+                setLoading(false);
+            })
+            .catch(err => { console.error(err); setLoading(false); });
+    }, [selectedCursId, token]);
+
+    // Refresh catalog when group changes
+    useEffect(() => {
+        if (!selectedCursId || !selectedGrupa) return;
+        setLoading(true);
+        Promise.all([
+            fetch(`/didactic/course/${selectedCursId}/enrolled`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
+            fetch(`/didactic/course/${selectedCursId}/grades`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json())
+        ])
+            .then(([enrollments, grades]) => {
+                const students = enrollments
+                    .filter(e => e.student.facultyGroup === selectedGrupa)
+                    .map(e => e.student);
+                const newCatalog = students.map(student => {
+                    const g = grades.find(x => x.student.id === student.id);
+                    return { name: `${student.firstName} ${student.lastName}`, grade: g ? g.value : '', studentId: student.id };
+                });
+                setCatalog(newCatalog);
+                setLoading(false);
+            })
+            .catch(err => { console.error(err); setLoading(false); });
+    }, [selectedCursId, selectedGrupa, token]);
+
+    const handleSaveGrade = (index) => {
+        const entry = catalog[index];
+        if (!entry) return;
+        const parsed = parseFloat(editedGrade);
+        if (isNaN(parsed) || parsed < 1 || parsed > 10) {
+            alert('Nota trebuie să fie între 1 și 10.');
+            return;
+        }
+        const dateNow = new Date().toISOString();
+        const hasExisting = entry.grade !== '';
+        const method = hasExisting ? 'PUT' : 'POST';
+        const payload = hasExisting
+            ? {
+                id: { idStud: entry.studentId, idCourse: selectedCursId },
+                value: parsed
+            }
+            : {
+                id: { idStud: entry.studentId, idCourse: selectedCursId },
+                value: parsed,
+                gradingDate: dateNow
+            };
+
+        fetch('/didactic/grade', {
+            method,
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            body: JSON.stringify(payload)
+        })
+            .then(res => {
+                if (!res.ok) throw new Error(`Eroare ${method}`);
+                const updated = [...catalog]; updated[index].grade = parsed;
+                setCatalog(updated);
+                setEditingIndex(null);
+            })
+            .catch(err => { console.error(err); alert('Eroare salvare nota: ' + err.message); });
+    };
+
+    const handleUndo = () => {
+        setEditedGrade(prevGrade);
+        setEditingIndex(null);
+    };
+
+    const handleUploadExcel = () => {
+        // TODO: implementare încărcare fișier Excel
+        console.log('Triggered upload');
+    };
+
+    const handleDownloadExcel = () => {
+        // TODO: implementare descărcare fișier Excel
+        console.log('Triggered download');
+    };
+
+    const currentCourseTitle = cursuri.find(c => c.id === selectedCursId)?.title || '';
 
     return (
         <div className="container-catalog">
@@ -62,57 +159,49 @@ const Profesor = () => {
                     <select value={selectedGrupa} onChange={e => setSelectedGrupa(e.target.value)}>
                         {grupe.map((g, i) => <option key={i} value={g}>{g}</option>)}
                     </select>
-
-                    <select value={selectedCurs} onChange={e => setSelectedCurs(e.target.value)}>
-                        {cursuri.map((c, i) => <option key={i} value={c}>{c}</option>)}
+                    <select value={selectedCursId || ''} onChange={e => setSelectedCursId(parseInt(e.target.value, 10))}>
+                        {cursuri.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
                     </select>
                 </div>
             </div>
-
             <div className="catalog-table">
                 <table>
                     <thead>
-                        <tr className='titlu'>
+                        <tr className="titlu">
                             <th>Nume student</th>
-                            <th>Titlu curs</th>
+                            <th>{`Titlu curs`}</th>
                             <th>Nota finală</th>
-                            <th>Administrative Note</th>
+                            <th>Administrare</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {loading ? (
-                            <tr><td colSpan="4">Se încarcă...</td></tr>
-                        ) : catalog.length === 0 ? (
-                            <tr><td colSpan="4">Nicio înregistrare.</td></tr>
-                        ) : (
-                            catalog.map((item, index) => (
-                                <tr key={index}>
-                                    <td>{item.name}</td>
-                                    <td>{selectedCurs}</td>
-                                    <td>{item.grade}</td>
-                                    <td>
-                                        <button
-                                            className="admin-button"
-                                            onClick={() => alert(`Deschide fișa pentru ${item.name}`)}
-                                        >
-                                            <img
-                                                src="/icons/edit-icon.png"
-                                                alt="Admin Note"
-                                                className="icon-img"
-                                            />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))
-                        )}
+                        {loading && <tr><td colSpan="4">Se încarcă...</td></tr>}
+                        {!loading && catalog.length === 0 && <tr><td colSpan="4">Nicio înregistrare.</td></tr>}
+                        {!loading && catalog.map((item, idx) => (
+                            <tr key={idx}>
+                                <td>{item.name}</td>
+                                <td>{currentCourseTitle}</td>
+                                <td>{editingIndex === idx ? (
+                                    <input type="number" value={editedGrade} onChange={e => setEditedGrade(e.target.value)} />
+                                ) : item.grade}</td>
+                                <td>
+                                    {editingIndex === idx ? (
+                                        <>
+                                            <button onClick={() => handleSaveGrade(idx)}>💾</button>
+                                            <button onClick={handleUndo}>↩️</button>
+                                        </>
+                                    ) : (
+                                        <button onClick={() => { setPrevGrade(item.grade); setEditingIndex(idx); setEditedGrade(item.grade); }}>✏️</button>
+                                    )}
+                                </td>
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
             </div>
-
             <div className="catalog-buttons">
-                <button onClick={handleUploadExcel}>Upload Excel</button>
-                <button onClick={handleDownloadExcel}>Download Excel</button>
-                <button onClick={handleCerereMutare}>Cerere mutare grupa activitate</button>
+                <button onClick={handleUploadExcel}>Încarcă Excel</button>
+                <button onClick={handleDownloadExcel}>Descarcă Excel</button>
             </div>
         </div>
     );
