@@ -12,9 +12,6 @@ export default function Profesor() {
     const [selGr, setSelGr] = useState("");
     const [selectedGrupa, setSelectedGrupa] = useState('');
 
-    const [catalog, setCatalog] = useState([]);
-    const [loading, setLoading] = useState(false);
-
     const [editingIndex, setEditingIndex] = useState(null);
     const [editedGrade, setEditedGrade] = useState('');
     const [prevGrade, setPrevGrade] = useState('');
@@ -119,7 +116,6 @@ export default function Profesor() {
     const [scaledGrades, setScaledGrades] = useState([]);
     const [lastAlgo, setLastAlgo] = useState(null);
 
-    const token = localStorage.getItem("token");
     const nav = useNavigate();
     const authHead = { Authorization: `Bearer ${token}` };
 
