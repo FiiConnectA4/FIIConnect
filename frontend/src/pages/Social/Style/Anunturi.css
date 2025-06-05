@@ -405,3 +405,105 @@
   text-align: center;
   margin: 0 5px;
 }
+
+/* === DARK MODE SUPPORT === */
+[data-theme="dark"] .announcements-container {
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+[data-theme="dark"] .announcements-header h1 {
+  color: var(--text-color);
+}
+[data-theme="dark"] .announcement-card {
+  background-color: var(--sidebar-bg);
+  color: var(--text-color);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+[data-theme="dark"] .add-button {
+  background-color: var(--main-blue, #335a77);
+  color: var(--text-white, #fff);
+}
+[data-theme="dark"] .add-button:hover {
+  background-color: var(--main-blue-hover, #3a607c);
+}
+[data-theme="dark"] .add-button:disabled {
+  background-color: #444;
+}
+[data-theme="dark"] .announcement-header h2,
+[data-theme="dark"] .announcement-meta,
+[data-theme="dark"] .announcement-author,
+[data-theme="dark"] .announcement-date {
+  color: var(--text-color);
+}
+[data-theme="dark"] .announcement-message {
+  color: var(--text-color);
+}
+[data-theme="dark"] .announcement-tags-header {
+  color: var(--text-color);
+}
+[data-theme="dark"] .modal-content {
+  background-color: var(--sidebar-bg);
+  color: var(--text-color);
+}
+[data-theme="dark"] .form-group input,
+[data-theme="dark"] .form-group textarea,
+[data-theme="dark"] .form-group select {
+  background: #232b39;
+  color: var(--text-color);
+  border: 1px solid #333;
+}
+[data-theme="dark"] .modal-actions button:first-child {
+  background-color: var(--main-blue, #335a77);
+  color: var(--text-white, #fff);
+}
+[data-theme="dark"] .modal-actions button:last-child {
+  background-color: #232b39;
+  color: var(--text-color);
+}
+[data-theme="dark"] .tag.general {
+  background-color: #2a3b4d;
+  color: #7ec9e6;
+}
+[data-theme="dark"] .tag.materie {
+  background-color: #233b2a;
+  color: #7ee67e;
+}
+[data-theme="dark"] .tag.an {
+  background-color: #4d3b2a;
+  color: #e6c97e;
+}
+[data-theme="dark"] .tag.seminar {
+  background-color: #3b2a4d;
+  color: #c97ee6;
+}
+[data-theme="dark"] .tag.grupa {
+  background-color: #2a334d;
+  color: #7eaee6;
+}
+[data-theme="dark"] .tag-item {
+  background-color: #2a3b4d;
+  color: #7ec9e6;
+}
+[data-theme="dark"] .remove-tag-button {
+  color: #ff8888;
+}
+[data-theme="dark"] .notification {
+  color: #fff;
+}
+[data-theme="dark"] .notification.error { background-color: #b91c1c; }
+[data-theme="dark"] .notification.warning { background-color: #b98c1c; }
+[data-theme="dark"] .no-tags-message {
+  background-color: #232b39;
+  color: #aaa;
+}
+[data-theme="dark"] .loading {
+  color: #aaa;
+}
+[data-theme="dark"] .error {
+  background-color: #3b2323;
+  color: #ff8888;
+}
+[data-theme="dark"] .no-tags-warning {
+  background-color: #3b2323;
+  color: #ff8888;
+}

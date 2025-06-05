@@ -436,3 +436,127 @@
     width: 100%;
   }
 }
+
+/* === DARK MODE SUPPORT === */
+[data-theme="dark"] .secretariat-container {
+  background: var(--bg-color);
+  color: var(--text-color);
+}
+[data-theme="dark"] .secretariat-header {
+  border-bottom: 1px solid #222;
+}
+[data-theme="dark"] .secretariat-titlu h1,
+[data-theme="dark"] .secretariat-titlu h2 {
+  color: var(--text-color);
+}
+[data-theme="dark"] .switch-button {
+  background-color: var(--main-blue, #335a77);
+  color: var(--text-white, #fff);
+}
+[data-theme="dark"] .switch-button:hover {
+  background-color: var(--main-blue-hover, #3a607c);
+}
+[data-theme="dark"] .search-section,
+[data-theme="dark"] .tags-section {
+  background-color: var(--sidebar-bg);
+  color: var(--text-color);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+[data-theme="dark"] .search-input,
+[data-theme="dark"] .dropdown-group select {
+  background: #232b39;
+  color: var(--text-color);
+  border: 1px solid #333;
+}
+[data-theme="dark"] .user-item {
+  background-color: #232b39;
+  color: var(--text-color);
+  border: 1px solid #333;
+}
+[data-theme="dark"] .user-item.selected {
+  background-color: #335a77;
+  border-color: var(--main-blue, #335a77);
+  box-shadow: 0 0 0 1px var(--main-blue, #335a77);
+}
+[data-theme="dark"] .user-name {
+  color: #fff;
+}
+[data-theme="dark"] .user-role {
+  background-color: #232b39;
+  color: var(--text-color);
+}
+[data-theme="dark"] .add-tag-button {
+  background-color: var(--main-blue, #335a77);
+  color: var(--text-white, #fff);
+}
+[data-theme="dark"] .add-tag-button:hover {
+  background-color: var(--main-blue-hover, #3a607c);
+}
+[data-theme="dark"] .add-tag-button:disabled {
+  background-color: #444;
+}
+[data-theme="dark"] .tag-item {
+  background-color: #232b39;
+  color: var(--text-color);
+  border-left-color: var(--main-blue, #335a77);
+}
+[data-theme="dark"] .tag-type {
+  background-color: #232b39;
+  color: var(--main-blue, #7ec9e6);
+}
+[data-theme="dark"] .remove-tag-button {
+  color: #ff8888;
+}
+[data-theme="dark"] .notification.error {
+  background-color: #3b2323;
+  color: #ff8888;
+  border-left: 4px solid #b91c1c;
+}
+[data-theme="dark"] .notification.success {
+  background-color: #233b2a;
+  color: #7ee67e;
+  border-left: 4px solid #22c55e;
+}
+[data-theme="dark"] .loading-message {
+  color: #aaa;
+}
+[data-theme="dark"] .tag-item.GENERAL {
+  background-color: #fef9c3;
+  border-left-color: #fde047;
+}
+[data-theme="dark"] .tag-type.GENERAL {
+  background-color: #fde047;
+  color: #fff;
+}
+[data-theme="dark"] .tag-item.GRUPA {
+  background-color: #e0e7ff;
+  border-left-color: #3b82f6;
+}
+[data-theme="dark"] .tag-type.GRUPA {
+  background-color: #3b82f6;
+  color: #fff;
+}
+[data-theme="dark"] .tag-item.MATERIE {
+  background-color: #dcfce7;
+  border-left-color: #22c55e;
+}
+[data-theme="dark"] .tag-type.MATERIE {
+  background-color: #22c55e;
+  color: #fff;
+}
+[data-theme="dark"] .tag-item.AN {
+  background-color: #fee2e2;
+  border-left-color: #ef4444;
+}
+[data-theme="dark"] .tag-type.AN {
+  background-color: #ef4444;
+  color: #fff;
+}
+[data-theme="dark"] .tag-item.SEMIAN {
+  background-color: #d3cbf7;
+  border-left-color: #a21caf;
+}
+[data-theme="dark"] .tag-type.SEMIAN {
+  background-color: #a21caf;
+  color: #fff;
+}
