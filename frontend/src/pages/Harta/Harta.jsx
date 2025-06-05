@@ -30,11 +30,11 @@ const Harta = () => {
   const [rezervareStatus, setRezervareStatus] = useState(null);
 
   const saliPeEtaj = {
-    Demisol: ["112"],
-    Parter: ["210", "C2"],
-    "Etajul 1": ["308", "309"],
-    "Etajul 2": ["401", "403", "405", "409", "411", "412", "413"],
-    "Etajul 7": ["901", "903", "905", "909"],
+    Demisol: ["C112"],
+    Parter: ["C210", "C2"],
+    "Etajul 1": ["C308", "C309"],
+    "Etajul 2": ["C401", "C403", "C405", "C409", "C411", "C412", "C413"],
+    "Etajul 7": ["C901", "C903", "C905", "C909"],
   };
 
   const etaje = [
@@ -61,8 +61,8 @@ const Harta = () => {
         return res.json();
       })
       .then((data) => {
-        if (data.profesor && data.profesor.id) {
-          setProfesorId(data.profesor.id);
+        if (data.professor && data.professor.id) {
+          setProfesorId(data.professor.id);
         } else {
           console.warn("Nu s-a găsit profesorId în răspuns");
         }

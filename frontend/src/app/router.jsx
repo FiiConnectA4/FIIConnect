@@ -104,13 +104,11 @@ const AppRoutes = () => {
         <Route path="orar-secretariat/discipline" element={<OrarSecretariat />} />
         <Route path="orar-secretariat/discipline/:disciplina" element={<OrarSecretariat />} />
 
-        <Route path="secretariat" element={<Secretariat />}>
-          <Route path="cerere-decontare" element={<CerereDecontari />} />
-          <Route path="cerere-adeverinte" element={<SecretariatCerereAdeverinte />} />
-          <Route path="cerere-bursa-sociala" element={<SecretariatBursaSociala />} />
-          <Route path="cerere-caz-social" element={<SecretariatCazSocial />} />
-          <Route path="atribuire-taguri" element={<AtribuireTaguri />} />
-        </Route>
+        <Route path="secretariat" element={<Secretariat />} />
+        <Route path="secretariat/cerere-adeverinte" element={<SecretariatCerereAdeverinte />} />
+        <Route path="secretariat/cerere-bursa-sociala" element={<SecretariatBursaSociala />} />
+        <Route path="secretariat/cerere-caz-social" element={<SecretariatCazSocial />} />
+        <Route path="secretariat/atribuire-taguri" element={<AtribuireTaguri />} />
 
                 <Route path="orar-secretariat" element={<OrarSecretariat />} />
                 <Route path="orar-secretariat/studenti" element={<OrarSecretariat />} />

@@ -32,14 +32,17 @@ const CerereCazSocial = () => {
         return res.json();
       })
       .then((data) => {
-        setStudentId(data.id);
-        // Presupunem că API-ul returnează și nume, prenume și nr matricol
-        setFormData((prev) => ({
-          ...prev,
-          nume: data.nume || "",
-          prenume: data.prenume || "",
-          numarMatricol: data.numarMatricol || "",
-        }));
+        if (data.student) {
+          setStudentId(data.student.id);
+          setFormData({
+            nume: data.student.firstName || "",
+            prenume: data.student.lastName || "",
+            numarMatricol: data.student.regNumber || "",
+            adresa: "",
+          });
+        } else {
+          alert("Studentul nu este identificat în răspuns");
+        }
         setLoading(false);
       })
       .catch((err) => {

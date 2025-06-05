@@ -37,6 +37,7 @@ const DotariSala = ({ isSecretariat = false }) => {
       .then(res => res.json())
       .then(data => {
         const salaObj = data[0];
+        console.log(salaObj);
         setSalaData(salaObj);
         setEditData({
           dotari: salaObj.dotari || '',
