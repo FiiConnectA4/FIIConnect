@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import SockJS from "sockjs-client";
 import { Stomp } from "@stomp/stompjs";
+import { API_ROUTES } from '../../../app/router';
 import "../Style/Chat.css";
 
 function Chat() {
@@ -14,6 +15,7 @@ function Chat() {
   const [activeChannel, setActiveChannel] = useState(null);
   const [userTags, setUserTags] = useState([]);
   const [pendingMessages, setPendingMessages] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
 
   const messagesEndRef = useRef(null);
 
@@ -23,10 +25,10 @@ function Chat() {
         setLoading(true);
         const token = localStorage.getItem('token');
         // Fetch user info, tags, and role from unified endpoint
-        const response = await fetch("http://localhost:34101/person/me", {
-          headers: { 'Authorization': `Bearer ${token}` }
+        const response = await fetch(API_ROUTES.PERSON_ME, {
+          headers: { 'Authorization': `Bearer ${token}` },
         });
-        if (!response.ok) throw new Error("Failed to fetch user info");
+        if (!response.ok) throw new Error('Failed to fetch user info');
         const user = await response.json();
         console.log("User primit de la backend:", user); // DEBUG: vezi structura user-ului
         setCurrentUser({
@@ -44,18 +46,17 @@ function Chat() {
         } else {
           // Always send Authorization header for channel fetch
           const channelsResponse = await fetch(
-            `http://localhost:34101/channel/with-tags?tagIds=${tagIds.join(',')}`,
-            { headers: { 'Authorization': `Bearer ${token}` } }
+            `${API_ROUTES.CHANNEL_WITH_TAGS}?tagIds=${tagIds.join(',')}`,
+            { headers: { 'Authorization': `Bearer ${token}` } },
           );
-          if (!channelsResponse.ok) {
-            const errorText = await channelsResponse.text();
-            throw new Error(errorText || "Failed to fetch channels");
-          }
+          if (!channelsResponse.ok) throw new Error('Failed to fetch channels');
           const channelsData = await channelsResponse.json();
-          setChannels(channelsData);
-          if (channelsData.length > 0) {
-            setActiveChannel(channelsData[0]);
-            loadChannelMessages(channelsData[0].id, token);
+          // Sorteaza canalele lexicografic si seteaza primul ca activ
+          const sorted = channelsData.slice().sort((a, b) => a.name.localeCompare(b.name));
+          setChannels(sorted);
+          if (sorted.length > 0) {
+            setActiveChannel(sorted[0]);
+            loadChannelMessages(sorted[0].id, token);
           } else {
             setActiveChannel(null);
           }
@@ -73,9 +74,10 @@ function Chat() {
     try {
       setMessages([]);
       const token = tokenOverride || localStorage.getItem('token');
-      const response = await fetch(`http://localhost:34101/chat/get-chats/${channelId}`,
-        { headers: { 'Authorization': `Bearer ${token}` } });
-      if (!response.ok) throw new Error("Failed to fetch channel messages");
+      const response = await fetch(`${API_ROUTES.CHAT_GET_CHATS}/${channelId}`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      });
+      if (!response.ok) throw new Error('Failed to fetch channel messages');
       const data = await response.json();
       setMessages(data);
     } catch (err) {
@@ -86,7 +88,7 @@ function Chat() {
   useEffect(() => {
     if (!currentUser || !activeChannel) return;
 
-    const socket = new SockJS('http://localhost:34101/ws');
+    const socket = new SockJS(API_ROUTES.WS);
     const client = Stomp.over(socket);
 
     client.connect({}, () => {
@@ -198,6 +200,33 @@ function Chat() {
     return 'general';
   };
 
+  // Fetch all users for name lookup
+  const fetchAllUsers = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(API_ROUTES.PERSON_GET_ALL, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!response.ok) throw new Error('Failed to fetch all users');
+      const data = await response.json();
+      setAllUsers(data);
+    } catch (err) {
+      console.error('Error fetching all users:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllUsers();
+    // ...existing code...
+  }, []);
+
+  // Helper to get full name by userId
+  const getUserNameById = (userId) => {
+    const user = allUsers.find(u => u.userId === userId || u.id === userId);
+    if (!user) return `User ${userId}`;
+    return `${user.firstName || ''} ${user.lastName || ''}`.trim();
+  };
+
   if (loading) return <div className="loading">Se încarcă...</div>;
   if (error) return <div className="error">{error}</div>;
   if (!currentUser) return <div className="error">Nu ești autentificat</div>;
@@ -235,9 +264,7 @@ function Chat() {
                         <div className="message-sender">
                           {isSentByCurrentUser
                             ? 'Tu'
-                            : (typeof message.sender === "object"
-                                ? message.sender?.name
-                                : `User ${message.sender}`)}
+                            : getUserNameById(senderId)}
                         </div>
                         <div className="message-text">{message.message}</div>
                         <div className="message-time">
@@ -273,20 +300,23 @@ function Chat() {
         <div className="chat-sidebar">
           <h2>Canale disponibile</h2>
           <ul className="channel-list">
-            {channels.map((channel) => (
-              <li
-                key={channel.id}
-                className={`channel-item ${activeChannel?.id === channel.id ? 'active' : ''}`}
-                onClick={() => handleChannelChange(channel)}
-              >
-                <span className={`channel-name ${getChannelTypeClass(channel)}`}>
-                  {channel.name}
-                </span>
-                <span className="channel-type">
-                  {getChannelTypeClass(channel)}
-                </span>
-              </li>
-            ))}
+            {channels
+              .slice()
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((channel) => (
+                <li
+                  key={channel.id}
+                  className={`channel-item ${activeChannel?.id === channel.id ? 'active' : ''}`}
+                  onClick={() => handleChannelChange(channel)}
+                >
+                  <span className={`channel-name ${getChannelTypeClass(channel)}`}>
+                    {channel.name}
+                  </span>
+                  <span className="channel-type">
+                    {getChannelTypeClass(channel)}
+                  </span>
+                </li>
+              ))}
           </ul>
         </div>
       </div>

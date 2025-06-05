@@ -17,7 +17,8 @@ public class Chat {
 
     private String message;
 
-    @JsonProperty("sender")
+    //@JsonProperty("SENDER_ID")
+    @Column(name="SENDER_ID")
     private Long sender;
 
 
@@ -26,7 +27,7 @@ public class Chat {
     @Enumerated(EnumType.STRING)
     private ChatType type;
 
-
+    @Column(name="CHANNEL_ID")
     private Long channelId;
     // Constructors, getters, setters
 
