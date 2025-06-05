@@ -40,6 +40,11 @@ public class TransferRequestController {
         return response;
     }
 
+    @GetMapping("/didactic/transfer/professor/{idProf}")
+    public List<TransferRequest> getTransfersByProfessor(@PathVariable Long idProf) {
+        return repository.findAllByIdProf(idProf);
+    }
+
     @PostMapping("didactic/transfer")
     @ResponseStatus(HttpStatus.CREATED)
     public TransferRequest create(@RequestBody TransferRequest transferRequest) {
@@ -49,7 +54,7 @@ public class TransferRequestController {
         }
 
         StudCourseCompositeKey id = transferRequest.getId();
-        System.out.println(transferRequest.getId());
+        System.out.println(transferRequest.getFacultyGroup());
         if(id == null || id.getIdStud() == null || id.getIdCourse() == null) {
             throw new InvalidArgumentsException("Arguments provided idStud and idCourse are both required for transfer requests");
         }
