@@ -140,13 +140,43 @@ const Profesor = () => {
     };
 
     const handleUploadExcel = () => {
-        // TODO: implementare încărcare fișier Excel
-        console.log('Triggered upload');
-    };
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.csv';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
 
-    const handleDownloadExcel = () => {
-        // TODO: implementare descărcare fișier Excel
-        console.log('Triggered download');
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch(`/didactic/course/${selectedCursId}/upload_csv`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error('Eroare la încărcarea fișierului CSV');
+                    // Check if response has content before parsing JSON
+                    const contentType = res.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        return res.json();
+                    }
+                    return null; // Return null if no JSON content
+                })
+                .then(data => {
+                    alert('Fișierul CSV a fost încărcat cu succes!');
+                    // Refresh the catalog to show updated grades
+                    setSelectedGrupa(selectedGrupa); // This will trigger the useEffect to reload data
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Eroare la încărcarea fișierului CSV: ' + err.message);
+                });
+        };
+        input.click();
     };
 
     const currentCourseTitle = cursuri.find(c => c.id === selectedCursId)?.title || '';
@@ -200,8 +230,7 @@ const Profesor = () => {
                 </table>
             </div>
             <div className="catalog-buttons">
-                <button onClick={handleUploadExcel}>Încarcă Excel</button>
-                <button onClick={handleDownloadExcel}>Descarcă Excel</button>
+                <button onClick={handleUploadExcel}>Încarcă CSV</button>
             </div>
         </div>
     );
