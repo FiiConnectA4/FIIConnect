@@ -250,6 +250,14 @@ const Profesor = () => {
             </div>
             <div className="catalog-buttons">
                 <button onClick={handleUploadExcel}>Încarcă CSV</button>
+                <button
+                    onClick={() =>
+                        navigate(`/app/catalog/activity-sheet/group/${selectedCursId}?grupa=${encodeURIComponent(selectedGrupa)}`)
+                    }
+                    disabled={!selectedCursId || !selectedGrupa}
+                >
+                    🧾 Fișa de activitate — grupă curentă
+                </button>
             </div>
         </div>
     );

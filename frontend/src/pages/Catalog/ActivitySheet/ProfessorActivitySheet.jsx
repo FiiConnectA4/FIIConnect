@@ -129,8 +129,9 @@ const ProfessorActivitySheet = () => {
                 body: JSON.stringify(payload)
             });
 
-            if (!response.ok) throw new Error(`Error ${method}`);
+            if (!response.ok) throw new Error(`Eroare la salvarea notei de componentă`);
 
+            // Update component grade in local state
             if (existingGrade) {
                 setGrades(grades.map(g =>
                     g.id?.idStud === studentId && g.id?.idComponent === componentId
@@ -148,9 +149,46 @@ const ProfessorActivitySheet = () => {
             setEditingCell(null);
             setEditedGrade('');
 
+            // ✅ Evaluate final grade for this student
+            await updateFinalGrade(courseId, studentId);
+
         } catch (err) {
-            console.error('Error saving grade:', err);
+            console.error('Eroare la salvare:', err);
             alert('Eroare la salvarea notei: ' + err.message);
+        }
+    };
+
+    const updateFinalGrade = async (courseId, studentId) => {
+        try {
+            const formulaRes = await fetch(`/didactic/course/${courseId}/formula`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!formulaRes.ok) throw new Error("Formulă inexistentă pentru acest curs");
+            const formula = await formulaRes.json();
+
+            const gradeRes = await fetch(`/didactic/formula/${formula.id}/evaluate?idStud=${studentId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!gradeRes.ok) throw new Error("Eroare la evaluarea formulei");
+
+            const finalGrade = await gradeRes.json();
+
+            const postGradeRes = await fetch('/didactic/grade', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(finalGrade)
+            });
+
+            if (!postGradeRes.ok) throw new Error("Eroare la salvarea notei finale");
+            console.log(`Nota finală actualizată pentru student ${studentId}: ${finalGrade.value}`);
+        } catch (err) {
+            console.error("Eroare la actualizarea notei finale:", err);
+            alert("Eroare la actualizarea notei finale: " + err.message);
         }
     };
 
