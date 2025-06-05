@@ -17,8 +17,15 @@ const Profesor = () => {
     const [editingIndex, setEditingIndex] = useState(null);
     const [editedGrade, setEditedGrade] = useState('');
     const [prevGrade, setPrevGrade] = useState('');
+
+    // Transfer requests state
+    const [showTransferPopup, setShowTransferPopup] = useState(false);
+    const [transferRequests, setTransferRequests] = useState([]);
+    const [loadingTransfers, setLoadingTransfers] = useState(false);
+
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
+
     useEffect(() => {
         fetch('/person/me', {
             headers: {
@@ -35,6 +42,7 @@ const Profesor = () => {
             })
             .catch(err => console.error("Eroare la fetch /person/me:", err));
     }, []);
+
     useEffect(() => {
         if (!profesorId) return;
         fetch(`/didactic/professor/${profesorId}`, {
@@ -50,6 +58,7 @@ const Profesor = () => {
             })
             .catch(err => console.error(err));
     }, [profesorId, token]);
+
     useEffect(() => {
         if (!selectedCursId) return;
         setLoading(true);
@@ -180,6 +189,109 @@ const Profesor = () => {
         input.click();
     };
 
+    // Transfer requests functions
+    const handleShowTransferRequests = () => {
+        if (!profesorId) {
+            alert('Nu s-a putut obține ID-ul profesorului.');
+            return;
+        }
+        
+        setLoadingTransfers(true);
+        setShowTransferPopup(true);
+        
+        fetch(`/didactic/transfer/professor/${profesorId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+            .then(res => res.json())
+            .then(async (data) => {
+                const requests = data || [];
+                
+                // Fetch student and course names for each request
+                const requestsWithNames = await Promise.all(
+                    requests.map(async (request) => {
+                        try {
+                            const [studentRes, courseRes] = await Promise.all([
+                                fetch(`/didactic/student/${request.id.idStud}`, {
+                                    headers: { 'Authorization': `Bearer ${token}` }
+                                }),
+                                fetch(`/didactic/course/${request.id.idCourse}`, {
+                                    headers: { 'Authorization': `Bearer ${token}` }
+                                })
+                            ]);
+                            
+                            const student = await studentRes.json();
+                            const course = await courseRes.json();
+                            
+                            return {
+                                ...request,
+                                studentName: `${student.firstName} ${student.lastName}`,
+                                courseName: course.title
+                            };
+                        } catch (err) {
+                            console.error('Eroare la încărcarea datelor pentru cererea:', request, err);
+                            return {
+                                ...request,
+                                studentName: `Student ID: ${request.id.idStud}`,
+                                courseName: `Curs ID: ${request.id.idCourse}`
+                            };
+                        }
+                    })
+                );
+                
+                setTransferRequests(requestsWithNames);
+                setLoadingTransfers(false);
+            })
+            .catch(err => {
+                console.error('Eroare la încărcarea cererilor de transfer:', err);
+                alert('Eroare la încărcarea cererilor de transfer.');
+                setLoadingTransfers(false);
+            });
+    };
+
+    const handleDenyTransfer = (request) => {
+        const url = `/didactic/transfer?idStud=${request.id.idStud}&idCourse=${request.id.idCourse}`;
+        
+        fetch(url, {
+            method: 'DELETE',
+            headers: { 
+                'Authorization': `Bearer ${token}` 
+            }
+        })
+            .then(res => {
+                if (!res.ok) throw new Error('Eroare la respingerea cererii');
+                // Remove the request from the list
+                setTransferRequests(prev => prev.filter(r => 
+                    !(r.id.idStud === request.id.idStud && r.id.idCourse === request.id.idCourse)
+                ));
+                alert('Cererea a fost respinsă cu succes.');
+            })
+            .catch(err => {
+                console.error('Eroare la respingerea cererii:', err);
+                alert('Eroare la respingerea cererii: ' + err.message);
+            });
+    };
+
+    const handleApproveTransfer = (request) => {
+        const url = `/didactic/enroll/transfer?studentId=${request.id.idStud}&courseId=${request.id.idCourse}&facultyGroup=${request.facultyGroup}`;
+        
+        fetch(url, {
+            method: 'PATCH',
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+            .then(res => {
+                if (!res.ok) throw new Error('Eroare la aprobarea cererii');
+                // Remove the request from the list
+                setTransferRequests(prev => prev.filter(r => 
+                    !(r.id.idStud === request.id.idStud && r.id.idCourse === request.id.idCourse)
+                ));
+                alert('Cererea a fost aprobată cu succes.');
+            })
+            .catch(err => {
+                console.error('Eroare la aprobarea cererii:', err);
+                alert('Eroare la aprobarea cererii: ' + err.message);
+            });
+    };
+
     const currentCourseTitle = cursuri.find(c => c.id === selectedCursId)?.title || '';
 
     return (
@@ -251,6 +363,64 @@ const Profesor = () => {
             <div className="catalog-buttons">
                 <button onClick={handleUploadExcel}>Încarcă CSV</button>
             </div>
+            <div className="catalog-buttons">
+                <button onClick={handleShowTransferRequests}>Vezi cereri de transfer la cursul tau</button>
+            </div>
+
+            {/* Transfer Requests Popup */}
+            {showTransferPopup && (
+                <div className="popup-overlay">
+                    <div className="popup-content">
+                        <div className="popup-header">
+                            <h2>Cereri de transfer</h2>
+                            <button 
+                                className="popup-close"
+                                onClick={() => setShowTransferPopup(false)}
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        <div className="popup-body">
+                            {loadingTransfers ? (
+                                <div className="loading-text">Se încarcă cererile...</div>
+                            ) : transferRequests.length === 0 ? (
+                                <div className="no-requests">Nu există cereri de transfer.</div>
+                            ) : (
+                                <div className="transfer-requests-list">
+                                    {transferRequests.map((request, index) => (
+                                        <div key={index} className="transfer-request-item">
+                                            <div className="request-info">
+                                                <div className="request-details">
+                                                    <strong>Student:</strong> {request.studentName} | 
+                                                    <strong> Curs:</strong> {request.courseName} | 
+                                                    <strong> Grupa:</strong> {request.facultyGroup}
+                                                </div>
+                                                <div className="request-reason">
+                                                    <strong>Motiv:</strong> {request.reasonText}
+                                                </div>
+                                            </div>
+                                            <div className="request-actions">
+                                                <button 
+                                                    className="approve-btn"
+                                                    onClick={() => handleApproveTransfer(request)}
+                                                >
+                                                    Aprobă
+                                                </button>
+                                                <button 
+                                                    className="deny-btn"
+                                                    onClick={() => handleDenyTransfer(request)}
+                                                >
+                                                    Respinge
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

@@ -6,7 +6,9 @@ import com.fiiconnect.api.didactic.exceptions.TransferRequestAlreadyRegisteredEx
 import com.fiiconnect.api.didactic.exceptions.TransferRequestNotFound;
 import com.fiiconnect.api.didactic.models.StudCourseCompositeKey;
 import com.fiiconnect.api.didactic.models.TransferRequest;
+import com.fiiconnect.api.didactic.repositories.EnrollmentRepository;
 import com.fiiconnect.api.didactic.repositories.TransferRequestRepository;
+import com.fiiconnect.api.didactic.services.EnrollmentService;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,6 +22,8 @@ import java.util.List;
 @RestController
 public class TransferRequestController {
     TransferRequestRepository repository;
+    EnrollmentRepository enrollmentRepository;
+    EnrollmentService enrollmentService;
 
 
     @GetMapping("/didactic/transfers")
@@ -40,6 +44,11 @@ public class TransferRequestController {
         return response;
     }
 
+    @GetMapping("/didactic/transfer/professor/{idProf}")
+    public List<TransferRequest> getTransfersByProfessor(@PathVariable Long idProf) {
+        return repository.findAllByIdProf(idProf);
+    }
+
     @PostMapping("didactic/transfer")
     @ResponseStatus(HttpStatus.CREATED)
     public TransferRequest create(@RequestBody TransferRequest transferRequest) {
@@ -49,7 +58,7 @@ public class TransferRequestController {
         }
 
         StudCourseCompositeKey id = transferRequest.getId();
-        System.out.println(transferRequest.getId());
+        System.out.println(transferRequest.getFacultyGroup());
         if(id == null || id.getIdStud() == null || id.getIdCourse() == null) {
             throw new InvalidArgumentsException("Arguments provided idStud and idCourse are both required for transfer requests");
         }
