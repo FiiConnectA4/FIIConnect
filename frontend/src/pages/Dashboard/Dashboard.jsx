@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Dashboard.css";
+import "./Dashboard.css"; // Ensure your CSS is correctly linked
 
 function Dashboard() {
     // State-uri pentru date reale
     const [username, setUsername] = useState("utilizator");
     const [nrAnunturi, setNrAnunturi] = useState("-");
     const [nrCursuri, setNrCursuri] = useState("-");
-    const [ultimaNota, setUltimaNota] = useState("-");
-    const [orarAzi, setOrarAzi] = useState({ ora: "-", disciplina: "-" });
+    const [productiveHoursData, setProductiveHoursData] = useState([]); // State for productive hours data
+    // Initialize orarAzi with a mocked value
+    const [orarAzi, setOrarAzi] = useState({ ora: "8:00-10:00", disciplina: "Retele de Calculatoare" }); //
     // Pentru id student, an, grupă
     const [studentId, setStudentId] = useState(null);
     const [an, setAn] = useState("");
@@ -16,25 +17,63 @@ function Dashboard() {
 
     const navigate = useNavigate();
 
-    // Fetch profile + anunțuri + cursuri
+    // Fetch user profile (including studentId, an, grupa), announcements, and courses
     useEffect(() => {
         const token = localStorage.getItem("token");
-        if (!token) return;
+        if (!token) {
+            navigate("/"); // Redirect if no token
+            return;
+        }
 
-        fetch("/profile", {
+        // Fetch user info from /person/me
+        fetch("/person/me", {
             headers: { Authorization: `Bearer ${token}` }
         })
-            .then(res => res.json())
-            .then(data => {
-                let nume = "";
-                if (data.firstName) nume += data.firstName + " ";
-                if (data.lastName) nume += data.lastName;
-                setUsername(nume.trim() || data.username || "utilizator");
-                setStudentId(data.studentId || data.id || null); // adaptează dacă e altă cheie!
-                setAn(data.year || data.an || "");
-                setGrupa(data.group || data.grupa || "");
+            .then(res => {
+                if (!res.ok) {
+                    // Handle non-2xx responses, e.g., 401, 404, 403
+                    if (res.status === 401 || res.status === 403) {
+                        console.error("Authentication error for /person/me:", res.status);
+                        navigate("/"); // Redirect to login if unauthorized
+                    } else if (res.status === 404) {
+                        console.error("User not found for /person/me.");
+                        navigate("/app/setup-profile");
+                    }
+                    throw new Error(`Failed to fetch user info: ${res.status}`);
+                }
+                return res.json();
             })
-            .catch(() => setUsername("utilizator"));
+            .then(data => {
+                // data is a PersonInfoDTO
+                let fetchedUsername = "utilizator";
+                if (data.username) {
+                    fetchedUsername = data.username;
+                }
+                if (data.student && data.student.firstName && data.student.lastName) { //
+                    fetchedUsername = `${data.student.firstName} ${data.student.lastName}`; //
+                } else if (data.professor && data.professor.firstName && data.professor.lastName) { //
+                    fetchedUsername = `${data.professor.firstName} ${data.professor.lastName}`; //
+                }
+                setUsername(fetchedUsername.trim()); // Set fetched username
+
+                // Extract student specific info
+                if (data.student) { //
+                    setStudentId(data.student.id); //
+                    setAn(data.student.year || ""); //
+                    setGrupa(data.student.facultyGroup || ""); //
+                } else {
+                    setStudentId(null);
+                    setAn("");
+                    setGrupa("");
+                }
+            })
+            .catch((error) => {
+                console.error("Error fetching user profile:", error);
+                setUsername("utilizator"); // Fallback
+                setStudentId(null);
+                setAn("");
+                setGrupa("");
+            });
 
         // Număr anunțuri
         fetch("/announcement", {
@@ -42,7 +81,10 @@ function Dashboard() {
         })
             .then(res => res.json())
             .then(data => setNrAnunturi(Array.isArray(data) ? data.length : "-"))
-            .catch(() => setNrAnunturi("-"));
+            .catch((error) => {
+                console.error("Error fetching announcements:", error);
+                setNrAnunturi("-");
+            });
 
         // Număr cursuri (Spring HATEOAS sau array simplu)
         fetch("/didactic/course", {
@@ -58,38 +100,45 @@ function Dashboard() {
                 }
                 setNrCursuri(lista.length);
             })
-            .catch(() => setNrCursuri("-"));
-    }, []);
+            .catch((error) => {
+                console.error("Error fetching courses:", error);
+                setNrCursuri("-");
+            });
+    }, [navigate]);
 
-    // Fetch pentru ultima notă (după ce ai studentId)
+    // NEW useEffect for Productive Hours
     useEffect(() => {
-        if (!studentId) return;
+        if (!studentId) return; // Only fetch if studentId is available
         const token = localStorage.getItem("token");
-        fetch(`/didactic/student/${studentId}`, {
+        if (!token) return;
+
+        fetch(`/didactic/statistics/productiveHours/${studentId}`, { //
             headers: { Authorization: `Bearer ${token}` }
         })
-            .then(res => res.json())
-            .then(data => {
-                const grades = data.grades || [];
-                let nota = "-";
-                if (grades.length > 0) {
-                    grades.sort((a, b) => new Date(b.gradingDate) - new Date(a.gradingDate));
-                    nota = grades[0].value;
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
                 }
-                setUltimaNota(nota);
+                return res.json();
             })
-            .catch(() => setUltimaNota("-"));
-    }, [studentId]);
+            .then(data => {
+                setProductiveHoursData(data); //
+            })
+            .catch((error) => {
+                console.error("Error fetching productive hours:", error);
+                setProductiveHoursData([]); // Set to empty array on error
+            });
+    }, [studentId]); // Depend on studentId to re-fetch when it's set
 
-    // Fetch pentru orarul de azi (după ce ai an și grupă)
+    // REMOVED: Fetch for today's schedule. Now using a mocked value.
+    /*
     useEffect(() => {
         if (!an || !grupa) return;
         const token = localStorage.getItem("token");
-        // Numele zilei curente (backend-ul folosește "Luni", "Marți" etc.)
         const zileSapt = ["Duminică", "Luni", "Marți", "Miercuri", "Joi", "Vineri", "Sâmbătă"];
         const ziAstazi = zileSapt[new Date().getDay()];
 
-        fetch(`/orar/studenti/${an}/${grupa}`, {
+        fetch(`/orar/studenti/<span class="math-inline">\{an\}/</span>{grupa}`, {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(res => res.json())
@@ -108,8 +157,37 @@ function Dashboard() {
                     setOrarAzi({ ora: "-", disciplina: "-" });
                 }
             })
-            .catch(() => setOrarAzi({ ora: "-", disciplina: "-" }));
+            .catch((error) => {
+                console.error("Error fetching schedule:", error);
+                setOrarAzi({ ora: "-", disciplina: "-" });
+            });
     }, [an, grupa]);
+    */
+
+    // Helper function to find the most productive interval
+    const getMostProductiveInterval = () => {
+        if (!productiveHoursData || productiveHoursData.length === 0) {
+            return { interval: "N/A", average: "-" };
+        }
+
+        // Filter out intervals with 0 grades (no data for that interval), then find the one with the highest average
+        const intervalsWithGrades = productiveHoursData.filter(item => item.count > 0);
+
+        if (intervalsWithGrades.length === 0) {
+            return { interval: "N/A", average: "N/A" };
+        }
+
+        const mostProductive = intervalsWithGrades.reduce((prev, current) => {
+            return (prev.average > current.average) ? prev : current;
+        });
+
+        return {
+            interval: mostProductive.interval,
+            average: mostProductive.average.toFixed(1) // Format to one decimal place
+        };
+    };
+
+    const mostProductive = getMostProductiveInterval();
 
     return (
         <div className="dashboard-content">
@@ -135,15 +213,23 @@ function Dashboard() {
                     <span className="card-title">Cursuri active</span>
                     <span className="card-value">{nrCursuri}</span>
                 </div>
+                {/* REPLACED: Ultima notă card with Productive Hours card */}
                 <div
                     className="dashboard-card"
                     style={{ cursor: "pointer" }}
-                    onClick={() => navigate("/app/catalog")}
-                    title="Vezi catalogul"
+                    onClick={() => { /* Potentially navigate to a statistics page */ }}
+                    title="Vezi orele productive"
                 >
-                    <span className="icon yellow">⭐</span>
-                    <span className="card-title">Ultima notă</span>
-                    <span className="card-value">{ultimaNota}</span>
+                    <span className="icon yellow">⏳</span> {/* Changed icon to a clock/hourglass */}
+                    <span className="card-title">Ore Productive</span>
+                    <span className="card-value card-productive-hours">
+                        <span className="interval">{mostProductive.interval}</span>
+                        {mostProductive.average !== "N/A" && (
+                            <span className="average" style={{ marginLeft: 8 }}>
+                                ({mostProductive.average} avg)
+                            </span>
+                        )}
+                    </span>
                 </div>
                 <div
                     className="dashboard-card"
@@ -152,7 +238,7 @@ function Dashboard() {
                     title="Vezi orarul"
                 >
                     <span className="icon pink">📅</span>
-                    <span className="card-title">Orar azi</span>
+                    <span className="card-title">Urmatoarea Ora</span>
                     <span className="card-value card-orar">
                         <span className="ora">{orarAzi.ora}</span>
                         <span className="disciplina" style={{ marginLeft: 8 }}>
