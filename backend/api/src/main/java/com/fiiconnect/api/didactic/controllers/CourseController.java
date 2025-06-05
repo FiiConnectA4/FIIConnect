@@ -59,7 +59,6 @@ public class CourseController {
     }
 
     // get all courses
-    @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @GetMapping("/didactic/course")
      public CollectionModel<EntityModel<Course>> all() {
         PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
