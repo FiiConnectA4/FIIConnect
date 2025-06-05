@@ -1,7 +1,11 @@
 package com.fiiconnect.api.didactic.controllers;
 
 import com.fiiconnect.api.auth_userMgmt.controllers.PersonController;
+import com.fiiconnect.api.auth_userMgmt.dtos.BulkNotificationRequest;
 import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
+import com.fiiconnect.api.auth_userMgmt.models.User;
+import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository;
+import com.fiiconnect.api.auth_userMgmt.services.NotificationService;
 import com.fiiconnect.api.didactic.exceptions.FeedbackForProfessorNotFound;
 import com.fiiconnect.api.didactic.exceptions.FeedbackFromStudentNotFound;
 import com.fiiconnect.api.didactic.exceptions.FeedbackNotFound;
@@ -12,6 +16,7 @@ import com.fiiconnect.api.didactic.models.GlobalConstant;
 import com.fiiconnect.api.didactic.repositories.FeedbackRepository;
 import com.fiiconnect.api.didactic.repositories.GlobalConstantRepository;
 import com.fiiconnect.api.didactic.services.FeedbackService;
+import com.fiiconnect.api.didactic.services.ProfessorService;
 import jakarta.websocket.server.PathParam;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -29,6 +34,7 @@ public class FeedbackController {
     private final FeedbackService service;
     private final PersonController personController;
     private final GlobalConstantRepository globalConstantRepository;
+    private final ProfessorService professorService;
 
     @GetMapping("/didactic/feedback")
     public List<Feedback> getFeedback() {
@@ -80,7 +86,11 @@ public class FeedbackController {
             throw new UnauthorizedOperationException("Only students can create feedbacks");
 
         feedback.getId().setIdStud(person.student().id());
-        return ResponseEntity.status(HttpStatus.CREATED).body(repository.save(feedback));
+
+        Feedback addedFeedback = repository.save(feedback);
+        professorService.notifyProfessorUser(feedback.getId().getIdProf(), "Feedback notification", "You have received a new feedback", "feedback");
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(addedFeedback);
     }
 
     @PreAuthorize("hasRole('STUDENT') or hasRole('ADMIN')")
