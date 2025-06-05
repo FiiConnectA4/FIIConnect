@@ -1,7 +1,11 @@
 package com.fiiconnect.api.didactic.controllers;
 
 import com.fiiconnect.api.auth_userMgmt.controllers.PersonController;
+import com.fiiconnect.api.auth_userMgmt.dtos.BulkNotificationRequest;
 import com.fiiconnect.api.auth_userMgmt.dtos.PersonInfoDTO;
+import com.fiiconnect.api.auth_userMgmt.models.User;
+import com.fiiconnect.api.auth_userMgmt.repositories.UserRepository;
+import com.fiiconnect.api.auth_userMgmt.services.NotificationService;
 import com.fiiconnect.api.didactic.exceptions.GradeNotFoundException;
 import com.fiiconnect.api.didactic.exceptions.UnauthorizedOperationException;
 import com.fiiconnect.api.didactic.helpers.SQLExceptionMessageParser;
@@ -9,6 +13,9 @@ import com.fiiconnect.api.didactic.models.Grade;
 import com.fiiconnect.api.didactic.models.StudCourseCompositeKey;
 import com.fiiconnect.api.didactic.repositories.GradeRepository;
 import com.fiiconnect.api.didactic.services.CourseService;
+import com.fiiconnect.api.didactic.services.StudentService;
+import com.fiiconnect.api.didactic.services.TeachingService;
+import lombok.AllArgsConstructor;
 import org.hibernate.exception.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,19 +25,14 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.util.Date;
 
+@AllArgsConstructor
 @RestController
 public class GradeController {
     private final GradeRepository repository;
     private final SQLExceptionMessageParser exceptionHelper;
     private final PersonController personController;
     private final CourseService courseService;
-
-    public GradeController(GradeRepository repository, SQLExceptionMessageParser exceptionHelper, PersonController personController, CourseService courseService) {
-        this.repository = repository;
-        this.exceptionHelper = exceptionHelper;
-        this.personController = personController;
-        this.courseService = courseService;
-    }
+    private final StudentService studentService;
 
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
     @PostMapping("/didactic/grade")
@@ -42,6 +44,7 @@ public class GradeController {
         //////////////////////////////////////////
 
         repository.save(gradeInfo);
+        studentService.notifyStudentUser(gradeInfo.getId().getIdStud(), "Grade notification", "You have received a new grade", "grade");
     }
 
     @PreAuthorize("hasRole('PROFESOR') or hasRole('ADMIN')")
