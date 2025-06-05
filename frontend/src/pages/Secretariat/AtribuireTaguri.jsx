@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { API_ROUTES } from '../../app/router';
 import "./AtribuireTaguri.css";
 
 const AtribuireTaguri = () => {
@@ -26,14 +25,14 @@ const AtribuireTaguri = () => {
   const fetchCurrentUser = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(API_ROUTES.PERSON_ME, {
-        headers: { 'Authorization': `Bearer ${token}` },
+      const response = await fetch("http://localhost:34101/person/me", {
+        headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (!response.ok) throw new Error('Failed to fetch current user');
+      if (!response.ok) throw new Error("Failed to fetch current user");
       const data = await response.json();
       return data;
     } catch (err) {
-      console.error('Error fetching current user:', err);
+      console.error("Error fetching current user:", err);
       throw err;
     }
   };
@@ -43,10 +42,14 @@ const AtribuireTaguri = () => {
 const fetchAllUsers = async () => {
   try {
     const token = localStorage.getItem('token');
-    const response = await fetch(API_ROUTES.PERSON_GET_ALL, {
-      headers: { 'Authorization': `Bearer ${token}` },
+    const response = await fetch("http://localhost:34101/person/get-all", {
+      headers: { 'Authorization': `Bearer ${token}` }
     });
-    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
     const data = await response.json();
     console.log("User JSON:", data); // Debug: verifică structura primită
 
@@ -58,7 +61,6 @@ const fetchAllUsers = async () => {
         id: user.userId, // Folosim userId din răspuns
         name: `${user.lastName || ''} ${user.firstName || ''}`.trim() || 'Necunoscut',
         role: (user.role || 'unknown').toLowerCase(),
-        // Am eliminat email-ul deoarece nu este prezent în structura ta
         tags: user.tags || [] // Păstrăm tag-urile dacă sunt necesare
       };
     }).filter(user => user !== null);
@@ -73,14 +75,14 @@ const fetchAllUsers = async () => {
   const fetchAllTags = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(API_ROUTES.TAGS, {
-        headers: { 'Authorization': `Bearer ${token}` },
+      const response = await fetch("http://localhost:34101/tags", {
+        headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (!response.ok) throw new Error('Failed to fetch tags');
+      if (!response.ok) throw new Error("Failed to fetch tags");
       const data = await response.json();
       return data;
     } catch (err) {
-      console.error('Error fetching tags:', err);
+      console.error("Error fetching tags:", err);
       throw err;
     }
   };
@@ -89,14 +91,14 @@ const fetchAllUsers = async () => {
   const fetchUserTags = async (userId) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`${API_ROUTES.MANAGE_TAGS}/${userId}`, {
-        headers: { 'Authorization': `Bearer ${token}` },
+      const response = await fetch(`http://localhost:34101/manage_tags/${userId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
       });
-      if (!response.ok) throw new Error('Failed to fetch user tags');
+      if (!response.ok) throw new Error("Failed to fetch user tags");
       const data = await response.json();
       return data;
     } catch (err) {
-      console.error('Error fetching user tags:', err);
+      console.error("Error fetching user tags:", err);
       throw err;
     }
   };
@@ -208,92 +210,104 @@ useEffect(() => {
   };
 
   const addTag = async () => {
-    setError(null);
-    setNotification(null);
-    if (!selectedUser || !currentTag.id) {
-      setError("Selectează un utilizator și un tag.");
+    if (!selectedUser) {
+      setError("Selectează mai întâi un utilizator");
       return;
     }
+
+    if (!currentTag.id) {
+      setError("Selectează un tag");
+      return;
+    }
+
+    if (!currentUser) {
+      setError("Nu s-a putut identifica utilizatorul curent");
+      return;
+    }
+
     try {
       const token = localStorage.getItem('token');
-      // whoIsLoggedId = utilizatorul curent (secretar/admin)
-      // Asigură-te că iei id-ul corect din structura de la /person/me
-      const whoIsLoggedId = currentUser?.id || currentUser?.userId;
-      const userId = selectedUser.id;
-      const tagId = currentTag.id;
-      // DEBUG: log parametri request și currentUser
-      console.log('AddTag params:', { whoIsLoggedId, userId, tagId, currentUser });
-      const response = await fetch(`${API_ROUTES.MANAGE_TAGS}/${whoIsLoggedId}/${userId}/${tagId}`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      // DEBUG: log status code
-      console.log('AddTag status:', response.status);
+      const whoIsLoggedId = currentUser.id;
+      
+      const response = await fetch(
+        `http://localhost:34101/manage_tags/${whoIsLoggedId}/${selectedUser.id}/${currentTag.id}`,
+        {
+          method: "POST",
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      const responseData = await response.json();
+      
       if (!response.ok) {
-        const msg = await response.text();
-        setError(msg || 'Eroare la adăugarea tag-ului.');
-        // DEBUG: log response body
-        console.log('AddTag ERROR:', msg);
-        return;
+        throw new Error(responseData.message || responseData);
       }
-      // DEBUG: log success
-      const successMsg = await response.text();
-      console.log('AddTag SUCCESS:', successMsg);
-      setNotification({ type: 'success', message: 'Tag adăugat cu succes!' });
-      // reîncarcă tag-urile utilizatorului și resetează selecția tagului
-      const tags = await fetchUserTags(userId);
-      setUserTags(tags);
-      setCurrentTag({ id: null, name: '', type: currentTag.type });
+
+      // Refresh user tags after adding
+      const updatedTags = await fetchUserTags(selectedUser.id);
+      setUserTags(updatedTags);
+      
+      setNotification({
+        message: `Tag-ul "${currentTag.name}" a fost adăugat`,
+        type: "success"
+      });
+      
+      // Reset tag selection
+      setCurrentTag(prev => ({
+        id: null,
+        name: "",
+        type: prev.type
+      }));
     } catch (err) {
-      setError('Eroare la adăugarea tag-ului.');
-      // DEBUG: log error
-      console.log('AddTag error:', err);
+      console.error("Error adding tag:", err);
+      setNotification({
+        message: err.message || "Eroare la adăugarea tag-ului",
+        type: "error"
+      });
     }
   };
 
   const removeTag = async (tagId) => {
-    setError(null);
-    setNotification(null);
-    if (!selectedUser || !tagId) {
-      setError("Selectează un utilizator și un tag.");
-      return;
-    }
+    if (!selectedUser || !currentUser) return;
+
     try {
       const token = localStorage.getItem('token');
-      // whoIsLoggedId = utilizatorul curent (secretar/admin)
-      const whoIsLoggedId = currentUser?.id || currentUser?.userId;
-      const userId = selectedUser.id;
-      // DEBUG: log parametri request
-      console.log('RemoveTag params:', { whoIsLoggedId, userId, tagId, currentUser });
-      const response = await fetch(`${API_ROUTES.MANAGE_TAGS}/${whoIsLoggedId}/${userId}/${tagId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      // DEBUG: log status code
-      console.log('RemoveTag status:', response.status);
+      const whoIsLoggedId = currentUser.id;
+      
+      const response = await fetch(
+        `http://localhost:34101/manage_tags/${whoIsLoggedId}/${selectedUser.id}/${tagId}`,
+        {
+          method: "DELETE",
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      const responseData = await response.json();
+      
       if (!response.ok) {
-        const msg = await response.text();
-        setError(msg || 'Eroare la ștergerea tag-ului.');
-        // DEBUG: log response body
-        console.log('RemoveTag ERROR:', msg);
-        return;
+        throw new Error(responseData.message || responseData);
       }
-      // DEBUG: log success
-      const successMsg = await response.text();
-      console.log('RemoveTag SUCCESS:', successMsg);
-      setNotification({ type: 'success', message: 'Tag șters cu succes!' });
-      // reîncarcă tag-urile utilizatorului
-      const tags = await fetchUserTags(userId);
-      setUserTags(tags);
+
+      // Refresh user tags after removal
+      const updatedTags = await fetchUserTags(selectedUser.id);
+      setUserTags(updatedTags);
+      
+      setNotification({
+        message: "Tag-ul a fost eliminat",
+        type: "success"
+      });
     } catch (err) {
-      setError('Eroare la ștergerea tag-ului.');
-      // DEBUG: log error
-      console.log('RemoveTag error:', err);
+      console.error("Error removing tag:", err);
+      setNotification({
+        message: err.message || "Eroare la eliminarea tag-ului",
+        type: "error"
+      });
     }
   };
 
@@ -359,7 +373,7 @@ useEffect(() => {
                 <label>Tip tag:</label>
                 <select
                   value={currentTag.type}
-                  onChange={handleTagTypeChange}
+            onChange={handleTagTypeChange}
                 >
                   {availableTagTypes.map(type => (
                     <option key={type} value={type}>{type}</option>
