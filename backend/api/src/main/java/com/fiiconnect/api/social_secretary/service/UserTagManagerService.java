@@ -33,6 +33,7 @@ public class UserTagManagerService {
     @Autowired
     TagRepository tagRepository;
 
+
     @Autowired
     UserRepository userRepository;
 
@@ -79,7 +80,12 @@ public class UserTagManagerService {
 
     public void automaticallyAddTags(User user) {
         Student student = user.getStudent();
-        if (student != null) {
+        if (user.getRoles().stream().findFirst().get().getRoleName().equals("ROLE_ADMIN")) {
+            List <Tag> tags = tagRepository.findAll();
+            for(Tag tag : tags){
+                userTagManagerRepository.addTagToUser(user.getId(), tag.getId());
+            }
+        } else if (student != null) {
             String year = student.getYear().toString();
             String facultyGroup = student.getFacultyGroup();
             String semian = year + facultyGroup.charAt(0);
@@ -96,7 +102,7 @@ public class UserTagManagerService {
             List<Enrollment> enrollments = enrollmentRepository.findByIdIdStud(student.getId());
             for (Enrollment e : enrollments) {
                 Long courseId = e.getId().getIdCourse();
-                String courseTitle =  courseRepository.findById(courseId).stream().findFirst().get().getTitle().trim().toUpperCase();
+                String courseTitle = courseRepository.findById(courseId).stream().findFirst().get().getTitle().trim().toUpperCase();
                 System.out.println(courseTitle);
                 Tag t = tagRepository.findByNameAndType(courseTitle, TagType.MATERIE);
 

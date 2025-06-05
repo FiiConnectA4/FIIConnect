@@ -131,6 +131,16 @@ const Secretariat = () => {
                     📂 {userRole === "ROLE_ADMIN" ? "Gestionează" : "Cerere"} Caz Social
                 </button>
 
+                {/* Atribuire Tag-uri button for secretariat/admin only */}
+                {(userRole === "ROLE_ADMIN" || userRole === "ROLE_SECRETARIAT") && (
+                    <button
+                        className="secretariat-button"
+                        onClick={() => navigate("/app/secretariat/atribuire-taguri")}
+                    >
+                        🏷️ Atribuire Tag-uri
+                    </button>
+                )}
+
                 {userRole !== "ROLE_ADMIN" && (
                     <button
                         className="secretariat-button"
@@ -144,4 +154,4 @@ const Secretariat = () => {
     );
 };
 
-export default Secretariat; 
+export default Secretariat;
