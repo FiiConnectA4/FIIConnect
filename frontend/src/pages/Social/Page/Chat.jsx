@@ -50,10 +50,12 @@ function Chat() {
           );
           if (!channelsResponse.ok) throw new Error('Failed to fetch channels');
           const channelsData = await channelsResponse.json();
-          setChannels(channelsData);
-          if (channelsData.length > 0) {
-            setActiveChannel(channelsData[0]);
-            loadChannelMessages(channelsData[0].id, token);
+          // Sorteaza canalele lexicografic si seteaza primul ca activ
+          const sorted = channelsData.slice().sort((a, b) => a.name.localeCompare(b.name));
+          setChannels(sorted);
+          if (sorted.length > 0) {
+            setActiveChannel(sorted[0]);
+            loadChannelMessages(sorted[0].id, token);
           } else {
             setActiveChannel(null);
           }
@@ -272,20 +274,23 @@ function Chat() {
         <div className="chat-sidebar">
           <h2>Canale disponibile</h2>
           <ul className="channel-list">
-            {channels.map((channel) => (
-              <li
-                key={channel.id}
-                className={`channel-item ${activeChannel?.id === channel.id ? 'active' : ''}`}
-                onClick={() => handleChannelChange(channel)}
-              >
-                <span className={`channel-name ${getChannelTypeClass(channel)}`}>
-                  {channel.name}
-                </span>
-                <span className="channel-type">
-                  {getChannelTypeClass(channel)}
-                </span>
-              </li>
-            ))}
+            {channels
+              .slice()
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((channel) => (
+                <li
+                  key={channel.id}
+                  className={`channel-item ${activeChannel?.id === channel.id ? 'active' : ''}`}
+                  onClick={() => handleChannelChange(channel)}
+                >
+                  <span className={`channel-name ${getChannelTypeClass(channel)}`}>
+                    {channel.name}
+                  </span>
+                  <span className="channel-type">
+                    {getChannelTypeClass(channel)}
+                  </span>
+                </li>
+              ))}
           </ul>
         </div>
       </div>
