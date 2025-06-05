@@ -332,6 +332,10 @@ function Anunturi() {
       if (!editingAnnouncement.message.trim()) {
         throw new Error("Te rugăm să introduci un mesaj");
       }
+      if (!editingAnnouncement.tags || editingAnnouncement.tags.length === 0) {
+        showNotification("Nu poți posta un anunț fără niciun tag!", "error");
+        return;
+      }
       const token = localStorage.getItem('token');
       const payload = {
         title: editingAnnouncement.title.trim(),
