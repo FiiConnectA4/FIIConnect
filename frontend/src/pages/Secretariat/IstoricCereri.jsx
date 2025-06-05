@@ -1,93 +1,111 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./IstoricCereri.css";
-// import { AuthContext } from "../context/AuthContext"; // dacă ai un context
 
 const IstoricCereri = () => {
   const navigate = useNavigate();
   const [cereri, setCereri] = useState([]);
+  const [studentId, setStudentId] = useState(null);
 
-  // const { user } = useContext(AuthContext);
-  // const studentId = user?.id;
-  const studentId = 31; // temporar hardcodat
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Nu ești autentificat!");
+      return;
+    }
 
-useEffect(() => {
-  if (!studentId) return;
-
-  const token = localStorage.getItem("token");
-
-  const fetchAdeverinte = fetch(`/cereri/adeverinta-student/student/${studentId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }).then(res => res.json());
-
-  const fetchCamin = fetch(`/cereri/adeverinta-camin/student/${studentId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }).then(res => res.json());
-
-  const fetchCazSocial = fetch(`/cereri/caz-social/student/${studentId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }).then(res => res.json());
-
-  const fetchBursaSociala = fetch(`/cereri/bursa-sociala/student/${studentId}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  }).then(res => res.json());
-  
-  Promise.all([fetchAdeverinte, fetchCamin, fetchCazSocial, fetchBursaSociala])
-    .then(([adeverinteData, caminData, cazSocialData, bursaSocialaData]) => {
-      if (!Array.isArray(adeverinteData)) adeverinteData = [];
-      if (!Array.isArray(caminData)) caminData = [];
-      if (!Array.isArray(cazSocialData)) cazSocialData = [];
-      if (!Array.isArray(bursaSocialaData)) bursaSocialaData = [];
-
-      const transformedAdeverinte = adeverinteData.map(c => ({
-        id: c.id,
-        tip: c.tip || "Adeverință Student",
-        data: c.dataTrimitere,
-        status: c.status,
-        comentariu: c.comentariu,
-      }));
-
-      const transformedCamin = caminData.map(c => ({
-        id: c.id,
-        tip: c.tip || "Adeverință Cămin",
-        data: c.dataTrimitere,
-        status: c.status,
-        comentariu: c.comentariu,
-      }));
-
-      const transformedCazSocial = cazSocialData.map(c => ({
-        id: c.id,
-        tip: c.tip || "Cerere Caz Social",
-        data: c.dataTrimitere,
-        status: c.status,
-        comentariu: c.comentariu,
-      }));
-
-      const transformedBursaSociala = bursaSocialaData.map(c => ({
-        id: c.id,
-        tip: c.tip || "Cerere Bursa Socială",
-        data: c.dataTrimitere,
-        status: c.status,
-        comentariu: c.comentariu,
-      }));
-
-      setCereri([...transformedAdeverinte, ...transformedCamin, ...transformedCazSocial, ...transformedBursaSociala]);
+    fetch("http://localhost:34101/person/me", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     })
-    .catch(err => {
-      console.error("Eroare la încărcarea cererilor:", err);
-    });
-}, [studentId]);
+      .then((res) => {
+        if (!res.ok) throw new Error("Nu s-a putut prelua persoana");
+        return res.json();
+      })
+      .then((data) => {
+        if (data.student && data.student.id) {
+          setStudentId(data.student.id);
+        } else {
+          alert("Studentul nu este identificat în răspuns");
+        }
+      })
+      .catch((err) => {
+        alert("Eroare la preluarea persoanei: " + err.message);
+      });
+  }, []);
 
+  useEffect(() => {
+    if (!studentId) return;
 
+    const token = localStorage.getItem("token");
 
+    const fetchAdeverinte = fetch(`http://localhost:34101/cereri/adeverinta-student/student/${studentId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then((res) => res.json());
+
+    const fetchCamin = fetch(`http://localhost:34101/cereri/adeverinta-camin/student/${studentId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then((res) => res.json());
+
+    const fetchCazSocial = fetch(`http://localhost:34101/cereri/caz-social/student/${studentId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then((res) => res.json());
+
+    const fetchBursaSociala = fetch(`http://localhost:34101/cereri/bursa-sociala/student/${studentId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }).then((res) => res.json());
+
+    Promise.all([fetchAdeverinte, fetchCamin, fetchCazSocial, fetchBursaSociala])
+      .then(([adeverinteData, caminData, cazSocialData, bursaSocialaData]) => {
+        if (!Array.isArray(adeverinteData)) adeverinteData = [];
+        if (!Array.isArray(caminData)) caminData = [];
+        if (!Array.isArray(cazSocialData)) cazSocialData = [];
+        if (!Array.isArray(bursaSocialaData)) bursaSocialaData = [];
+
+        const transformedAdeverinte = adeverinteData.map((c) => ({
+          id: c.id,
+          tip: c.tip || "Adeverință Student",
+          data: c.dataTrimitere,
+          status: c.status,
+          comentariu: c.comentariu,
+        }));
+
+        const transformedCamin = caminData.map((c) => ({
+          id: c.id,
+          tip: c.tip || "Adeverință Cămin",
+          data: c.dataTrimitere,
+          status: c.status,
+          comentariu: c.comentariu,
+        }));
+
+        const transformedCazSocial = cazSocialData.map((c) => ({
+          id: c.id,
+          tip: c.tip || "Cerere Caz Social",
+          data: c.dataTrimitere,
+          status: c.status,
+          comentariu: c.comentariu,
+        }));
+
+        const transformedBursaSociala = bursaSocialaData.map((c) => ({
+          id: c.id,
+          tip: c.tip || "Cerere Bursa Socială",
+          data: c.dataTrimitere,
+          status: c.status,
+          comentariu: c.comentariu,
+        }));
+
+        setCereri([
+          ...transformedAdeverinte,
+          ...transformedCamin,
+          ...transformedCazSocial,
+          ...transformedBursaSociala,
+        ]);
+      })
+      .catch((err) => {
+        console.error("Eroare la încărcarea cererilor:", err);
+      });
+  }, [studentId]);
 
   return (
     <div className="istoric-cereri-container">

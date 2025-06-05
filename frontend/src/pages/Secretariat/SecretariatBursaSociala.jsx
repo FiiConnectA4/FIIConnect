@@ -53,34 +53,41 @@ Multumesc anticipat pentru analiza cererii!
   };
 
   const valideazaCerere = (id) => {
-    fetch(`/cereri/bursa-sociala/${id}?status=aprobat`, {
-      method: "PUT",
+  fetch(`/cereri/bursa-sociala/${id}?status=aprobat`, {
+    method: "PUT",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("Eroare validare cerere");
+      setCereri((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, status: "aprobat" } : c))
+      );
     })
-      .then((res) => {
-        if (!res.ok) throw new Error("Eroare validare cerere");
-        setCereri((prev) =>
-          prev.map((c) => (c.id === id ? { ...c, status: "aprobat" } : c))
-        );
-      })
-      .catch((err) => {
-        console.error("Eroare validare:", err);
-        alert("Nu s-a putut valida cererea.");
-      });
-  };
+    .catch((err) => {
+      console.error("Eroare validare:", err);
+      alert("Nu s-a putut valida cererea.");
+    });
+};
 
-  const respingeCerere = (id) => {
-    fetch(`/cereri/bursa-sociala/${id}`, {
-      method: "DELETE",
+const respingeCerere = (id) => {
+  fetch(`/cereri/bursa-sociala/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("Eroare ștergere cerere");
+      setCereri((prev) => prev.filter((c) => c.id !== id));
     })
-      .then((res) => {
-        if (!res.ok) throw new Error("Eroare ștergere cerere");
-        setCereri((prev) => prev.filter((c) => c.id !== id));
-      })
-      .catch((err) => {
-        console.error("Eroare ștergere:", err);
-        alert("Eroare la respingere cererii.");
-      });
-  };
+    .catch((err) => {
+      console.error("Eroare ștergere:", err);
+      alert("Eroare la respingere cererii.");
+    });
+};
+
 
   return (
     <div>

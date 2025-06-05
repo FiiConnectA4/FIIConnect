@@ -29,7 +29,6 @@ const SecretariatCerereCamin = () => {
       grupa ${cerere.grupa}, cu numarul matricol ${cerere.regNumber},
       va rog sa-mi aprobati repartizarea in caminul ${cerere.camin}.
 
-      Motivatie: ${cerere.continut || "Nespecificata"}
 
       Data trimiterii cererii: ${cerere.dataTrimitere}
 

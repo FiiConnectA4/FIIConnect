@@ -1,11 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "./CerereDecontari.css";
 
 const CerereBursaSociala = () => {
-  // PENTRU TEST: setează manual studentId, de ex 7
-  const studentId = 7;
-
   const [formData, setFormData] = useState({
     nume: "",
     prenume: "",
@@ -15,7 +12,38 @@ const CerereBursaSociala = () => {
     comentariu: "",
   });
 
+  const [studentId, setStudentId] = useState(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetch("http://localhost:34101/person/me", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Nu s-a putut prelua persoana");
+        return res.json();
+      })
+      .then((data) => {
+        if (data.student) {
+          setStudentId(data.student.id);
+          setFormData({
+            nume: data.student.firstName || "",
+            prenume: data.student.lastName || "",
+            numarMatricol: data.student.regNumber || "",
+            an: data.student.year ? data.student.year.toString() : "",
+            facultate: data.student.faculty || "",
+            comentariu: "",
+          });
+        } else {
+          alert("Studentul nu este identificat în răspuns");
+        }
+      })
+      .catch((err) => {
+        alert("Eroare la preluarea persoanei: " + err.message);
+      });
+  }, []);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -28,23 +56,26 @@ const CerereBursaSociala = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
+    if (!studentId) {
+      alert("Studentul nu este identificat!");
+      return;
+    }
+
     const jsonData = {
       studentId: studentId,
       status: "Asteptare",
-      dataTrimitere: new Date().toISOString().split("T")[0], // format yyyy-MM-dd
+      dataTrimitere: new Date().toISOString().split("T")[0], // yyyy-MM-dd
       comentariu: formData.comentariu || "",
       anStudent: parseInt(formData.an, 10),
       facultate: formData.facultate,
-      // dacă backend vrea și dosarPath, poți pune null sau ""
       dosarPath: null,
     };
 
-    console.log("Trimitem JSON:", jsonData);
-
-    fetch("/cereri/bursa-sociala", {
+    fetch("http://localhost:34101/cereri/bursa-sociala", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
       body: JSON.stringify(jsonData),
     })

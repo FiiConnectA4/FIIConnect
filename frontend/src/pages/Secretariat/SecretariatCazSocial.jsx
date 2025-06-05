@@ -31,8 +31,6 @@ const SecretariatCazSocial = () => {
       Justificare:
       ${cerere.justificare || "Nicio justificare"}
 
-      Comentarii: ${cerere.comentariu || "Niciun comentariu"}
-
       Data trimiterii cererii: ${cerere.dataTrimitere}
 
       Multumesc anticipat pentru analiza cererii!
@@ -46,19 +44,39 @@ const SecretariatCazSocial = () => {
     window.open(url, "_blank");
   };
 
-  const veziDocument = (cerere) => {
-    if (!cerere.documentePath) {
-      alert("Nu există document atașat.");
-      return;
-    }
-    // Deschide fișierul PDF trimis de student
-    const url = `/cereri/caz-social/${cerere.id}/document`;
+const veziDocument = async (cerere) => {
+  if (!cerere.documentePath) {
+    alert("Nu există document atașat.");
+    return;
+  }
+
+  try {
+    const token = localStorage.getItem("token");
+
+    const res = await fetch(`http://localhost:34101/cereri/caz-social/${cerere.id}/document`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) throw new Error("Fișierul nu poate fi deschis.");
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
     window.open(url, "_blank");
-  };
+  } catch (err) {
+    alert("Eroare la deschiderea fișierului.");
+    console.error(err);
+  }
+};
+
 
   const valideazaCerere = (id) => {
     fetch(`/cereri/caz-social/${id}?status=aprobat`, {
       method: "PUT",
+       headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
     })
       .then((res) => {
         if (!res.ok) throw new Error("Eroare validare");
@@ -72,6 +90,9 @@ const SecretariatCazSocial = () => {
   const respingeCerere = (id) => {
     fetch(`/cereri/caz-social/${id}`, {
       method: "DELETE",
+       headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+       },
     })
       .then((res) => {
         if (!res.ok) throw new Error("Eroare ștergere");

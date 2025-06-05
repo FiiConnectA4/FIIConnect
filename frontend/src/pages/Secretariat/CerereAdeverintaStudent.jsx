@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import "./CerereAdeverintaStudent.css";
+import React, { useState, useEffect } from "react";
 
 const CerereAdeverintaStudent = ({ onBack }) => {
   const [formData, setFormData] = useState({
@@ -9,6 +8,37 @@ const CerereAdeverintaStudent = ({ onBack }) => {
     adresa: "",
   });
 
+  const [studentId, setStudentId] = useState(null);
+
+  useEffect(() => {
+    // Aici faci fetch la /person/me ca să preiei studentId și datele de baza
+    fetch("http://localhost:34101/person/me", {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Nu s-a putut prelua persoana");
+        return res.json();
+      })
+      .then((data) => {
+        if (data.student) {
+          setStudentId(data.student.id);
+          setFormData({
+            nume: data.student.firstName || "",
+            prenume: data.student.lastName || "",
+            numarMatricol: data.student.regNumber || "",
+            adresa: "",
+          });
+        } else {
+          alert("Studentul nu este identificat în răspuns");
+        }
+      })
+      .catch((err) => {
+        alert("Eroare la preluarea persoanei: " + err.message);
+      });
+  }, []);
+
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     setFormData((prevData) => ({
@@ -17,47 +47,50 @@ const CerereAdeverintaStudent = ({ onBack }) => {
     }));
   };
 
- const handleSubmit = async (event) => {
-  event.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-  const studentId = 7; // hardcodat pentru test
-
-  const cerereDto = {
-    studentId: studentId,
-    status: "Trimis",
-    dataTrimitere: new Date().toISOString(),
-    comentariu: "",
-    adresa: formData.adresa,
-  };
-
-  try {
-    const response = await fetch("http://localhost:34101/cereri/adeverinta-student", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(cerereDto),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      alert("Eroare la trimiterea cererii: " + errorText);
+    if (!studentId) {
+      alert("Studentul nu este identificat!");
       return;
     }
 
-    alert("Cererea pentru Adeverință Student a fost trimisă cu succes!");
-    setFormData({
-      nume: "",
-      prenume: "",
-      numarMatricol: "",
-      adresa: "",
-    });
-    onBack();
-  } catch (error) {
-    alert("Eroare la trimiterea cererii: " + error.message);
-  }
-};
+    const cerereDto = {
+      studentId,
+      status: "Asteptare",
+      dataTrimitere: new Date().toISOString(),
+      comentariu: "",
+      adresa: formData.adresa,
+    };
 
+    try {
+      const response = await fetch("http://localhost:34101/cereri/adeverinta-student", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify(cerereDto),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        alert("Eroare la trimiterea cererii: " + errorText);
+        return;
+      }
+
+      alert("Cererea pentru Adeverință Student a fost trimisă cu succes!");
+      setFormData({
+        nume: "",
+        prenume: "",
+        numarMatricol: "",
+        adresa: "",
+      });
+      onBack();
+    } catch (error) {
+      alert("Eroare la trimiterea cererii: " + error.message);
+    }
+  };
 
   return (
     <div className="cerere-decontari-container">
