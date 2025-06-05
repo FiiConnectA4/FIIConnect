@@ -51,9 +51,11 @@ const StudentCatalog = () => {
     const [showTransferModal, setShowTransferModal] = useState(false);
     const [selectedCourse, setSelectedCourse] = useState('');
     const [selectedGroup, setSelectedGroup] = useState('');
+    const [customGroup, setCustomGroup] = useState('');
     const [transferReason, setTransferReason] = useState('');
     const [transferLoading, setTransferLoading] = useState(false);
     const [availableGroups, setAvailableGroups] = useState([]);
+    const [hasAvailableGroups, setHasAvailableGroups] = useState(true);
 
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
@@ -150,40 +152,43 @@ const StudentCatalog = () => {
 
             if (response.ok) {
                 const groups = await response.json();
-                setAvailableGroups(groups);
+                if (groups && groups.length > 0) {
+                    setAvailableGroups(groups);
+                    setHasAvailableGroups(true);
+                } else {
+                    // No groups found, allow manual input
+                    setAvailableGroups([]);
+                    setHasAvailableGroups(false);
+                }
             } else {
-                // If no specific endpoint exists, provide default group options
-                setAvailableGroups([
-                    { id: 'A', name: 'Grupa A' },
-                    { id: 'B', name: 'Grupa B' },
-                    { id: 'C', name: 'Grupa C' },
-                    { id: 'D', name: 'Grupa D' }
-                ]);
+                // API error, allow manual input
+                setAvailableGroups([]);
+                setHasAvailableGroups(false);
             }
         } catch (error) {
             console.error('Error fetching groups:', error);
-            // Fallback to default groups
-            setAvailableGroups([
-                { id: 'A', name: 'Grupa A' },
-                { id: 'B', name: 'Grupa B' },
-                { id: 'C', name: 'Grupa C' },
-                { id: 'D', name: 'Grupa D' }
-            ]);
+            // Error occurred, allow manual input
+            setAvailableGroups([]);
+            setHasAvailableGroups(false);
         }
     };
 
     const handleCourseSelection = (courseId) => {
         setSelectedCourse(courseId);
         setSelectedGroup('');
+        setCustomGroup('');
         if (courseId) {
             fetchAvailableGroups(courseId);
         } else {
             setAvailableGroups([]);
+            setHasAvailableGroups(true);
         }
     };
 
     const submitTransferRequest = async () => {
-        if (!selectedCourse || !selectedGroup || !transferReason.trim()) {
+        const targetGroup = hasAvailableGroups ? selectedGroup : customGroup;
+
+        if (!selectedCourse || !targetGroup || !transferReason.trim()) {
             alert('Vă rugăm să completați toate câmpurile obligatorii.');
             return;
         }
@@ -201,7 +206,7 @@ const StudentCatalog = () => {
                     idStud: studentId,
                     idCourse: parseInt(selectedCourse)
                 },
-                targetGroup: selectedGroup,
+                targetGroup: targetGroup,
                 reasonText: transferReason,
                 requestDate: new Date().toISOString()
             };
@@ -238,8 +243,10 @@ const StudentCatalog = () => {
         setShowTransferModal(false);
         setSelectedCourse('');
         setSelectedGroup('');
+        setCustomGroup('');
         setTransferReason('');
         setAvailableGroups([]);
+        setHasAvailableGroups(true);
     };
 
     const downloadPDF = async () => {
@@ -485,20 +492,39 @@ const StudentCatalog = () => {
 
                             <div className="filter-group">
                                 <label htmlFor="group-select">Grupa țintă: *</label>
-                                <select
-                                    id="group-select"
-                                    value={selectedGroup}
-                                    onChange={e => setSelectedGroup(e.target.value)}
-                                    disabled={!selectedCourse}
-                                    required
-                                >
-                                    <option value="">Selectează grupa</option>
-                                    {availableGroups.map(group => (
-                                        <option key={group.id} value={group.id}>
-                                            {group.name || group.id}
-                                        </option>
-                                    ))}
-                                </select>
+                                {hasAvailableGroups ? (
+                                    <select
+                                        id="group-select"
+                                        value={selectedGroup}
+                                        onChange={e => setSelectedGroup(e.target.value)}
+                                        disabled={!selectedCourse}
+                                        required
+                                    >
+                                        <option value="">Selectează grupa</option>
+                                        {availableGroups.map((group, index) => (
+                                            <option key={index} value={group}>
+                                                {group}
+                                            </option>
+                                        ))}
+                                    </select>
+                                ) : (
+                                    <>
+                                        <input
+                                            type="text"
+                                            id="group-input"
+                                            value={customGroup}
+                                            onChange={e => setCustomGroup(e.target.value)}
+                                            placeholder="Introduceți numele grupei (ex: A, B, C1, etc.)"
+                                            disabled={!selectedCourse}
+                                            required
+                                        />
+                                        {selectedCourse && (
+                                            <small className="info-text">
+                                                Nu s-au găsit grupe predefinite pentru acest curs. Vă rugăm să introduceți manual numele grupei dorite.
+                                            </small>
+                                        )}
+                                    </>
+                                )}
                             </div>
 
                             <div className="filter-group">
@@ -533,7 +559,7 @@ const StudentCatalog = () => {
                             <button
                                 className="btn-download"
                                 onClick={submitTransferRequest}
-                                disabled={transferLoading || !selectedCourse || !selectedGroup || !transferReason.trim()}
+                                disabled={transferLoading || !selectedCourse || (!hasAvailableGroups ? !customGroup : !selectedGroup) || !transferReason.trim()}
                             >
                                 {transferLoading ? 'Se trimite...' : 'Trimite Cererea'}
                             </button>
