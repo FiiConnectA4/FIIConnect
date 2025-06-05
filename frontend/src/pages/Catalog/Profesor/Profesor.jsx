@@ -10,14 +10,17 @@ export default function Profesor() {
 
     const [grupe, setGrupe] = useState([]);
     const [selGr, setSelGr] = useState("");
-    const [selectedGrupa, setSelectedGrupa] = useState('');
 
     const [catalog, setCatalog] = useState([]);
     const [loading, setLoading] = useState(false);
 
     const [editingIndex, setEditingIndex] = useState(null);
     const [editedGrade, setEditedGrade] = useState('');
-    const [prevGrade, setPrevGrade] = useState('');
+
+    // Scaling state
+    const [scaledView, setScaledView] = useState([]);
+    const [scaledGrades, setScaledGrades] = useState([]);
+    const [lastAlgo, setLastAlgo] = useState('');
 
     // Transfer requests state
     const [showTransferPopup, setShowTransferPopup] = useState(false);
@@ -27,111 +30,55 @@ export default function Profesor() {
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
 
-    useEffect(() => {
-        fetch('/person/me', {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-            .then(res => res.json())
-            .then(data => {
-                if (data.role === "ROLE_PROFESOR" && data.professor?.id) {
-                    setProfesorId(data.professor.id);
-                } else {
-                    console.error("Nu s-a putut obține profesorId.");
-                }
-            })
-            .catch(err => console.error("Eroare la fetch /person/me:", err));
-    }, []);
-
-    useEffect(() => {
-        if (!profesorId) return;
-        fetch(`/didactic/professor/${profesorId}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        })
-            .then(res => res.json())
-            .then(data => {
-                const courses = (data.courses || [])
-                    .map(c => c.course)
-                    .filter(c => c.archived !== 1);
-                setCursuri(courses);
-                if (courses.length) setSelectedCursId(courses[0].id);
-            })
-            .catch(err => console.error(err));
-    }, [profesorId, token]);
-
-    useEffect(() => {
-        if (!selectedCursId) return;
-        setLoading(true);
-        Promise.all([
-            fetch(`/didactic/course/${selectedCursId}/enrolled`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
-            fetch(`/didactic/course/${selectedCursId}/grades`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json())
-        ])
-            .then(([enrollments, grades]) => {
-                const uniqueGroups = [...new Set(enrollments.map(e => e.student.facultyGroup))];
-                setGrupe(uniqueGroups);
-                const defaultGroup = uniqueGroups[0] || '';
-                setSelectedGrupa(defaultGroup);
-
-                // build initial catalog for default group
-                const students = enrollments
-                    .filter(e => e.student.facultyGroup === defaultGroup)
-                    .map(e => e.student);
-                const initCatalog = students.map(student => {
-                    const g = grades.find(x => x.student.id === student.id);
-                    return { name: `${student.firstName} ${student.lastName}`, grade: g ? g.value : '', studentId: student.id };
-                });
-                setCatalog(initCatalog);
-                setLoading(false);
-            })
-            .catch(err => { console.error(err); setLoading(false); });
-    }, [selectedCursId, token]);
-
-    // Refresh catalog when group changes
-    useEffect(() => {
-        if (!selectedCursId || !selectedGrupa) return;
-        setLoading(true);
-        Promise.all([
-            fetch(`/didactic/course/${selectedCursId}/enrolled`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
-            fetch(`/didactic/course/${selectedCursId}/grades`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json())
-        ])
-            .then(([enrollments, grades]) => {
-                const students = enrollments
-                    .filter(e => e.student.facultyGroup === selectedGrupa)
-                    .map(e => e.student);
-                const newCatalog = students.map(student => {
-                    const g = grades.find(x => x.student.id === student.id);
-                    return { name: `${student.firstName} ${student.lastName}`, grade: g ? g.value : '', studentId: student.id };
-                });
-                setCatalog(newCatalog);
-                setLoading(false);
-            })
-            .catch(err => { console.error(err); setLoading(false); });
-    }, [selectedCursId, selectedGrupa, token]);
-
-    const [catalog, setCat] = useState([]);
-    const [loading, setLoad] = useState(false);
-
-    const [editIdx, setEditIdx] = useState(null);
-    const [editVal, setEditVal] = useState("");
-
-    const [scaledView, setScaledView] = useState([]);
-    const [scaledGrades, setScaledGrades] = useState([]);
-    const [lastAlgo, setLastAlgo] = useState(null);
-
-    const token = localStorage.getItem("token");
-    const nav = useNavigate();
     const authHead = { Authorization: `Bearer ${token}` };
 
+    const handleUploadCSV = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.csv';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            fetch(`/didactic/course/${idCurs}/upload_component_scores_csv`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error('Eroare la încărcarea fișierului CSV');
+                    return res.json().catch(() => null);
+                })
+                .then(() => {
+                    alert('Fișierul CSV a fost încărcat cu succes!');
+                    // Reload the current course data instead of full page reload
+                    load(idCurs, selGr);
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Eroare la încărcarea fișierului CSV: ' + err.message);
+                });
+        };
+        input.click();
+    };
+
+    // Get professor ID
     useEffect(() => {
         fetch("/person/me", { headers: authHead })
             .then(r => r.json())
             .then(d => {
                 if (d.role === "ROLE_PROFESOR" && d.professor?.id)
                     setProfesorId(d.professor.id);
-            });
+            })
+            .catch(err => console.error("Eroare la fetch /person/me:", err));
     }, []);
 
+    // Get professor's courses
     useEffect(() => {
         if (!profesorId) return;
         fetch(`/didactic/professor/${profesorId}`, { headers: authHead })
@@ -140,13 +87,17 @@ export default function Profesor() {
                 const list = (d.courses ?? []).map(c => c.course).filter(c => c.archived !== 1);
                 setCurs(list);
                 if (list.length) setIdCurs(list[0].id);
-            });
+            })
+            .catch(err => console.error(err));
     }, [profesorId]);
 
-    useEffect(() => { if (idCurs) load(idCurs, selGr); }, [idCurs, selGr]);
+    // Load data when course or group changes
+    useEffect(() => {
+        if (idCurs) load(idCurs, selGr);
+    }, [idCurs, selGr]);
 
     async function load(cId, grupa) {
-        setLoad(true);
+        setLoading(true);
         try {
             const [enroll, grades] = await Promise.all([
                 fetch(`/didactic/course/${cId}/enrolled`, { headers: authHead }).then(r => r.json()),
@@ -156,41 +107,60 @@ export default function Profesor() {
             setGrupe(groups);
             if (!grupa && groups.length) setSelGr(groups[0]);
 
-            const stud = enroll.filter(e => e.student.facultyGroup === (grupa || groups[0])).map(e => e.student);
-            setCat(stud.map(s => ({
+            const targetGroup = grupa || groups[0];
+            const stud = enroll.filter(e => e.student.facultyGroup === targetGroup).map(e => e.student);
+            setCatalog(stud.map(s => ({
                 studentId: s.id,
                 name: `${s.firstName} ${s.lastName}`,
                 grade: grades.find(g => g.student.id === s.id)?.value ?? ""
             })));
 
-            setScaledView([]); setScaledGrades([]);
-        } finally { setLoad(false); }
+            setScaledView([]);
+            setScaledGrades([]);
+        } finally {
+            setLoading(false);
+        }
     }
 
     async function saveSingle(idx) {
-        const row = catalog[idx], v = parseFloat(editVal);
+        const row = catalog[idx];
+        const v = parseFloat(editedGrade);
         if (isNaN(v) || v < 1 || v > 10) return alert("Nota invalidă!");
-        await fetch("/didactic/grade", {
-            method: row.grade === "" ? "POST" : "PUT",
-            headers: { "Content-Type": "application/json", ...authHead },
-            body: JSON.stringify({ id: { idStud: row.studentId, idCourse: idCurs }, value: v, gradingDate: new Date().toISOString() })
-        });
-        setCat(catalog.map((r, i) => i === idx ? { ...r, grade: v } : r));
-        setEditIdx(null);
+
+        try {
+            await fetch("/didactic/grade", {
+                method: row.grade === "" ? "POST" : "PUT",
+                headers: { "Content-Type": "application/json", ...authHead },
+                body: JSON.stringify({
+                    id: { idStud: row.studentId, idCourse: idCurs },
+                    value: v,
+                    gradingDate: new Date().toISOString()
+                })
+            });
+            setCatalog(catalog.map((r, i) => i === idx ? { ...r, grade: v } : r));
+            setEditingIndex(null);
+        } catch (err) {
+            console.error('Eroare la salvarea notei:', err);
+            alert('Eroare la salvarea notei!');
+        }
     }
 
     function gaussLocal(list) {
         const sorted = list.filter(g => g.value >= 4.5).sort((a, b) => b.value - a.value);
-        const n = sorted.length, idx = [0.10, 0.25, 0.30, 0.25];
+        const n = sorted.length;
+        const idx = [0.10, 0.25, 0.30, 0.25];
         const cut = [Math.max(1, Math.round(idx[0] * n))];
         cut.push(cut[0] + Math.max(1, Math.round(idx[1] * n)));
         cut.push(cut[1] + Math.max(1, Math.round(idx[2] * n)));
         cut.push(cut[2] + Math.max(1, Math.round(idx[3] * n)));
         cut.push(n);
-        const val = [10, 9, 8, 7, 6]; let tier = 0, prev = 10, out = [];
+        const val = [10, 9, 8, 7, 6];
+        let tier = 0, prev = 10, out = [];
+
         sorted.forEach((g, i) => {
             if (i >= cut[tier] && g.value !== prev) tier++;
-            out.push({ ...g, value: val[tier] }); prev = g.value;
+            out.push({ ...g, value: val[tier] });
+            prev = g.value;
         });
         list.filter(g => g.value < 4.5).forEach(g => out.push({ ...g }));
         return out;
@@ -216,7 +186,7 @@ export default function Profesor() {
             const studentMap = new Map();
             enrolled.forEach(e => studentMap.set(e.student.id, `${e.student.firstName} ${e.student.lastName}`));
 
-            setCat(cur => cur.map(row => {
+            setCatalog(cur => cur.map(row => {
                 const f = scaled.find(s => s.id.idStud === row.studentId);
                 return f ? { ...row, grade: f.value } : row;
             }));
@@ -228,7 +198,10 @@ export default function Profesor() {
                 value: s.value
             })));
             alert(`Notele ${(algo === "gauss") ? "Gauss" : "Best"} au fost calculate.`);
-        } catch (e) { console.error(e); alert("Eroare: " + e.message); }
+        } catch (e) {
+            console.error(e);
+            alert("Eroare: " + e.message);
+        }
     }
 
     async function saveScaling() {
@@ -243,25 +216,29 @@ export default function Profesor() {
             );
             alert("Notele au fost salvate!");
             load(idCurs, selGr);
-        } catch (e) { console.error(e); alert("Eroare salvare: " + e.message); }
+        } catch (e) {
+            console.error(e);
+            alert("Eroare salvare: " + e.message);
+        }
     }
+
     // Transfer requests functions
     const handleShowTransferRequests = () => {
         if (!profesorId) {
             alert('Nu s-a putut obține ID-ul profesorului.');
             return;
         }
-        
+
         setLoadingTransfers(true);
         setShowTransferPopup(true);
-        
+
         fetch(`/didactic/transfer/professor/${profesorId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
             .then(res => res.json())
             .then(async (data) => {
                 const requests = data || [];
-                
+
                 // Fetch student and course names for each request
                 const requestsWithNames = await Promise.all(
                     requests.map(async (request) => {
@@ -274,10 +251,10 @@ export default function Profesor() {
                                     headers: { 'Authorization': `Bearer ${token}` }
                                 })
                             ]);
-                            
+
                             const student = await studentRes.json();
                             const course = await courseRes.json();
-                            
+
                             return {
                                 ...request,
                                 studentName: `${student.firstName} ${student.lastName}`,
@@ -293,7 +270,7 @@ export default function Profesor() {
                         }
                     })
                 );
-                
+
                 setTransferRequests(requestsWithNames);
                 setLoadingTransfers(false);
             })
@@ -306,17 +283,17 @@ export default function Profesor() {
 
     const handleDenyTransfer = (request) => {
         const url = `/didactic/transfer?idStud=${request.id.idStud}&idCourse=${request.id.idCourse}`;
-        
+
         fetch(url, {
             method: 'DELETE',
-            headers: { 
-                'Authorization': `Bearer ${token}` 
+            headers: {
+                'Authorization': `Bearer ${token}`
             }
         })
             .then(res => {
                 if (!res.ok) throw new Error('Eroare la respingerea cererii');
                 // Remove the request from the list
-                setTransferRequests(prev => prev.filter(r => 
+                setTransferRequests(prev => prev.filter(r =>
                     !(r.id.idStud === request.id.idStud && r.id.idCourse === request.id.idCourse)
                 ));
                 alert('Cererea a fost respinsă cu succes.');
@@ -329,7 +306,7 @@ export default function Profesor() {
 
     const handleApproveTransfer = (request) => {
         const url = `/didactic/enroll/transfer?studentId=${request.id.idStud}&courseId=${request.id.idCourse}&facultyGroup=${request.facultyGroup}`;
-        
+
         fetch(url, {
             method: 'PATCH',
             headers: { 'Authorization': `Bearer ${token}` }
@@ -337,7 +314,7 @@ export default function Profesor() {
             .then(res => {
                 if (!res.ok) throw new Error('Eroare la aprobarea cererii');
                 // Remove the request from the list
-                setTransferRequests(prev => prev.filter(r => 
+                setTransferRequests(prev => prev.filter(r =>
                     !(r.id.idStud === request.id.idStud && r.id.idCourse === request.id.idCourse)
                 ));
                 alert('Cererea a fost aprobată cu succes.');
@@ -348,15 +325,13 @@ export default function Profesor() {
             });
     };
 
-    const currentCourseTitle = cursuri.find(c => c.id === selectedCursId)?.title || '';
-
     return (
         <div className="container-catalog">
             <div className="catalog-header">
                 <h1>CATALOG</h1>
                 <div className="select-controls">
                     <select value={selGr} onChange={e => setSelGr(e.target.value)}>
-                        {grupe.map(g => <option key={g}>{g}</option>)}
+                        {grupe.map(g => <option key={g} value={g}>{g}</option>)}
                     </select>
                     <select value={idCurs || ""} onChange={e => setIdCurs(Number(e.target.value))}>
                         {cursuri.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
@@ -366,53 +341,90 @@ export default function Profesor() {
 
             <div className="catalog-table">
                 <table>
-                    <thead><tr><th>Student</th><th>Notă</th><th>Actiuni</th></tr></thead>
+                    <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Notă</th>
+                        <th>Acțiuni</th>
+                    </tr>
+                    </thead>
                     <tbody>
-                    {loading ? <tr><td colSpan={3}>Se încarcă...</td></tr> :
+                    {loading ? (
+                        <tr><td colSpan={3}>Se încarcă...</td></tr>
+                    ) : (
                         catalog.map((row, i) => (
                             <tr key={row.studentId}>
                                 <td>{row.name}</td>
-                                <td>{editIdx === i ?
-                                    <input type="number" min="1" max="10" step="0.01"
-                                           value={editVal} onChange={e => setEditVal(e.target.value)} />
-                                    : row.grade}</td>
-                                <td>{editIdx === i ?
-                                    <>
-                                        <button onClick={() => saveSingle(i)}>💾</button>
-                                        <button onClick={() => setEditIdx(null)}>↩️</button>
-                                    </>
-                                    : <>
-                                        <button onClick={() => { setEditIdx(i); setEditVal(row.grade); }}>✏️</button>
-                                        <button onClick={() => nav(`/app/catalog/activity-sheet/${idCurs}/${row.studentId}`)}>📋</button>
-                                    </>
-                                }</td>
+                                <td>
+                                    {editingIndex === i ? (
+                                        <input
+                                            type="number"
+                                            min="1"
+                                            max="10"
+                                            step="0.01"
+                                            value={editedGrade}
+                                            onChange={e => setEditedGrade(e.target.value)}
+                                        />
+                                    ) : row.grade}
+                                </td>
+                                <td>
+                                    {editingIndex === i ? (
+                                        <>
+                                            <button onClick={() => saveSingle(i)}>💾</button>
+                                            <button onClick={() => setEditingIndex(null)}>↩️</button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <button onClick={() => {
+                                                setEditingIndex(i);
+                                                setEditedGrade(row.grade);
+                                            }}>✏️</button>
+                                            <button onClick={() => navigate(`/app/catalog/activity-sheet/${idCurs}/${row.studentId}`)}>📋</button>
+                                        </>
+                                    )}
+                                </td>
                             </tr>
-                        ))}
+                        ))
+                    )}
                     </tbody>
                 </table>
             </div>
 
             <div className="catalog-buttons">
-                <button onClick={() => nav(`/app/catalog/activity-sheet/group/${idCurs}?grupa=${encodeURIComponent(selGr)}`)} disabled={!idCurs || !selGr}>🧾 Fișa grupă</button>
+                <button
+                    onClick={() => navigate(`/app/catalog/activity-sheet/group/${idCurs}?grupa=${encodeURIComponent(selGr)}`)}
+                    disabled={!idCurs || !selGr}
+                >
+                    🧾 Fișa grupă
+                </button>
                 <button onClick={() => runScaling("gauss")}>📊 Aplică Gauss</button>
                 <button onClick={() => runScaling("best")}>📈 Aplică Best</button>
                 <button onClick={saveScaling} disabled={!scaledGrades.length}>💾 Salvează note</button>
+                <button onClick={handleUploadCSV} disabled={!idCurs}>📤 Încarcă CSV</button>
+                <button onClick={handleShowTransferRequests}>Vezi cereri de transfer la cursul tau</button>
             </div>
 
             {scaledView.length > 0 && (
                 <div className="catalog-table" style={{ marginTop: "2rem" }}>
                     <h2>Note după {lastAlgo === "best" ? "Best" : "Gauss"}</h2>
                     <table>
-                        <thead><tr><th>Student</th><th>Notă scalată</th></tr></thead>
+                        <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Notă scalată</th>
+                        </tr>
+                        </thead>
                         <tbody>
                         {scaledView.map(r => (
-                            <tr key={r.studentId}><td>{r.name}</td><td>{r.value}</td></tr>
+                            <tr key={r.studentId}>
+                                <td>{r.name}</td>
+                                <td>{r.value}</td>
+                            </tr>
                         ))}
                         </tbody>
                     </table>
-            <div className="catalog-buttons">
-                <button onClick={handleShowTransferRequests}>Vezi cereri de transfer la cursul tau</button>
-            </div>
+                </div>
+            )}
 
             {/* Transfer Requests Popup */}
             {showTransferPopup && (
@@ -420,7 +432,7 @@ export default function Profesor() {
                     <div className="popup-content">
                         <div className="popup-header">
                             <h2>Cereri de transfer</h2>
-                            <button 
+                            <button
                                 className="popup-close"
                                 onClick={() => setShowTransferPopup(false)}
                             >
@@ -438,8 +450,8 @@ export default function Profesor() {
                                         <div key={index} className="transfer-request-item">
                                             <div className="request-info">
                                                 <div className="request-details">
-                                                    <strong>Student:</strong> {request.studentName} | 
-                                                    <strong> Curs:</strong> {request.courseName} | 
+                                                    <strong>Student:</strong> {request.studentName} |
+                                                    <strong> Curs:</strong> {request.courseName} |
                                                     <strong> Grupa:</strong> {request.facultyGroup}
                                                 </div>
                                                 <div className="request-reason">
@@ -447,13 +459,13 @@ export default function Profesor() {
                                                 </div>
                                             </div>
                                             <div className="request-actions">
-                                                <button 
+                                                <button
                                                     className="approve-btn"
                                                     onClick={() => handleApproveTransfer(request)}
                                                 >
                                                     Aprobă
                                                 </button>
-                                                <button 
+                                                <button
                                                     className="deny-btn"
                                                     onClick={() => handleDenyTransfer(request)}
                                                 >

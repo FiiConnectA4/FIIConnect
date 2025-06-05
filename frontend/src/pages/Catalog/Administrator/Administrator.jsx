@@ -73,6 +73,39 @@ export default function Administrator() {
         setEditIdx(null);
     }
 
+    /* --------------- încărcare CSV ---------------------------- */
+    const handleUploadCSV = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.csv';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('file', file);
+            fetch(`/didactic/course/${idCurs}/upload_component_scores_csv`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error('Eroare la încărcarea fișierului CSV');
+                    return res.json().catch(() => null);
+                })
+                .then(() => {
+                    alert('Fișierul CSV a fost încărcat cu succes!');
+                    load(idCurs, selGr); // Reîncarcă datele în loc de window.location.reload()
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Eroare la încărcarea fișierului CSV: ' + err.message);
+                });
+        };
+        input.click();
+    };
+
     /* ---------------- algoritmi locali ------------------------ */
     function gaussLocal(list){
         const sorted=list.filter(g=>g.value>=4.5).sort((a,b)=>b.value-a.value);
@@ -199,6 +232,10 @@ export default function Administrator() {
                 <button onClick={()=>nav(`/app/catalog/activity-sheet/group/${idCurs}?grupa=${encodeURIComponent(selGr)}`)}
                         disabled={!idCurs||!selGr}>
                     🧾 Fișa de activitate — grupă curentă
+                </button>
+
+                <button onClick={handleUploadCSV} disabled={!idCurs}>
+                    📤 Încarcă CSV
                 </button>
 
                 <button onClick={()=>runScaling("gauss")} disabled={!idCurs}>📊 Aplică Gauss</button>
