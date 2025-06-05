@@ -1,83 +1,139 @@
-// src/DetaliiCurs/AssignUsersToCourses.jsx
-
 import React, { useState, useEffect } from 'react';
-import './AssignUsersToCourses.css';
+import './AssignUsersToCourses.css'; // CSS unificat pentru ambele moduri
 
-const AssignUsersToCourses = ({ onBack }) => {
-    // State pentru tipul de utilizator ales (student/profesor)
-    const [userType, setUserType] = useState('student');
-    // Listele de studenți, profesori și cursuri
+const AssignEntitiesToCourses = ({ onBack }) => {
+    // --- STATE PENTRU DATE ---
+    const [mode, setMode] = useState('student'); // 'student' sau 'professor'
     const [students, setStudents] = useState([]);
     const [professors, setProfessors] = useState([]);
     const [courses, setCourses] = useState([]);
-    // Set-uri pentru ID-urile selectate
-    const [selectedUserIds, setSelectedUserIds] = useState(new Set());
+
+    const [selectedStudentIds, setSelectedStudentIds] = useState(new Set());
+    const [selectedProfessorIds, setSelectedProfessorIds] = useState(new Set());
+    const [professorRoles, setProfessorRoles] = useState({});
+    // { [profId]: 'titular' | 'seminar' | 'laborator' }
+
     const [selectedCourseIds, setSelectedCourseIds] = useState(new Set());
-    // Loading și mesaje de status
+
     const [loading, setLoading] = useState(true);
-    const [assignmentLoading, setAssignmentLoading] = useState(false);
+    const [assignLoading, setAssignLoading] = useState(false);
     const [status, setStatus] = useState(null);
 
     const token = localStorage.getItem('token');
 
+    // --- FETCH AL DATELOR: studenți, profesori și cursuri NE-ARHIVATE ---
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchAll = async () => {
             try {
                 setLoading(true);
+                console.log('--- fetchAll: începe încărcarea datelor ---');
+                console.log('Token folosit:', token);
 
-                // Fetch studenți
+                // 1. Fetch studenți
+                console.log('📡 Fetching students from /didactic/student...');
                 const studentsRes = await fetch('/didactic/student', {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                if (!studentsRes.ok) throw new Error(`Studenți HTTP ${studentsRes.status}`);
+                console.log('↩️ Students response status:', studentsRes.status);
+                if (!studentsRes.ok) {
+                    let errMsg = `Studenți HTTP ${studentsRes.status}`;
+                    try {
+                        const errJson = await studentsRes.json();
+                        console.log('📨 Students error body:', errJson);
+                        errMsg += ` – ${errJson.message || JSON.stringify(errJson)}`;
+                    } catch { }
+                    throw new Error(errMsg);
+                }
                 const studentsData = await studentsRes.json();
-                // backend returnează un array de obiecte Student, cu câmpuri firstName, lastName, group, id
+                console.log('✅ Students data primită:', studentsData);
                 setStudents(Array.isArray(studentsData) ? studentsData : []);
 
-                // Fetch profesori
-                const professorsRes = await fetch('/didactic/professor', {
+                // 2. Fetch profesori
+                console.log('📡 Fetching professors from /didactic/professor...');
+                const profRes = await fetch('/didactic/professor', {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                if (!professorsRes.ok) throw new Error(`Profesori HTTP ${professorsRes.status}`);
-                const professorsData = await professorsRes.json();
-                // backend returnează un array de obiecte Professor, cu câmpuri firstName, lastName, id, rank
-                setProfessors(Array.isArray(professorsData) ? professorsData : []);
+                console.log('↩️ Professors response status:', profRes.status);
+                if (!profRes.ok) {
+                    let errMsg = `Profesori HTTP ${profRes.status}`;
+                    try {
+                        const errJson = await profRes.json();
+                        console.log('📨 Professors error body:', errJson);
+                        errMsg += ` – ${errJson.message || JSON.stringify(errJson)}`;
+                    } catch { }
+                    throw new Error(errMsg);
+                }
+                const profData = await profRes.json();
+                console.log('✅ Professors data primită:', profData);
+                setProfessors(Array.isArray(profData) ? profData : []);
 
-                // Fetch cursuri ne-arhivate
+                // 3. Fetch cursuri ne-arhivate
+                console.log('📡 Fetching courses from /didactic/course...');
                 const coursesRes = await fetch('/didactic/course', {
                     headers: { Authorization: `Bearer ${token}` },
                 });
-                if (!coursesRes.ok) throw new Error(`Cursuri HTTP ${coursesRes.status}`);
+                console.log('↩️ Courses response status:', coursesRes.status);
+                if (!coursesRes.ok) {
+                    let errMsg = `Cursuri HTTP ${coursesRes.status}`;
+                    try {
+                        const errJson = await coursesRes.json();
+                        console.log('📨 Courses error body:', errJson);
+                        errMsg += ` – ${errJson.message || JSON.stringify(errJson)}`;
+                    } catch { }
+                    throw new Error(errMsg);
+                }
                 const coursesData = await coursesRes.json();
-                // Dacă răspunsul e HAL, extragem _embedded.courseList, altfel dacă e array, folosim direct
+                console.log('✅ Courses data brută:', coursesData);
                 const allCourses = Array.isArray(coursesData)
                     ? coursesData
                     : coursesData._embedded?.courseList || [];
-                setCourses(allCourses.filter((c) => c.archived === 0));
+                const filtered = allCourses.filter((c) => c.archived === 0);
+                console.log('👉 Cursuri ne-arhivate (filtered):', filtered);
+                setCourses(filtered);
             } catch (error) {
-                console.error('Error fetching data:', error);
+                console.error('❌ Error fetchAll:', error);
                 setStatus({
                     type: 'error',
                     message: 'Eroare la încărcarea datelor.',
                 });
             } finally {
+                console.log('--- fetchAll: s-a încheiat încărcarea datelor ---');
                 setLoading(false);
             }
         };
 
-        fetchData();
+        fetchAll();
     }, [token]);
 
-    const handleUserTypeChange = (e) => {
-        setUserType(e.target.value);
-        setSelectedUserIds(new Set());
+    // --- HANDLERE PENTRU SELECTAREA CU CHECKBOX-URI ---
+    const handleStudentSelection = (studentId) => {
+        setSelectedStudentIds((prev) => {
+            const newSet = new Set(prev);
+            if (newSet.has(studentId)) newSet.delete(studentId);
+            else newSet.add(studentId);
+            return newSet;
+        });
     };
 
-    const handleUserSelection = (userId) => {
-        setSelectedUserIds((prev) => {
+    const handleProfessorSelection = (professorId) => {
+        setSelectedProfessorIds((prev) => {
             const newSet = new Set(prev);
-            if (newSet.has(userId)) newSet.delete(userId);
-            else newSet.add(userId);
+            if (newSet.has(professorId)) {
+                // dacă deselectăm profesor, îl scoatem și din professorRoles
+                newSet.delete(professorId);
+                setProfessorRoles((old) => {
+                    const copy = { ...old };
+                    delete copy[professorId];
+                    return copy;
+                });
+            } else {
+                newSet.add(professorId);
+                // inițial, rol-ul implicit este 'titular'
+                setProfessorRoles((old) => ({
+                    ...old,
+                    [professorId]: 'titular',
+                }));
+            }
             return newSet;
         });
     };
@@ -91,63 +147,183 @@ const AssignUsersToCourses = ({ onBack }) => {
         });
     };
 
-    const handleAssign = async () => {
-        if (selectedUserIds.size === 0 || selectedCourseIds.size === 0) {
+    const handleRoleChange = (professorId, newRole) => {
+        setProfessorRoles((old) => ({
+            ...old,
+            [professorId]: newRole,
+        }));
+    };
+
+    // --- HANDLER PENTRU TRIMITERE (Student sau Profesor) ---
+    const handleSubmit = async () => {
+        // Verificăm că s-a selectat măcar o entitate (în funcție de modul curent)
+        if (
+            (mode === 'student' && selectedStudentIds.size === 0) ||
+            (mode === 'professor' && selectedProfessorIds.size === 0) ||
+            selectedCourseIds.size === 0
+        ) {
             setStatus({
                 type: 'error',
-                message: 'Vă rugăm să selectați cel puțin un utilizator și un curs.',
+                message:
+                    mode === 'student'
+                        ? 'Selectează cel puțin un student și un curs.'
+                        : 'Selectează cel puțin un profesor și un curs.',
             });
             return;
         }
 
-        setAssignmentLoading(true);
+        // Dacă suntem la profesor, ne asigurăm că pentru fiecare profesor există un rol
+        if (mode === 'professor') {
+            for (let profId of selectedProfessorIds) {
+                if (!professorRoles[profId]) {
+                    setStatus({
+                        type: 'error',
+                        message: 'Te rugăm să alegi rolul pentru fiecare profesor selectat.',
+                    });
+                    return;
+                }
+            }
+        }
+
+        setAssignLoading(true);
         setStatus(null);
+        console.log(
+            `--- handleSubmit (${mode}): începe procesul de ${mode === 'student' ? 'înscriere' : 'asignare'
+            } ---`
+        );
+        console.log(
+            mode === 'student' ? 'Studenți selectați:' : 'Profesori selectați:',
+            mode === 'student'
+                ? Array.from(selectedStudentIds)
+                : Array.from(selectedProfessorIds)
+        );
+        console.log('Cursuri selectate:', Array.from(selectedCourseIds));
+        if (mode === 'professor') console.log('Roluri selectate:', professorRoles);
 
         try {
-            const payload = {
-                userIds: Array.from(selectedUserIds),
-                courseIds: Array.from(selectedCourseIds),
-                userType: userType,
-            };
+            const promises = [];
 
-            const res = await fetch('/didactic/assign', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify(payload),
-            });
+            if (mode === 'student') {
+                // 1. STUDENT: pentru fiecare studId și fiecare courseId, construim payload-ul
+                Array.from(selectedStudentIds).forEach((studId) => {
+                    const student = students.find((s) => s.id === studId);
+                    // extracem facultyGroup (poate fi sub numele student.group sau student.facultyGroup)
+                    const facultyGroup = student?.facultyGroup ?? student?.group ?? '';
+                    Array.from(selectedCourseIds).forEach((courseId) => {
+                        const payload = {
+                            id: {
+                                idStud: studId,
+                                idCourse: courseId,
+                            },
+                            facultyGroup: facultyGroup,
+                        };
+                        console.log('📨 Trimitem STUDENT payload spre /didactic/enroll:', payload);
 
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({}));
-                const errorMessage =
-                    errorData.message || 'Eroare la atribuire. Vă rugăm să încercați din nou.';
-                throw new Error(errorMessage);
+                        const p = fetch('/didactic/enroll', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: `Bearer ${token}`,
+                            },
+                            body: JSON.stringify(payload),
+                        }).then(async (res) => {
+                            console.log(`↩️ enroll(${studId}, ${courseId}) status:`, res.status);
+                            if (!res.ok) {
+                                let errorMessage = `Enroll HTTP ${res.status}`;
+                                try {
+                                    const errJson = await res.json();
+                                    console.log('📨 enroll error body:', errJson);
+                                    errorMessage += ` – ${errJson.message || JSON.stringify(errJson)}`;
+                                } catch { }
+                                throw new Error(errorMessage);
+                            }
+                            return res;
+                        });
+
+                        promises.push(p);
+                    });
+                });
+            } else {
+                // 2. PROFESSOR: pentru fiecare profId și fiecare courseId, construim payload-ul cu rol,
+                //        dar trimitem către endpoint-ul nou /didactic/teach
+                Array.from(selectedProfessorIds).forEach((profId) => {
+                    Array.from(selectedCourseIds).forEach((courseId) => {
+                        const payload = {
+                            id: {
+                                idProf: profId,
+                                idCourse: courseId,
+                            },
+                            role: professorRoles[profId],
+                        };
+                        console.log('📨 Trimitem PROFESSOR payload spre /didactic/teach:', payload);
+
+                        const p = fetch('/didactic/teach', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: `Bearer ${token}`,
+                            },
+                            body: JSON.stringify(payload),
+                        }).then(async (res) => {
+                            console.log(
+                                `↩️ teach(prof ${profId}, curs ${courseId}) status:`,
+                                res.status
+                            );
+                            if (!res.ok) {
+                                let errorMessage = `Teach HTTP ${res.status}`;
+                                try {
+                                    const errJson = await res.json();
+                                    console.log('📨 teach error body:', errJson);
+                                    errorMessage += ` – ${errJson.message || JSON.stringify(errJson)}`;
+                                } catch { }
+                                throw new Error(errorMessage);
+                            }
+                            return res;
+                        });
+
+                        promises.push(p);
+                    });
+                });
             }
+
+            const responses = await Promise.all(promises);
+            console.log('✅ Toate răspunsurile ok:', responses.map((r) => r.status));
 
             setStatus({
                 type: 'success',
-                message: 'Atribuirea a fost realizată cu succes!',
+                message:
+                    mode === 'student'
+                        ? 'Înscrierea studenților la cursuri a fost realizată cu succes!'
+                        : 'Asignarea profesorilor la cursuri a fost realizată cu succes!',
             });
-            setSelectedUserIds(new Set());
+            // Resetăm selecțiile
+            setSelectedStudentIds(new Set());
+            setSelectedProfessorIds(new Set());
             setSelectedCourseIds(new Set());
+            setProfessorRoles({});
         } catch (error) {
-            console.error('Assignment error:', error);
+            console.error(
+                `❌ ${mode === 'student' ? 'Enroll' : 'Teach'} error:`,
+                error
+            );
             setStatus({
                 type: 'error',
-                message:
-                    error.message || 'A apărut o eroare neașteptată la atribuire.',
+                message: error.message || 'A apărut o eroare neașteptată.',
             });
         } finally {
-            setAssignmentLoading(false);
+            console.log(
+                `--- handleSubmit (${mode}): s-a încheiat procesul de ${mode === 'student' ? 'înscriere' : 'asignare'
+                } ---`
+            );
+            setAssignLoading(false);
         }
     };
 
+    // --- RENDER: loading, switch de mod, liste + formular ---
     if (loading) {
         return (
             <div className="trimite-feedback-container">
-                Se încarcă datele pentru atribuire...
+                Se încarcă datele (studenți, profesori, cursuri)…
             </div>
         );
     }
@@ -160,71 +336,141 @@ const AssignUsersToCourses = ({ onBack }) => {
             </button>
 
             <div className="trimite-feedback-header">
-                <h1>Atribuire Utilizatori la Cursuri</h1>
+                <h1>
+                    {mode === 'student'
+                        ? 'Înscriere Studenți la Cursuri'
+                        : 'Asignare Profesori la Cursuri'}
+                </h1>
+            </div>
+
+            {/* Switch de mod: Student vs Profesor */}
+            <div className="mode-switch">
+                <label>
+                    <input
+                        type="radio"
+                        name="mode"
+                        value="student"
+                        checked={mode === 'student'}
+                        onChange={() => {
+                            setMode('student');
+                            setStatus(null);
+                            setSelectedProfessorIds(new Set());
+                            setSelectedCourseIds(new Set());
+                            setSelectedStudentIds(new Set());
+                            setProfessorRoles({});
+                        }}
+                    />
+                    Student
+                </label>
+                <label>
+                    <input
+                        type="radio"
+                        name="mode"
+                        value="professor"
+                        checked={mode === 'professor'}
+                        onChange={() => {
+                            setMode('professor');
+                            setStatus(null);
+                            setSelectedStudentIds(new Set());
+                            setSelectedCourseIds(new Set());
+                            setSelectedProfessorIds(new Set());
+                            setProfessorRoles({});
+                        }}
+                    />
+                    Profesor
+                </label>
             </div>
 
             <form
                 className="trimite-feedback-form"
                 onSubmit={(e) => {
                     e.preventDefault();
-                    handleAssign();
+                    handleSubmit();
                 }}
             >
-                {/* Select tip utilizator */}
-                <select
-                    className="trimite-feedback-select"
-                    value={userType}
-                    onChange={handleUserTypeChange}
-                >
-                    <option value="student">Studenti</option>
-                    <option value="professor">Profesori</option>
-                </select>
-
-                {/* Lista de utilizatori */}
-                <div className="trimite-feedback-lista-users">
-                    {userType === 'student' ? (
-                        students.length > 0 ? (
+                {/* Dacă suntem în modul “student”: afișăm lista de studenți */}
+                {mode === 'student' && (
+                    <div className="trimite-feedback-lista-users">
+                        {students.length > 0 ? (
                             students.map((student) => (
-                                <label key={student.id} className="trimite-feedback-user-item">
+                                <label
+                                    key={student.id}
+                                    className="trimite-feedback-user-item"
+                                >
                                     <input
                                         type="checkbox"
-                                        checked={selectedUserIds.has(student.id)}
-                                        onChange={() => handleUserSelection(student.id)}
+                                        checked={selectedStudentIds.has(student.id)}
+                                        onChange={() => handleStudentSelection(student.id)}
                                     />
-                                    {student.firstName} {student.lastName}{' '}
-                                    {student.group ? `(Grupa: ${student.group})` : ''}
+                                    <span className="user-text">
+                                        {student.firstName} {student.lastName}{' '}
+                                        {student.group || student.facultyGroup
+                                            ? `(Grupa: ${student.group ?? student.facultyGroup})`
+                                            : '(Grupa: –)'}
+                                    </span>
                                 </label>
                             ))
                         ) : (
                             <p>Nu există studenți disponibili.</p>
-                        )
-                    ) : professors.length > 0 ? (
-                        professors.map((prof) => (
-                            <label key={prof.id} className="trimite-feedback-user-item">
-                                <input
-                                    type="checkbox"
-                                    checked={selectedUserIds.has(prof.id)}
-                                    onChange={() => handleUserSelection(prof.id)}
-                                />
-                                {prof.firstName} {prof.lastName} {prof.rank ? `(${prof.rank})` : ''}
-                            </label>
-                        ))
-                    ) : (
-                        <p>Nu există profesori disponibili.</p>
-                    )}
-                </div>
+                        )}
+                    </div>
+                )}
 
-                {/* Lista de cursuri */}
+                {/* Dacă suntem în modul “professor”: afișăm lista de profesori + dropdown-uri per profesor */}
+                {mode === 'professor' && (
+                    <div className="trimite-feedback-lista-users">
+                        {professors.length > 0 ? (
+                            professors.map((prof) => (
+                                <div
+                                    key={prof.id}
+                                    className="professor-item"
+                                >
+                                    <label className="trimite-feedback-user-item">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedProfessorIds.has(prof.id)}
+                                            onChange={() => handleProfessorSelection(prof.id)}
+                                        />
+                                        <span className="user-text">
+                                            {prof.firstName} {prof.lastName}{' '}
+                                            {prof.title ? `(${prof.title})` : ''}
+                                        </span>
+                                    </label>
+                                    {selectedProfessorIds.has(prof.id) && (
+                                        <select
+                                            className="role-dropdown"
+                                            value={professorRoles[prof.id] || 'titular'}
+                                            onChange={(e) =>
+                                                handleRoleChange(prof.id, e.target.value)
+                                            }
+                                        >
+                                            <option value="titular">titular</option>
+                                            <option value="seminar">seminar</option>
+                                            <option value="laborator">laborator</option>
+                                        </select>
+                                    )}
+                                </div>
+                            ))
+                        ) : (
+                            <p>Nu există profesori disponibili.</p>
+                        )}
+                    </div>
+                )}
+
+                {/* Lista de cursuri este comună pentru ambele moduri */}
                 <div className="trimite-feedback-lista-cursuri">
                     {courses.length > 0 ? (
                         courses.map((course) => (
-                            <label key={course.id} className="trimite-feedback-course-item">
+                            <label
+                                key={course.id}
+                                className="trimite-feedback-course-item"
+                            >
                                 <input
                                     type="checkbox"
                                     checked={selectedCourseIds.has(course.id)}
                                     onChange={() => handleCourseSelection(course.id)}
                                 />
-                                {course.title}
+                                <span className="course-text">{course.title}</span>
                             </label>
                         ))
                     ) : (
@@ -233,17 +479,24 @@ const AssignUsersToCourses = ({ onBack }) => {
                 </div>
 
                 {/* Buton de submit */}
-                <div className="text-right">
+                <div className="submit-container">
                     <button
                         type="submit"
                         className="trimite-feedback-btn-primary trimite-feedback-submit"
                         disabled={
-                            assignmentLoading ||
-                            selectedUserIds.size === 0 ||
-                            selectedCourseIds.size === 0
+                            assignLoading ||
+                            (mode === 'student'
+                                ? selectedStudentIds.size === 0 || selectedCourseIds.size === 0
+                                : selectedProfessorIds.size === 0 || selectedCourseIds.size === 0)
                         }
                     >
-                        {assignmentLoading ? 'Se Atribuie...' : 'Atribuie Selectate'}
+                        {assignLoading
+                            ? mode === 'student'
+                                ? 'Se înscriu studenții...'
+                                : 'Se înscriu profesorii...'
+                            : mode === 'student'
+                                ? 'Înregistrează Studenți'
+                                : 'Înregistrează Profesori'}
                     </button>
                 </div>
 
@@ -261,4 +514,4 @@ const AssignUsersToCourses = ({ onBack }) => {
     );
 };
 
-export default AssignUsersToCourses;
+export default AssignEntitiesToCourses;
