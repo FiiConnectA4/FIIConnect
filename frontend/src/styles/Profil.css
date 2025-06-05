@@ -1,3 +1,4 @@
+
 .profile-wrapper {
     padding: 2rem;
     background-color: #f0f4f8;
@@ -312,4 +313,108 @@
 
 .danger-btn:hover {
     background-color: #b91c1c;
+}
+
+
+[data-theme="dark"] .profile-wrapper {
+  background: #1a3c5a;               /* darker page background */
+  color: #f0f0f0;                   /* light text */
+}
+
+[data-theme="dark"] .card {
+  background: #274c72;               /* darker card panels */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="dark"] .profile-title {
+  color: #f0f0f0;                   /* page heading */
+}
+
+/* Left side */
+[data-theme="dark"] .upload-btn {
+  background: #2f3dbe;
+  color: #fff;
+}
+[data-theme="dark"] .upload-btn:hover {
+  background: #3464ca;
+}
+
+[data-theme="dark"] .label {
+  color: #e2e8f0;                   /* field labels */
+}
+
+[data-theme="dark"] .value-edit .value-text,
+[data-theme="dark"] .info-item > .value-text {
+  color: #cbd5e1;                   /* field values */
+}
+
+[data-theme="dark"] .edit-btn,
+[data-theme="dark"] .view-btn {
+  background: #384d7c;
+  color: #e0e0e0;
+}
+[data-theme="dark"] .edit-btn:hover,
+[data-theme="dark"] .view-btn:hover {
+  background: #2f3dbe;
+  color: #fff;
+}
+
+/* About section */
+[data-theme="dark"] .about-textarea {
+  background: #537A9C;
+  border-color: #384d7c;
+  color: #e0e0e0;
+}
+[data-theme="dark"] .about-textarea:focus {
+  background: #3371c2;
+  border-color: #2f3dbe;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+}
+[data-theme="dark"] .about-textarea::placeholder {
+  color: #ccc;
+}
+
+/* Action buttons */
+[data-theme="dark"] .save-btn {
+  background: #16a34a;
+  color: #fff;
+}
+[data-theme="dark"] .cancel-btn {
+  background: #384d7c;
+  color: #cbd5e1;
+}
+
+/* Tags */
+[data-theme="dark"] .tag {
+  background: #3a517a;
+  color: #dbeafe;
+}
+
+/* Horizontal cards (status boxes) */
+[data-theme="dark"] .horizontal-card {
+  background: #274c72;
+}
+[data-theme="dark"] .emoji-box {
+  background: #537A9C;
+}
+[data-theme="dark"] .value-text {
+  color: #e0e0e0;
+}
+
+/* Achievement list */
+[data-theme="dark"] .achievement-list.spaced {
+  background: #3a517a;
+  border-color: #4a6c8a;
+}
+[data-theme="dark"] .achievement-list li {
+  color: #dbeafe;
+}
+
+/* Error / Danger button */
+[data-theme="dark"] .danger-btn {
+  background: #b91c1c;
+  color: #fff;
+}
+[data-theme="dark"] .danger-btn:hover {
+  background: #7f1d1d;
 }

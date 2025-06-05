@@ -1,63 +1,64 @@
 import React, { useState, useEffect, useCallback } from "react";
+import axios from 'axios';
 import { useNavigate } from "react-router-dom";
 import "../../styles/Profil.css";
 
-/**
- * Profile.jsx – componentă completă
- *  • Fetch profil autenticat (GET /profile)
- *  • Dacă lipseşte profilul → redirect /app/setup-profile
- *  • Dacă token invalid → redirect /
- *  • Permite editarea Phone & About, salvează cu PUT /profile
- */
+const BACKEND_URL = "http://localhost:34101"; // modifică dacă ai alt port
+
 const Profile = () => {
-    /* --------------------------- state --------------------------- */
-    const API = "http://localhost:34101";
     const [profile, setProfile] = useState(null);
     const [loading, setLoading] = useState(true);
     const [editing, setEditing] = useState({ phone: false, about: false });
     const [draft, setDraft] = useState({ phone: "", about: "" });
+    const [photoFile, setPhotoFile] = useState(null);
+    const [photoUrl, setPhotoUrl] = useState(null);
+    const [photoError, setPhotoError] = useState("");
+    const [uploadError, setUploadError] = useState(null);
     const navigate = useNavigate();
 
-    const handleDisable2FA = async () => {
-        const confirm = window.confirm("Sigur vrei să dezactivezi 2FA?");
-        if (!confirm) return;
-
-        try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API}/users/disable-2fa`, {
-                method: "POST",
-                headers: { Authorization: `Bearer ${token}` },
-            });
-
-            if (!res.ok) throw new Error("Failed to disable 2FA");
-
-            // refacem profilul după dezactivare
-            await loadProfile();
-        } catch (err) {
-            console.error("Eroare la dezactivare 2FA:", err);
-            alert("A apărut o problemă la dezactivare.");
+    // Funcție pentru reîmprospătarea imaginii de profil
+    const refreshProfileImage = useCallback(() => {
+        if (profile && profile.profilePicture) {
+            const timestamp = Date.now();
+            setPhotoUrl(`${BACKEND_URL}/profile/photo?t=${timestamp}`);
+            setPhotoError("");
+        } else {
+            setPhotoError("No profile picture available");
         }
-    };
+    }, [profile]);
 
-    /* -------------------- fetch profil din backend -------------------- */
     const loadProfile = useCallback(async () => {
         setLoading(true);
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch("/profile", {
-                headers: { Authorization: `Bearer ${token}` },
+            if (!token) {
+                console.error("No token found!");
+                navigate("/");
+                return;
+            }
+
+            const res = await fetch(`${BACKEND_URL}/profile`, {
+                headers: { Authorization: `Bearer ${token}`, Accept: "application/json" }
             });
 
             if (res.status === 404) return navigate("/app/setup-profile");
-            if (res.status === 401 || res.status === 403) return navigate("/");
-            if (!res.ok) throw new Error("Eroare necunoscută la fetch profil");
+            if (res.status === 401 || res.status === 403) {
+                console.error("Authentication error:", res.status);
+                return navigate("/");
+            }
+
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(`Profile fetch failed: ${res.status} ${errText}`);
+            }
 
             const data = await res.json();
             setProfile(data);
-            console.log("Profil primit:", profile);
             setDraft({ phone: data.phone || "", about: data.about || "" });
+
         } catch (err) {
-            console.error(err);
+            console.error("Profile loading error:", err);
+            setUploadError(err.message); // Potențial ar trebui un alt state de eroare generală
         } finally {
             setLoading(false);
         }
@@ -67,52 +68,178 @@ const Profile = () => {
         loadProfile();
     }, [loadProfile]);
 
-    /* ------------------------- update profile ------------------------ */
+    // Încarcă poza de profil cu error handling explicit
+    useEffect(() => {
+        if (!profile || !profile.profilePicture) return;
+        const token = localStorage.getItem("token");
+        if (!token) {
+            setPhotoError("No auth token");
+            return;
+        }
+        fetch(`${BACKEND_URL}/profile/photo?t=${Date.now()}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then(res => {
+                if (res.status === 403) {
+                    setPhotoError("Access forbidden (403)");
+                    return null;
+                }
+                if (!res.ok) {
+                    setPhotoError(`HTTP error: ${res.status}`);
+                    return null;
+                }
+                return res.blob();
+            })
+            .then(blob => {
+                if (blob) {
+                    setPhotoUrl(URL.createObjectURL(blob));
+                }
+            })
+            .catch(err => {
+                console.error("Error fetching profile photo:", err);
+                setPhotoError(err.message);
+            });
+    }, [profile]);
+
     const updateProfile = async (changes) => {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch("/profile", {
+            if (!token) return navigate("/");
+            const res = await fetch(`${BACKEND_URL}/profile`, {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify(changes),
+                headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ firstName: profile.firstName, lastName: profile.lastName, ...changes })
             });
-            if (!res.ok) throw new Error("Update failed");
-            const updated = await res.json();
-            setProfile(updated);
-            setDraft({
-                phone: updated.phone || "",
-                about: updated.about || "",
-            });
-
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(`Update failed: ${res.status} ${errText}`);
+            }
+            await loadProfile();
         } catch (err) {
-            console.error("Eroare la actualizare:", err);
+            console.error("Update error:", err);
+            alert("Actualizare eșuată: " + err.message);
         }
     };
 
+    const uploadPhoto = async () => {
+        if (!photoFile) return;
+        setUploadError(null);
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) throw new Error("No auth token");
+            const formData = new FormData();
+            formData.append("file", photoFile);
+            const res = await axios.post(
+                `${BACKEND_URL}/profile/photo`, formData,
+                { headers: { Authorization: `Bearer ${token}` }, withCredentials: true }
+            );
+            setPhotoFile(null);
+            // Nu mai apelăm refreshProfileImage, loadProfile ar trebui să fie suficient
+            // și va re-rula useEffect-ul pentru poză dacă e cazul.
+            await loadProfile();
+        } catch (err) {
+            console.error("Upload error:", err);
+            setUploadError(err.response?.data || err.message);
+        }
+    };
 
-    /* --------------------------- render --------------------------- */
+    // Funcția pentru dezactivarea 2FA
+    const handleDisable2FA = useCallback(async () => {
+        if (!window.confirm("Sunteți sigur că doriți să dezactivați autentificarea cu doi factori?")) {
+            return;
+        }
+        try {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert("Token de autentificare negăsit. Vă rugăm să vă autentificați din nou.");
+                navigate("/");
+                return;
+            }
+
+            const res = await fetch(`${BACKEND_URL}/users/disable-2fa`, {
+                method: "POST", // Majoritatea acțiunilor de tip 'disable' folosesc POST sau DELETE
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    // "Content-Type": "application/json", // De obicei nu e necesar pentru un simplu POST de disable fără body
+                }
+            });
+
+            if (res.status === 401 || res.status === 403) {
+                alert("Eroare de autentificare sau autorizare. Vă rugăm să vă autentificați din nou.");
+                navigate("/");
+                return;
+            }
+
+            if (!res.ok) {
+                const errText = await res.text();
+                throw new Error(`Dezactivarea 2FA a eșuat: ${res.status} ${errText || 'Eroare necunoscută'}`);
+            }
+
+            alert("Autentificarea cu doi factori a fost dezactivată cu succes.");
+            await loadProfile(); // Reîncarcă profilul pentru a reflecta schimbarea stării 2FA
+
+        } catch (err) {
+            console.error("Eroare la dezactivarea 2FA:", err);
+            alert("Eroare la dezactivarea 2FA: " + err.message);
+        }
+    }, [navigate, loadProfile]);
+
+
+    const handleImageError = () => {
+        console.log("Image load failed");
+        setPhotoError("Failed to load image");
+    };
+
     if (loading) return <div>Loading…</div>;
-    if (!profile) return null; // fallback – nu ar trebui să ajungă aici
+    if (!profile) return null; // Sau un mesaj mai prietenos, ex: "Profilul nu a putut fi încărcat."
 
     return (
         <div className="profile-wrapper">
             <h1 className="profile-title">MY PROFILE</h1>
 
+            {uploadError && (
+                <div className="error-message">
+                    Eroare: {uploadError}
+                </div>
+            )}
+
             <div className="profile-sections">
-                {/* ================ LEFT SIDE ================ */}
                 <div className="profile-left">
-                    {/* CARD PRINCIPAL */}
                     <div className="card profile-main-card">
                         <div className="profile-header">
-                            <img
-                                src={profile.profilePictureUrl || "/avatar.jpg"}
-                                alt="Avatar"
-                                className="profile-avatar"
+                            {photoError ? (
+                                <div className="profile-avatar no-image">
+                                    {photoError === "No profile picture available" ? "No Image" : "Error"}
+                                </div>
+                            ) : (
+                                <img
+                                    src={photoUrl}
+                                    alt="Avatar"
+                                    className="profile-avatar"
+                                    onError={handleImageError} // S-ar putea să vrei să folosești refreshProfileImage aici sau alt mecanism
+                                />
+                            )}
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    if (e.target.files && e.target.files[0]) {
+                                        console.log("File selected:", e.target.files[0].name);
+                                        setPhotoFile(e.target.files[0]);
+                                        // O previzualizare instantanee ar putea fi utilă aici
+                                        // setPhotoUrl(URL.createObjectURL(e.target.files[0]));
+                                        // setPhotoError(""); // Resetează eroarea dacă o imagine nouă e selectată
+                                    }
+                                }}
+                                style={{ display: "none" }}
+                                id="fileInput"
                             />
-                            <button className="upload-btn">Upload Photo</button>
+                            <label htmlFor="fileInput" className="upload-btn">Choose Photo</label>
+                            {photoFile && (
+                                <button className="upload-btn" onClick={uploadPhoto}>
+                                    Upload
+                                </button>
+                            )}
                         </div>
 
                         <div className="info-group">
@@ -120,78 +247,66 @@ const Profile = () => {
                             <InfoRow label="Your Last Name" value={profile.lastName} />
                             <InfoRow label="Email" value={profile.email} />
 
-                            {/* PHONE editable */}
                             <div className="info-item">
                                 <span className="label">Phone Number</span>
                                 {!editing.phone ? (
                                     <div className="value-edit">
-                                        <span>{profile.phone}</span>
+                                        <span>{profile.phone || "-"}</span>
                                         <button
                                             className="edit-btn"
-                                            onClick={() => setEditing((e) => ({ ...e, phone: true }))}
-                                        >
-                                            Edit
-                                        </button>
+                                            onClick={() => setEditing(e => ({ ...e, phone: true }))}
+                                        >Edit</button>
                                     </div>
                                 ) : (
-                                    <EditPhoneField
+                                    <EditField
+                                        type="text"
                                         value={draft.phone}
                                         onChange={(v) => setDraft({ ...draft, phone: v })}
-                                        onSave={async () => {
-                                            await updateProfile({ phone: draft.phone });
-                                            setEditing((e) => ({ ...e, phone: false }));
+                                        onSave={() => {
+                                            updateProfile({ phone: draft.phone });
+                                            setEditing(e => ({ ...e, phone: false }));
                                         }}
                                         onCancel={() => {
-                                            setDraft((d) => ({ ...d, phone: profile.phone }));
-                                            setEditing((e) => ({ ...e, phone: false }));
+                                            setDraft(d => ({ ...d, phone: profile.phone || "" }));
+                                            setEditing(e => ({ ...e, phone: false }));
                                         }}
                                     />
-
                                 )}
                             </div>
 
-                            {/* PASSWORD reset */}
                             <div className="info-item">
                                 <span className="label">Password</span>
-                                <button
-                                    className="view-btn"
-                                    onClick={() => navigate("/app/reset-password")}
-                                >
+                                <button className="view-btn" onClick={() => navigate("/app/reset-password")}>
                                     Reset Password
                                 </button>
                             </div>
                         </div>
                     </div>
 
-                    {/* ABOUT card */}
                     <div className="card">
                         <div className="info-item header-row">
-              <span className="label">
-                About <span className="highlight">(Optional)</span>
-              </span>
-                            {!editing.about ? (
+                            <span className="label">About <span className="highlight">(Optional)</span></span>
+                            {!editing.about && (
                                 <button
                                     className="edit-btn"
-                                    onClick={() => setEditing((e) => ({ ...e, about: true }))}
-                                >
-                                    Edit
-                                </button>
-                            ) : null}
+                                    onClick={() => setEditing(e => ({ ...e, about: true }))}
+                                >Edit</button>
+                            )}
                         </div>
 
                         {!editing.about ? (
-                            <p className="about-text">{profile.about}</p>
+                            <p className="about-text">{profile.about || "N/A"}</p>
                         ) : (
                             <EditTextarea
                                 value={draft.about}
                                 onChange={(v) => setDraft({ ...draft, about: v })}
                                 onSave={() => {
                                     updateProfile({ about: draft.about });
-                                    setEditing((e) => ({ ...e, about: false }));
+                                    setEditing(e => ({ ...e, about: false }));
                                 }}
                                 onCancel={() => {
-                                    setDraft((d) => ({ ...d, about: profile.about }));
-                                    setEditing((e) => ({ ...e, about: false }));
+                                    setDraft(d => ({ ...d, about: profile.about || "" }));
+                                    setEditing(e => ({ ...e, about: false }));
                                 }}
                             />
                         )}
@@ -200,53 +315,38 @@ const Profile = () => {
                     <div className="card">
                         <div className="info-item">
                             <span className="label">Two-Factor Authentication</span>
-
-                            {profile.twoFactorEnabled ? (
-                                <>
-                                    <span className="enabled-badge">2FA is enabled</span>
-                                    <button className="danger-btn" onClick={handleDisable2FA}>
-                                        Dezactivează 2FA
-                                    </button>
-                                </>
-                            ) : (
+                            <button
+                                className="edit-btn" // Poate redenumi în 'action-btn' sau similar
+                                onClick={() => navigate("/app/setup-2fa")}
+                            >{profile.twoFactorEnabled ? "Manage 2FA" : "Enable 2FA"}</button>
+                            {profile.twoFactorEnabled && (
                                 <button
-                                    className="edit-btn"
-                                    onClick={() => navigate("/app/setup-2fa")}
+                                    className="edit-btn" // Sau o clasă specifică gen 'warning-btn' sau 'disable-btn'
+                                    onClick={handleDisable2FA}
+                                    style={{ marginLeft: '10px' }} // Adaugă un mic spațiu
                                 >
-                                    Activează 2FA
+                                    Disable 2FA
                                 </button>
                             )}
                         </div>
-
-
                     </div>
 
-
-                    {/* KYC card */}
-                    <div className="card">
-                        <InfoRow label="KYC Status" value={<span className="kyc-badge">{profile.kycStatus}</span>} />
-                        <InfoRow label="KYC Details" value={<button className="view-btn">View</button>} />
-                    </div>
-
-                    {/* Bank */}
                     <div className="card">
                         <InfoRow label="Bank details" value={<button className="view-btn">View</button>} />
                     </div>
                 </div>
 
-                {/* ================ RIGHT SIDE ================ */}
                 <div className="profile-right">
                     <div className="card status-header">
-                        <InfoRow label={<span className="label large">Current Status</span>} value={<span className="status-icon">⭐</span>} />
+                        <InfoRow label={<span className="label large">Current Status</span>}
+                                 value={<span className="status-icon">⭐</span>} />
                     </div>
 
                     <div className="card">
                         <span className="label">Expertise In</span>
                         <div className="tags spaced">
                             {profile.expertise?.map((tag, i) => (
-                                <span key={i} className="tag active">
-                  {tag}
-                </span>
+                                <span key={i} className="tag active">{tag}</span>
                             ))}
                         </div>
                     </div>
@@ -261,16 +361,16 @@ const Profile = () => {
                     <HorizontalCard
                         outline="yellow-outline"
                         label="Rating"
-                        value={`${profile.rating}/10`}
+                        value={`${profile.rating || "N/A"}/10`}
                         emoji="⭐"
                     />
 
                     <div className="card achievement-box">
                         <span className="label">Your Achievements</span>
                         <ul className="achievement-list spaced">
-                            {profile.achievements?.map((a, i) => (
+                            {profile.achievements?.length > 0 ? profile.achievements.map((a, i) => (
                                 <li key={i}>{a}</li>
-                            ))}
+                            )) : <li>No achievements yet.</li>}
                         </ul>
                     </div>
                 </div>
@@ -279,7 +379,6 @@ const Profile = () => {
     );
 };
 
-/* --------------------------- Helpers UI --------------------------- */
 const InfoRow = ({ label, value }) => (
     <div className="info-item">
         <span className="label">{label}</span>
@@ -287,58 +386,30 @@ const InfoRow = ({ label, value }) => (
     </div>
 );
 
-const EditPhoneField = ({ value, onChange, onSave, onCancel }) => {
-    const handleInputChange = (e) => {
-        const digitsOnly = e.target.value.replace(/\D/g, "");
-        if (digitsOnly.length <= 10) {
-            onChange(digitsOnly);
-        }
-    };
-
-    return (
-        <div className="value-edit">
-            <input
-                type="text"
-                className="editable-input"
-                value={value}
-                onChange={handleInputChange}
-                inputMode="numeric"
-                maxLength={10}
-            />
-            <button
-                className="save-btn"
-                onClick={() => {
-                    if (!/^\d{10}$/.test(value)) {
-                        alert("Numărul trebuie să aibă exact 10 cifre.");
-                        return;
-                    }
-                    onSave();
-                }}
-            >
-                Save
-            </button>
-            <button className="cancel-btn" onClick={onCancel}>
-                Cancel
-            </button>
-        </div>
-    );
-};
-
+const EditField = ({ type, value, onChange, onSave, onCancel }) => (
+    <div className="value-edit">
+        <input
+            type={type}
+            className="editable-input"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+        />
+        <button className="save-btn" onClick={onSave}>Save</button>
+        <button className="cancel-btn" onClick={onCancel}>Cancel</button>
+    </div>
+);
 
 const EditTextarea = ({ value, onChange, onSave, onCancel }) => (
     <div className="edit-textarea-wrapper">
-    <textarea
-        className="about-textarea"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-    />
+        <textarea
+            className="about-textarea"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            rows={4} // Adaugă un număr de rânduri default
+        />
         <div className="edit-actions">
-            <button className="save-btn" onClick={onSave}>
-                Save
-            </button>
-            <button className="cancel-btn" onClick={onCancel}>
-                Cancel
-            </button>
+            <button className="save-btn" onClick={onSave}>Save</button>
+            <button className="cancel-btn" onClick={onCancel}>Cancel</button>
         </div>
     </div>
 );
@@ -350,7 +421,7 @@ const HorizontalCard = ({ outline, label, value, emoji }) => (
                 <span className="label">{label}</span>
                 <p className="value-text">{value}</p>
             </div>
-            <div className="emoji-box">{emoji}</div>
+            {emoji && <div className="emoji-box">{emoji}</div>}
         </div>
     </div>
 );
