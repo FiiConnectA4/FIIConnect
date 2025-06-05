@@ -6,7 +6,9 @@ import com.fiiconnect.api.didactic.exceptions.TransferRequestAlreadyRegisteredEx
 import com.fiiconnect.api.didactic.exceptions.TransferRequestNotFound;
 import com.fiiconnect.api.didactic.models.StudCourseCompositeKey;
 import com.fiiconnect.api.didactic.models.TransferRequest;
+import com.fiiconnect.api.didactic.repositories.EnrollmentRepository;
 import com.fiiconnect.api.didactic.repositories.TransferRequestRepository;
+import com.fiiconnect.api.didactic.services.EnrollmentService;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,6 +22,8 @@ import java.util.List;
 @RestController
 public class TransferRequestController {
     TransferRequestRepository repository;
+    EnrollmentRepository enrollmentRepository;
+    EnrollmentService enrollmentService;
 
 
     @GetMapping("/didactic/transfers")

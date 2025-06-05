@@ -1,10 +1,9 @@
 package com.fiiconnect.api.didactic.services;
 
 import com.fiiconnect.api.didactic.exceptions.CourseNotFoundException;
+import com.fiiconnect.api.didactic.exceptions.StudentAlreadyEnrolledInCourse;
 import com.fiiconnect.api.didactic.exceptions.StudentNotFoundException;
-import com.fiiconnect.api.didactic.models.Course;
-import com.fiiconnect.api.didactic.models.Enrollment;
-import com.fiiconnect.api.didactic.models.Student;
+import com.fiiconnect.api.didactic.models.*;
 import com.fiiconnect.api.didactic.repositories.CourseRepository;
 import com.fiiconnect.api.didactic.repositories.EnrollmentRepository;
 import com.fiiconnect.api.didactic.repositories.StudentRepository;
@@ -36,6 +35,18 @@ public class EnrollmentService {
         Long idCourse = enrollment.getId().getIdCourse();
         Course course = courseRepository.findById(idCourse).orElseThrow(() -> new CourseNotFoundException(idCourse));
         enrollment.setCourse(course);
+    }
+
+    public void updateEnroll(Long idStud, Long idCourse, String group){
+        if(studentRepository.findById(idStud).isEmpty())
+            throw new StudentNotFoundException(idStud);
+        if(courseRepository.findById(idCourse).isEmpty())
+            throw new CourseNotFoundException(idCourse);
+        var enrollment_key = new EnrollmentCompositeKey(idStud, idCourse);
+        if(repository.existsById(enrollment_key))
+            repository.deleteById(enrollment_key);
+        Enrollment enrollment = new Enrollment(enrollment_key, group);
+        repository.save(enrollment);
     }
 
     public List<Enrollment> getCourseEnrollments(Long idCourse)

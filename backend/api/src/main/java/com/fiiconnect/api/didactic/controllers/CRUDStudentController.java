@@ -1,12 +1,11 @@
 package com.fiiconnect.api.didactic.controllers;
 
 import com.fiiconnect.api.didactic.exceptions.*;
-import com.fiiconnect.api.didactic.models.Enrollment;
-import com.fiiconnect.api.didactic.models.EnrollmentCompositeKey;
-import com.fiiconnect.api.didactic.models.Student;
+import com.fiiconnect.api.didactic.models.*;
 import com.fiiconnect.api.didactic.repositories.CourseRepository;
 import com.fiiconnect.api.didactic.repositories.EnrollmentRepository;
 import com.fiiconnect.api.didactic.repositories.StudentRepository;
+import com.fiiconnect.api.didactic.repositories.TransferRequestRepository;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,13 +24,15 @@ public class CRUDStudentController {
     private final StudentRepository repository;
     private final EnrollmentRepository enrollmentRepository;
     private final CourseRepository courseRepository;
+    private final TransferRequestRepository transferRequestRepository;
 
 
-    public CRUDStudentController(StudentRepository repository, EnrollmentRepository enrollmentRepository, CourseRepository courseRepository)
+    public CRUDStudentController(StudentRepository repository, EnrollmentRepository enrollmentRepository, CourseRepository courseRepository, TransferRequestRepository transferRequestRepository )
     {
         this.courseRepository = courseRepository;
         this.enrollmentRepository = enrollmentRepository;
         this.repository = repository;
+        this.transferRequestRepository = transferRequestRepository;
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -55,20 +56,27 @@ public class CRUDStudentController {
         return ResponseEntity.created(location).body(studentResource);
     }
 
-    // Example: didactic/enroll?studentId=x&courseId=y$faculty_group=z
-    @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/didactic/enroll")
+    // Example: didactic/enroll/transfer?studentId=x&courseId=y$faculty_group=z
+    //@PreAuthorize("hasRole('ADMIN')")
+    @PatchMapping("/didactic/enroll/transfer")
     public ResponseEntity<Object> updateEnroll(@RequestParam Long studentId, @RequestParam Long courseId, @RequestParam String facultyGroup) {
         if(repository.findById(studentId).isEmpty())
             throw new StudentNotFoundException(studentId);
         if(courseRepository.findById(courseId).isEmpty())
             throw new CourseNotFoundException(courseId);
         var enrollment_key = new EnrollmentCompositeKey(studentId, courseId);
-        if(enrollmentRepository.existsById(enrollment_key))
-            throw new StudentAlreadyEnrolledInCourse(studentId, courseId);
 
         var enrollment = new Enrollment(enrollment_key, facultyGroup);
         enrollmentRepository.save(enrollment);
+
+        TransferRequest tr = transferRequestRepository.findById(
+                new StudCourseCompositeKey(studentId, courseId)
+        ).orElse(null);
+
+        if(enrollmentRepository.existsById(enrollment_key) && tr == null)
+            throw new StudentAlreadyEnrolledInCourse(studentId, courseId);
+        else
+            transferRequestRepository.deleteById(tr.getId());
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
