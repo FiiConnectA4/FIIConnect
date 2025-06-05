@@ -1,0 +1,148 @@
+/* CerereDecontari.css - Light Theme */
+.cerere-decontari-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 25px; /* Slightly increased padding */
+  max-width: 600px;
+  margin: 20px auto; /* Added top/bottom margin */
+  background-color: #f9f9f9;
+  border-radius: 12px; /* More rounded */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.07); /* Softer shadow */
+  font-family: 'Inter', sans-serif; /* Added consistent font */
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.cerere-decontari-titlu h1 { /* Assuming a title might be added */
+  font-size: 1.8em;
+  color: #1A3C5A;
+  margin-bottom: 1em;
+  font-weight: 600;
+  text-align: center;
+  transition: color 0.3s ease;
+}
+
+.cerere-decontari-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px; /* Slightly increased gap */
+  width: 100%;
+}
+
+.cerere-decontari-form label {
+  display: flex;
+  flex-direction: column;
+  font-size: 0.95rem; /* Adjusted font size */
+  color: #374151; /* Darker grey for label */
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.cerere-decontari-form input[type="text"],
+.cerere-decontari-form input[type="number"],
+.cerere-decontari-form input[type="date"],
+.cerere-decontari-form textarea { /* Added textarea styling */
+  padding: 12px; /* Increased padding */
+  font-size: 1rem; /* Standardized font size */
+  border: 1px solid #d1d5db; /* Light grey border */
+  border-radius: 8px; /* More rounded */
+  background-color: #fff;
+  color: #1f2937;
+  transition: border-color 0.2s ease, background-color 0.3s ease, color 0.3s ease, box-shadow 0.2s ease;
+}
+.cerere-decontari-form input[type="text"]::placeholder,
+.cerere-decontari-form input[type="number"]::placeholder,
+.cerere-decontari-form input[type="date"]::placeholder,
+.cerere-decontari-form textarea::placeholder {
+  color: #9ca3af;
+}
+.cerere-decontari-form input[type="text"]:focus,
+.cerere-decontari-form input[type="number"]:focus,
+.cerere-decontari-form input[type="date"]:focus,
+.cerere-decontari-form textarea:focus {
+  outline: none;
+  border-color: #537A9C; /* Match submit button base color */
+  box-shadow: 0 0 0 3px rgba(83, 122, 156, 0.2);
+}
+
+
+.submit-button,
+.back-button { /* Combined for common styles */
+  padding: 12px 22px; /* Increased padding */
+  font-size: 1rem;  /* Standardized font size */
+  color: white;
+  border: none;
+  border-radius: 8px; /* More rounded */
+  cursor: pointer;
+  font-weight: 600; /* Bolder */
+  transition: background-color 0.2s ease;
+  text-align: center;
+}
+
+.submit-button {
+  background-color: #537A9C; /* Primary action blue-grey */
+}
+.submit-button:hover {
+  background-color: #3a5f7d; /* Darker shade */
+}
+
+.back-button {
+  background-color: #6c757d; /* Secondary/neutral grey */
+  margin-top: 10px; /* Add some space if it's a standalone button below the form */
+}
+.back-button:hover {
+  background-color: #5a6268; /* Darker grey */
+}
+
+
+/* ===== Dark Theme Styles for CerereDecontari ===== */
+
+[data-theme="dark"] .cerere-decontari-container {
+  background-color: #1a202c;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.25);
+}
+
+[data-theme="dark"] .cerere-decontari-titlu h1 {
+  color: #90cdf4;
+}
+
+[data-theme="dark"] .cerere-decontari-form label {
+  color: #a0aec0;
+}
+
+[data-theme="dark"] .cerere-decontari-form input[type="text"],
+[data-theme="dark"] .cerere-decontari-form input[type="number"],
+[data-theme="dark"] .cerere-decontari-form input[type="date"],
+[data-theme="dark"] .cerere-decontari-form textarea {
+  background-color: #1e293b;
+  border-color: #4a5568;
+  color: #e2e8f0;
+}
+[data-theme="dark"] .cerere-decontari-form input[type="text"]::placeholder,
+[data-theme="dark"] .cerere-decontari-form input[type="number"]::placeholder,
+[data-theme="dark"] .cerere-decontari-form input[type="date"]::placeholder,
+[data-theme="dark"] .cerere-decontari-form textarea::placeholder {
+  color: #718096;
+}
+[data-theme="dark"] .cerere-decontari-form input[type="text"]:focus,
+[data-theme="dark"] .cerere-decontari-form input[type="number"]:focus,
+[data-theme="dark"] .cerere-decontari-form input[type="date"]:focus,
+[data-theme="dark"] .cerere-decontari-form textarea:focus {
+  border-color: #63b3ed;
+  box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.25);
+}
+
+[data-theme="dark"] .submit-button {
+  background-color: #3182ce; /* Brighter blue for dark theme */
+}
+[data-theme="dark"] .submit-button:hover {
+  background-color: #2b6cb0;
+}
+
+[data-theme="dark"] .back-button {
+  background-color: #4a5568; /* Darker grey for dark theme */
+}
+[data-theme="dark"] .back-button:hover {
+  background-color: #5a6678;
+}

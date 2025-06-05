@@ -1,0 +1,176 @@
+package com.fiiconnect.api.didactic.services;
+
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.integration.sftp.session.SftpRemoteFileTemplate;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Objects;
+
+@Service
+public class SftpService {
+
+    @Getter
+    private final SftpRemoteFileTemplate sftpRemoteFileTemplate;
+    private final MessageChannel outboundChannel;
+    @Value("${sftp.inbound.local.dir}")
+    private String localDir;
+
+    public SftpService(SftpRemoteFileTemplate sftpRemoteFileTemplate, @Qualifier("outboundChannel") MessageChannel outboundChannel) {
+        this.sftpRemoteFileTemplate = sftpRemoteFileTemplate;
+        this.outboundChannel = outboundChannel;
+    }
+
+    public void uploadFile(MultipartFile multipartFile, String remoteTargetDir, String... desiredFileName) throws IOException {
+        File file = null;
+        try {
+            // Convert MultipartFile to File
+            assert desiredFileName.length <= 1;
+            if(desiredFileName.length > 0)
+                file = convertToFile(multipartFile, desiredFileName);
+            else
+                file = convertToFile(multipartFile);
+            // Send to SFTP via outboundChannel
+            outboundChannel.send(MessageBuilder.withPayload(file)
+                    .setHeader("remote-target-dir", remoteTargetDir)
+                    .build());
+        } catch (IOException e) {
+            throw new IOException("Failed to process file: " + multipartFile.getOriginalFilename(), e);
+        } catch (Exception e) {
+            throw new RuntimeException("Unexpected error during SFTP upload", e);
+        } finally {
+            if (file != null && file.exists()) {
+                if (!file.delete())
+                    System.err.println("Failed to delete file: " + file.getAbsolutePath());
+            }
+        }
+    }
+
+    public File downloadFile(String remoteFilePath) throws IOException {
+        return this.downloadFile(remoteFilePath, new File(remoteFilePath).getName());
+    }
+
+    public File downloadFile(String remoteFilePath, String localPath) throws IOException {
+        File localFile = new File(localDir, localPath);
+
+        try {
+            if (!localFile.getParentFile().mkdirs() && !Files.exists(Path.of(localFile.getParentFile().getAbsolutePath()))) //create all directories leading to file if necessary
+                throw new IOException("Failed to create directory: " + localFile.getParentFile().getAbsolutePath());
+            sftpRemoteFileTemplate.execute(session -> {
+                try {
+                    if (!session.exists(remoteFilePath)) {
+                        throw new FileNotFoundException("Remote file not found: " + remoteFilePath);
+                    }
+
+                    try (OutputStream os = new FileOutputStream(localFile)) {
+                        session.read(remoteFilePath, os);
+                    }
+
+                } catch (FileNotFoundException e) {
+                    throw e;
+                } catch (IOException e) {
+                    throw new IOException("I/O error while reading remote file: " + remoteFilePath, e);
+                } catch (Exception e) {
+                    throw new RuntimeException("SFTP session error during file download", e);
+                }
+                return null;
+            });
+        } catch (RuntimeException e) {
+            // Re-throw specific causes
+            if (e.getCause() instanceof FileNotFoundException) {
+                throw (FileNotFoundException) e.getCause();
+            } else if (e.getCause() instanceof IOException) {
+                throw (IOException) e.getCause();
+            }
+            throw e;
+        }
+
+        return localFile;
+    }
+
+    public boolean checkExists(String remoteFilePath) throws IOException {
+        try {
+            sftpRemoteFileTemplate.execute(session -> {
+                if (!session.exists(remoteFilePath)) {
+                    throw new FileNotFoundException("Remote file not found: " + remoteFilePath);
+                }
+
+                return null;
+            });
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof FileNotFoundException) {
+                return false;
+            } else if (e.getCause() instanceof IOException) {
+                throw (IOException) e.getCause();
+            }
+            throw e;
+        }
+        return true;
+    }
+
+
+    public void deleteFile(String remoteFilePath, boolean isDirectory) throws IOException {
+        try {
+            sftpRemoteFileTemplate.execute(session -> {
+                if (!session.exists(remoteFilePath)) {
+                    throw new FileNotFoundException("Remote file not found: " + remoteFilePath);
+                }
+                if (!isDirectory) {
+                    session.remove(remoteFilePath);
+                } else {
+                    session.rmdir(remoteFilePath);
+                }
+                return null;
+            });
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof FileNotFoundException) {
+                throw (FileNotFoundException) e.getCause();
+            } else if (e.getCause() instanceof IOException) {
+                throw (IOException) e.getCause();
+            }
+            throw e;
+        }
+    }
+
+
+    public void renameFile(String originalFilePath, String newFilePath) throws IOException {
+        try {
+            sftpRemoteFileTemplate.execute(session -> {
+                if (!session.exists(originalFilePath)) {
+                    throw new FileNotFoundException("Remote file not found: " + originalFilePath);
+                }
+                session.rename(originalFilePath, newFilePath);
+                return null;
+            });
+        } catch (RuntimeException e) {
+            if (e.getCause() instanceof FileNotFoundException) {
+                throw (FileNotFoundException) e.getCause();
+            } else if (e.getCause() instanceof IOException) {
+                throw (IOException) e.getCause();
+            }
+            throw e;
+        }
+    }
+
+    private File convertToFile(MultipartFile multipartFile, String... desiredFileName) throws IOException {
+        if (multipartFile.isEmpty()) {
+            throw new IOException("Cannot convert empty MultipartFile to file.");
+        }
+        assert desiredFileName.length <= 1;
+        String desiredName = desiredFileName.length > 0 ? desiredFileName[0] : multipartFile.getOriginalFilename();
+        Path tempPath = Path.of(System.getProperty("java.io.tmpdir"), Objects.requireNonNull(desiredName));
+        Files.write(tempPath, multipartFile.getBytes());
+        return tempPath.toFile();
+    }
+}

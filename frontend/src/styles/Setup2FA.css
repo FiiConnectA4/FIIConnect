@@ -1,0 +1,212 @@
+/* Setup2FA.css */
+.setup2fa-wrapper {
+    min-height: calc(100vh - 4rem);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f8fafc;        /* very light gray-blue */
+    padding: 1rem;
+}
+
+.setup2fa-card {
+    width: 100%;
+    max-width: 420px;
+    background: #ffffff;
+    border-radius: 1.25rem;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+    padding: 2.5rem 2rem;
+}
+
+.setup2fa-card h1 {
+    font-size: 1.6rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+    color: #1e293b;
+}
+
+.qr-box {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.secret-box {
+    background: #f1f5f9;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    text-align: center;
+    word-break: break-all;
+    margin-bottom: 1.5rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    color: #4338ca;
+}
+
+.setup2fa-input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.75rem;
+    font-size: 1.25rem;
+    text-align: center;
+    letter-spacing: 0.2em;
+    margin-bottom: 1.25rem;
+}
+
+.main-btn,
+.secondary-btn {
+    width: 100%;
+    padding: 0.9rem;
+    border: none;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: transform 0.15s ease, background-color 0.2s ease;
+}
+
+.main-btn {
+    background: #4338ca;
+    color: #ffffff;
+    margin-bottom: 0.75rem;
+}
+
+.main-btn:hover { background: #3730a3; transform: translateY(-2px); }
+
+.secondary-btn {
+    background: #ffffff;
+    color: #0f172a;
+    border: 1px solid #e2e8f0;
+}
+
+.secondary-btn:hover { background: #f8fafc; transform: translateY(-2px); }
+
+.status-message {
+    max-width: 500px;
+    margin: 5rem auto;
+    padding: 2rem;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 1.1rem;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.status-message.loading {
+    background-color: #f3f7fc;
+    color: #333;
+}
+
+.status-message.success {
+    background-color: #e6ffed;
+    color: #2f855a;
+    border: 1px solid #c6f6d5;
+}
+
+.status-message.error {
+    background-color: #ffe6e6;
+    color: #c53030;
+    border: 1px solid #feb2b2;
+}
+
+.back-btn {
+    margin-top: 1.5rem;
+    background-color: #003087;
+    color: white;
+    border: none;
+    padding: 0.6rem 1.2rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.back-btn:hover {
+    background-color: #002266;
+}
+
+[data-theme="dark"] .setup2fa-wrapper {
+  background: #17212b; /* darker overall background */
+}
+
+[data-theme="dark"] .setup2fa-card {
+  background: #1a3c5a; /* card bg */
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="dark"] .setup2fa-card h1 {
+  color: #f0f0f0; /* card title */
+}
+
+/* QR box stays white, no change */
+
+/* secret key box */
+[data-theme="dark"] .secret-box {
+  background: #537a9c;
+  color: #e0e0e0;
+}
+
+/* input styling */
+[data-theme="dark"] .setup2fa-input {
+  background: #537a9c;
+  border-color: #384d7c;
+  color: #fff;
+}
+
+[data-theme="dark"] .setup2fa-input:focus {
+  background: #3371c2;
+  border-color: #2f3dbe;
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+/* primary button */
+[data-theme="dark"] .main-btn {
+  background: #2f3dbe;
+  color: #fff;
+}
+
+[data-theme="dark"] .main-btn:hover {
+  background: #3464ca;
+}
+
+/* secondary button */
+[data-theme="dark"] .secondary-btn {
+  background: #1a3c5a;
+  color: #e0e0e0;
+  border: 1px solid #374a6b;
+}
+
+[data-theme="dark"] .secondary-btn:hover {
+  background: #274c72;
+}
+
+/* status messages */
+[data-theme="dark"] .status-message.loading {
+  background-color: #273546;
+  color: #cbd5e1;
+  box-shadow: none;
+}
+
+[data-theme="dark"] .status-message.success {
+  background-color: #123723;
+  color: #7af6a8;
+  border: 1px solid #234d3a;
+}
+
+[data-theme="dark"] .status-message.error {
+  background-color: #402122;
+  color: #ff7a7a;
+  border: 1px solid #7f3030;
+}
+
+/* back button */
+[data-theme="dark"] .back-btn {
+  background-color: #2f3dbe;
+  color: #fff;
+}
+
+[data-theme="dark"] .back-btn:hover {
+  background-color: #3464ca;
+}
+
+[data-theme="dark"] .setup2fa-input::placeholder {
+  color: rgba(255,255,255,0.7);
+}

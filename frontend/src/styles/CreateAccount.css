@@ -1,0 +1,281 @@
+/* src/styles/CreateAccount.css */
+
+/* Light Theme Styles (most are the same as before) */
+.create-page {
+    flex: 1;
+    min-height: 80vh;
+    background: #f0f4f8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    transition: background-color 0.3s ease;
+    font-family: 'Inter', sans-serif; /* Added for consistency */
+}
+
+.create-card {
+    width: 100%;
+    max-width: 480px;
+    background: white;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.create-title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #1a202c;
+    transition: color 0.3s ease;
+}
+
+.message {
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+.message.success {
+    background: #e6fffa;
+    color: #2c7a7b;
+    border: 1px solid #9ae6b4;
+}
+.message.error {
+    background: #ffe6e6;
+    color: #cc0000;
+    border: 1px solid #feb2b2;
+}
+
+.form-group label { /* Assuming this class might be used elsewhere, keeping it */
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #4a5568;
+    transition: color 0.3s ease;
+}
+.form-control { /* Assuming this class might be used elsewhere */
+    padding: 0.75rem 1rem;
+    border: 1px solid #cbd5e0;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    background-color: #fff;
+    color: #1a202c;
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s ease, color 0.3s ease;
+}
+.form-control:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.3);
+}
+.form-control::placeholder {
+    color: #a0aec0;
+}
+
+
+.btn-create {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #003087;
+    color: white;
+    font-weight: 600;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s, opacity 0.2s;
+}
+.btn-create:hover:not(:disabled) {
+    background-color: #00205b;
+}
+.btn-create:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.unassigned-container {
+    border: 1px solid #cbd5e0;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    background: #fafafa;
+    max-height: 200px; /* Consider making this taller if needed, or removing max-height */
+    overflow-y: auto;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+.unassigned-container h2 {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+    font-size: 1.25rem;
+    color: #2d3748;
+    transition: color 0.3s ease;
+}
+.unassigned-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 0.5rem;
+}
+.unassigned-table th,
+.unassigned-table td {
+    border: 1px solid #e2e8f0;
+    padding: 0.5rem;
+    text-align: left;
+    font-size: 0.9rem;
+    color: #2d3748;
+    transition: border-color 0.3s ease, color 0.3s ease, background-color 0.3s ease;
+}
+.unassigned-table th {
+    background: #edf2f7;
+    font-weight: 600;
+    color: #1a202c;
+    position: sticky; /* Make header sticky if container scrolls */
+    top: 0;          /* Make header sticky if container scrolls */
+    z-index: 1;      /* Make header sticky if container scrolls */
+}
+.unassigned-table tbody tr {
+    transition: background-color 0.3s ease;
+}
+.unassigned-table tbody tr:nth-child(even) {
+    background-color: #f9fafb;
+}
+.unassigned-table tbody tr:hover {
+    background-color: #f0f4f8;
+}
+.unassigned-table tbody tr.selected-row { /* Style for selected rows */
+    background-color: #e6f7ff;
+}
+
+
+.btn-refresh {
+    padding: 0.5rem 1rem;
+    background-color: #3182ce;
+    color: white;
+    font-weight: 500;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-bottom: 1rem;
+}
+.btn-refresh:hover {
+    background-color: #2b6cb0;
+}
+.btn-refresh:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(49,130,206,0.4);
+}
+
+/* --- Checkbox styling for the table --- */
+.unassigned-table th:first-child, /* Target the first header cell */
+.unassigned-table td:first-child { /* Target the first data cell */
+    /* Ensure there's enough space and alignment for the checkbox */
+    width: 30px; /* Give a specific small width if needed, or let padding control */
+    text-align: center; /* Center the checkbox in its cell */
+}
+
+.unassigned-table input[type="checkbox"] {
+    /* Ensure visibility and dimensions */
+    appearance: auto; /* Or 'checkbox' for default browser style */
+    -webkit-appearance: auto; /* For Safari/Chrome */
+    -moz-appearance: auto; /* For Firefox */
+    opacity: 1;
+    display: inline-block; /* Or 'block' if you want it on its own line within the cell */
+    visibility: visible;
+    position: relative; /* Ensure it's not pushed out */
+    width: 1rem;  /* Standard size */
+    height: 1rem; /* Standard size */
+    margin: 0; /* Remove any default margins that might affect positioning */
+    cursor: pointer;
+    accent-color: #003087; /* Light theme accent */
+    vertical-align: middle; /* Align with text if any */
+}
+
+
+/* ===== Dark Theme Styles using [data-theme="dark"] ===== */
+
+[data-theme="dark"] .create-page {
+    background-color: #1a202c;
+}
+[data-theme="dark"] .create-card {
+    background-color: #2d3748;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+[data-theme="dark"] .create-title {
+    color: #e2e8f0;
+}
+[data-theme="dark"] .message.success {
+    background-color: #2f855a;
+    color: #c6f6d5;
+    border-color: #38a169;
+}
+[data-theme="dark"] .message.error {
+    background-color: #c53030;
+    color: #fed7d7;
+    border-color: #e53e3e;
+}
+[data-theme="dark"] .form-group label {
+    color: #a0aec0;
+}
+[data-theme="dark"] .form-control {
+    background-color: #1e293b;
+    border-color: #4a5568;
+    color: #e2e8f0;
+}
+[data-theme="dark"] .form-control:focus {
+    border-color: #63b3ed;
+    box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.3);
+}
+[data-theme="dark"] .form-control::placeholder {
+    color: #718096;
+}
+[data-theme="dark"] .btn-create {
+    background-color: #3182ce;
+}
+[data-theme="dark"] .btn-create:hover:not(:disabled) {
+    background-color: #2b6cb0;
+}
+[data-theme="dark"] .unassigned-container {
+    background: #2d3748;
+    border-color: #4a5568;
+}
+[data-theme="dark"] .unassigned-container h2 {
+    color: #e2e8f0;
+}
+[data-theme="dark"] .unassigned-table th,
+[data-theme="dark"] .unassigned-table td {
+    border-color: #4a5568;
+    color: #cbd5e1;
+}
+[data-theme="dark"] .unassigned-table th {
+    background-color: #354152;
+    color: #e2e8f0;
+}
+[data-theme="dark"] .unassigned-table tbody tr {
+    background-color: #2d3748;
+}
+[data-theme="dark"] .unassigned-table tbody tr:nth-child(even) {
+    background-color: #273140;
+}
+[data-theme="dark"] .unassigned-table tbody tr:hover {
+    background-color: #354152;
+}
+[data-theme="dark"] .unassigned-table tbody tr.selected-row {
+    background-color: #2c5282;
+}
+[data-theme="dark"] .btn-refresh {
+    background-color: #4299e1;
+}
+[data-theme="dark"] .btn-refresh:hover {
+    background-color: #3182ce;
+}
+[data-theme="dark"] .btn-refresh:focus {
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.4);
+}
+
+[data-theme="dark"] .unassigned-table input[type="checkbox"] {
+    accent-color: #63b3ed; /* Dark theme accent */
+    /* Rely on browser default for box visibility against dark header,
+       accent-color should style the checkmark and focus states.
+       Avoid explicit background-color/border-color on checkbox itself
+       for dark theme unless absolutely necessary and tested cross-browser. */
+}

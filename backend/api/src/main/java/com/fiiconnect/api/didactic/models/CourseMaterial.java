@@ -1,0 +1,61 @@
+package com.fiiconnect.api.didactic.models;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.util.Date;
+import java.util.Objects;
+
+@Setter
+@Getter
+@Entity
+@Table(name = "material")
+public class CourseMaterial {
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "material_id_gen")
+    @SequenceGenerator(name="material_id_gen", sequenceName = "seq_material_id", allocationSize = 1)
+    private Long id;
+    private Long idCourse;
+    @Column(name = "idProf")
+    private Long idProfessor;
+
+    private String filename;
+    private Date uploadDate;
+    private Date updateDate;
+
+    public CourseMaterial() {
+    }
+
+    public CourseMaterial(Long id, Long idCourse, Long idProfessor, String filename, Date uploadDate, Date updateDate) {
+        this.id = id;
+        this.idCourse = idCourse;
+        this.idProfessor = idProfessor;
+        this.filename = filename;
+        this.uploadDate = uploadDate;
+        this.updateDate = updateDate;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof CourseMaterial that)) return false;
+        return Objects.equals(id, that.id) && Objects.equals(idCourse, that.idCourse) && Objects.equals(idProfessor, that.idProfessor) && Objects.equals(filename, that.filename) && Objects.equals(uploadDate, that.uploadDate) && Objects.equals(updateDate, that.updateDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, idCourse, idProfessor, filename, uploadDate, updateDate);
+    }
+
+    @Override
+    public String toString() {
+        return "CourseMaterial{" +
+                "id=" + id +
+                ", idCourse=" + idCourse +
+                ", idProfessor=" + idProfessor +
+                ", filename='" + filename + '\'' +
+                ", uploadDate=" + uploadDate +
+                ", updateDate=" + updateDate +
+                '}';
+    }
+}

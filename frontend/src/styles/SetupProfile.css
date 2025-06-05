@@ -1,0 +1,136 @@
+.setup-profile-wrapper {
+  max-width: 420px;
+  margin: 4rem auto;
+  padding: 2rem 2.5rem;
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+  font-family: "Inter", sans-serif;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.setup-profile-wrapper h2 {
+  margin-bottom: 1.5rem;
+  font-size: 1.6rem;
+  text-align: center;
+  color: var(--text-main);
+}
+
+.setup-profile-wrapper input,
+.setup-profile-wrapper textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--input-border, #d3dce6);
+  border-radius: 8px;
+  font-size: 1rem;
+  background: var(--input-bg, #f9fafb);
+  color: var(--card-text);
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, color 0.2s;
+}
+
+.setup-profile-wrapper input:focus,
+.setup-profile-wrapper textarea:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.2);
+  background: var(--card-bg);
+}
+
+.setup-profile-wrapper textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.setup-profile-wrapper button {
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  width: 100%;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.setup-profile-wrapper button:hover {
+  background: var(--primary-hover);
+  box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.3);
+}
+
+.setup-profile-wrapper button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(var(--primary-rgb), 0.4);
+}
+
+@media (max-width: 480px) {
+  .setup-profile-wrapper {
+    margin: 2rem 1rem;
+    padding: 1.5rem;
+  }
+  .setup-profile-wrapper h2 {
+    font-size: 1.4rem;
+  }
+}
+
+.error-msg {
+  color: var(--error, #e53e3e);
+  font-size: 0.875rem;
+  margin: -0.5rem 0 0.75rem;
+  text-align: left;
+}
+
+.input-error {
+  border-color: var(--error, #e53e3e) !important;
+  background-color: var(--error-bg, #fff5f5);
+}
+
+/* DARK-THEME OVERRIDES for SetupProfile */
+[data-theme="dark"] .setup-profile-wrapper {
+  background: #1a3c5a;                    /* fundal mai închis */
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+}
+
+[data-theme="dark"] .setup-profile-wrapper h2 {
+  color: #f0f0f0;                        /* text deschis */
+}
+
+[data-theme="dark"] .setup-profile-wrapper input,
+[data-theme="dark"] .setup-profile-wrapper textarea {
+  background: #537A9C;                   /* fundal câmpuri */
+  border-color: #384d7c;                    /* bordură mai închisă */
+  color: #e0e0e0;                        /* text câmpuri */
+}
+
+[data-theme="dark"] .setup-profile-wrapper input:focus,
+[data-theme="dark"] .setup-profile-wrapper textarea:focus {
+  background: #3371c2;                   /* același fundal ca wrapper */
+  border-color: #2f3dbe;                 /* primar (indigo) */
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+[data-theme="dark"] .setup-profile-wrapper button {
+  background: #2f3dbe;                   /* buton primar */
+  color: #fff;
+}
+
+[data-theme="dark"] .setup-profile-wrapper button:hover {
+  background: rgb(52, 100, 202);                   /* primar hover */
+  box-shadow: 0 4px 12px rgba(90, 103, 216, 0.5);
+}
+
+[data-theme="dark"] .error-msg {
+  color: #ff6b6b;                        /* eroare închisă pe fundal închis */
+}
+
+[data-theme="dark"] .input-error {
+  background-color: #4f1f1f;             /* fundal roșu foarte închis */
+  border-color: #ff6b6b !important;
+}
+
+[data-theme="dark"] .setup-profile-wrapper input::placeholder,
+[data-theme="dark"] .setup-profile-wrapper textarea::placeholder {
+  color: #ccc; /* placeholder mai deschis, vizibil pe fundal închis */
+}
