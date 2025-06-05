@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Profesor.css';
 
 const Profesor = () => {
@@ -16,7 +17,7 @@ const Profesor = () => {
     const [editingIndex, setEditingIndex] = useState(null);
     const [editedGrade, setEditedGrade] = useState('');
     const [prevGrade, setPrevGrade] = useState('');
-
+    const navigate = useNavigate();
     const token = localStorage.getItem('token');
     useEffect(() => {
         fetch('/person/me', {
@@ -231,6 +232,9 @@ const Profesor = () => {
             </div>
             <div className="catalog-buttons">
                 <button onClick={handleUploadExcel}>Încarcă CSV</button>
+                <button onClick={() => navigate(`/app/catalog/activity-sheet/${c.courseId}`)}>
+                    <img src="/icons/edit-icon.png" alt="Fișa activitate" className="icon-img" />
+                </button>
             </div>
         </div>
     );

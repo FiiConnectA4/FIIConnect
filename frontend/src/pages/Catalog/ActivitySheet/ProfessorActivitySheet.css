@@ -1,0 +1,381 @@
+.container-activity-sheet {
+    padding: 2rem;
+    font-family: sans-serif;
+    max-width: 100%;
+    overflow-x: auto;
+}
+
+.activity-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.activity-header h1 {
+    margin: 0;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.title-icon {
+    font-size: 1.2em;
+}
+
+.header-controls {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.header-controls select {
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background-color: white;
+}
+
+.close-button {
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    border: none;
+    background-color: #6195C9;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s;
+}
+
+.close-button:hover {
+    background-color: #4a7ba7;
+}
+
+.activity-content {
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.activity-table {
+    overflow-x: auto;
+}
+
+.table-wrapper {
+    min-width: 100%;
+}
+
+.activity-table table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+.activity-table th,
+.activity-table td {
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.activity-table thead tr {
+    background-color: #6195C9;
+    color: white;
+}
+
+.student-header {
+    position: sticky;
+    left: 0;
+    background-color: #6195C9 !important;
+    z-index: 2;
+    min-width: 200px;
+}
+
+.component-header {
+    min-width: 120px;
+    writing-mode: horizontal-tb;
+}
+
+.student-name {
+    position: sticky;
+    left: 0;
+    background-color: #f8f9fa;
+    font-weight: 500;
+    text-align: left;
+    z-index: 1;
+    border-right: 2px solid #6195C9;
+}
+
+.grade-cell {
+    position: relative;
+    padding: 0.5rem;
+}
+
+.grade-display {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.3rem;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.grade-display:hover {
+    background-color: #f0f8ff;
+}
+
+.grade-value {
+    font-weight: 500;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    min-width: 30px;
+    display: inline-block;
+}
+
+.grade-value.has-grade {
+    background-color: #e8f5e8;
+    color: #2d5a2d;
+}
+
+.grade-value.no-grade {
+    background-color: #f8f8f8;
+    color: #999;
+}
+
+.edit-icon {
+    opacity: 0;
+    transition: opacity 0.2s;
+    font-size: 0.8em;
+}
+
+.grade-display:hover .edit-icon {
+    opacity: 1;
+}
+
+.edit-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    align-items: center;
+}
+
+.grade-input {
+    width: 60px;
+    padding: 0.3rem;
+    border: 2px solid #6195C9;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 0.9rem;
+}
+
+.grade-input:focus {
+    outline: none;
+    border-color: #4a7ba7;
+}
+
+.edit-buttons {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.save-btn,
+.cancel-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.9em;
+    padding: 0.2rem;
+    border-radius: 3px;
+    transition: background-color 0.2s;
+}
+
+.save-btn:hover {
+    background-color: #e8f5e8;
+}
+
+.cancel-btn:hover {
+    background-color: #ffe8e8;
+}
+
+.activity-buttons {
+    padding: 1.5rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    background-color: #f8f9fa;
+    flex-wrap: wrap;
+}
+
+.upload-btn,
+.print-btn {
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    border: none;
+    background-color: #6195C9;
+    color: white;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background-color 0.2s;
+}
+
+.upload-btn:hover,
+.print-btn:hover {
+    background-color: #4a7ba7;
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem;
+    gap: 1rem;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #6195C9;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+.loading-text {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Dark theme support */
+[data-theme="dark"] .container-activity-sheet {
+    background-color: #1a1a1a;
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .activity-header h1 {
+    color: #e0e0e0;
+}
+
+[data-theme="dark"] .header-controls select {
+    background-color: #333;
+    color: #e0e0e0;
+    border-color: #555;
+}
+
+[data-theme="dark"] .close-button {
+    background-color: #4a6d9d;
+}
+
+[data-theme="dark"] .close-button:hover {
+    background-color: #3a5a8a;
+}
+
+[data-theme="dark"] .activity-content {
+    background-color: #2d2d2d;
+}
+
+[data-theme="dark"] .activity-table th,
+[data-theme="dark"] .activity-table td {
+    border-color: #444;
+}
+
+[data-theme="dark"] .activity-table thead tr {
+    background-color: #4a6d9d;
+}
+
+[data-theme="dark"] .student-header {
+    background-color: #4a6d9d !important;
+}
+
+[data-theme="dark"] .student-name {
+    background-color: #333;
+    border-right-color: #4a6d9d;
+}
+
+[data-theme="dark"] .grade-display:hover {
+    background-color: #3a3a3a;
+}
+
+[data-theme="dark"] .grade-value.has-grade {
+    background-color: #2d4a2d;
+    color: #a8d8a8;
+}
+
+[data-theme="dark"] .grade-value.no-grade {
+    background-color: #404040;
+    color: #999;
+}
+
+[data-theme="dark"] .grade-input {
+    background-color: #404040;
+    color: #e0e0e0;
+    border-color: #4a6d9d;
+}
+
+[data-theme="dark"] .activity-buttons {
+    background-color: #333;
+}
+
+[data-theme="dark"] .upload-btn,
+[data-theme="dark"] .print-btn {
+    background-color: #4a6d9d;
+}
+
+[data-theme="dark"] .upload-btn:hover,
+[data-theme="dark"] .print-btn:hover {
+    background-color: #3a5a8a;
+}
+
+[data-theme="dark"] .loading-spinner {
+    border-color: #444;
+    border-top-color: #4a6d9d;
+}
+
+[data-theme="dark"] .loading-text {
+    color: #ccc;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container-activity-sheet {
+        padding: 1rem;
+    }
+
+    .activity-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .header-controls {
+        justify-content: space-between;
+    }
+
+    .activity-buttons {
+        flex-direction: column;
+    }
+
+    .component-header {
+        writing-mode: vertical-lr;
+        text-orientation: mixed;
+        min-width: 80px;
+    }
+}
