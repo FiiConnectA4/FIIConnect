@@ -1,291 +1,262 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import './Administrator.css';
-import ProfessorActivitySheet from "../ActivitySheet/ProfessorActivitySheet";
+// Administrator.jsx  –  Gauss + Best, totul calculat în browser
+import {useEffect, useState} from "react";
+import {useNavigate}       from "react-router-dom";
+import "./Administrator.css";
 
-const Administrator = () => {
-    const [grupe, setGrupe] = useState([]);
-    const [selectedGrupa, setSelectedGrupa] = useState('');
+export default function Administrator() {
+    /* ----------------------- state ------------------------ */
+    const [grupe, setGrupe]   = useState([]);
+    const [selGr, setSelGr]   = useState("");
+    const [cursuri, setCurs]  = useState([]);
+    const [idCurs,setIdCurs]  = useState(null);
 
-    const [cursuri, setCursuri] = useState([]);
-    const [selectedCursId, setSelectedCursId] = useState(null);
+    const [catalog,setCat]    = useState([]); // [{studentId,name,grade}]
+    const [loading,setLoad]   = useState(false);
 
-    const [catalog, setCatalog] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [editIdx,setEditIdx]= useState(null);
+    const [editVal,setEditVal]= useState("");
 
-    const [editingIndex, setEditingIndex] = useState(null);
-    const [editedGrade, setEditedGrade] = useState('');
-    const [prevGrade, setPrevGrade] = useState('');
+    /** rezultat ultim-scaling aplicat (Gauss sau Best) */
+    const [scaledView,   setScaledView]   = useState([]); // pt tabel
+    const [scaledGrades, setScaledGrades] = useState([]); // <Grade> pt salvare
+    const [lastAlgo,     setLastAlgo]     = useState(null); // "gauss" | "best"
 
-    // New state for advance year functionality
-    const [advanceYearLoading, setAdvanceYearLoading] = useState(false);
-    const [successMessage, setSuccessMessage] = useState('');
+    const token = localStorage.getItem("token");
+    const nav   = useNavigate();
 
-    const token = localStorage.getItem('token');
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        fetch('/didactic/course', { headers: { 'Authorization': `Bearer ${token}` } })
-            .then(res => res.json())
-            .then(data => {
-                const courseList = data._embedded?.courseList || [];
-                setCursuri(courseList);
-                if (courseList.length) setSelectedCursId(courseList[0].id);
-            })
-            .catch(err => console.error('Eroare la încărcarea cursurilor:', err));
-    }, [token]);
-
-    useEffect(() => {
-        if (!selectedCursId) return;
-        setLoading(true);
-        Promise.all([
-            fetch(`/didactic/course/${selectedCursId}/enrolled`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
-            fetch(`/didactic/course/${selectedCursId}/grades`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json())
-        ])
-            .then(([enrollments, grades]) => {
-                const allGroups = [...new Set(enrollments.map(e => e.student.facultyGroup))];
-                setGrupe(allGroups);
-                const defaultGroup = allGroups[0] || '';
-                setSelectedGrupa(defaultGroup);
-
-                const groupStudents = enrollments
-                    .filter(e => e.student.facultyGroup === defaultGroup)
-                    .map(e => e.student);
-
-                const initialCatalog = groupStudents.map(student => {
-                    const gradeEntry = grades.find(g => g.student.id === student.id);
-                    return {
-                        name: `${student.firstName} ${student.lastName}`,
-                        grade: gradeEntry ? gradeEntry.value : '',
-                        studentId: student.id
-                    };
-                });
-
-                setCatalog(initialCatalog);
-                setLoading(false);
-            })
-            .catch(err => { console.error('Eroare la încărcarea datelor:', err); setLoading(false); });
-    }, [selectedCursId, token]);
-
-    useEffect(() => {
-        if (!selectedCursId || !selectedGrupa) return;
-        setLoading(true);
-        Promise.all([
-            fetch(`/didactic/course/${selectedCursId}/enrolled`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json()),
-            fetch(`/didactic/course/${selectedCursId}/grades`, { headers: { 'Authorization': `Bearer ${token}` } }).then(res => res.json())
-        ])
-            .then(([enrollments, grades]) => {
-                const groupStudents = enrollments
-                    .filter(e => e.student.facultyGroup === selectedGrupa)
-                    .map(e => e.student);
-
-                const filteredCatalog = groupStudents.map(student => {
-                    const gradeEntry = grades.find(g => g.student.id === student.id);
-                    return {
-                        name: `${student.firstName} ${student.lastName}`,
-                        grade: gradeEntry ? gradeEntry.value : '',
-                        studentId: student.id
-                    };
-                });
-
-                setCatalog(filteredCatalog);
-                setLoading(false);
-            })
-            .catch(err => { console.error('Eroare la fetch:', err); setLoading(false); });
-    }, [selectedCursId, selectedGrupa, token]);
-
-    const handleSaveGrade = (index) => {
-        const gradeEntry = catalog[index];
-        if (!gradeEntry) return;
-
-        const studentId = gradeEntry.studentId;
-        const courseId = selectedCursId;
-        const parsed = parseFloat(editedGrade);
-
-        if (isNaN(parsed) || parsed < 1 || parsed > 10) {
-            alert("Introduceți o notă validă între 1 și 10.");
-            return;
-        }
-
-        const hasExisting = gradeEntry.grade !== ""; // dacă e gol, e POST, altfel PUT
-        const url = '/didactic/grade';
-        const method = hasExisting ? 'PUT' : 'POST';
-        const payload = hasExisting
-            ? {
-                id: { idStud: studentId, idCourse: courseId },
-                value: parsed
-            }
-            : {
-                id: { idStud: studentId, idCourse: courseId },
-                value: parsed,
-                gradingDate: new Date().toISOString()
-            };
-
-        fetch(url, {
-            method,
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(payload)
-        })
-            .then(res => {
-                if (!res.ok) return res.text().then(text => { throw new Error(text) });
-                // actualizează local
-                const updated = [...catalog];
-                updated[index].grade = parsed;
-                setCatalog(updated);
-                setEditingIndex(null);
-            })
-            .catch(err => {
-                console.error(err);
-                alert("Eroare la salvarea notei: " + err.message);
+    /* ------------------- inițializare cursuri ------------------ */
+    useEffect(()=>{
+        fetch("/didactic/course",{headers:{Authorization:`Bearer ${token}`}})
+            .then(r=>r.json())
+            .then(d=>{
+                const list = d._embedded?.courseList ?? [];
+                setCurs(list);
+                if(list.length) setIdCurs(list[0].id);
             });
+    },[token]);
+
+    /* ------------------- încărcare catalog -------------------- */
+    useEffect(()=>{ if(idCurs) load(idCurs,selGr); },[idCurs,selGr]);
+
+    async function load(cId, grupa) {
+        setLoad(true);
+        try{
+            const [enroll,grades] = await Promise.all([
+                fetch(`/didactic/course/${cId}/enrolled`,{headers:{Authorization:`Bearer ${token}`}}).then(r=>r.json()),
+                fetch(`/didactic/course/${cId}/grades`,  {headers:{Authorization:`Bearer ${token}`}}).then(r=>r.json())
+            ]);
+            const groups=[...new Set(enroll.map(e=>e.student.facultyGroup))];
+            setGrupe(groups);
+            if(!grupa&&groups.length) setSelGr(groups[0]);
+
+            const stud=enroll.filter(e=>e.student.facultyGroup===(grupa||groups[0])).map(e=>e.student);
+            setCat(stud.map(s=>({
+                studentId:s.id,
+                name:`${s.firstName} ${s.lastName}`,
+                grade:grades.find(g=>g.student.id===s.id)?.value ?? ""
+            })));
+            // reset scaled
+            setScaledView([]); setScaledGrades([]);
+        }finally{ setLoad(false); }
+    }
+
+    /* --------------- salvare manuală notă --------------------- */
+    async function saveSingle(idx){
+        const row=catalog[idx], v=parseFloat(editVal);
+        if(isNaN(v)||v<1||v>10) return alert("Nota invalidă!");
+        await fetch("/didactic/grade",{
+            method: row.grade===""?"POST":"PUT",
+            headers: {"Content-Type":"application/json", Authorization:`Bearer ${token}`},
+            body: JSON.stringify({id:{idStud:row.studentId,idCourse:idCurs},value:v,gradingDate:new Date().toISOString()})
+        });
+        setCat(catalog.map((r,i)=>i===idx?{...r,grade:v}:r));
+        setEditIdx(null);
+    }
+
+    /* --------------- încărcare CSV ---------------------------- */
+    const handleUploadCSV = () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.csv';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('file', file);
+            fetch(`/didactic/course/${idCurs}/upload_component_scores_csv`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            })
+                .then(res => {
+                    if (!res.ok) throw new Error('Eroare la încărcarea fișierului CSV');
+                    return res.json().catch(() => null);
+                })
+                .then(() => {
+                    alert('Fișierul CSV a fost încărcat cu succes!');
+                    load(idCurs, selGr); // Reîncarcă datele în loc de window.location.reload()
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Eroare la încărcarea fișierului CSV: ' + err.message);
+                });
+        };
+        input.click();
     };
 
-    const handleUndo = () => {
-        setEditedGrade(prevGrade);
-        setEditingIndex(null);
-    };
-
-    // New function to handle year advancement
-    const handleAdvanceYear = () => {
-        const confirmed = window.confirm(
-            "Sunteți sigur că doriți să avansați studenții la anul următor? Această acțiune nu poate fi anulată."
+    /* ---------------- algoritmi locali ------------------------ */
+    function gaussLocal(list){
+        const sorted=list.filter(g=>g.value>=4.5).sort((a,b)=>b.value-a.value);
+        const n=sorted.length, idx=[0.10,0.25,0.30,0.25];
+        const cut=[Math.max(1,Math.round(idx[0]*n))];
+        cut.push(cut[0]+Math.max(1,Math.round(idx[1]*n)));
+        cut.push(cut[1]+Math.max(1,Math.round(idx[2]*n)));
+        cut.push(cut[2]+Math.max(1,Math.round(idx[3]*n)));
+        cut.push(n);
+        const val=[10,9,8,7,6]; let tier=0,prev=10, out=[];
+        sorted.forEach((g,i)=>{
+            if(i>=cut[tier]&&g.value!==prev) tier++;
+            out.push({...g,value:val[tier]}); prev=g.value;
+        });
+        list.filter(g=>g.value<4.5).forEach(g=>out.push({...g}));
+        return out;
+    }
+    function bestLocal(list){
+        const max=list.filter(g=>g.value>=4.5).reduce((m,g)=>g.value>m?g.value:m,0);
+        if(max===0) return list.map(g=>({...g}));
+        return list.map(g=>
+            g.value>=4.5 ? {...g,value: +(g.value/max*10).toFixed(2)} : {...g}
         );
+    }
 
-        if (!confirmed) return;
+    /* ------- helper: calculează, afișează, setează state ------- */
+    async function runScaling(algo){            // "gauss" | "best"
+        if(!idCurs) return;
+        try{
+            const [gradesR, enrollR] = await Promise.all([
+                fetch(`/didactic/course/${idCurs}/grades`,{headers:{Authorization:`Bearer ${token}`}}),
+                fetch(`/didactic/course/${idCurs}/enrolled`,{headers:{Authorization:`Bearer ${token}`}})
+            ]);
+            if(!gradesR.ok) throw new Error(await gradesR.text());
+            if(!enrollR.ok) throw new Error(await enrollR.text());
 
-        setAdvanceYearLoading(true);
-        setSuccessMessage('');
+            const all = await gradesR.json();
+            const enrolled = await enrollR.json();
+            const scaled = algo==="gauss"? gaussLocal(all) : bestLocal(all);
 
-        fetch('/didactic/advanceYear', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        })
-            .then(res => {
-                if (!res.ok) {
-                    return res.text().then(text => { throw new Error(text) });
-                }
-                return res.json();
-            })
-            .then(eligibleStudentIds => {
-                const count = eligibleStudentIds.length;
-                setSuccessMessage(`Anul a fost avansat cu succes pentru ${count} studenți.`);
-                setAdvanceYearLoading(false);
-
-                // Hide success message after 5 seconds
-                setTimeout(() => {
-                    setSuccessMessage('');
-                }, 5000);
-            })
-            .catch(err => {
-                console.error('Eroare la avansarea anului:', err);
-                alert("Eroare la avansarea anului: " + err.message);
-                setAdvanceYearLoading(false);
+            // Create a map of studentId to student info for quick lookup
+            const studentMap = new Map();
+            enrolled.forEach(e => {
+                studentMap.set(e.student.id, `${e.student.firstName} ${e.student.lastName}`);
             });
-    };
 
+            setCat(cur=>cur.map(row=>{
+                const f=scaled.find(s=>s.id.idStud===row.studentId);
+                return f?{...row,grade:f.value}:row;
+            }));
+            setScaledGrades(scaled);
+            setLastAlgo(algo);
+            setScaledView(scaled.map(s=>{
+                const name = studentMap.get(s.id.idStud) ?? `Student ${s.id.idStud}`;
+                return {studentId:s.id.idStud,name,value:s.value};
+            }));
+            alert(`Notele ${(algo==="gauss")?"Gauss":"Best"} au fost calculate – apasă "💾 Salvează" pentru a le scrie în catalog.`);
+        }catch(e){ console.error(e); alert("Eroare: "+e.message); }
+    }
+
+    /* ------------------- salvare scaling ---------------------- */
+    async function saveScaling(){
+        if(!scaledGrades.length) return;
+        try{
+            await Promise.all(
+                scaledGrades.map(g=>fetch("/didactic/grade",{
+                    method:"PUT",
+                    headers:{"Content-Type":"application/json",Authorization:`Bearer ${token}`},
+                    body:JSON.stringify({id:g.id,value:g.value,gradingDate:g.gradingDate})
+                }))
+            );
+            alert("Notele au fost salvate!");
+            load(idCurs,selGr);
+        }catch(e){ console.error(e); alert("Eroare la salvare: "+e.message); }
+    }
+
+    /* ------------------------- UI ----------------------------- */
     return (
         <div className="container-catalog">
+            {/* selectoare curs/grupă */}
             <div className="catalog-header">
                 <h1>CATALOG</h1>
                 <div className="select-controls">
-                    <select value={selectedGrupa} onChange={e => setSelectedGrupa(e.target.value)}>
-                        {grupe.map((g, i) => <option key={i} value={g}>{g}</option>)}
+                    <select value={selGr} onChange={e=>setSelGr(e.target.value)}>
+                        {grupe.map(g=><option key={g}>{g}</option>)}
                     </select>
-                    <select value={selectedCursId || ''} onChange={e => setSelectedCursId(parseInt(e.target.value, 10))}>
-                        {cursuri.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
+                    <select value={idCurs||""} onChange={e=>setIdCurs(Number(e.target.value))}>
+                        {cursuri.map(c=><option key={c.id} value={c.id}>{c.title}</option>)}
                     </select>
                 </div>
-
-                {/* Advance Year Button */}
-                <div className="admin-actions">
-                    <button
-                        className="advance-year-button"
-                        onClick={handleAdvanceYear}
-                        disabled={advanceYearLoading}
-                    >
-                        {advanceYearLoading ? 'Se procesează...' : 'Avansează Anul Academic'}
-                    </button>
-                </div>
-
-                {/* Success Message */}
-                {successMessage && (
-                    <div className="success-message">
-                        {successMessage}
-                    </div>
-                )}
             </div>
 
+            {/* tabel note */}
             <div className="catalog-table">
                 <table>
-                    <thead>
-                    <tr className='titlu'>
-                        <th><input type="checkbox" /></th>
-                        <th>Student Name</th>
-                        <th>Titlu Curs</th>
-                        <th>Nota finală</th>
-                        <th>Administrative Note</th>
-                    </tr>
-                    </thead>
+                    <thead><tr><th>Student</th><th>Notă finală</th><th>Acțiuni</th></tr></thead>
                     <tbody>
-                        {loading ? (
-                            <tr><td colSpan="5">Se încarcă...</td></tr>
-                        ) : catalog.length === 0 ? (
-                            <tr><td colSpan="5">Nicio înregistrare pentru grupa selectată.</td></tr>
-                        ) : (
-                            catalog.map((item, idx) => (
-                                <tr key={idx}>
-                                    <td><input type="checkbox" /></td>
-                                    <td>{item.name}</td>
-                                    <td>{cursuri.find(c => c.id === selectedCursId)?.title || ''}</td>
-                                    <td>{editingIndex === idx ? (
-                                        <input type="number" value={editedGrade} onChange={e => setEditedGrade(e.target.value)} />
-                                    ) : (
-                                        item.grade
-                                    )}</td>
-                                    <td>
-                                        {editingIndex === idx ? (
-                                            <>
-                                                <button onClick={() => handleSaveGrade(idx)}>💾</button>
-                                                <button onClick={handleUndo}>↩️</button>
-                                            </>
-                                        ) : (
-                                            <>
-                                                <button onClick={() => { setPrevGrade(item.grade); setEditingIndex(idx); setEditedGrade(item.grade); }}>
-                                                    ✏️
-                                                </button>
-                                                <button
-                                                    onClick={() => navigate(`/app/catalog/activity-sheet/${selectedCursId}/${item.studentId}`)}
-                                                    title="Vezi fișa de activitate"
-                                                >
-                                                    📋
-                                                </button>
-                                            </>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))
-                        )}
+                    {loading?<tr><td colSpan={3}>Se încarcă…</td></tr>:
+                        catalog.map((row,i)=>(
+                            <tr key={row.studentId}>
+                                <td>{row.name}</td>
+                                <td>{editIdx===i
+                                    ? <input type="number" min="1" max="10" step="0.01"
+                                             value={editVal} onChange={e=>setEditVal(e.target.value)}/>
+                                    : row.grade}</td>
+                                <td>{editIdx===i
+                                    ? <>
+                                        <button onClick={()=>saveSingle(i)}>💾</button>
+                                        <button onClick={()=>setEditIdx(null)}>↩️</button>
+                                    </>
+                                    : <>
+                                        <button onClick={()=>{setEditIdx(i);setEditVal(row.grade);}}>✏️</button>
+                                        <button onClick={()=>nav(`/app/catalog/activity-sheet/${idCurs}/${row.studentId}`)}>📋</button>
+                                    </>
+                                }</td>
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
             </div>
+
+            {/* butoane acțiune */}
             <div className="catalog-buttons">
-                <button
-                    onClick={() =>
-                        navigate(`/app/catalog/activity-sheet/group/${selectedCursId}?grupa=${encodeURIComponent(selectedGrupa)}`)
-                    }
-                    disabled={!selectedCursId || !selectedGrupa}
-                >
+                <button onClick={()=>nav(`/app/catalog/activity-sheet/group/${idCurs}?grupa=${encodeURIComponent(selGr)}`)}
+                        disabled={!idCurs||!selGr}>
                     🧾 Fișa de activitate — grupă curentă
                 </button>
+
+                <button onClick={handleUploadCSV} disabled={!idCurs}>
+                    📤 Încarcă CSV
+                </button>
+
+                <button onClick={()=>runScaling("gauss")} disabled={!idCurs}>📊 Aplică Gauss</button>
+                <button onClick={()=>runScaling("best")}  disabled={!idCurs}>📈 Aplică Best</button>
+
+                <button onClick={saveScaling} disabled={!scaledGrades.length}>💾 Salvează note</button>
             </div>
+
+            {/* tabel rezultate scaling */}
+            {scaledView.length>0 && (
+                <div className="catalog-table" style={{marginTop:"2rem"}}>
+                    <h2>Note după {lastAlgo==="best" ? "Best" : "Gauss"}</h2>
+                    <table><thead><tr><th>Student</th><th>Notă scalată</th></tr></thead>
+                        <tbody>
+                        {scaledView.map(r=>(
+                            <tr key={r.studentId}><td>{r.name}</td><td>{r.value}</td></tr>
+                        ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
-};
-
-export default Administrator;
+}

@@ -105,6 +105,40 @@ const ActivitySheet = () => {
         );
     };
 
+    const updateFinalGrade = async () => {
+        try {
+            const formulaRes = await fetch(`${API_BASE_URL}/didactic/course/${courseId}/formula`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!formulaRes.ok) throw new Error("Formulă inexistentă pentru acest curs");
+            const formula = await formulaRes.json();
+
+            const gradeRes = await fetch(`${API_BASE_URL}/didactic/formula/${formula.id}/evaluate?idStud=${studentId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (!gradeRes.ok) throw new Error("Eroare la evaluarea formulei");
+
+            const finalGrade = await gradeRes.json();
+
+            const postGradeRes = await fetch(`${API_BASE_URL}/didactic/grade`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(finalGrade)
+            });
+
+            if (!postGradeRes.ok) throw new Error("Eroare la salvarea notei finale");
+            console.log(`✅ Nota finală actualizată: ${finalGrade.value}`);
+        } catch (err) {
+            console.error("⛔ Eroare la nota finală:", err);
+            alert("Eroare la actualizarea notei finale: " + err.message);
+        }
+    };
+
     const handleSave = async () => {
         for (const comp of grades) {
             if (!comp.id || comp.nota === '-') continue;
@@ -127,7 +161,11 @@ const ActivitySheet = () => {
                 body: JSON.stringify(payload)
             });
         }
-        alert("Notele au fost salvate!");
+
+        // ✅ Apelă funcția de actualizare a notei finale
+        await updateFinalGrade();
+
+        alert("Notele au fost salvate și nota finală recalculată!");
     };
 
     if (loading) {
