@@ -4,7 +4,7 @@ path=$(pwd)
 sftp_dir="$path/../../SFTP_remote_files"
 volume_path="/Volumes/sftp-volume"
 
-mkdir -p "$volume_path"
+sudo mkdir -p "$volume_path"
 
 echo "SFTP Remote Files Path: $sftp_dir"
 
@@ -14,12 +14,15 @@ if ! docker info > /dev/null 2>&1; then
 fi
 
 if [[ "$(uname -m)" == "arm64" ]]; then
-     docker run --platform linux/amd64 -p 2222:22 -d \
+    sudo docker run --platform linux/amd64 -p 2222:22 -d \
     -v "$volume_path":"$sftp_dir" \
-    atmoz/sftp 
+    atmoz/sftp \
     fiiconnect:fiiconnect:::faculty_files
 else
-    docker run -p 2222:22 -d  -v /Volumes/sftp-volume:\mnt\c\Users\Roberto\OneDrive\Desktop\IP_Sec\FIIConnect\SFTP_remote_files  atmoz/sftp  fiiconnect:fiiconnect:::faculty_files
+    sudo docker run -p 2222:22 -d \
+    -v "$volume_path":"$sftp_dir" \
+    atmoz/sftp \
+    fiiconnect:fiiconnect:::faculty_files
 fi
 
 echo "Run with user: fiiconnect -- password: fiiconnect"
@@ -27,4 +30,3 @@ rm -rf ~/.ssh/known_hosts
 
 cd "$sftp_dir"
 sftp -P 2222 fiiconnect@localhost
-
