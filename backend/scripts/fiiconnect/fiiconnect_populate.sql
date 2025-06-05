@@ -250,13 +250,14 @@ insert into material values(material_ids(9), course_ids(4), professor_ids(3), 'n
 
 --SECRETARIAT
 
-for v_index in 1..15 loop
+for v_index in 1..16 loop
     sala_ids.extend;
     sala_ids(sala_ids.last) := seq_sala_id.nextval;
 end loop;
 
 delete SALI;
 INSERT INTO SALI (ID, NUME, CAPACITATE, TIPSALA, LOCATIE, IMAGINEURL, DOTARI, OBSERVATII) VALUES (sala_ids(1), 'C112', 100, 'Curs', 'Corp C, Etajul -1', 'https://fii.example.com/img/C112.jpg', 'Proiector, Tabla, Prize', 'Mai multe prize');
+INSERT INTO SALI VALUES (sala_ids(16), 'C2', 100, 'Curs', 'Corp C, Parter', 'https://fii.example.com/img/C2.jpg', 'Proiector, Tabla, Prize', '');
 INSERT INTO SALI VALUES (sala_ids(2), 'C210', 35, 'Seminar/Laborator', 'Corp C, Parter', 'https://fii.example.com/img/C210.jpg', 'Proiector, Tabla, Prize', '');
 INSERT INTO SALI VALUES (sala_ids(3), 'C308', 50, 'Curs', 'Corp C, Etajul 1', 'https://fii.example.com/img/C308.jpg', 'Proiector, Tabla, Prize', 'Mai multe prize');
 INSERT INTO SALI VALUES (sala_ids(4), 'C309', 60, 'Curs', 'Corp C, Etajul 1', 'https://fii.example.com/img/C309.jpg', 'Proiector, Tabla, Prize', '');
