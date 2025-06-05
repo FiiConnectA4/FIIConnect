@@ -95,7 +95,7 @@ const AppRoutes = () => {
         <Route path="catalog" element={<Catalog />} />
 
         {/* Rutele pentru orar */}
-        <Route path="orar" element={<OrarToti />} />
+        <Route path="orar" element={<Orar />} />
         <Route path="orar/studenti" element={<OrarToti />} />
         <Route path="orar/studenti/:an/:grupa" element={<OrarToti />} />
         <Route path="orar/profesori" element={<OrarToti />} />
