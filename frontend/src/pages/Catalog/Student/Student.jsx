@@ -41,11 +41,19 @@ const StudentCatalog = () => {
     const [loading, setLoading] = useState(true);
     const [studentId, setStudentId] = useState(null);
 
-    // Modal state
+    // Modal state for PDF download
     const [showModal, setShowModal] = useState(false);
     const [selectedYear, setSelectedYear] = useState('');
     const [selectedSemester, setSelectedSemester] = useState('');
     const [downloadLoading, setDownloadLoading] = useState(false);
+
+    // Modal state for transfer request
+    const [showTransferModal, setShowTransferModal] = useState(false);
+    const [selectedCourse, setSelectedCourse] = useState('');
+    const [selectedGroup, setSelectedGroup] = useState('');
+    const [transferReason, setTransferReason] = useState('');
+    const [transferLoading, setTransferLoading] = useState(false);
+    const [availableGroups, setAvailableGroups] = useState([]);
 
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
@@ -133,6 +141,107 @@ const StudentCatalog = () => {
         setAvg(cr ? (p / cr).toFixed(2) : 0);
     }, [selectedSem, bySem]);
 
+    // Fetch available groups when a course is selected for transfer
+    const fetchAvailableGroups = async (courseId) => {
+        try {
+            const response = await fetch(`${API_BASE_URL}/didactic/course/${courseId}/groups`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                const groups = await response.json();
+                setAvailableGroups(groups);
+            } else {
+                // If no specific endpoint exists, provide default group options
+                setAvailableGroups([
+                    { id: 'A', name: 'Grupa A' },
+                    { id: 'B', name: 'Grupa B' },
+                    { id: 'C', name: 'Grupa C' },
+                    { id: 'D', name: 'Grupa D' }
+                ]);
+            }
+        } catch (error) {
+            console.error('Error fetching groups:', error);
+            // Fallback to default groups
+            setAvailableGroups([
+                { id: 'A', name: 'Grupa A' },
+                { id: 'B', name: 'Grupa B' },
+                { id: 'C', name: 'Grupa C' },
+                { id: 'D', name: 'Grupa D' }
+            ]);
+        }
+    };
+
+    const handleCourseSelection = (courseId) => {
+        setSelectedCourse(courseId);
+        setSelectedGroup('');
+        if (courseId) {
+            fetchAvailableGroups(courseId);
+        } else {
+            setAvailableGroups([]);
+        }
+    };
+
+    const submitTransferRequest = async () => {
+        if (!selectedCourse || !selectedGroup || !transferReason.trim()) {
+            alert('Vă rugăm să completați toate câmpurile obligatorii.');
+            return;
+        }
+
+        if (transferReason.length > 300) {
+            alert('Motivul nu poate depăși 300 de caractere.');
+            return;
+        }
+
+        setTransferLoading(true);
+
+        try {
+            const transferRequest = {
+                id: {
+                    idStud: studentId,
+                    idCourse: parseInt(selectedCourse)
+                },
+                targetGroup: selectedGroup,
+                reasonText: transferReason,
+                requestDate: new Date().toISOString()
+            };
+
+            const response = await fetch(`${API_BASE_URL}/didactic/transfer`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(transferRequest)
+            });
+
+            if (response.ok) {
+                alert('Cererea de transfer a fost trimisă cu succes!');
+                handleTransferModalClose();
+            } else {
+                const errorData = await response.json().catch(() => ({}));
+                if (response.status === 409) {
+                    alert('Există deja o cerere de transfer pentru acest curs.');
+                } else {
+                    alert(`Eroare la trimiterea cererii: ${errorData.message || 'Eroare necunoscută'}`);
+                }
+            }
+        } catch (error) {
+            console.error('Error submitting transfer request:', error);
+            alert('Eroare la trimiterea cererii de transfer. Vă rugăm să încercați din nou.');
+        } finally {
+            setTransferLoading(false);
+        }
+    };
+
+    const handleTransferModalClose = () => {
+        setShowTransferModal(false);
+        setSelectedCourse('');
+        setSelectedGroup('');
+        setTransferReason('');
+        setAvailableGroups([]);
+    };
+
     const downloadPDF = async () => {
         if (!studentId) {
             alert('ID student nu este disponibil');
@@ -213,6 +322,9 @@ const StudentCatalog = () => {
         yearOptions.push(year);
     }
 
+    // Get all courses for transfer dropdown
+    const allCourses = Object.values(bySem).flat();
+
     if (loading) return <div className="container-catalog">Se încarcă catalogul…</div>;
 
     return (
@@ -260,9 +372,14 @@ const StudentCatalog = () => {
             </div>
 
             <div className="catalog-footer">
-                <button className="buton-catalog" onClick={() => setShowModal(true)}>
-                    Descarcă PDF
-                </button>
+                <div className="catalog-buttons">
+                    <button className="buton-catalog" onClick={() => setShowModal(true)}>
+                        Descarcă PDF
+                    </button>
+                    <button className="buton-catalog" onClick={() => setShowTransferModal(true)}>
+                        Cerere Transfer
+                    </button>
+                </div>
                 <div className="stats">
                     <p><strong>Punctaj final:</strong> {points}</p>
                     <p><strong>Media finală:</strong> {avg}</p>
@@ -294,7 +411,6 @@ const StudentCatalog = () => {
                                     <option value="3">Anul 3</option>
                                     <option value="4">Anul 4</option>
                                     <option value="5">Anul 5</option>
-
                                 </select>
                             </div>
 
@@ -332,6 +448,94 @@ const StudentCatalog = () => {
                                 disabled={downloadLoading}
                             >
                                 {downloadLoading ? 'Se descarcă...' : 'Descarcă PDF'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal for transfer request */}
+            {showTransferModal && (
+                <div className="modal-overlay" onClick={handleTransferModalClose}>
+                    <div className="modal-content" onClick={e => e.stopPropagation()}>
+                        <div className="modal-header">
+                            <h3>Cerere de Transfer</h3>
+                            <button className="modal-close" onClick={handleTransferModalClose}>×</button>
+                        </div>
+
+                        <div className="modal-body">
+                            <p>Completează detaliile pentru cererea de transfer:</p>
+
+                            <div className="filter-group">
+                                <label htmlFor="course-select">Cursul pentru care solicitați transferul: *</label>
+                                <select
+                                    id="course-select"
+                                    value={selectedCourse}
+                                    onChange={e => handleCourseSelection(e.target.value)}
+                                    required
+                                >
+                                    <option value="">Selectează cursul</option>
+                                    {allCourses.map(course => (
+                                        <option key={course.courseId} value={course.courseId}>
+                                            {course.curs} - {course.semestru}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="filter-group">
+                                <label htmlFor="group-select">Grupa țintă: *</label>
+                                <select
+                                    id="group-select"
+                                    value={selectedGroup}
+                                    onChange={e => setSelectedGroup(e.target.value)}
+                                    disabled={!selectedCourse}
+                                    required
+                                >
+                                    <option value="">Selectează grupa</option>
+                                    {availableGroups.map(group => (
+                                        <option key={group.id} value={group.id}>
+                                            {group.name || group.id}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+
+                            <div className="filter-group">
+                                <label htmlFor="reason-textarea">Motivul transferului: *</label>
+                                <textarea
+                                    id="reason-textarea"
+                                    value={transferReason}
+                                    onChange={e => setTransferReason(e.target.value)}
+                                    placeholder="Explicați motivul pentru care solicitați transferul..."
+                                    maxLength={300}
+                                    rows={4}
+                                    required
+                                />
+                                <small className="character-count">
+                                    {transferReason.length}/300 caractere
+                                </small>
+                            </div>
+
+                            <p className="info-text">
+                                <em>* Câmpuri obligatorii</em>
+                            </p>
+                        </div>
+
+                        <div className="modal-footer">
+                            <button
+                                className="btn-cancel"
+                                onClick={handleTransferModalClose}
+                                disabled={transferLoading}
+                            >
+                                Anulează
+                            </button>
+                            <button
+                                className="btn-download"
+                                onClick={submitTransferRequest}
+                                disabled={transferLoading || !selectedCourse || !selectedGroup || !transferReason.trim()}
+                            >
+                                {transferLoading ? 'Se trimite...' : 'Trimite Cererea'}
                             </button>
                         </div>
                     </div>
