@@ -208,7 +208,7 @@ public class GradeService {
                 if(!found){
                    if (componentName.equals(FINAL_GRADE)) {
                        found = true;
-                       GradeCompositeKey key = new GradeCompositeKey(student.getId(), courseId);
+                       StudCourseCompositeKey key = new StudCourseCompositeKey(student.getId(), courseId);
                        Grade g = new Grade(key, gradeValue, new Date());
                        gradeRepository.save(g);
                    }
