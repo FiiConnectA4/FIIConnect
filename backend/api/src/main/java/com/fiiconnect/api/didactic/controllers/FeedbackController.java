@@ -36,14 +36,14 @@ public class FeedbackController {
     private final GlobalConstantRepository globalConstantRepository;
     private final ProfessorService professorService;
 
-    @GetMapping("/didactic/feedback")
+    @GetMapping("/didactic/feedbacks")
     public List<Feedback> getFeedback() {
         PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
         return repository.findAll().stream().filter(f -> service.allowFeedbackViewing(person, f.getId())).toList();
     }
 
-    @GetMapping("/didactic/feedback/")
-    public ResponseEntity<?> getFeedbackByDidacticId(@RequestParam Long studentId, @RequestParam Long profId) {
+    @GetMapping("/didactic/feedback")
+    public ResponseEntity<?> getFeedbackByDidacticId(@RequestParam(required = false) Long studentId, @RequestParam Long profId) {
         if(studentId == null && profId == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
