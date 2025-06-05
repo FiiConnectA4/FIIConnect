@@ -27,7 +27,6 @@ public class NotificationController {
     private final UserRepository userRepo;
     private final NotificationService notificationService;
 
-    // ✅ [POST] Trimitere notificări bulk (ADMIN / PROFESSOR)
     @PostMapping("/send")
     @RolesAllowed({"ADMIN", "PROFESOR"})
     public ResponseEntity<List<NotificationResponse>> sendBulk(@RequestBody BulkNotificationRequest req) {
@@ -58,7 +57,6 @@ public class NotificationController {
 
 
 
-    // ✅ [GET] Toate notificările necitite ale utilizatorului autentificat
     @GetMapping("/unread")
     public ResponseEntity<List<NotificationResponse>> getUnread(@AuthenticationPrincipal UserDetails userDetails) {
         User user = userRepo.findByUsername(userDetails.getUsername());
@@ -72,7 +70,6 @@ public class NotificationController {
         return ResponseEntity.ok(dtos);
     }
 
-    // ✅ [PUT] Marchează o notificare ca "citită"
     @PutMapping("/{id}/read")
     public ResponseEntity<?> markAsRead(@PathVariable Long id) {
         Notification notif = notificationRepo.findById(id)
@@ -82,7 +79,6 @@ public class NotificationController {
         return ResponseEntity.ok().build();
     }
 
-    // ✅ [GET] Returnează notificări filtrate după `read` și limitate
     @GetMapping
     public ResponseEntity<List<NotificationResponse>> getLimitedNotifications(
             @AuthenticationPrincipal UserDetails userDetails,

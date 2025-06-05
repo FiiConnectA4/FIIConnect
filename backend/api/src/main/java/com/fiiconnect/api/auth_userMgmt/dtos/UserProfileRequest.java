@@ -19,9 +19,8 @@ public class UserProfileRequest {
     private final String currentYear;
     private final double rating;
     private final List<String> expertise;
-    //ar trebui sa fie list de achievements
     private final List<String> achievements;
-    private final String profilePictureUrl;
+    private final String profilePicture;
 
     public UserProfileRequest(User user, UserProfile profile) {
         this.firstName = profile.getFirstName();
@@ -34,7 +33,7 @@ public class UserProfileRequest {
         this.rating = profile.getRating();
         this.expertise = profile.getExpertise();
         this.achievements = profile.getAchievements();
-        this.profilePictureUrl = profile.getProfilePictureUrl();
+        this.profilePicture = profile.getProfilePicture();
         this.email = user.getEmail();
     }
 }

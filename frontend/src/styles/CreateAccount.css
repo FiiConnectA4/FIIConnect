@@ -1,5 +1,6 @@
 /* src/styles/CreateAccount.css */
 
+/* Light Theme Styles */
 .create-page {
     flex: 1;
     min-height: 80vh;
@@ -8,6 +9,7 @@
     align-items: center;
     justify-content: center;
     padding: 2rem;
+    transition: background-color 0.3s ease;
 }
 
 .create-card {
@@ -17,6 +19,7 @@
     padding: 2rem;
     border-radius: 1rem;
     box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .create-title {
@@ -24,6 +27,7 @@
     font-weight: 600;
     margin-bottom: 1.5rem;
     color: #1a202c;
+    transition: color 0.3s ease;
 }
 
 .message {
@@ -31,14 +35,17 @@
     border-radius: 0.5rem;
     margin-bottom: 1.5rem;
     font-size: 0.95rem;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 .message.success {
     background: #e6fffa;
     color: #2c7a7b;
+    border: 1px solid #9ae6b4; /* Light green border */
 }
 .message.error {
     background: #ffe6e6;
     color: #cc0000;
+    border: 1px solid #feb2b2; /* Light red border */
 }
 
 .form-group {
@@ -50,24 +57,31 @@
     margin-bottom: 0.5rem;
     font-weight: 500;
     color: #4a5568;
+    transition: color 0.3s ease;
 }
 .form-control {
     padding: 0.75rem 1rem;
     border: 1px solid #cbd5e0;
     border-radius: 0.5rem;
     font-size: 1rem;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    background-color: #fff; /* Explicit background for light theme */
+    color: #1a202c;      /* Explicit text color for light theme */
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.3s ease, color 0.3s ease;
 }
 .form-control:focus {
     outline: none;
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59,130,246,0.3);
 }
+.form-control::placeholder {
+    color: #a0aec0; /* Placeholder color for light theme */
+}
+
 
 .btn-create {
     width: 100%;
     padding: 0.75rem;
-    background-color: #003087;
+    background-color: #003087; /* Primary button blue */
     color: white;
     font-weight: 600;
     border: none;
@@ -76,7 +90,7 @@
     transition: background-color 0.2s, opacity 0.2s;
 }
 .btn-create:hover:not(:disabled) {
-    background-color: #00205b;
+    background-color: #00205b; /* Darker blue on hover */
 }
 .btn-create:disabled {
     opacity: 0.6;
@@ -92,12 +106,14 @@
     background: #fafafa;
     max-height: 200px;
     overflow-y: auto;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 .unassigned-container h2 {
     margin-top: 0;
     margin-bottom: 0.75rem;
     font-size: 1.25rem;
     color: #2d3748;
+    transition: color 0.3s ease;
 }
 .unassigned-table {
     width: 100%;
@@ -110,19 +126,29 @@
     padding: 0.5rem;
     text-align: left;
     font-size: 0.9rem;
+    color: #2d3748; /* Default text color for table cells */
+    transition: border-color 0.3s ease, color 0.3s ease, background-color 0.3s ease;
 }
 .unassigned-table th {
     background: #edf2f7;
     font-weight: 600;
+    color: #1a202c; /* Header text color */
 }
 .unassigned-table tbody tr {
-    height: 30px;
+    transition: background-color 0.3s ease;
 }
+.unassigned-table tbody tr:nth-child(even) {
+    background-color: #f9fafb; /* Slightly different for even rows if needed */
+}
+.unassigned-table tbody tr:hover {
+    background-color: #f0f4f8;
+}
+
 
 /* Refresh button styling */
 .btn-refresh {
     padding: 0.5rem 1rem;
-    background-color: #3182ce;
+    background-color: #3182ce; /* Secondary button blue */
     color: white;
     font-weight: 500;
     border: none;
@@ -132,9 +158,115 @@
     margin-bottom: 1rem;
 }
 .btn-refresh:hover {
-    background-color: #2b6cb0;
+    background-color: #2b6cb0; /* Darker blue on hover */
 }
 .btn-refresh:focus {
     outline: none;
     box-shadow: 0 0 0 3px rgba(49,130,206,0.4);
 }
+
+/* Checkbox styling for the table */
+.unassigned-table input[type="checkbox"] {
+    width: 1rem;
+    height: 1rem;
+    accent-color: #003087; /* Matches primary button color */
+}
+
+
+/* ===== Dark Theme Styles using [data-theme="dark"] ===== */
+
+[data-theme="dark"] .create-page {
+    background-color: #1a202c; /* Darker page background, e.g., dark blue/grey */
+}
+
+[data-theme="dark"] .create-card {
+    background-color: #2d3748; /* Darker card background, e.g., lighter dark blue/grey */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); /* More pronounced shadow for dark theme */
+}
+
+[data-theme="dark"] .create-title {
+    color: #e2e8f0; /* Light text for title, e.g., light grey/off-white */
+}
+
+[data-theme="dark"] .message.success {
+    background-color: #2f855a; /* Dark green background */
+    color: #c6f6d5;           /* Light green text */
+    border-color: #38a169;    /* Darker green border */
+}
+[data-theme="dark"] .message.error {
+    background-color: #c53030; /* Dark red background */
+    color: #fed7d7;           /* Light red text */
+    border-color: #e53e3e;    /* Darker red border */
+}
+
+[data-theme="dark"] .form-group label {
+    color: #a0aec0; /* Lighter grey for labels */
+}
+[data-theme="dark"] .form-control {
+    background-color: #1e293b; /* Very dark input background */
+    border-color: #4a5568;     /* Medium grey border */
+    color: #e2e8f0;           /* Light text for input */
+}
+[data-theme="dark"] .form-control:focus {
+    border-color: #63b3ed;     /* Light blue border on focus */
+    box-shadow: 0 0 0 3px rgba(99, 179, 237, 0.3); /* Light blue shadow */
+}
+[data-theme="dark"] .form-control::placeholder {
+    color: #718096; /* Darker placeholder text for dark theme */
+}
+
+[data-theme="dark"] .btn-create {
+    background-color: #3182ce; /* Brighter blue for primary button */
+    color: #ffffff;
+}
+[data-theme="dark"] .btn-create:hover:not(:disabled) {
+    background-color: #2b6cb0; /* Slightly darker shade of the brighter blue */
+}
+
+[data-theme="dark"] .unassigned-container {
+    background: #2d3748;      /* Match card background or a slightly different dark shade */
+    border-color: #4a5568;    /* Darker border */
+}
+[data-theme="dark"] .unassigned-container h2 {
+    color: #e2e8f0;           /* Light text for heading */
+}
+[data-theme="dark"] .unassigned-table th,
+[data-theme="dark"] .unassigned-table td {
+    border-color: #4a5568;    /* Darker border for table cells */
+    color: #cbd5e1;           /* Light grey text for table content */
+}
+[data-theme="dark"] .unassigned-table th {
+    background-color: #354152; /* Darker header background for table */
+    color: #e2e8f0;            /* Light text for table header */
+}
+[data-theme="dark"] .unassigned-table tbody tr {
+    background-color: #2d3748; /* Dark background for rows */
+}
+[data-theme="dark"] .unassigned-table tbody tr:nth-child(even) {
+    background-color: #273140; /* Slightly different dark for even rows */
+}
+[data-theme="dark"] .unassigned-table tbody tr:hover {
+    background-color: #354152; /* Hover effect for dark rows */
+}
+
+
+[data-theme="dark"] .btn-refresh {
+    background-color: #4299e1; /* A different shade of blue for secondary button */
+    color: #ffffff;
+}
+[data-theme="dark"] .btn-refresh:hover {
+    background-color: #3182ce; /* Darker shade for hover */
+}
+[data-theme="dark"] .btn-refresh:focus {
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.4); /* Adjusted shadow for dark theme */
+}
+
+[data-theme="dark"] .unassigned-table input[type="checkbox"] {
+    accent-color: #3182ce; /* Matches dark theme primary button color */
+    background-color: #4a5568; /* Background for the checkbox itself */
+    border-color: #718096;
+}
+[data-theme="dark"] .unassigned-table input[type="checkbox"]:checked {
+    background-color: #3182ce;
+}
+
