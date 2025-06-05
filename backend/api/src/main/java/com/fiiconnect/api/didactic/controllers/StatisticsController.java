@@ -66,10 +66,74 @@ public class StatisticsController {
         return average / count;
     }
 
+    @GetMapping("didactic/statistics/productiveHours/{id}")
+    public List<Map<String, Object>> getMostProductiveHours(@PathVariable Long id) {
+        Student student = studentRepository.findById(id)
+                .orElseThrow(() -> new StudentNotFoundException(id));
+
+        studentService.attachGrades(student);
+
+        Map<String, List<Double>> intervalGradesMap = new HashMap<>();
+        String[] intervals = {"08-10", "10-12", "12-14", "14-16", "16-18", "18-20", "Altele"};
+        for (String interval : intervals) {
+            intervalGradesMap.put(interval, new ArrayList<>());
+        }
+
+        for (Grade grade : student.getGrades()) {
+            int hour = grade.getGradingDate().toInstant()
+                    .atZone(java.time.ZoneId.systemDefault())
+                    .getHour();
+
+            String interval;
+            if (hour >= 8 && hour < 10) interval = "08-10";
+            else if (hour < 12) interval = "10-12";
+            else if (hour < 14) interval = "12-14";
+            else if (hour < 16) interval = "14-16";
+            else if (hour < 18) interval = "16-18";
+            else if (hour < 20) interval = "18-20";
+            else interval = "Altele";
+
+            intervalGradesMap.get(interval).add(grade.getValue());
+        }
+
+        List<Map<String, Object>> result = new ArrayList<>();
+        for (String interval : intervals) {
+            List<Double> values = intervalGradesMap.get(interval);
+            double avg = values.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+
+            Map<String, Object> data = new HashMap<>();
+            data.put("interval", interval);
+            data.put("average", avg);
+            data.put("count", values.size());
+
+            result.add(data);
+        }
+
+        return result;
+    }
+
+    @GetMapping("/didactic/statistics/topProfessors")
+    public List<Map<String, Object>> getTopProfessorsByFeedback(@RequestParam(defaultValue = "10") int limit) {
+        List<Object[]> results = professorRepository.findTopProfessorsByAverageFeedback();
+
+        List<Map<String, Object>> topList = new ArrayList<>();
+
+        for (int i = 0; i < Math.min(limit, results.size()); i++) {
+            Object[] row = results.get(i);
+            Map<String, Object> profMap = new HashMap<>();
+            profMap.put("professorId", row[0]);
+            profMap.put("professorName", row[1]);
+            profMap.put("averageFeedbackScore", row[2]);
+            profMap.put("feedbackCount", row[3]);
+            topList.add(profMap);
+        }
+        return topList;
+    }
+
+
     @PreAuthorize("hasRole('STUDENT') or hasRole('ADMIN')")
     @GetMapping("/didactic/statistics/grades/distribution/{userID}")
     public List<Map<String, Object>> getStudentGradeDistribution(@PathVariable Long userID, @RequestParam int year, @RequestParam int semester) {
-        System.out.println("pula");
         PersonInfoDTO person = (PersonInfoDTO) personController.getCurrentUserInfo().getBody();
 
         if (person.role().equals("ROLE_STUDENT") && !userID.equals(person.student().id())) {
@@ -117,4 +181,6 @@ public class StatisticsController {
 
         return distribution;
     }
+
+
 }
