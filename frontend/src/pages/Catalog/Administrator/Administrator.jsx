@@ -15,6 +15,10 @@ const Administrator = () => {
     const [editedGrade, setEditedGrade] = useState('');
     const [prevGrade, setPrevGrade] = useState('');
 
+    // New state for advance year functionality
+    const [advanceYearLoading, setAdvanceYearLoading] = useState(false);
+    const [successMessage, setSuccessMessage] = useState('');
+
     const token = localStorage.getItem('token');
 
     useEffect(() => {
@@ -141,6 +145,47 @@ const Administrator = () => {
         setEditingIndex(null);
     };
 
+    // New function to handle year advancement
+    const handleAdvanceYear = () => {
+        const confirmed = window.confirm(
+            "Sunteți sigur că doriți să avansați studenții la anul următor? Această acțiune nu poate fi anulată."
+        );
+
+        if (!confirmed) return;
+
+        setAdvanceYearLoading(true);
+        setSuccessMessage('');
+
+        fetch('/didactic/advanceYear', {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        })
+            .then(res => {
+                if (!res.ok) {
+                    return res.text().then(text => { throw new Error(text) });
+                }
+                return res.json();
+            })
+            .then(eligibleStudentIds => {
+                const count = eligibleStudentIds.length;
+                setSuccessMessage(`Anul a fost avansat cu succes pentru ${count} studenți.`);
+                setAdvanceYearLoading(false);
+
+                // Hide success message after 5 seconds
+                setTimeout(() => {
+                    setSuccessMessage('');
+                }, 5000);
+            })
+            .catch(err => {
+                console.error('Eroare la avansarea anului:', err);
+                alert("Eroare la avansarea anului: " + err.message);
+                setAdvanceYearLoading(false);
+            });
+    };
+
     return (
         <div className="container-catalog">
             <div className="catalog-header">
@@ -153,48 +198,66 @@ const Administrator = () => {
                         {cursuri.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
                     </select>
                 </div>
+
+                {/* Advance Year Button */}
+                <div className="admin-actions">
+                    <button
+                        className="advance-year-button"
+                        onClick={handleAdvanceYear}
+                        disabled={advanceYearLoading}
+                    >
+                        {advanceYearLoading ? 'Se procesează...' : 'Avansează Anul Academic'}
+                    </button>
+                </div>
+
+                {/* Success Message */}
+                {successMessage && (
+                    <div className="success-message">
+                        {successMessage}
+                    </div>
+                )}
             </div>
 
             <div className="catalog-table">
                 <table>
                     <thead>
-                        <tr className='titlu'>
-                            <th><input type="checkbox" /></th>
-                            <th>Student Name</th>
-                            <th>Titlu Curs</th>
-                            <th>Nota finală</th>
-                            <th>Administrative Note</th>
-                        </tr>
+                    <tr className='titlu'>
+                        <th><input type="checkbox" /></th>
+                        <th>Student Name</th>
+                        <th>Titlu Curs</th>
+                        <th>Nota finală</th>
+                        <th>Administrative Note</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        {loading ? (
-                            <tr><td colSpan="5">Se încarcă...</td></tr>
-                        ) : catalog.length === 0 ? (
-                            <tr><td colSpan="5">Nicio înregistrare pentru grupa selectată.</td></tr>
-                        ) : (
-                            catalog.map((item, idx) => (
-                                <tr key={idx}>
-                                    <td><input type="checkbox" /></td>
-                                    <td>{item.name}</td>
-                                    <td>{cursuri.find(c => c.id === selectedCursId)?.title || ''}</td>
-                                    <td>{editingIndex === idx ? (
-                                        <input type="number" value={editedGrade} onChange={e => setEditedGrade(e.target.value)} />
-                                    ) : (
-                                        item.grade
-                                    )}</td>
-                                    <td>{editingIndex === idx ? (
-                                        <>
-                                            <button onClick={() => handleSaveGrade(idx)}>💾</button>
-                                            <button onClick={handleUndo}>↩️</button>
-                                        </>
-                                    ) : (
-                                        <button onClick={() => { setPrevGrade(item.grade); setEditingIndex(idx); setEditedGrade(item.grade); }}>
-                                            ✏️
-                                        </button>
-                                    )}</td>
-                                </tr>
-                            ))
-                        )}
+                    {loading ? (
+                        <tr><td colSpan="5">Se încarcă...</td></tr>
+                    ) : catalog.length === 0 ? (
+                        <tr><td colSpan="5">Nicio înregistrare pentru grupa selectată.</td></tr>
+                    ) : (
+                        catalog.map((item, idx) => (
+                            <tr key={idx}>
+                                <td><input type="checkbox" /></td>
+                                <td>{item.name}</td>
+                                <td>{cursuri.find(c => c.id === selectedCursId)?.title || ''}</td>
+                                <td>{editingIndex === idx ? (
+                                    <input type="number" value={editedGrade} onChange={e => setEditedGrade(e.target.value)} />
+                                ) : (
+                                    item.grade
+                                )}</td>
+                                <td>{editingIndex === idx ? (
+                                    <>
+                                        <button onClick={() => handleSaveGrade(idx)}>💾</button>
+                                        <button onClick={handleUndo}>↩️</button>
+                                    </>
+                                ) : (
+                                    <button onClick={() => { setPrevGrade(item.grade); setEditingIndex(idx); setEditedGrade(item.grade); }}>
+                                        ✏️
+                                    </button>
+                                )}</td>
+                            </tr>
+                        ))
+                    )}
                     </tbody>
                 </table>
             </div>
