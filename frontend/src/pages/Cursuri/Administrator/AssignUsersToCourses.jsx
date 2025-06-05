@@ -29,25 +29,31 @@ const AssignUsersToCourses = ({ onBack }) => {
                 const studentsRes = await fetch('/didactic/student', {
                     headers: { Authorization: `Bearer ${token}` },
                 });
+                if (!studentsRes.ok) throw new Error(`Studenți HTTP ${studentsRes.status}`);
                 const studentsData = await studentsRes.json();
-                setStudents(studentsData._embedded?.studentList || []);
+                // backend returnează un array de obiecte Student, cu câmpuri firstName, lastName, group, id
+                setStudents(Array.isArray(studentsData) ? studentsData : []);
 
                 // Fetch profesori
                 const professorsRes = await fetch('/didactic/professor', {
                     headers: { Authorization: `Bearer ${token}` },
                 });
+                if (!professorsRes.ok) throw new Error(`Profesori HTTP ${professorsRes.status}`);
                 const professorsData = await professorsRes.json();
-                setProfessors(professorsData._embedded?.professorList || []);
+                // backend returnează un array de obiecte Professor, cu câmpuri firstName, lastName, id, rank
+                setProfessors(Array.isArray(professorsData) ? professorsData : []);
 
                 // Fetch cursuri ne-arhivate
                 const coursesRes = await fetch('/didactic/course', {
                     headers: { Authorization: `Bearer ${token}` },
                 });
+                if (!coursesRes.ok) throw new Error(`Cursuri HTTP ${coursesRes.status}`);
                 const coursesData = await coursesRes.json();
-                setCourses(
-                    coursesData._embedded?.courseList.filter((c) => c.archived === 0) ||
-                    []
-                );
+                // Dacă răspunsul e HAL, extragem _embedded.courseList, altfel dacă e array, folosim direct
+                const allCourses = Array.isArray(coursesData)
+                    ? coursesData
+                    : coursesData._embedded?.courseList || [];
+                setCourses(allCourses.filter((c) => c.archived === 0));
             } catch (error) {
                 console.error('Error fetching data:', error);
                 setStatus({
@@ -58,6 +64,7 @@ const AssignUsersToCourses = ({ onBack }) => {
                 setLoading(false);
             }
         };
+
         fetchData();
     }, [token]);
 
@@ -69,11 +76,8 @@ const AssignUsersToCourses = ({ onBack }) => {
     const handleUserSelection = (userId) => {
         setSelectedUserIds((prev) => {
             const newSet = new Set(prev);
-            if (newSet.has(userId)) {
-                newSet.delete(userId);
-            } else {
-                newSet.add(userId);
-            }
+            if (newSet.has(userId)) newSet.delete(userId);
+            else newSet.add(userId);
             return newSet;
         });
     };
@@ -81,11 +85,8 @@ const AssignUsersToCourses = ({ onBack }) => {
     const handleCourseSelection = (courseId) => {
         setSelectedCourseIds((prev) => {
             const newSet = new Set(prev);
-            if (newSet.has(courseId)) {
-                newSet.delete(courseId);
-            } else {
-                newSet.add(courseId);
-            }
+            if (newSet.has(courseId)) newSet.delete(courseId);
+            else newSet.add(courseId);
             return newSet;
         });
     };
@@ -121,8 +122,7 @@ const AssignUsersToCourses = ({ onBack }) => {
             if (!res.ok) {
                 const errorData = await res.json().catch(() => ({}));
                 const errorMessage =
-                    errorData.message ||
-                    'Eroare la atribuire. Vă rugăm să încercați din nou.';
+                    errorData.message || 'Eroare la atribuire. Vă rugăm să încercați din nou.';
                 throw new Error(errorMessage);
             }
 
@@ -137,8 +137,7 @@ const AssignUsersToCourses = ({ onBack }) => {
             setStatus({
                 type: 'error',
                 message:
-                    error.message ||
-                    'A apărut o eroare neașteptată la atribuire.',
+                    error.message || 'A apărut o eroare neașteptată la atribuire.',
             });
         } finally {
             setAssignmentLoading(false);
@@ -156,10 +155,7 @@ const AssignUsersToCourses = ({ onBack }) => {
     return (
         <div className="trimite-feedback-container">
             {/* Buton Înapoi */}
-            <button
-                onClick={onBack}
-                className="trimite-feedback-buton-inapoi"
-            >
+            <button onClick={onBack} className="trimite-feedback-buton-inapoi">
                 ← Înapoi la Administrare
             </button>
 
@@ -189,17 +185,14 @@ const AssignUsersToCourses = ({ onBack }) => {
                     {userType === 'student' ? (
                         students.length > 0 ? (
                             students.map((student) => (
-                                <label
-                                    key={student.id}
-                                    className="trimite-feedback-user-item"
-                                >
+                                <label key={student.id} className="trimite-feedback-user-item">
                                     <input
                                         type="checkbox"
                                         checked={selectedUserIds.has(student.id)}
                                         onChange={() => handleUserSelection(student.id)}
                                     />
-                                    {student.name} {student.surname} (Grupa:{' '}
-                                    {student.group})
+                                    {student.firstName} {student.lastName}{' '}
+                                    {student.group ? `(Grupa: ${student.group})` : ''}
                                 </label>
                             ))
                         ) : (
@@ -207,16 +200,13 @@ const AssignUsersToCourses = ({ onBack }) => {
                         )
                     ) : professors.length > 0 ? (
                         professors.map((prof) => (
-                            <label
-                                key={prof.id}
-                                className="trimite-feedback-user-item"
-                            >
+                            <label key={prof.id} className="trimite-feedback-user-item">
                                 <input
                                     type="checkbox"
                                     checked={selectedUserIds.has(prof.id)}
                                     onChange={() => handleUserSelection(prof.id)}
                                 />
-                                {prof.name} {prof.surname}
+                                {prof.firstName} {prof.lastName} {prof.rank ? `(${prof.rank})` : ''}
                             </label>
                         ))
                     ) : (
@@ -228,10 +218,7 @@ const AssignUsersToCourses = ({ onBack }) => {
                 <div className="trimite-feedback-lista-cursuri">
                     {courses.length > 0 ? (
                         courses.map((course) => (
-                            <label
-                                key={course.id}
-                                className="trimite-feedback-course-item"
-                            >
+                            <label key={course.id} className="trimite-feedback-course-item">
                                 <input
                                     type="checkbox"
                                     checked={selectedCourseIds.has(course.id)}
@@ -256,9 +243,7 @@ const AssignUsersToCourses = ({ onBack }) => {
                             selectedCourseIds.size === 0
                         }
                     >
-                        {assignmentLoading
-                            ? 'Se Atribuie...'
-                            : 'Atribuie Selectate'}
+                        {assignmentLoading ? 'Se Atribuie...' : 'Atribuie Selectate'}
                     </button>
                 </div>
 
