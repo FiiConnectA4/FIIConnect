@@ -73,10 +73,8 @@ function Dashboard() {
                 const grades = data.grades || [];
                 let nota = "-";
                 if (grades.length > 0) {
-                    // Dacă ai gradingDate, poți sorta, altfel iei ultimul
-                    // grades.sort((a, b) => new Date(b.gradingDate) - new Date(a.gradingDate));
-                    // nota = grades[0].value;
-                    nota = grades[grades.length - 1].value;
+                    grades.sort((a, b) => new Date(b.gradingDate) - new Date(a.gradingDate));
+                    nota = grades[0].value;
                 }
                 setUltimaNota(nota);
             })
