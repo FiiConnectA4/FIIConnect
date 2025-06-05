@@ -68,7 +68,7 @@ const StudentCatalog = () => {
 
         (async () => {
             try {
-                const res = await fetch('/didactic/course', { headers });
+                const res = await fetch('/didactic/course', { headers:{ Authorization: `Bearer ${token}` } });
                 const body = await res.json();
                 const courses = body._embedded?.courseList ?? [];
 
@@ -79,8 +79,8 @@ const StudentCatalog = () => {
 
                 const detailPromises = courses.map(async c => {
                     const [gradesRes, detailRes] = await Promise.all([
-                        fetch(`/didactic/course/${c.id}/grades`, { headers }),
-                        fetch(`/didactic/course/${c.id}`, { headers })
+                        fetch(`/didactic/course/${c.id}/grades`, { headers:{ Authorization: `Bearer ${token}` }}),
+                        fetch(`/didactic/course/${c.id}`, {headers:{ Authorization: `Bearer ${token}` } })
                     ]);
 
                     const grades = await gradesRes.json();
@@ -171,11 +171,11 @@ const StudentCatalog = () => {
 
             // Extract filename from response headers or use default
             const contentDisposition = response.headers.get('content-disposition');
-            let filename = 'catalog_note.pdf';
+            let filename = 'catalog_note.pdf'; // Default filename
             if (contentDisposition) {
-                const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
-                if (filenameMatch) {
-                    filename = filenameMatch[1];
+                const filenameMatch = contentDisposition.match(/filename=["']?([^"']+)["']?/i);
+                if (filenameMatch && filenameMatch[1]) {
+                    filename = filenameMatch[1].replace(/\.pdf_$/i, '.pdf'); // Clean up trailing underscore
                 }
             }
 
