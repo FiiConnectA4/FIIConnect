@@ -1,7 +1,12 @@
 import { useEffect, useState } from 'react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import './ProfessorActivitySheet.css';
 
-const ProfessorActivitySheet = ({ courseId, onClose }) => {
+const ProfessorActivitySheet = () => {
+    const { courseId } = useParams();
+    const location = useLocation();
+    const navigate = useNavigate();
+
     const [course, setCourse] = useState(null);
     const [students, setStudents] = useState([]);
     const [components, setComponents] = useState([]);
@@ -13,56 +18,56 @@ const ProfessorActivitySheet = ({ courseId, onClose }) => {
     const [editedGrade, setEditedGrade] = useState('');
 
     const token = localStorage.getItem('token');
+    const searchParams = new URLSearchParams(location.search);
+    const grupaParam = searchParams.get('grupa');
 
     useEffect(() => {
         if (!courseId) return;
 
         const fetchData = async () => {
             try {
-                // Get course info
                 const courseRes = await fetch(`/didactic/course/${courseId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 const courseData = await courseRes.json();
                 setCourse(courseData);
 
-                // Get enrolled students
                 const enrolledRes = await fetch(`/didactic/course/${courseId}/enrolled`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 const enrolledData = await enrolledRes.json();
 
-                // Get unique groups
                 const uniqueGroups = [...new Set(enrolledData.map(e => e.student.facultyGroup))];
                 setGrupe(uniqueGroups);
-                const defaultGroup = uniqueGroups[0] || '';
+
+                const defaultGroup = grupaParam || uniqueGroups[0] || '';
                 setSelectedGrupa(defaultGroup);
 
-                // Filter students by default group
                 const groupStudents = enrolledData
                     .filter(e => e.student.facultyGroup === defaultGroup)
                     .map(e => e.student);
                 setStudents(groupStudents);
 
-                // Get formula components
                 const formulaRes = await fetch(`/didactic/course/${courseId}/formula`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 const formulaData = await formulaRes.json();
                 const comps = formulaData.components || [];
 
-                // Add attendance if not present
-                if (!comps.find(c => c.name.toLowerCase().includes('prezen'))) {
-                    comps.push({ id: 'attendance', name: 'Prezențe' });
-                }
                 setComponents(comps);
 
-                // Get all component scores for the course
-                const scoresRes = await fetch(`/didactic/component-score/course/${courseId}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                const scoresData = await scoresRes.json();
-                setGrades(scoresData);
+                const allScores = [];
+
+                for (const comp of comps) {
+                    const res = await fetch(`/didactic/component-score/all/by-component?idComponent=${comp.id}`, {
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const scores = await res.json();
+                        allScores.push(...scores);
+                    }
+                }
+                setGrades(allScores);
 
             } catch (err) {
                 console.error('Error fetching data:', err);
@@ -74,7 +79,6 @@ const ProfessorActivitySheet = ({ courseId, onClose }) => {
         fetchData();
     }, [courseId, token]);
 
-    // Refresh data when group changes
     useEffect(() => {
         if (!courseId || !selectedGrupa) return;
 
@@ -112,7 +116,7 @@ const ProfessorActivitySheet = ({ courseId, onClose }) => {
         const payload = {
             id: { idStud: studentId, idComponent: componentId },
             value: parseFloat(value),
-            ...(method === 'POST' && { gradingDate: new Date().toISOString() })
+            gradingDate: new Date().toISOString()
         };
 
         try {
@@ -127,17 +131,17 @@ const ProfessorActivitySheet = ({ courseId, onClose }) => {
 
             if (!response.ok) throw new Error(`Error ${method}`);
 
-            // Update local state
             if (existingGrade) {
                 setGrades(grades.map(g =>
                     g.id?.idStud === studentId && g.id?.idComponent === componentId
-                        ? { ...g, value: parseFloat(value) }
+                        ? { ...g, value: parseFloat(value), gradingDate: payload.gradingDate }
                         : g
                 ));
             } else {
                 setGrades([...grades, {
                     id: { idStud: studentId, idComponent: componentId },
-                    value: parseFloat(value)
+                    value: parseFloat(value),
+                    gradingDate: payload.gradingDate
                 }]);
             }
 
@@ -174,7 +178,6 @@ const ProfessorActivitySheet = ({ courseId, onClose }) => {
                 })
                 .then(() => {
                     alert('Fișierul CSV a fost încărcat cu succes!');
-                    // Refresh data
                     window.location.reload();
                 })
                 .catch(err => {
@@ -207,7 +210,7 @@ const ProfessorActivitySheet = ({ courseId, onClose }) => {
                     <select value={selectedGrupa} onChange={e => setSelectedGrupa(e.target.value)}>
                         {grupe.map((g, i) => <option key={i} value={g}>{g}</option>)}
                     </select>
-                    <button onClick={onClose} className="close-button">
+                    <button onClick={() => navigate('/app/catalog')} className="close-button">
                         <span className="button-icon">←</span>
                         Înapoi la Catalog
                     </button>
@@ -303,9 +306,6 @@ const ProfessorActivitySheet = ({ courseId, onClose }) => {
                 <div className="activity-buttons">
                     <button onClick={handleUploadCSV} className="upload-btn">
                         📁 Încarcă CSV Note Componente
-                    </button>
-                    <button onClick={() => window.print()} className="print-btn">
-                        🖨️ Printează Fișa
                     </button>
                 </div>
             </div>

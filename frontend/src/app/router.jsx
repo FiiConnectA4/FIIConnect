@@ -8,6 +8,7 @@ import EtajeHarta from "../pages/Harta/EtajeHarta";
 import Cursuri from "../pages/Cursuri/Cursuri";
 import Catalog from "../pages/Catalog/Catalog";
 import ActivitySheet from "../pages/Catalog/ActivitySheet/ActivitySheet";
+import ProfessorActivitySheet from "../pages/Catalog/ActivitySheet/ProfessorActivitySheet";
 import OrarToti from "../pages/Orar/OrarToti";
 import Secretariat from "../pages/Secretariat/Secretariat";
 
@@ -85,6 +86,11 @@ const AppRoutes = () => {
 
         <Route path="catalog" element={<Catalog />} />
           <Route path="catalog/activity-sheet/:courseId" element={<ActivitySheet />} />
+          <Route path="/app/catalog/activity-sheet/:courseId/:studentId" element={<ActivitySheet />} />
+          <Route
+              path="/app/catalog/activity-sheet/group/:courseId"
+              element={<ProfessorActivitySheet />}
+          />
 
         {/* Rutele pentru orar */}
         <Route path="orar" element={<OrarToti />} />

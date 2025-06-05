@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import './Administrator.css';
+import ProfessorActivitySheet from "../ActivitySheet/ProfessorActivitySheet";
 
 const Administrator = () => {
     const [grupe, setGrupe] = useState([]);
@@ -20,6 +22,7 @@ const Administrator = () => {
     const [successMessage, setSuccessMessage] = useState('');
 
     const token = localStorage.getItem('token');
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetch('/didactic/course', { headers: { 'Authorization': `Bearer ${token}` } })
@@ -230,36 +233,56 @@ const Administrator = () => {
                     </tr>
                     </thead>
                     <tbody>
-                    {loading ? (
-                        <tr><td colSpan="5">Se încarcă...</td></tr>
-                    ) : catalog.length === 0 ? (
-                        <tr><td colSpan="5">Nicio înregistrare pentru grupa selectată.</td></tr>
-                    ) : (
-                        catalog.map((item, idx) => (
-                            <tr key={idx}>
-                                <td><input type="checkbox" /></td>
-                                <td>{item.name}</td>
-                                <td>{cursuri.find(c => c.id === selectedCursId)?.title || ''}</td>
-                                <td>{editingIndex === idx ? (
-                                    <input type="number" value={editedGrade} onChange={e => setEditedGrade(e.target.value)} />
-                                ) : (
-                                    item.grade
-                                )}</td>
-                                <td>{editingIndex === idx ? (
-                                    <>
-                                        <button onClick={() => handleSaveGrade(idx)}>💾</button>
-                                        <button onClick={handleUndo}>↩️</button>
-                                    </>
-                                ) : (
-                                    <button onClick={() => { setPrevGrade(item.grade); setEditingIndex(idx); setEditedGrade(item.grade); }}>
-                                        ✏️
-                                    </button>
-                                )}</td>
-                            </tr>
-                        ))
-                    )}
+                        {loading ? (
+                            <tr><td colSpan="5">Se încarcă...</td></tr>
+                        ) : catalog.length === 0 ? (
+                            <tr><td colSpan="5">Nicio înregistrare pentru grupa selectată.</td></tr>
+                        ) : (
+                            catalog.map((item, idx) => (
+                                <tr key={idx}>
+                                    <td><input type="checkbox" /></td>
+                                    <td>{item.name}</td>
+                                    <td>{cursuri.find(c => c.id === selectedCursId)?.title || ''}</td>
+                                    <td>{editingIndex === idx ? (
+                                        <input type="number" value={editedGrade} onChange={e => setEditedGrade(e.target.value)} />
+                                    ) : (
+                                        item.grade
+                                    )}</td>
+                                    <td>
+                                        {editingIndex === idx ? (
+                                            <>
+                                                <button onClick={() => handleSaveGrade(idx)}>💾</button>
+                                                <button onClick={handleUndo}>↩️</button>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <button onClick={() => { setPrevGrade(item.grade); setEditingIndex(idx); setEditedGrade(item.grade); }}>
+                                                    ✏️
+                                                </button>
+                                                <button
+                                                    onClick={() => navigate(`/app/catalog/activity-sheet/${selectedCursId}/${item.studentId}`)}
+                                                    title="Vezi fișa de activitate"
+                                                >
+                                                    📋
+                                                </button>
+                                            </>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
+            </div>
+            <div className="catalog-buttons">
+                <button
+                    onClick={() =>
+                        navigate(`/app/catalog/activity-sheet/group/${selectedCursId}?grupa=${encodeURIComponent(selectedGrupa)}`)
+                    }
+                    disabled={!selectedCursId || !selectedGrupa}
+                >
+                    🧾 Fișa de activitate — grupă curentă
+                </button>
             </div>
         </div>
     );
