@@ -9,14 +9,14 @@ import lombok.Setter;
 @Getter
 @EqualsAndHashCode
 @Embeddable
-public class GradeCompositeKey {
+public class StudCourseCompositeKey {
     private Long idStud;
     private Long idCourse;
 
-    public GradeCompositeKey() {
+    public StudCourseCompositeKey() {
     }
 
-    public GradeCompositeKey(Long idStud, Long idCourse) {
+    public StudCourseCompositeKey(Long idStud, Long idCourse) {
         this.idStud = idStud;
         this.idCourse = idCourse;
     }

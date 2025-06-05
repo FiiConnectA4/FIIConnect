@@ -11,7 +11,6 @@ import com.fiiconnect.api.didactic.repositories.FormulaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -168,7 +167,7 @@ public class FormulaService {
             if(i >= indexArray[currentArrayIndex] && !currentGrade.getValue().equals(prevGrade))
                 currentArrayIndex++;
 
-            outputGrades.add(new Grade(new GradeCompositeKey(currentGrade.getId().getIdStud().longValue(), currentGrade.getId().getIdCourse().longValue()), gradeArray[currentArrayIndex], Date.from(currentGrade.getGradingDate().toInstant())));
+            outputGrades.add(new Grade(new StudCourseCompositeKey(currentGrade.getId().getIdStud().longValue(), currentGrade.getId().getIdCourse().longValue()), gradeArray[currentArrayIndex], Date.from(currentGrade.getGradingDate().toInstant())));
             prevGrade = currentGrade.getValue();
         }
 
@@ -178,7 +177,7 @@ public class FormulaService {
 //        sortedGrades.stream().skip(endIndex8).limit(endIndex7 - endIndex8).forEach(g -> outputGrades.add(new Grade(new GradeCompositeKey(g.getId().getIdStud().longValue(), g.getId().getIdCourse().longValue()), 7.0, Date.from(g.getGradingDate().toInstant()))));
 //        sortedGrades.stream().skip(endIndex7).limit(endIndex6 - endIndex7).forEach(g -> outputGrades.add(new Grade(new GradeCompositeKey(g.getId().getIdStud().longValue(), g.getId().getIdCourse().longValue()), 6.0, Date.from(g.getGradingDate().toInstant()))));
 
-        grades.stream().filter(g -> g.getValue() < 4.5).forEach(g -> outputGrades.add(new Grade(new GradeCompositeKey(g.getId().getIdStud().longValue(), g.getId().getIdCourse().longValue()), g.getValue().doubleValue(), Date.from(g.getGradingDate().toInstant()))));
+        grades.stream().filter(g -> g.getValue() < 4.5).forEach(g -> outputGrades.add(new Grade(new StudCourseCompositeKey(g.getId().getIdStud().longValue(), g.getId().getIdCourse().longValue()), g.getValue().doubleValue(), Date.from(g.getGradingDate().toInstant()))));
         return outputGrades;
     }
 
@@ -189,8 +188,8 @@ public class FormulaService {
         if(maxGrade == null)
             return grades;
 
-        grades.stream().filter(g -> g.getValue() >= 4.5).forEach(g -> outputGrades.add(new Grade(new GradeCompositeKey(g.getId().getIdStud().longValue(), g.getId().getIdCourse().longValue()), g.getValue() / maxGrade.getValue() * 10, Date.from(g.getGradingDate().toInstant()))));
-        grades.stream().filter(g -> g.getValue() < 4.5).forEach(g -> outputGrades.add(new Grade(new GradeCompositeKey(g.getId().getIdStud().longValue(), g.getId().getIdCourse().longValue()), g.getValue().doubleValue(), Date.from(g.getGradingDate().toInstant()))));
+        grades.stream().filter(g -> g.getValue() >= 4.5).forEach(g -> outputGrades.add(new Grade(new StudCourseCompositeKey(g.getId().getIdStud().longValue(), g.getId().getIdCourse().longValue()), g.getValue() / maxGrade.getValue() * 10, Date.from(g.getGradingDate().toInstant()))));
+        grades.stream().filter(g -> g.getValue() < 4.5).forEach(g -> outputGrades.add(new Grade(new StudCourseCompositeKey(g.getId().getIdStud().longValue(), g.getId().getIdCourse().longValue()), g.getValue().doubleValue(), Date.from(g.getGradingDate().toInstant()))));
         return outputGrades;
     }
 }

@@ -15,7 +15,7 @@ import java.util.Date;
 @Entity
 public class Grade {
     @EmbeddedId
-    private GradeCompositeKey id;
+    private StudCourseCompositeKey id;
     private Double value;
     private Date gradingDate;
 
@@ -25,7 +25,7 @@ public class Grade {
     public Grade() {
     }
 
-    public Grade(GradeCompositeKey id, Double value, Date gradingDate) {
+    public Grade(StudCourseCompositeKey id, Double value, Date gradingDate) {
         this.id = id;
         this.value = value;
         this.gradingDate = gradingDate;

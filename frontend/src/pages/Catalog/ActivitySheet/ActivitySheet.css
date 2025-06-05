@@ -1,93 +1,394 @@
+/* Enhanced Activity Sheet Styles */
+
 .container-fisa {
+    min-height: 100vh;
     padding: 2rem;
-    font-family: sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: #f5f7fa;
+    line-height: 1.6;
 }
 
-.container-fisa h1 {
-    margin-bottom: 1rem;
-    color: var(--text-color, #1a1a1a);
+/* Loading States */
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    gap: 1rem;
 }
 
-h1 {
-    font-size: 1.6rem;
-    margin-bottom: 0.5rem;
-    color: #1a1a1a;
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e3e3e3;
+    border-top: 4px solid #6195C9;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
 
-.fisa-info {
-    background-color: #eaf3fb;
-    padding: 1rem;
-    border-radius: 15px;
-    border: 1px solid #ccc;
-    margin-bottom: 1rem;
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
-.fisa-info p {
-    margin: 0.4rem 0;
-    font-size: 1rem;
+.loading-text {
+    color: #6195C9;
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+/* Header Section */
+.header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.title-icon {
+    font-size: 1.8rem;
 }
 
 .buton-catalog {
-    padding: 0.8rem 1.5rem;
+    padding: 0.75rem 1.5rem;
     font-size: 1rem;
+    font-weight: 600;
     border: none;
     background-color: #6195C9;
-    border-radius: 20px;
+    border-radius: 25px;
     cursor: pointer;
+    color: white;
+    transition: background-color 0.2s ease;
+    box-shadow: 0 2px 8px rgba(97, 149, 201, 0.3);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: fit-content;
+}
+
+.buton-catalog:hover {
+    background-color: #4A6C8A;
+}
+
+.buton-catalog:active {
+    transform: none;
+}
+
+.button-icon {
+    font-size: 1.2rem;
+}
+
+/* Content Wrapper */
+.content-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Student Info Section */
+.fisa-info {
+    background-color: rgba(255, 255, 255, 0.95);
+    padding: 2rem;
+    border-radius: 15px;
+    border: 1px solid rgba(234, 243, 251, 0.8);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+}
+
+.info-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.info-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #6195C9;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.info-value {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #2c3e50;
+    padding: 0.5rem 0;
+    border-bottom: 2px solid #eaf3fb;
+}
+
+/* Activity Table */
+.activity-table {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.table-header {
+    background-color: #6195C9;
+    padding: 1.5rem 2rem;
     color: white;
 }
 
-.activity-table {
-    margin-top: 1rem;
-    width: 100%;
+.table-header h2 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.table-wrapper {
+    overflow-x: auto;
 }
 
 .activity-table table {
     width: 100%;
     border-collapse: collapse;
+    font-size: 1rem;
 }
 
 .activity-table th,
 .activity-table td {
-    border: 1px solid #ccc;
-    padding: 0.6rem;
-    text-align: center;
+    padding: 1rem 1.5rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .activity-table th {
     background-color: #6195C9;
     color: white;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.9rem;
+    position: sticky;
+    top: 0;
+    z-index: 10;
 }
 
-.activity-table td {
-    background-color: white;
-    color: black;
+.activity-table tbody tr {
+    transition: background-color 0.15s ease;
+}
+
+.activity-table tbody tr:hover {
+    background-color: rgba(97, 149, 201, 0.05);
+}
+
+.row-even {
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.row-odd {
+    background-color: rgba(234, 243, 251, 0.3);
+}
+
+.component-name {
+    font-weight: 500;
+    color: #2c3e50;
+}
+
+.grade-value {
+    text-align: center;
+}
+
+.grade-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    min-width: 40px;
+    text-align: center;
+}
+
+.grade-badge.has-grade {
+    background-color: #27ae60;
+    color: white;
+    box-shadow: 0 2px 4px rgba(46, 204, 113, 0.2);
+}
+
+.grade-badge.no-grade {
+    background-color: #95a5a6;
+    color: white;
+    box-shadow: 0 2px 4px rgba(149, 165, 166, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container-fisa {
+        padding: 1rem;
+        background-color: #f5f7fa;
+    }
+
+    .header-section {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+        text-align: center;
+    }
+
+    .buton-catalog {
+        align-self: center;
+        width: fit-content;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .fisa-info,
+    .activity-table {
+        padding: 1rem;
+    }
+
+    .table-header {
+        padding: 1rem;
+    }
+
+    .activity-table th,
+    .activity-table td {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-title {
+        font-size: 1.3rem;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .info-item {
+        gap: 0.25rem;
+    }
+
+    .info-label {
+        font-size: 0.8rem;
+    }
+
+    .info-value {
+        font-size: 1rem;
+    }
+
+    .activity-table th,
+    .activity-table td {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.85rem;
+    }
 }
 
 /* DARK MODE */
-
-[data-theme="dark"] .fisa-info {
-    background-color: #1e2a38;
-    border: 1px solid #3c4d5e;
+[data-theme="dark"] .container-fisa {
+    background-color: #1a1a2e;
     color: #e0e6ed;
 }
 
-[data-theme="dark"] .container-fisa {
-    background-color: transparent;
-    color: white;
+[data-theme="dark"] .page-title {
+    color: #e0e6ed;
 }
 
-[data-theme="dark"] .activity-table td {
-    background-color: #2a2a2a;
-    color: white;
+[data-theme="dark"] .loading-text {
+    color: #4A6C8A;
+}
+
+[data-theme="dark"] .fisa-info {
+    background-color: rgba(30, 42, 56, 0.95);
+    border: 1px solid rgba(60, 77, 94, 0.5);
+}
+
+[data-theme="dark"] .info-label {
+    color: #4A6C8A;
+}
+
+[data-theme="dark"] .info-value {
+    color: #e0e6ed;
+    border-bottom-color: rgba(60, 77, 94, 0.5);
+}
+
+[data-theme="dark"] .activity-table {
+    background-color: rgba(42, 42, 42, 0.95);
+}
+
+[data-theme="dark"] .table-header {
+    background-color: #1A3C5A;
 }
 
 [data-theme="dark"] .activity-table th {
     background-color: #1A3C5A;
-    color: white;
+}
+
+[data-theme="dark"] .activity-table tbody tr:hover {
+    background-color: rgba(74, 108, 138, 0.1);
+}
+
+[data-theme="dark"] .row-even {
+    background-color: rgba(42, 42, 42, 0.5);
+}
+
+[data-theme="dark"] .row-odd {
+    background-color: rgba(30, 42, 56, 0.3);
+}
+
+[data-theme="dark"] .component-name {
+    color: #e0e6ed;
 }
 
 [data-theme="dark"] .buton-catalog {
     background-color: #4A6C8A;
-    color: white;
+}
+
+[data-theme="dark"] .buton-catalog:hover {
+    background-color: #1A3C5A;
+}
+
+[data-theme="dark"] .activity-table th,
+[data-theme="dark"] .activity-table td {
+    border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .container-fisa {
+    background-color: #1a1a2e;
+}
+
+/* Simple fade-in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.container-fisa {
+    animation: fadeIn 0.3s ease-out;
 }

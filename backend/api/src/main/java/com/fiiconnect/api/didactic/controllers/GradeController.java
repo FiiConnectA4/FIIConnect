@@ -10,7 +10,7 @@ import com.fiiconnect.api.didactic.exceptions.GradeNotFoundException;
 import com.fiiconnect.api.didactic.exceptions.UnauthorizedOperationException;
 import com.fiiconnect.api.didactic.helpers.SQLExceptionMessageParser;
 import com.fiiconnect.api.didactic.models.Grade;
-import com.fiiconnect.api.didactic.models.GradeCompositeKey;
+import com.fiiconnect.api.didactic.models.StudCourseCompositeKey;
 import com.fiiconnect.api.didactic.repositories.GradeRepository;
 import com.fiiconnect.api.didactic.services.CourseService;
 import com.fiiconnect.api.didactic.services.StudentService;
@@ -56,7 +56,7 @@ public class GradeController {
             throw new UnauthorizedOperationException("Only course professors may delete grades from courses");
         //////////////////////////////////////////
 
-        GradeCompositeKey compKey = new GradeCompositeKey(idStud, idCourse);
+        StudCourseCompositeKey compKey = new StudCourseCompositeKey(idStud, idCourse);
         repository.deleteById(compKey);
     }
 
