@@ -10,6 +10,7 @@ import com.fiiconnect.api.didactic.models.Student;
 import com.fiiconnect.api.didactic.models.Professor;
 import com.fiiconnect.api.didactic.repositories.StudentRepository;
 import com.fiiconnect.api.didactic.repositories.ProfessorRepository;
+import com.fiiconnect.api.social_secretary.service.UserTagManagerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -50,6 +51,9 @@ public class DemoUserInitializer implements CommandLineRunner {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private UserTagManagerService userTagManagerService;
 
     @Override
     public void run(String... args) {
@@ -131,6 +135,11 @@ public class DemoUserInitializer implements CommandLineRunner {
         }
 
         userRepository.save(user);
+
+        if(role.getRoleName().equals("ROLE_ADMIN")){
+            userTagManagerService.automaticallyAddTags(user);
+        }
+
         System.out.printf("Contul '%s' (%s) a fost creat cu succes.%n", username, roleName);
     }
 }

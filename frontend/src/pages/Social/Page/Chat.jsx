@@ -195,7 +195,7 @@ function Chat() {
     if (tagTypes.includes('AN')) return 'an';
     if (tagTypes.includes('MATERIE')) return 'materie';
     if (tagTypes.includes('GRUPA')) return 'grupa';
-    if (tagTypes.includes('SEMINAR')) return 'seminar';
+    if (tagTypes.includes('SEMIAN')) return 'semian';
 
     return 'general';
   };
