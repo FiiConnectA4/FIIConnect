@@ -56,7 +56,7 @@ public class CRUDStudentController {
         return ResponseEntity.created(location).body(studentResource);
     }
 
-    // Example: didactic/enroll/transfer?studentId=x&courseId=y$faculty_group=z
+    // Example: didactic/enroll/transfer?studentId=x&courseId=y$facultyGroup=z
     //@PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/didactic/enroll/transfer")
     public ResponseEntity<Object> updateEnroll(@RequestParam Long studentId, @RequestParam Long courseId, @RequestParam String facultyGroup) {
