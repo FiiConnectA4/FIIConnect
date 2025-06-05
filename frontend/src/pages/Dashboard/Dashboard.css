@@ -23,6 +23,7 @@
     .dashboard-container {
         max-width: 98vw;
     }
+}
 
 :root {
     --glass-bg: rgba(255, 255, 255, 0.78);
@@ -130,10 +131,11 @@
 }
 
 [data-theme="dark"] .dashboard-row > * {
-  background: #274c72;  /* card background */
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
-  color: #e0e0e0;       /* card text */
-  transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+    background: #274c72; /* card background */
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+    color: #e0e0e0; /* card text */
+    transition: background 0.2s, box-shadow 0.2s, color 0.2s;
+}
 
 .card-title {
     font-size: 1.12rem;
@@ -281,9 +283,10 @@
 .dashboard-row .react-calendar,
 [data-theme="dark"]
 .dashboard-row .activity-list {
-  background: #1a3c5a;
-  color: #e0e0e0;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+    background: #1a3c5a;
+    color: #e0e0e0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.7);
+}
 
 @media (max-width: 1100px) {
     .dashboard-content {

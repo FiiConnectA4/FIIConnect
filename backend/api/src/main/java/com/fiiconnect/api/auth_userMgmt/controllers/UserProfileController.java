@@ -84,27 +84,4 @@ public class UserProfileController {
 
         return ResponseEntity.ok("Profil creat cu succes");
     }
-
-    @PutMapping("/admin/{username}")
-    @RolesAllowed({"ROLE_ADMIN", "ROLE_PROFESOR"})
-    public ResponseEntity<?> adminUpdateProfile(@PathVariable String username,
-                                                @RequestBody FullUpdateUserProfileRequest dto) {
-        User user = userRepository.findByUsername(username);
-        if (user == null) return ResponseEntity.notFound().build();
-
-        UserProfile profile = profileService.getByUser(user);
-        if (profile == null) return ResponseEntity.notFound().build();
-
-        profile.setFirstName(dto.getFirstName());
-        profile.setLastName(dto.getLastName());
-        profile.setPhone(dto.getPhone());
-        profile.setAbout(dto.getAbout());
-        profile.setKycStatus(dto.getKycStatus());
-        profile.setTwoFactorEnabled(dto.isTwoFactorEnabled());
-        profile.setCurrentYear(dto.getCurrentYear());
-        profile.setRating(dto.getRating());
-
-        profileService.updateProfile(profile);
-        return ResponseEntity.ok("Profil actualizat cu succes");
-    }
 }
