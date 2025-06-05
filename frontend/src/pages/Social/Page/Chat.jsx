@@ -15,6 +15,7 @@ function Chat() {
   const [activeChannel, setActiveChannel] = useState(null);
   const [userTags, setUserTags] = useState([]);
   const [pendingMessages, setPendingMessages] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
 
   const messagesEndRef = useRef(null);
 
@@ -197,6 +198,33 @@ function Chat() {
     return 'general';
   };
 
+  // Fetch all users for name lookup
+  const fetchAllUsers = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(API_ROUTES.PERSON_GET_ALL, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!response.ok) throw new Error('Failed to fetch all users');
+      const data = await response.json();
+      setAllUsers(data);
+    } catch (err) {
+      console.error('Error fetching all users:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchAllUsers();
+    // ...existing code...
+  }, []);
+
+  // Helper to get full name by userId
+  const getUserNameById = (userId) => {
+    const user = allUsers.find(u => u.userId === userId || u.id === userId);
+    if (!user) return `User ${userId}`;
+    return `${user.firstName || ''} ${user.lastName || ''}`.trim();
+  };
+
   if (loading) return <div className="loading">Se încarcă...</div>;
   if (error) return <div className="error">{error}</div>;
   if (!currentUser) return <div className="error">Nu ești autentificat</div>;
@@ -234,9 +262,7 @@ function Chat() {
                         <div className="message-sender">
                           {isSentByCurrentUser
                             ? 'Tu'
-                            : (typeof message.sender === "object"
-                                ? message.sender?.name
-                                : `User ${message.sender}`)}
+                            : getUserNameById(senderId)}
                         </div>
                         <div className="message-text">{message.message}</div>
                         <div className="message-time">
