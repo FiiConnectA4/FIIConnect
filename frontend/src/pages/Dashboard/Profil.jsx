@@ -7,6 +7,7 @@ const BACKEND_URL = "http://localhost:34101"; // modifică dacă ai alt port
 
 const Profile = () => {
     const [profile, setProfile] = useState(null);
+    const [achievements, setAchievements] = useState([]); // New state for achievements
     const [loading, setLoading] = useState(true);
     const [editing, setEditing] = useState({ phone: false, about: false });
     const [draft, setDraft] = useState({ phone: "", about: "" });
@@ -37,24 +38,59 @@ const Profile = () => {
                 return;
             }
 
-            const res = await fetch(`${BACKEND_URL}/profile`, {
+            // Fetch user info including userId
+            const userRes = await fetch(`${BACKEND_URL}/person/me`, {
                 headers: { Authorization: `Bearer ${token}`, Accept: "application/json" }
             });
 
-            if (res.status === 404) return navigate("/app/setup-profile");
-            if (res.status === 401 || res.status === 403) {
-                console.error("Authentication error:", res.status);
+            if (userRes.status === 404) {
+                console.error("User info not found. Navigating to setup profile.");
+                return navigate("/app/setup-profile");
+            }
+            if (userRes.status === 401 || userRes.status === 403) {
+                console.error("Authentication error for /me:", userRes.status);
                 return navigate("/");
             }
-
-            if (!res.ok) {
-                const errText = await res.text();
-                throw new Error(`Profile fetch failed: ${res.status} ${errText}`);
+            if (!userRes.ok) {
+                const errText = await userRes.text();
+                throw new Error(`User info fetch failed: ${userRes.status} ${errText}`);
             }
+            const userData = await userRes.json();
 
-            const data = await res.json();
-            setProfile(data);
-            setDraft({ phone: data.phone || "", about: data.about || "" });
+            // Fetch profile details
+            const profileRes = await fetch(`${BACKEND_URL}/profile`, {
+                headers: { Authorization: `Bearer ${token}`, Accept: "application/json" }
+            });
+
+            if (profileRes.status === 404) {
+                console.error("Profile not found. Navigating to setup profile.");
+                return navigate("/app/setup-profile");
+            }
+            if (profileRes.status === 401 || profileRes.status === 403) {
+                console.error("Authentication error for /profile:", profileRes.status);
+                return navigate("/");
+            }
+            if (!profileRes.ok) {
+                const errText = await profileRes.text();
+                throw new Error(`Profile fetch failed: ${profileRes.status} ${errText}`);
+            }
+            const profileData = await profileRes.json();
+            setProfile(profileData);
+            setDraft({ phone: profileData.phone || "", about: profileData.about || "" });
+
+            // Fetch achievements using userId
+            if (userData.userId) {
+                const achievementsRes = await fetch(`${BACKEND_URL}/achievements/userAchievements/${userData.userId}`, {
+                    headers: { Authorization: `Bearer ${token}`, Accept: "application/json" }
+                });
+
+                if (!achievementsRes.ok) {
+                    const errText = await achievementsRes.text();
+                    throw new Error(`Achievements fetch failed: ${achievementsRes.status} ${errText}`);
+                }
+                const achievementsData = await achievementsRes.json();
+                setAchievements(achievementsData);
+            }
 
         } catch (err) {
             console.error("Profile loading error:", err);
@@ -337,20 +373,6 @@ const Profile = () => {
                 </div>
 
                 <div className="profile-right">
-                    <div className="card status-header">
-                        <InfoRow label={<span className="label large">Current Status</span>}
-                                 value={<span className="status-icon">⭐</span>} />
-                    </div>
-
-                    <div className="card">
-                        <span className="label">Expertise In</span>
-                        <div className="tags spaced">
-                            {profile.expertise?.map((tag, i) => (
-                                <span key={i} className="tag active">{tag}</span>
-                            ))}
-                        </div>
-                    </div>
-
                     <HorizontalCard
                         outline="orange-outline"
                         label="Current Year"
@@ -358,18 +380,11 @@ const Profile = () => {
                         emoji="🛠"
                     />
 
-                    <HorizontalCard
-                        outline="yellow-outline"
-                        label="Rating"
-                        value={`${profile.rating || "N/A"}/10`}
-                        emoji="⭐"
-                    />
-
                     <div className="card achievement-box">
                         <span className="label">Your Achievements</span>
                         <ul className="achievement-list spaced">
-                            {profile.achievements?.length > 0 ? profile.achievements.map((a, i) => (
-                                <li key={i}>{a}</li>
+                            {achievements.length > 0 ? achievements.map((a, i) => (
+                                <li key={i}>{a.name}: {a.description}</li> // Display achievement name and description
                             )) : <li>No achievements yet.</li>}
                         </ul>
                     </div>
