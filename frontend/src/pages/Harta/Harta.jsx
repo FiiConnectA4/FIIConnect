@@ -11,6 +11,8 @@ import hartaCompletaImg from "./Images/complet.png";
 const Harta = () => {
   const navigate = useNavigate();
 
+  const [profesorId, setProfesorId] = useState(null);
+
   const [showDropdown, setShowDropdown] = useState(false);
   const [showRezerva, setShowRezerva] = useState(false);
 
@@ -44,6 +46,33 @@ const Harta = () => {
     "Harta completă",
   ];
 
+  // Fetch profesorId la mount
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) return;
+
+    fetch("http://localhost:34101/person/me", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Nu s-a putut prelua profesorul.");
+        return res.json();
+      })
+      .then((data) => {
+        if (data.profesor && data.profesor.id) {
+          setProfesorId(data.profesor.id);
+        } else {
+          console.warn("Nu s-a găsit profesorId în răspuns");
+        }
+      })
+      .catch((err) => {
+        console.error("Eroare la preluarea persoanei:", err);
+      });
+  }, []);
+
+  // Fetch intervale libere când sala și ziua se schimbă
   useEffect(() => {
     if (sala && zi) {
       setLoading(true);
@@ -79,12 +108,17 @@ const Harta = () => {
   }, [sala, zi]);
 
   const trimiteRezervare = () => {
+    if (!profesorId) {
+      alert("Nu s-a identificat profesorul. Te rugăm să te autentifici.");
+      return;
+    }
+
     const payload = {
       sala,
       zi,
       oraStart,
       oraEnd,
-      profesorId: 1,
+      profesorId,
     };
 
     fetch("http://localhost:34101/harta/rezerva", {

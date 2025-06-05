@@ -42,9 +42,12 @@ const veziPdf = (cerere) => {
 };
 
 
-  const valideazaCerere = (id) => {
+const valideazaCerere = (id) => {
   fetch(`/cereri/adeverinta-student/${id}?status=aprobat`, {
     method: "PUT",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
   })
     .then(res => {
       if (!res.ok) throw new Error("Eroare validare");
@@ -53,19 +56,23 @@ const veziPdf = (cerere) => {
     .catch(console.error);
 };
 
-  const respingeCerere = (id) => {
-    fetch(`/cereri/adeverinta-student/${id}`, {
-      method: "DELETE",
+const respingeCerere = (id) => {
+  fetch(`/cereri/adeverinta-student/${id}`, {
+    method: "DELETE",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error("Eroare ștergere");
+      setCereri((prev) => prev.filter((c) => c.id !== id));
     })
-      .then((res) => {
-        if (!res.ok) throw new Error("Eroare ștergere");
-        setCereri((prev) => prev.filter((c) => c.id !== id));
-      })
-      .catch((err) => {
-        console.error("Eroare ștergere:", err);
-        alert("Eroare la respingere!");
-      });
-  };
+    .catch((err) => {
+      console.error("Eroare ștergere:", err);
+      alert("Eroare la respingere!");
+    });
+};
+
 
   return (
     <div>

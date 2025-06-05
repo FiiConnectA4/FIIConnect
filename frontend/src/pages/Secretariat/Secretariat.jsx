@@ -109,13 +109,7 @@ const Secretariat = () => {
             </div>
 
             <div className="secretariat-buttons">
-                <button
-                    className="secretariat-button"
-                    onClick={() => handleSectionChange("cerere-decontare")}
-                >
-                    🚌 {userRole === "ROLE_ADMIN" ? "Gestionează" : "Cerere"} Decontare CTP
-                </button>
-
+              
                 <button
                     className="secretariat-button"
                     onClick={() => handleSectionChange("cerere-adeverinte")}

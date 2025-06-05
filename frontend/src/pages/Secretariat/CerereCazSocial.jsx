@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Importăm useNavigate
-import "./CerereDecontari.css"; // Reutilizăm stilurile existente
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import "./CerereDecontari.css";
 
 const CerereCazSocial = () => {
   const [formData, setFormData] = useState({
@@ -11,7 +11,43 @@ const CerereCazSocial = () => {
     documente: null,
   });
 
-  const navigate = useNavigate(); // Inițializăm useNavigate
+  const [studentId, setStudentId] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Nu ești autentificat");
+      navigate("/", { replace: true });
+      return;
+    }
+
+    fetch("http://localhost:34101/person/me", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Nu s-a putut prelua info utilizator");
+        return res.json();
+      })
+      .then((data) => {
+        setStudentId(data.id);
+        // Presupunem că API-ul returnează și nume, prenume și nr matricol
+        setFormData((prev) => ({
+          ...prev,
+          nume: data.nume || "",
+          prenume: data.prenume || "",
+          numarMatricol: data.numarMatricol || "",
+        }));
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        alert("Eroare la preluarea informațiilor");
+        navigate("/", { replace: true });
+      });
+  }, [navigate]);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -27,49 +63,44 @@ const CerereCazSocial = () => {
       documente: event.target.files[0],
     }));
   };
-const studentId = 7;
-  const handleSubmit = (event) => {
-  event.preventDefault();
 
-  // Construiește payload-ul, adaptat la ce backend așteaptă
-  const payload = {
-    nume: formData.nume,
-    prenume: formData.prenume,
-    numarMatricol: formData.numarMatricol,
-    justificare: formData.justificare,
-    // aici studentId trebuie să fie luat de undeva, de ex din context sau props
-    studentId: studentId, // presupunem că îl ai definit în componentă
-    documentePath: formData.documente ? formData.documente.name : null,
-    status: "Asteptare",
-    dataTrimitere: new Date().toISOString(),
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    if (!studentId) {
+      alert("ID student invalid");
+      return;
+    }
+
+    const fd = new FormData();
+    fd.append("file", formData.documente);
+    fd.append("studentId", studentId);
+    fd.append("status", "Asteptare");
+    fd.append("dataTrimitere", new Date().toISOString().split("T")[0]);
+    fd.append("comentariu", "");
+    fd.append("justificare", formData.justificare);
+
+    fetch("http://localhost:34101/cereri/caz-social/cereri-cu-upload", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: fd,
+    })
+      .then(async (res) => {
+        if (!res.ok) throw new Error(await res.text());
+        alert("Cererea a fost trimisă cu succes!");
+        navigate(-1);
+      })
+      .catch((err) => {
+        console.error(err);
+        alert("A apărut o eroare la trimiterea cererii.");
+      });
   };
 
-  fetch("/cereri/caz-social", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`, // Adaugă token-ul aici
-    },
-    body: JSON.stringify(payload),
-  })
-    .then(async (res) => {
-      const text = await res.text();
-      if (!res.ok) throw new Error(text || "Eroare la trimiterea cererii");
-      alert("Cererea pentru Caz Social a fost trimisă cu succes!");
-      setFormData({
-        nume: "",
-        prenume: "",
-        numarMatricol: "",
-        justificare: "",
-        documente: null,
-      });
-      navigate(-1);
-    })
-    .catch((err) => {
-      console.error("Eroare la trimiterea cererii:", err);
-      alert("A apărut o eroare la trimiterea cererii.");
-    });
-};
+  if (loading) {
+    return <div>Se încarcă...</div>;
+  }
 
   return (
     <div className="cerere-decontari-container">

@@ -8,17 +8,17 @@ import Cursuri from "../pages/Cursuri/Cursuri";
 import Catalog from "../pages/Catalog/Catalog";
 import OrarToti from "../pages/Orar/OrarToti";
 import Secretariat from "../pages/Secretariat/Secretariat";
-import CerereDecontari from "../pages/Secretariat/CerereDecontari"; // ✅ Import corect
-import CerereAdeverinte from "../pages/Secretariat/CerereAdeverinte"; // ✅ Import corect
-import CerereBursaSociala from "../pages/Secretariat/CerereBursaSociala"; // ✅ Import corect
-import CerereCazSocial from "../pages/Secretariat/CerereCazSocial"; // ✅ Import corect
-import IstoricCereri from "../pages/Secretariat/IstoricCereri"; // ✅ Import corect
+
+import CerereAdeverinte from "../pages/Secretariat/CerereAdeverinte"; 
+import CerereBursaSociala from "../pages/Secretariat/CerereBursaSociala"; 
+import CerereCazSocial from "../pages/Secretariat/CerereCazSocial";
+import IstoricCereri from "../pages/Secretariat/IstoricCereri"; 
 import Harta from "../pages/Harta/Harta";
 import HartaFullScreen from "../pages/Harta/HartaFullScreen";
 
-import SecretariatCerereAdeverinte from "../pages/Secretariat/SecretariatCerereAdeverinte"; // ✅ Import corect
-import SecretariatBursaSociala from "../pages/Secretariat/SecretariatBursaSociala"; // ✅ Import corect
-import SecretariatCazSocial from "../pages/Secretariat/SecretariatCazSocial"; // ✅ Import corect
+import SecretariatCerereAdeverinte from "../pages/Secretariat/SecretariatCerereAdeverinte"; 
+import SecretariatBursaSociala from "../pages/Secretariat/SecretariatBursaSociala"; 
+import SecretariatCazSocial from "../pages/Secretariat/SecretariatCazSocial"; 
 import Chat from "../pages/Social/Page/Chat";
 import SetupProfile from "../pages/Dashboard/SetupProfile";
 import Profil from "../pages/Dashboard/Profil";
@@ -91,17 +91,18 @@ const AppRoutes = () => {
                 <Route path="orar-secretariat/sali/:sala" element={<OrarSecretariat />} />
                 <Route path="orar-secretariat/discipline" element={<OrarSecretariat />} />
                 <Route path="orar-secretariat/discipline/:disciplina" element={<OrarSecretariat />} />
+                <Route path="orar-secretariat/sali/:sala/dotari" element={<DotariSala />} />
+
 
                 <Route path="harta" element={<Harta />} />
                 <Route path="harta/fullscreen" element={<HartaFullScreen />} />
 
                 <Route path="secretariat" element={<Secretariat />} />
-                <Route path="secretariat/cerere-decontare" element={<CerereDecontari />} />
                 <Route path="secretariat/cerere-adeverinte" element={<SecretariatCerereAdeverinte />} />
                 <Route path="secretariat/cerere-bursa-sociala" element={<SecretariatBursaSociala />} />
                 <Route path="secretariat/cerere-caz-social" element={<SecretariatCazSocial />} />
 
-                <Route path="student/cerere-decontare" element={<CerereDecontari />} />
+                
                 <Route path="student/cerere-adeverinte" element={<CerereAdeverinte />} />
                 <Route path="student/cerere-bursa-sociala" element={<CerereBursaSociala />} />
                 <Route path="student/cerere-caz-social" element={<CerereCazSocial />} />
