@@ -84,9 +84,10 @@ function Chat() {
   };
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
     if (!currentUser || !activeChannel) return;
 
-    const socket = new SockJS('http://localhost:34101/ws');
+    const socket = new SockJS(`/ws?token=${token}`);
     const client = Stomp.over(socket);
 
     client.connect({}, () => {

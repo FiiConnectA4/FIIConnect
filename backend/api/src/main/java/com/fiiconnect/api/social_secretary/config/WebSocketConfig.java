@@ -51,17 +51,14 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
                         MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
 
                 if (StompCommand.CONNECT.equals(accessor.getCommand())) {
-                    // Extrage Principal-ul setat de JwtHandshakeInterceptor din atributele sesiunii WebSocket
                     Map<String, Object> sessionAttributes = accessor.getSessionAttributes();
                     if (sessionAttributes != null) {
                         Principal principal = (Principal) sessionAttributes.get("principal");
                         if (principal != null) {
-                            accessor.setUser(principal); // ACEASTA ESTE LINIA CRUCIALĂ!
+                            accessor.setUser(principal);
                             System.out.println("ChannelInterceptor: User Principal '" + principal.getName() + "' set on STOMP CONNECT message.");
                         } else {
                             System.out.println("ChannelInterceptor: 'principal' attribute not found in session for STOMP CONNECT.");
-                            // Aici ai putea decide să respingi conexiunea dacă principalul e obligatoriu
-                            // throw new MessagingException("Missing principal for STOMP CONNECT");
                         }
                     } else {
                         System.out.println("ChannelInterceptor: Session attributes are null for STOMP CONNECT.");
