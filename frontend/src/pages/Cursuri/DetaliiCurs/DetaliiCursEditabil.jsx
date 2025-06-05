@@ -353,13 +353,6 @@ const PDetaliiCurs = ({ curs, onBack }) => {
             <div className="course-title-section">
                 <h1>{curs.title}</h1>
 
-                {/* Switch care comută afișarea componentei CitesteFeedback */}
-                <SwitchToggle
-                    label="Afișează feedback"
-                //isOn={showFeedback}
-                //onToggle={() => setShowFeedback(prev => !prev)}
-                />
-
                 <button
                     className="buton-feedback"
                     onClick={() => setShowFeedback(true)}
