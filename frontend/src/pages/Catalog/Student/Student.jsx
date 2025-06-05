@@ -40,6 +40,34 @@ const StudentCatalog = () => {
     const [avg, setAvg] = useState(0);
     const [loading, setLoading] = useState(true);
     const [studentId, setStudentId] = useState(null);
+    useEffect(() => {
+        if (!studentId || !curCatalog.length) return;
+
+        const fetchAllGroups = async () => {
+            try {
+                const allGroups = [];
+
+                for (const course of curCatalog) {
+                    const res = await fetch(`/didactic/course/${course.courseId}/groups`, { headers });
+                    const data = await res.json();
+                    allGroups.push(...(data || [])); // adaugă toate grupele
+                }
+
+                // Elimină duplicate
+                const uniqueGroups = Array.from(
+                    new Map(allGroups.map(g => [g.id, g])).values()
+                );
+
+                setGrupeDisponibile(uniqueGroups);
+            } catch (err) {
+                console.error('Eroare la încărcarea grupelor disponibile:', err);
+            }
+        };
+
+        fetchAllGroups();
+    }, [studentId, curCatalog]);
+    const [grupeDisponibile, setGrupeDisponibile] = useState([]);
+    const [selectedTargetGroupId, setSelectedTargetGroupId] = useState('');
 
     // Modal state for PDF download
     const [showModal, setShowModal] = useState(false);
@@ -47,8 +75,10 @@ const StudentCatalog = () => {
     const [selectedSemester, setSelectedSemester] = useState('');
     const [downloadLoading, setDownloadLoading] = useState(false);
 
-    // Modal state for transfer request
     const [showTransferModal, setShowTransferModal] = useState(false);
+    const [selectedCourseId, setSelectedCourseId] = useState('');
+    const [reasonText, setReasonText] = useState('');
+    const [submitLoading, setSubmitLoading] = useState(false);
     const [selectedCourse, setSelectedCourse] = useState('');
     const [selectedGroup, setSelectedGroup] = useState('');
     const [customGroup, setCustomGroup] = useState('');
@@ -322,6 +352,42 @@ const StudentCatalog = () => {
         setSelectedSemester('');
     };
 
+    const handleTransferSubmit = async () => {
+        if (!selectedTargetGroupId || !reasonText || !studentId) return;
+
+        setSubmitLoading(true);
+        try {
+            const response = await fetch('/didactic/transfer', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    studentId,
+                    targetGroupId: selectedTargetGroupId,
+                    reasonText,
+                    requestDate: new Date().toISOString()
+                })
+            });
+
+            if (!response.ok) {
+                const text = await response.text();
+                throw new Error(`Server error: ${text}`);
+            }
+
+            alert("Cerere trimisă cu succes!");
+            setShowTransferModal(false);
+            setReasonText('');
+            setSelectedTargetGroupId('');
+        } catch (err) {
+            console.error('Eroare la trimiterea cererii:', err);
+            alert("Eroare la trimiterea cererii.");
+        } finally {
+            setSubmitLoading(false);
+        }
+    };
+
     // Generate year options (current year and previous years)
     const currentYear = new Date().getFullYear();
     const yearOptions = [];
@@ -358,22 +424,23 @@ const StudentCatalog = () => {
                     </tr>
                     </thead>
                     <tbody>
-                    {curCatalog.length === 0 && (
+                    {curCatalog.length === 0 ? (
                         <tr><td colSpan="5">Nu există note pentru semestrul selectat.</td></tr>
+                    ) : (
+                        curCatalog.map((c, i) => (
+                            <tr key={i}>
+                                <td>{c.curs}</td>
+                                <td>{c.profesor}</td>
+                                <td>{c.credite}</td>
+                                <td>{c.nota}</td>
+                                <td>
+                                    <button onClick={() => navigate(`/app/catalog/activity-sheet/${c.courseId}`)}>
+                                        <img src="/icons/edit-icon.png" alt="Fișa" className="icon-img" />
+                                    </button>
+                                </td>
+                            </tr>
+                        ))
                     )}
-                    {curCatalog.map((c, i) => (
-                        <tr key={i}>
-                            <td>{c.curs}</td>
-                            <td>{c.profesor}</td>
-                            <td>{c.credite}</td>
-                            <td>{c.nota}</td>
-                            <td>
-                                <button onClick={() => navigate(`/app/catalog/activity-sheet/${c.courseId}`)}>
-                                    <img src="/icons/edit-icon.png" alt="Fișa" className="icon-img" />
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
                     </tbody>
                 </table>
             </div>
@@ -393,7 +460,7 @@ const StudentCatalog = () => {
                 </div>
             </div>
 
-            {/* Modal for PDF download options */}
+            {/* MODAL PDF */}
             {showModal && (
                 <div className="modal-overlay" onClick={handleModalClose}>
                     <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -412,7 +479,7 @@ const StudentCatalog = () => {
                                     value={selectedYear}
                                     onChange={e => setSelectedYear(e.target.value)}
                                 >
-                                    <option value="">Toti anii </option>
+                                    <option value="">Toti anii</option>
                                     <option value="1">Anul 1</option>
                                     <option value="2">Anul 2</option>
                                     <option value="3">Anul 3</option>
@@ -460,7 +527,6 @@ const StudentCatalog = () => {
                     </div>
                 </div>
             )}
-
             {/* Modal for transfer request */}
             {showTransferModal && (
                 <div className="modal-overlay" onClick={handleTransferModalClose}>
